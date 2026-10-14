@@ -416,14 +416,25 @@ function myCalls(){
 // ============================================
 function eventCredit(e){
   if(e.purchase!=='انجام شد') return 0;
-  if(e.type!=='غیر حضوری' && e.attend!=='انجام شد') return 0;
-  if(e.exam==='رد') return 0;
+  if(e.type==='وبینار'){
+    if(e.attend!=='انجام شد') return 0;
+    if(e.exam==='رد') return 0;
+  }
+  if(e.type==='حضوری'){
+    if(e.attend!=='انجام شد') return 0;
+  }
+  // غیر حضوری: فقط خرید کافیه
   return Number(e.credit||0);
 }
 function eventState(e){
   if(e.purchase!=='انجام شد') return 'partial';
-  if(e.type!=='غیر حضوری' && e.attend!=='انجام شد') return 'partial';
-  if(e.exam==='رد') return 'failed';
+  if(e.type==='وبینار'){
+    if(e.attend!=='انجام شد') return 'partial';
+    if(e.exam==='رد') return 'failed';
+  }
+  if(e.type==='حضوری'){
+    if(e.attend!=='انجام شد') return 'partial';
+  }
   return 'earned';
 }
 function doctorCredits(d){
@@ -736,10 +747,10 @@ function renderEventRow(e){
       </div>
       <div class="event-meta" style="font-size:15px!important;font-weight:600;margin-top:5px">${e.date?'📅 <span class="ltr">'+esc(e.date)+'</span>':''}${e.time?' ⏰ <span class="ltr">'+esc(e.time)+'</span>':''}</div>
       <div class="event-credit"><span style="font-size:19px;font-weight:800;color:${earned?'var(--success)':(failed?'var(--danger)':'var(--muted)')}">${e.credit?num(e.credit):'—'} امتیاز</span></div>
-      <div class="status-group" style="${e.type==='غیر حضوری'?'grid-template-columns:1fr 1fr':''}">
+      <div class="status-group" style="${e.type==='وبینار'?'grid-template-columns:1fr 1fr 1fr':(e.type==='غیر حضوری'?'grid-template-columns:1fr 1fr':'grid-template-columns:1fr 1fr')}">
         <button class="stat-pill ${e.purchase==='انجام شد'?'ok':''}" onclick="cycleStatus('${e.id}','purchase')">${purchaseTxt}</button>
         ${e.type!=='غیر حضوری'?`<button class="stat-pill ${e.attend==='انجام شد'?'ok':''}" onclick="cycleStatus('${e.id}','attend')">${attendTxt}</button>`:''}
-        <button class="stat-pill ${e.exam==='قبول'?'ok':e.exam==='رد'?'no':'neu'}" onclick="cycleStatus('${e.id}','exam')">${examTxt}</button>
+        ${e.type==='وبینار'?`<button class="stat-pill ${e.exam==='قبول'?'ok':e.exam==='رد'?'no':'neu'}" onclick="cycleStatus('${e.id}','exam')">${examTxt}</button>`:''}
       </div>
       <div class="event-actions">
         <button class="mini" onclick="openEventModal('${e.id}')">✏️</button>
@@ -972,8 +983,6 @@ window.openEventModal = function(editId, presetType){
       document.getElementById('dynFields').innerHTML = `
         <label>شناسه برنامه *</label>
         <input autocomplete="off" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
-        <label>عنوان رویداد *</label>
-        <input autocomplete="off" id="eTitle" required value="${esc(e.title||'')}">
         <label>تاریخ (شمسی)</label>
         <div class="row3">${sel('eYear',YEARS,pd.y)}${sel('eMonth',MONTHS.map((m,i)=>({v:i+1,l:m})),pd.m)}${sel('eDay',DAYS,pd.d)}</div>
         <label>امتیاز</label>
@@ -995,7 +1004,7 @@ window.openEventModal = function(editId, presetType){
     const gv = id => toEnDigits(document.getElementById(id)?.value || '').trim();
     let data = { type, credit:Number(gv('eCredit')||0) };
     if(type==='غیر حضوری'){ data.num = gv('eNum'); data.title=''; data.date=''; data.time=''; }
-    else if(type==='حضوری'){ data.num = gv('eNum'); data.title = document.getElementById('eTitle').value.trim(); data.date = formatDate(gv('eYear'),gv('eMonth'),gv('eDay')); data.time=''; }
+    else if(type==='حضوری'){ data.num = gv('eNum'); data.title = ''; data.date = formatDate(gv('eYear'),gv('eMonth'),gv('eDay')); data.time=''; }
     else { data.num = gv('eNum'); data.title=''; data.date = formatDate(gv('eYear'),gv('eMonth'),gv('eDay')); data.time = ''; }
     if(isEdit){ Object.assign(existing, data); toast('✅ ویرایش شد'); }
     else {
