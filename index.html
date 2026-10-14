@@ -348,6 +348,8 @@ textarea{resize:vertical;min-height:55px}
 <script>
 const K = 'cme4_data';
 let doctors = JSON.parse(localStorage.getItem(K)||'[]');
+window.currentUser = 'morteza';
+try { var _s = localStorage.getItem('cme_current_user'); if(_s) window.currentUser = _s; } catch(e){}
 let calls = JSON.parse(localStorage.getItem(K+'_calls')||'[]');
 let selectedDoctorId = null;
 
@@ -447,19 +449,19 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
 
 setTimeout(()=>{
   document.querySelectorAll('.user-picker button').forEach(b=>{
-    b.classList.toggle('active', b.dataset.user === currentUser);
+    b.classList.toggle('active', b.dataset.user === window.currentUser);
   });
 }, 100);
 
 setTimeout(()=>{
   document.querySelectorAll('.user-picker button').forEach(b=>{
-    b.classList.toggle('active', b.dataset.user === currentUser);
+    b.classList.toggle('active', b.dataset.user === window.currentUser);
   });
 }, 100);
 
 setTimeout(()=>{
   document.querySelectorAll('.user-picker button').forEach(b=>{
-    b.classList.toggle('active', b.dataset.user === currentUser);
+    b.classList.toggle('active', b.dataset.user === window.currentUser);
   });
 }, 100);
 
@@ -566,7 +568,7 @@ function openDoctorModal(editId){
     };
     const id = document.getElementById('mEditId').value;
     if(id){ Object.assign(doctors.find(x=>x.id===id), data); toast('✅ پزشک ویرایش شد'); }
-    else { const n = { id:uid(), ...data, owner:currentUser, events:[], createdAt:Date.now() }; doctors.unshift(n); selectedDoctorId = n.id; toast('✅ پزشک ثبت شد'); }
+    else { const n = { id:uid(), ...data, owner:window.currentUser, events:[], createdAt:Date.now() }; doctors.unshift(n); selectedDoctorId = n.id; toast('✅ پزشک ثبت شد'); }
     save(); closeModal(); render();
   };
 }
@@ -663,7 +665,7 @@ function renderMain(){
           <div style="display:flex;gap:5px;flex-direction:column">
             <button class="mini green" onclick="callFromDetail('${esc(d.phone)}','${esc(fullName(d))}')">📞 تماس</button>
             <button class="mini" onclick="openDoctorModal('${d.id}')">✏️ ویرایش</button>
-            ${d.owner !== currentUser ? `<button class="mini" onclick="claimDoctor('${d.id}')">👤 انتقال به من</button>` : ''}
+            ${d.owner !== window.currentUser ? `<button class="mini" onclick="claimDoctor('${d.id}')">👤 انتقال به من</button>` : ''}
             <button class="mini danger" onclick="delDoctor('${d.id}')">🗑 حذف</button>
           </div>
         </div>
@@ -845,8 +847,8 @@ window.claimDoctor = id => {
   const d = doctors.find(x=>x.id===id);
   if(!d) return;
   const oldOwner = d.owner || 'نامشخص';
-  if(!confirm(`این پزشک به «${currentUser === 'morteza' ? 'مرتضی' : 'پروین'}» منتقل شود؟`)) return;
-  d.owner = currentUser;
+  if(!confirm(`این پزشک به «${window.currentUser === 'morteza' ? 'مرتضی' : 'پروین'}» منتقل شود؟`)) return;
+  d.owner = window.currentUser;
   save();
   render();
   toast('✅ انتقال انجام شد');
@@ -856,8 +858,8 @@ window.claimDoctor = id => {
   const d = doctors.find(x=>x.id===id);
   if(!d) return;
   const oldOwner = d.owner || 'نامشخص';
-  if(!confirm(`این پزشک به «${currentUser === 'morteza' ? 'مرتضی' : 'پروین'}» منتقل شود؟`)) return;
-  d.owner = currentUser;
+  if(!confirm(`این پزشک به «${window.currentUser === 'morteza' ? 'مرتضی' : 'پروین'}» منتقل شود؟`)) return;
+  d.owner = window.currentUser;
   save();
   render();
   toast('✅ انتقال انجام شد');
@@ -867,8 +869,8 @@ window.claimDoctor = id => {
   const d = doctors.find(x=>x.id===id);
   if(!d) return;
   const oldOwner = d.owner || 'نامشخص';
-  if(!confirm(`این پزشک به «${currentUser === 'morteza' ? 'مرتضی' : 'پروین'}» منتقل شود؟`)) return;
-  d.owner = currentUser;
+  if(!confirm(`این پزشک به «${window.currentUser === 'morteza' ? 'مرتضی' : 'پروین'}» منتقل شود؟`)) return;
+  d.owner = window.currentUser;
   save();
   render();
   toast('✅ انتقال انجام شد');
@@ -895,7 +897,7 @@ function updateCallInfo(){
 
 document.getElementById('fCall').onsubmit = e => {
   e.preventDefault();
-  calls.unshift({ id:uid(), owner:currentUser, phone:toEnDigits(document.getElementById('callPhone').value.trim()), name:document.getElementById('callName').value.trim(), subject:document.getElementById('callSubject').value, follow:document.getElementById('callFollow').value, note:document.getElementById('callNote').value.trim(), createdAt:Date.now() });
+  calls.unshift({ id:uid(), owner:window.currentUser, phone:toEnDigits(document.getElementById('callPhone').value.trim()), name:document.getElementById('callName').value.trim(), subject:document.getElementById('callSubject').value, follow:document.getElementById('callFollow').value, note:document.getElementById('callNote').value.trim(), createdAt:Date.now() });
   save(); e.target.reset(); document.getElementById('callCreditInfo').innerHTML=''; render(); toast('📞 تماس ثبت شد');
 };
 
@@ -1024,40 +1026,47 @@ render();
   <button data-tab="doctors"><span class="icon">👨‍⚕️</span>پزشکان</button>
   <button data-tab="calls"><span class="icon">📞</span>تماس‌ها</button>
 </nav>
+
 <script id="userSystemScript">
-(function(){
-  var currentUser = 'morteza';
-  try { var s = localStorage.getItem('cme_current_user'); if(s) currentUser = s; } catch(e){}
+window.switchUser = function(user){
+  window.currentUser = user;
+  try { localStorage.setItem('cme_current_user', user); } catch(e){}
+  if(typeof selectedDoctorId !== 'undefined') window.selectedDoctorId = null;
+  document.querySelectorAll('.user-picker button').forEach(function(b){
+    if(b.dataset.user === user) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+  if(typeof updateMobileSelection === 'function') updateMobileSelection();
+  if(typeof render === 'function') render();
+};
 
-  window.switchUser = function(user){
-    currentUser = user;
-    try { localStorage.setItem('cme_current_user', user); } catch(e){}
-    if(typeof selectedDoctorId !== 'undefined') window.selectedDoctorId = null;
-    document.querySelectorAll('.user-picker button').forEach(function(b){
-      if(b.dataset.user === user) b.classList.add('active');
-      else b.classList.remove('active');
-    });
-    if(typeof updateMobileSelection === 'function') updateMobileSelection();
-    if(typeof render === 'function') render();
-  };
+window.myDoctors = function(){
+  if(window.currentUser === 'all') return doctors;
+  return doctors.filter(function(d){ return d.owner === window.currentUser; });
+};
 
-  window.myDoctors = function(){
-    if(currentUser === 'all') return doctors;
-    return doctors.filter(function(d){ return d.owner === currentUser; });
-  };
+window.myCalls = function(){
+  if(window.currentUser === 'all') return calls;
+  return calls.filter(function(c){ return c.owner === window.currentUser; });
+};
 
-  window.myCalls = function(){
-    if(currentUser === 'all') return calls;
-    return calls.filter(function(c){ return c.owner === currentUser; });
-  };
+window.deleteNoOwnerDoctors = function(){
+  var before = doctors.length;
+  doctors = doctors.filter(function(d){ return d.owner === 'morteza' || d.owner === 'parvin'; });
+  var after = doctors.length;
+  localStorage.setItem(K, JSON.stringify(doctors));
+  if(window.__pushToCloud) window.__pushToCloud();
+  if(typeof render === 'function') render();
+  console.log('حذف شد: ' + (before - after) + ' دکتر. باقی‌مانده: ' + after);
+  return before - after;
+};
 
-  setTimeout(function(){
-    document.querySelectorAll('.user-picker button').forEach(function(b){
-      if(b.dataset.user === currentUser) b.classList.add('active');
-      else b.classList.remove('active');
-    });
-  }, 500);
-})();
+setTimeout(function(){
+  document.querySelectorAll('.user-picker button').forEach(function(b){
+    if(b.dataset.user === window.currentUser) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+}, 500);
 </script>
 </body>
 </html>
