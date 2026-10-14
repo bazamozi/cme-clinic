@@ -281,7 +281,7 @@ textarea{resize:vertical;min-height:55px}
         <h2>👨‍⚕️ پزشکان</h2>
         <button class="btn sm" onclick="openDoctorModal()">➕ جدید</button>
       </div>
-      <input id="searchDoctor" placeholder="🔍 جستجو..." style="margin-bottom:9px">
+      <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" id="searchDoctor" placeholder="🔍 جستجو..." style="margin-bottom:9px">
       <div class="doc-list" id="docList"></div>
     </aside>
     <main class="main-area" id="mainArea" onscroll="toggleCompact(event)">
@@ -298,8 +298,8 @@ textarea{resize:vertical;min-height:55px}
     <h2>ثبت تماس جدید</h2>
     <form id="fCall">
       <div class="row">
-        <div><label>شماره تماس‌گیرنده</label><input id="callPhone" required placeholder="0912..."></div>
-        <div><label>نام (خودکار)</label><input id="callName" placeholder="—"></div>
+        <div><label>شماره تماس‌گیرنده</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" id="callPhone" required placeholder="0912..."></div>
+        <div><label>نام (خودکار)</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" id="callName" placeholder="—"></div>
       </div>
       <div id="callCreditInfo"></div>
       <div class="row">
@@ -329,7 +329,7 @@ textarea{resize:vertical;min-height:55px}
   <div class="panel">
     <h2>لیست تماس‌ها</h2>
     <div class="row" style="margin-bottom:10px">
-      <input id="searchCall" placeholder="🔍 جستجو">
+      <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" id="searchCall" placeholder="🔍 جستجو">
       <select id="filterCall">
         <option value="all">همه</option>
         <option value="pending">پیگیری‌نشده</option>
@@ -506,42 +506,42 @@ function openDoctorModal(editId){
   openModal(`
     <h2>${d?'✏️ ویرایش':'➕ ثبت'} پزشک</h2>
     <form id="mDoctorForm" autocomplete="off">
-      <input type="hidden" id="mEditId" value="${d?.id||''}">
+      <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" type="hidden" id="mEditId" value="${d?.id||''}">
       <div class="sect">👤 اطلاعات فردی</div>
       <div class="row">
-        <div><label>نام *</label><input id="mFirstName" required value="${esc(d?.firstName||'')}"></div>
-        <div><label>نام خانوادگی *</label><input id="mLastName" required value="${esc(d?.lastName||'')}"></div>
+        <div><label>نام *</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" id="mFirstName" required value="${esc(d?.firstName||'')}"></div>
+        <div><label>نام خانوادگی *</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" id="mLastName" required value="${esc(d?.lastName||'')}"></div>
       </div>
       <div class="row">
-        <div><label>تخصص *</label><input id="mSpec" required value="${esc(d?.spec||'')}"></div>
-        <div><label>کد ملی *</label><input dir="ltr" style="text-align:center" id="mNat" required maxlength="10" value="${esc(d?.nat||'')}"></div>
+        <div><label>تخصص *</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" id="mSpec" required value="${esc(d?.spec||'')}"></div>
+        <div><label>کد ملی *</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mNat" required maxlength="10" value="${esc(d?.nat||'')}"></div>
       </div>
       <div class="row">
-        <div><label>شماره موبایل *</label><input dir="ltr" style="text-align:center" id="mPhone" required value="${esc(d?.phone||'')}"></div>
-        <div><label>امتیاز درخواستی *</label><input dir="ltr" style="text-align:center" id="mCreditReq" required value="${esc(d?.creditReq||'')}"></div>
+        <div><label>شماره موبایل *</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mPhone" required value="${esc(d?.phone||'')}"></div>
+        <div><label>امتیاز درخواستی *</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mCreditReq" required value="${esc(d?.creditReq||'')}"></div>
       </div>
       <div class="row">
-        <div><label>رمز سامانه</label><input id="mPass" value="${esc(d?.pass||'')}"></div>
-        <div><label>سال کارنامه</label><input dir="ltr" style="text-align:center" id="mYear" value="${esc(d?.year||'')}"></div>
+        <div><label>رمز سامانه</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" id="mPass" value="${esc(d?.pass||'')}"></div>
+        <div><label>سال کارنامه</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mYear" value="${esc(d?.year||'')}"></div>
       </div>
       <div class="sect">💳 کارت بانکی (اختیاری)</div>
       <div class="row">
-        <div><label>شماره کارت</label><input dir="ltr" style="text-align:center" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"></div>
-        <div><label>CVV2</label><input dir="ltr" style="text-align:center" id="mCvv2" maxlength="4" value="${esc(c.cvv2||'')}"></div>
+        <div><label>شماره کارت</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"></div>
+        <div><label>CVV2</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mCvv2" maxlength="4" value="${esc(c.cvv2||'')}"></div>
       </div>
       <div class="row">
-        <div><label>ماه انقضا (MM)</label><input dir="ltr" style="text-align:center" id="mCardM" maxlength="2" value="${esc(c.m||'')}"></div>
-        <div><label>سال انقضا (YY)</label><input dir="ltr" style="text-align:center" id="mCardY" maxlength="2" value="${esc(c.y||'')}"></div>
+        <div><label>ماه انقضا (MM)</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mCardM" maxlength="2" value="${esc(c.m||'')}"></div>
+        <div><label>سال انقضا (YY)</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mCardY" maxlength="2" value="${esc(c.y||'')}"></div>
       </div>
       <div class="row">
-        <div><label>رمز دوم کارت</label><input dir="ltr" style="text-align:center" id="mPass2" value="${esc(c.pass2||'')}"></div>
+        <div><label>رمز دوم کارت</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mPass2" value="${esc(c.pass2||'')}"></div>
         <div></div>
       </div>
       <div class="sect">💰 هزینه‌ها (تومان)</div>
       <div class="row3">
-        <div><label>کل هزینه</label><input dir="ltr" style="text-align:center" id="mTotal" value="${f.total?Number(f.total).toLocaleString('en-US'):''}"></div>
-        <div><label>پرداختی</label><input dir="ltr" style="text-align:center" id="mPaid" value="${f.paid?Number(f.paid).toLocaleString('en-US'):''}"></div>
-        <div><label>باقی‌مانده</label><input dir="ltr" style="text-align:center" id="mRem" disabled style="opacity:.7"></div>
+        <div><label>کل هزینه</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mTotal" value="${f.total?Number(f.total).toLocaleString('en-US'):''}"></div>
+        <div><label>پرداختی</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mPaid" value="${f.paid?Number(f.paid).toLocaleString('en-US'):''}"></div>
+        <div><label>باقی‌مانده</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mRem" disabled style="opacity:.7"></div>
       </div>
       <button class="btn" type="submit">${d?'💾 ذخیره':'➕ ثبت پزشک'}</button>
       <button class="btn ghost" type="button" onclick="closeModal()">انصراف</button>
@@ -794,30 +794,30 @@ function openEventModal(editId, presetType){
     if(type==='غیر حضوری'){
       document.getElementById('dynFields').innerHTML = `
         <label>شناسه برنامه *</label>
-        <input dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
+        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
         <label>امتیاز</label>
-        <input dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">
+        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">
         <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:8px;padding:7px;font-size:11px;color:var(--warn);margin-top:7px">📁 غیر حضوری نیازی به تاریخ و ساعت ندارد</div>`;
     } else if(type==='حضوری'){
       document.getElementById('dynFields').innerHTML = `
         <label>شناسه برنامه *</label>
-        <input dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
+        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
         <label>عنوان رویداد *</label>
-        <input id="eTitle" required value="${esc(e.title||'')}">
+        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" id="eTitle" required value="${esc(e.title||'')}">
         <label>تاریخ (شمسی)</label>
         <div class="row3">${sel('eYear',YEARS,pd.y)}${sel('eMonth',MONTHS.map((m,i)=>({v:i+1,l:m})),pd.m)}${sel('eDay',DAYS,pd.d)}</div>
         <label>امتیاز</label>
-        <input dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">`;
+        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">`;
     } else {
       document.getElementById('dynFields').innerHTML = `
         <label>شناسه برنامه *</label>
-        <input dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
+        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
         <label>تاریخ (شمسی)</label>
         <div class="row3">${sel('eYear',YEARS,pd.y)}${sel('eMonth',MONTHS.map((m,i)=>({v:i+1,l:m})),pd.m)}${sel('eDay',DAYS,pd.d)}</div>
         <label>ساعت</label>
         <div class="row">${sel('eHour',HOURS,eh||'20')}${sel('eMin',MINUTES,(em||'00').padStart(2,'0'))}</div>
         <label>امتیاز</label>
-        <input dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">`;
+        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">`;
     }
   }
   renderDynFields();
@@ -1067,6 +1067,30 @@ setTimeout(function(){
     else b.classList.remove('active');
   });
 }, 500);
+</script>
+
+<script>
+// جلوگیری از autocomplete Safari
+(function(){
+  function applyReadonly(){
+    document.querySelectorAll('input:not([type=checkbox]):not([type=radio]):not([type=hidden])').forEach(function(inp){
+      if(!inp.hasAttribute('readonly')) inp.setAttribute('readonly','readonly');
+    });
+  }
+  document.addEventListener('focusin', function(e){
+    if(e.target.tagName === 'INPUT') e.target.removeAttribute('readonly');
+  });
+  document.addEventListener('focusout', function(e){
+    if(e.target.tagName === 'INPUT') e.target.setAttribute('readonly','readonly');
+  });
+  // روی همه inputهای جدید هم اعمال کن
+  var observer = new MutationObserver(function(){
+    applyReadonly();
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+  setTimeout(applyReadonly, 100);
+  setTimeout(applyReadonly, 500);
+})();
 </script>
 </body>
 </html>
