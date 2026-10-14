@@ -775,8 +775,8 @@ window.openDoctorModal = function(editId){
       <div class="row">
         <div><label>مالک</label>
           <select id="mOwner">
-            <option value="morteza" ${(d?.owner||currentUser)==='morteza'?'selected':''}>مرتضی</option>
-            <option value="parvin" ${d?.owner==='parvin'?'selected':''}>پروین</option>
+            <option value="morteza" ${(d?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='morteza'?'selected':''}>مرتضی</option>
+            <option value="parvin" ${(d?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='parvin'?'selected':''}>پروین</option>
           </select>
         </div>
         <div></div>
