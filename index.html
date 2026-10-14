@@ -721,24 +721,56 @@ window.toggleCard = function(id, btn){
 
 window.copyText = function(text, btn){
   if(!text || text==='—'){ toast('⚠️ چیزی برای کپی نیست'); return; }
-  const done = () => {
-    const old = btn.textContent;
+  
+  var success = false;
+  
+  // روش ۱: execCommand (روش مطمئن‌تر روی همه مرورگرها)
+  try {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.top = '-9999px';
+    ta.style.left = '-9999px';
+    ta.setAttribute('readonly', '');
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+    success = document.execCommand('copy');
+    document.body.removeChild(ta);
+  } catch(e){
+    console.log('execCommand failed:', e);
+  }
+  
+  // روش ۲: navigator.clipboard (روش مدرن)
+  if(!success && navigator.clipboard){
+    navigator.clipboard.writeText(text).then(function(){
+      showCopied(btn);
+    }).catch(function(e){
+      console.log('clipboard failed:', e);
+      toast('❌ کپی نشد — دستی کپی کنید');
+    });
+    return;
+  }
+  
+  if(success){
+    showCopied(btn);
+  } else {
+    toast('❌ کپی نشد — دستی کپی کنید');
+  }
+};
+
+function showCopied(btn){
+  if(btn){
+    var old = btn.textContent;
     btn.textContent = '✅';
     btn.classList.add('copied');
-    setTimeout(()=>{ btn.textContent = old; btn.classList.remove('copied'); }, 1500);
-    toast('📋 کپی شد');
-  };
-  const fallback = () => {
-    const ta = document.createElement('textarea');
-    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
-    document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); done(); } catch(e){ toast('❌ کپی نشد'); }
-    document.body.removeChild(ta);
-  };
-  if(navigator.clipboard && window.isSecureContext){
-    navigator.clipboard.writeText(text).then(done).catch(fallback);
-  } else fallback();
-};
+    setTimeout(function(){
+      btn.textContent = old;
+      btn.classList.remove('copied');
+    }, 1500);
+  }
+  toast('📋 کپی شد');
+}
 
 // ============================================
 // MODALS
