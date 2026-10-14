@@ -783,7 +783,7 @@ window.openDoctorModal = function(editId){
       </div>
       <div class="sect">💳 کارت بانکی (اختیاری)</div>
       <div class="row">
-        <div><label>شماره کارت</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"></div>
+        <div><label>شماره کارت</label><div style="display:flex;gap:6px"><input autocomplete="off" dir="ltr" style="text-align:center;flex:1" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"><button type="button" class="copy-btn" style="padding:8px 12px;font-size:14px" onclick="copyText(document.getElementById('mCardNum').value,this)">K</button></div></div>
         <div><label>CVV2</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCvv2" maxlength="4" value="${esc(c.cvv2||'')}"></div>
       </div>
       <div class="row">
@@ -890,8 +890,6 @@ window.openEventModal = function(editId, presetType){
         <input autocomplete="off" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
         <label>تاریخ (شمسی)</label>
         <div class="row3">${sel('eYear',YEARS,pd.y)}${sel('eMonth',MONTHS.map((m,i)=>({v:i+1,l:m})),pd.m)}${sel('eDay',DAYS,pd.d)}</div>
-        <label>ساعت</label>
-        <div class="row">${sel('eHour',HOURS,eh||'20')}${sel('eMin',MINUTES,(em||'00').padStart(2,'0'))}</div>
         <label>امتیاز</label>
         <input autocomplete="off" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">`;
     }
@@ -904,7 +902,7 @@ window.openEventModal = function(editId, presetType){
     let data = { type, credit:Number(gv('eCredit')||0) };
     if(type==='غیر حضوری'){ data.num = gv('eNum'); data.title=''; data.date=''; data.time=''; }
     else if(type==='حضوری'){ data.num = gv('eNum'); data.title = document.getElementById('eTitle').value.trim(); data.date = formatDate(gv('eYear'),gv('eMonth'),gv('eDay')); data.time=''; }
-    else { data.num = gv('eNum'); data.title=''; data.date = formatDate(gv('eYear'),gv('eMonth'),gv('eDay')); data.time = gv('eHour')+':'+gv('eMin'); }
+    else { data.num = gv('eNum'); data.title=''; data.date = formatDate(gv('eYear'),gv('eMonth'),gv('eDay')); data.time = ''; }
     if(isEdit){ Object.assign(existing, data); toast('✅ ویرایش شد'); }
     else {
       if(type==='غیر حضوری' && offlinePurchasedToday(d)){
