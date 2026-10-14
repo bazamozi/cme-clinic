@@ -261,16 +261,7 @@ textarea{resize:vertical;min-height:55px}
     <label>👤</label>
     <button data-user="morteza" class="active" onclick="switchUser('morteza')">مرتضی</button>
     <button data-user="parvin" onclick="switchUser('parvin')">پروین</button>
-  </div>
-  <div class="user-picker" id="userPicker">
-    <label>👤</label>
-    <button data-user="morteza" class="active" onclick="switchUser('morteza')">مرتضی</button>
-    <button data-user="parvin" onclick="switchUser('parvin')">پروین</button>
-  </div>
-  <div class="user-picker" id="userPicker">
-    <label>👤</label>
-    <button data-user="morteza" class="active" onclick="switchUser('morteza')">مرتضی</button>
-    <button data-user="parvin" onclick="switchUser('parvin')">پروین</button>
+    <button data-user="all" onclick="switchUser('all')">همه</button>
   </div>
   <div class="sub" id="clock"></div>
 </header>
@@ -359,66 +350,27 @@ const K = 'cme4_data';
 let doctors = JSON.parse(localStorage.getItem(K)||'[]');
 let calls = JSON.parse(localStorage.getItem(K+'_calls')||'[]');
 let selectedDoctorId = null;
-let currentUser = localStorage.getItem('cme_current_user') || 'morteza';
 
-window.switchUser = function(user){
-  currentUser = user;
-  localStorage.setItem('cme_current_user', user);
-  selectedDoctorId = null;
-  document.querySelectorAll('.user-picker button').forEach(b=>{
-    b.classList.toggle('active', b.dataset.user === user);
-  });
-  if(typeof updateMobileSelection === 'function') updateMobileSelection();
-  render();
-};
+
+
 
 // فیلتر کردن پزشکان بر اساس کاربر فعلی
-function myDoctors(){
-  return doctors.filter(d => !d.owner || d.owner === currentUser);
-}
-function myCalls(){
-  return calls.filter(c => !c.owner || c.owner === currentUser);
-}
-let currentUser = localStorage.getItem('cme_current_user') || 'morteza';
 
-window.switchUser = function(user){
-  currentUser = user;
-  localStorage.setItem('cme_current_user', user);
-  selectedDoctorId = null;
-  document.querySelectorAll('.user-picker button').forEach(b=>{
-    b.classList.toggle('active', b.dataset.user === user);
-  });
-  if(typeof updateMobileSelection === 'function') updateMobileSelection();
-  render();
-};
+
+
+
+
 
 // فیلتر کردن پزشکان بر اساس کاربر فعلی
-function myDoctors(){
-  return doctors.filter(d => !d.owner || d.owner === currentUser);
-}
-function myCalls(){
-  return calls.filter(c => !c.owner || c.owner === currentUser);
-}
-let currentUser = localStorage.getItem('cme_current_user') || 'morteza';
 
-window.switchUser = function(user){
-  currentUser = user;
-  localStorage.setItem('cme_current_user', user);
-  selectedDoctorId = null;
-  document.querySelectorAll('.user-picker button').forEach(b=>{
-    b.classList.toggle('active', b.dataset.user === user);
-  });
-  if(typeof updateMobileSelection === 'function') updateMobileSelection();
-  render();
-};
+
+
+
+
 
 // فیلتر کردن پزشکان بر اساس کاربر فعلی
-function myDoctors(){
-  return doctors.filter(d => !d.owner || d.owner === currentUser);
-}
-function myCalls(){
-  return calls.filter(c => !c.owner || c.owner === currentUser);
-}
+
+
 
 const save = () => {
   localStorage.setItem(K, JSON.stringify(doctors));
