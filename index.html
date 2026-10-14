@@ -1033,17 +1033,7 @@ window.callFromDetail = (phone,name) => {
   setTimeout(applyReadonly, 500);
 })();
 
-window.switchUser = function(user){
-  window.currentUser = user;
-  try { localStorage.setItem('cme_current_user', user); } catch(e){}
-  selectedDoctorId = null;
-  document.querySelectorAll('.user-picker button').forEach(function(b){
-    if(b.dataset.user === user) b.classList.add('active');
-    else b.classList.remove('active');
-  });
-  if(typeof updateMobileSelection === 'function') updateMobileSelection();
-  if(typeof render === 'function') render();
-};
+
 
 
 // ===== Navigation System (مطمئن) =====
@@ -1121,6 +1111,39 @@ window.renderMain = renderMain;
 window.renderCalls = renderCalls;
 window.claimDoctor = claimDoctor;
 window.toggleCompact = toggleCompact;
+
+window.switchUser = function(user){
+  window.currentUser = user;
+  try { localStorage.setItem('cme_current_user', user); } catch(e){}
+  
+  // 1) پاک کردن مستقیم selectedDoctorId
+  try { selectedDoctorId = null; } catch(e){}
+  
+  // 2) پاک کردن پنل وسط از کارنامه‌ی قبلی
+  var ma = document.getElementById('mainArea');
+  if(ma){
+    ma.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>';
+  }
+  
+  // 3) آپدیت دکمه‌های پیکر
+  document.querySelectorAll('.user-picker button').forEach(function(b){
+    if(b.dataset.user === user) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+  
+  // 4) رندر تب‌های مختلف
+  try { renderDash(); } catch(e){}
+  try { renderDocList(); } catch(e){}
+  try { renderCalls(); } catch(e){}
+  
+  // 5) دوباره پنل وسط رو خالی کن (چون renderDash ممکنه mainArea رو پر کنه)
+  if(ma){
+    ma.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>';
+  }
+  
+  // 6) آپدیت موبایل
+  if(typeof updateMobileSelection === 'function') updateMobileSelection();
+};
 </script>
 
 </body>
