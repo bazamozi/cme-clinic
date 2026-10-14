@@ -804,8 +804,14 @@ window.openDoctorModal = function(editId){
       <button class="btn ghost" type="button" onclick="closeModal()">انصراف</button>
     </form>
   `);
-  const parseNum = inp => Number(String(inp.value).replace(/,/g,'').replace(/[^0-9]/g,'')) || 0;
-  const fmtNum = inp => { const v = String(inp.value).replace(/[^0-9]/g,''); inp.value = v ? parseInt(v).toLocaleString('en-US') : ''; };
+  const parseNum = inp => {
+    var v = toEnDigits(String(inp.value)).replace(/,/g,'').replace(/[^0-9]/g,'');
+    return Number(v) || 0;
+  };
+  const fmtNum = inp => {
+    var v = toEnDigits(String(inp.value)).replace(/[^0-9]/g,'');
+    inp.value = v ? parseInt(v).toLocaleString('en-US') : '';
+  };
   const upd = () => { const t=parseNum(document.getElementById('mTotal')), p=parseNum(document.getElementById('mPaid')); document.getElementById('mRem').value = Math.max(0,t-p).toLocaleString('en-US'); };
   document.getElementById('mTotal').addEventListener('input',function(){fmtNum(this);upd();});
   document.getElementById('mPaid').addEventListener('input',function(){fmtNum(this);upd();});
