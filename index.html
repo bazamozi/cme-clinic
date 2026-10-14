@@ -351,7 +351,8 @@ let doctors = JSON.parse(localStorage.getItem(K)||'[]');
 window.currentUser = 'morteza';
 try { var _s = localStorage.getItem('cme_current_user'); if(_s) window.currentUser = _s; } catch(e){}
 let calls = JSON.parse(localStorage.getItem(K+'_calls')||'[]');
-let selectedDoctorId = null;
+window.__setSelDoc = function(v){ selectedDoctorId = v; };
+window.__getSelDoc = function(){ return selectedDoctorId; };
 
 
 
@@ -635,6 +636,12 @@ function renderMain(){
   }
   const d = doctors.find(x=>x.id===selectedDoctorId);
   if(!d){ selectedDoctorId=null; renderMain(); return; }
+  // چک مالک
+  if(window.currentUser !== 'all' && d.owner && d.owner !== window.currentUser){
+    selectedDoctorId = null;
+    el.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>';
+    return;
+  }
   const cr = doctorCredits(d), total = totalEarned(d), req = Number(d.creditReq||0), rem = remainingCredits(d);
   const c = d.card||{}, f = d.finance||{};
   const rem$ = Math.max(0, Number(f.total||0)-Number(f.paid||0));
