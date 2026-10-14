@@ -1016,38 +1016,7 @@ render();
 })();
 
 
-/* ===== User System ===== */
-var currentUser = 'morteza';
-try { var _savedUser = localStorage.getItem('cme_current_user'); if(_savedUser) currentUser = _savedUser; } catch(e){}
 
-window.switchUser = function(user){
-  currentUser = user;
-  try { localStorage.setItem('cme_current_user', user); } catch(e){}
-  selectedDoctorId = null;
-  document.querySelectorAll('.user-picker button').forEach(function(b){
-    if(b.dataset.user === user) b.classList.add('active');
-    else b.classList.remove('active');
-  });
-  if(typeof updateMobileSelection === 'function') updateMobileSelection();
-  render();
-};
-
-function myDoctors(){
-  if(currentUser === 'all') return doctors;
-  return doctors.filter(function(d){ return d.owner === currentUser; });
-}
-
-function myCalls(){
-  if(currentUser === 'all') return calls;
-  return calls.filter(function(c){ return c.owner === currentUser; });
-}
-
-setTimeout(function(){
-  document.querySelectorAll('.user-picker button').forEach(function(b){
-    if(b.dataset.user === currentUser) b.classList.add('active');
-    else b.classList.remove('active');
-  });
-}, 300);
 
 </script>
 <nav class="mobile-nav" id="mobileNav">
@@ -1055,5 +1024,40 @@ setTimeout(function(){
   <button data-tab="doctors"><span class="icon">👨‍⚕️</span>پزشکان</button>
   <button data-tab="calls"><span class="icon">📞</span>تماس‌ها</button>
 </nav>
+<script id="userSystemScript">
+(function(){
+  var currentUser = 'morteza';
+  try { var s = localStorage.getItem('cme_current_user'); if(s) currentUser = s; } catch(e){}
+
+  window.switchUser = function(user){
+    currentUser = user;
+    try { localStorage.setItem('cme_current_user', user); } catch(e){}
+    if(typeof selectedDoctorId !== 'undefined') window.selectedDoctorId = null;
+    document.querySelectorAll('.user-picker button').forEach(function(b){
+      if(b.dataset.user === user) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+    if(typeof updateMobileSelection === 'function') updateMobileSelection();
+    if(typeof render === 'function') render();
+  };
+
+  window.myDoctors = function(){
+    if(currentUser === 'all') return doctors;
+    return doctors.filter(function(d){ return d.owner === currentUser; });
+  };
+
+  window.myCalls = function(){
+    if(currentUser === 'all') return calls;
+    return calls.filter(function(c){ return c.owner === currentUser; });
+  };
+
+  setTimeout(function(){
+    document.querySelectorAll('.user-picker button').forEach(function(b){
+      if(b.dataset.user === currentUser) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+  }, 500);
+})();
+</script>
 </body>
 </html>
