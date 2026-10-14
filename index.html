@@ -709,16 +709,35 @@ function renderMain(){
   `;
 }
 
+
+// بررسی کامل بودن همه وضعیت‌ها
+function eventComplete(e){
+  if(e.purchase !== 'انجام شد') return false;
+  if(e.type === 'وبینار'){
+    if(e.attend !== 'انجام شد') return false;
+    if(e.exam === 'رد') return false;
+    if(e.exam === 'ثبت نشده') return false;
+  }
+  if(e.type === 'حضوری'){
+    if(e.attend !== 'انجام شد') return false;
+  }
+  // غیر حضوری: فقط خرید کافیه
+  return true;
+}
+
 function renderEventSection(d, type, icon, color){
   const evs = (d.events||[]).filter(e=>e.type===type).sort((a,b)=>{
-    // اگه هر دو تاریخ دارن → مرتب‌سازی صعودی بر اساس تاریخ (نزدیک‌ترین بالا)
+    const aComp = eventComplete(a);
+    const bComp = eventComplete(b);
+    // تکمیل‌شده‌ها برن ته صف
+    if(aComp && !bComp) return 1;
+    if(!aComp && bComp) return -1;
+    // هر دو تکمیل یا هر دو ناتکمیل → مرتب‌سازی بر اساس تاریخ (نزدیک‌ترین بالا)
     if(a.date && b.date){
       return a.date.localeCompare(b.date);
     }
-    // اگه فقط یکی تاریخ داره → اون بالا
     if(a.date && !b.date) return -1;
     if(!a.date && b.date) return 1;
-    // اگه هیچ‌کدام تاریخ ندارن → newest اول
     return (b.createdAt||0)-(a.createdAt||0);
   });
   const totalCredit = evs.reduce((s,e)=>s+eventCredit(e),0);
