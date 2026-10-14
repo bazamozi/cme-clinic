@@ -448,13 +448,7 @@ function offlinePurchasedToday(d){
   });
 }
 
-document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  t.classList.add('active');
-  document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden'));
-  document.getElementById('tab-'+t.dataset.tab).classList.remove('hidden');
-  render();
-});
+
 
 setTimeout(()=>{
   document.querySelectorAll('.user-picker button').forEach(b=>{
@@ -1033,6 +1027,57 @@ window.switchUser = function(user){
   if(typeof render === 'function') render();
 };
 
+
+// ===== Navigation System (مطمئن) =====
+window.switchTab = function(tabName){
+  try {
+    // غیرفعال کردن همه تب‌ها
+    document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
+    document.querySelectorAll('.tab-content').forEach(function(x){ x.classList.add('hidden'); });
+    
+    // فعال کردن تب انتخاب‌شده
+    var tb = document.querySelector('.tab[data-tab="' + tabName + '"]');
+    if(tb) tb.classList.add('active');
+    var content = document.getElementById('tab-' + tabName);
+    if(content) content.classList.remove('hidden');
+    
+    // نوار پایین موبایل
+    document.querySelectorAll('.mobile-nav button').forEach(function(x){
+      if(x.dataset.tab === tabName) x.classList.add('active');
+      else x.classList.remove('active');
+    });
+    
+    // رندر محتوا
+    if(tabName === 'dash'){
+      try { if(typeof renderDash === 'function') renderDash(); } catch(e){ console.log('renderDash err:', e.message); }
+    } else if(tabName === 'doctors'){
+      try { if(typeof renderDocList === 'function') renderDocList(); } catch(e){ console.log('renderDocList err:', e.message); }
+      try { if(typeof renderMain === 'function') renderMain(); } catch(e){ console.log('renderMain err:', e.message); }
+    } else if(tabName === 'calls'){
+      try { if(typeof renderCalls === 'function') renderCalls(); } catch(e){ console.log('renderCalls err:', e.message); }
+    }
+  } catch(e){
+    console.log('switchTab error:', e.message);
+  }
+};
+
+// اتصال تب‌های بالا
+document.querySelectorAll('.tab').forEach(function(t){
+  t.onclick = function(e){
+    e.preventDefault();
+    window.switchTab(t.dataset.tab);
+  };
+});
+
+// اتصال نوار پایین
+document.querySelectorAll('.mobile-nav button').forEach(function(b){
+  b.onclick = function(e){
+    e.preventDefault();
+    window.switchTab(b.dataset.tab);
+  };
+});
+
+window.switchTab = window.switchTab || function(t){ console.log("switchTab not ready"); };
 </script>
 
 </body>
