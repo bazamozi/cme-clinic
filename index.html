@@ -51,7 +51,7 @@ textarea{resize:vertical;min-height:55px}
 .badge.yellow{background:rgba(251,191,36,0.18);color:var(--warn)}
 .badge.gray{background:rgba(148,163,184,0.18);color:var(--muted)}
 .actions{margin-top:7px;display:flex;gap:5px;flex-wrap:wrap}
-.mini{border:1px solid var(--border);background:transparent;color:var(--muted);padding:4px 9px;border-radius:7px;font-size:11px;cursor:pointer;font-family:inherit;transition:.2s}
+.mini{border:1px solid var(--border);background:transparent;color:var(--muted);padding:6px 11px;border-radius:7px;font-size:13px;cursor:pointer;font-family:inherit;transition:.2s}
 .mini:hover{color:var(--accent);border-color:var(--accent)}
 .mini.danger:hover{color:var(--danger);border-color:var(--danger)}
 .mini.green:hover{color:var(--success);border-color:var(--success)}
@@ -113,19 +113,19 @@ textarea{resize:vertical;min-height:55px}
 .ev-head .add-btn{background:transparent;border:1px solid var(--accent);color:var(--accent);padding:3px 9px;border-radius:7px;font-size:10.5px;cursor:pointer;font-family:inherit}
 .ev-head .add-btn:hover{background:rgba(56,189,248,0.15)}
 .ev-body{padding:8px 10px}
-.event-row{background:rgba(15,23,42,0.5);border:1px solid var(--border);border-radius:9px;padding:9px 10px;margin-bottom:7px}
+.event-row{background:rgba(15,23,42,0.5);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:8px}
 .event-row.earned{border-right:3px solid var(--success);background:rgba(52,211,153,0.05)}
 .event-row.partial{border-right:3px solid var(--warn);background:rgba(251,191,36,0.04)}
 .event-row.failed{border-right:3px solid var(--danger);background:rgba(248,113,113,0.04)}
-.event-title{font-weight:600;font-size:12.5px;color:#fff}
-.event-meta{color:var(--muted);font-size:10.5px;margin-top:3px}
-.event-credit{font-size:11px;color:var(--muted);margin-top:3px}
-.status-group{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:7px}
-.stat-pill{background:rgba(15,23,42,0.7);border:1px solid var(--border);color:var(--muted);border-radius:7px;padding:5px 4px;font-size:10.5px;cursor:pointer;font-family:inherit;text-align:center;font-weight:500}
+.event-title{font-weight:700;font-size:16px;color:#fff}
+.event-meta{color:var(--muted);font-size:13px;margin-top:5px}
+.event-credit{font-size:13px;color:var(--muted);margin-top:5px}
+.status-group{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px}
+.stat-pill{background:rgba(15,23,42,0.7);border:1px solid var(--border);color:var(--muted);border-radius:7px;padding:8px 4px;font-size:13px;cursor:pointer;font-family:inherit;text-align:center;font-weight:600}
 .stat-pill.ok{background:rgba(52,211,153,0.2);color:var(--success);border-color:rgba(52,211,153,0.5)}
 .stat-pill.no{background:rgba(248,113,113,0.2);color:var(--danger);border-color:rgba(248,113,113,0.5)}
 .stat-pill.neu{background:rgba(148,163,184,0.15);color:var(--muted)}
-.event-actions{display:flex;gap:4px;margin-top:6px;justify-content:flex-end}
+.event-actions{display:flex;gap:6px;margin-top:8px;justify-content:flex-end}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px}
 .modal{background:linear-gradient(160deg,#0f172a,#1e293b);border:1px solid var(--border);border-radius:14px;padding:18px;max-width:580px;width:100%;max-height:92vh;overflow-y:auto}
 .modal h2{color:var(--accent);font-size:14px;margin-bottom:10px}
@@ -673,7 +673,7 @@ function renderEventRow(e){
     <div class="event-row ${state}">
       <div class="event-title">${e.num?'#'+esc(e.num)+' ':''}${e.title?esc(e.title):''}${!e.num&&!e.title?'رویداد':''}</div>
       <div class="event-meta">${e.date?'📅 <span class="ltr">'+esc(e.date)+'</span>':''}${e.time?' ⏰ <span class="ltr">'+esc(e.time)+'</span>':''}</div>
-      <div class="event-credit"><span style="font-size:15px;font-weight:800;color:${earned?'var(--success)':(failed?'var(--danger)':'var(--muted)')}">${e.credit?num(e.credit):'—'} امتیاز</span></div>
+      <div class="event-credit"><span style="font-size:19px;font-weight:800;color:${earned?'var(--success)':(failed?'var(--danger)':'var(--muted)')}">${e.credit?num(e.credit):'—'} امتیاز</span></div>
       <div class="status-group" style="${e.type==='غیر حضوری'?'grid-template-columns:1fr 1fr':''}">
         <button class="stat-pill ${e.purchase==='انجام شد'?'ok':''}" onclick="cycleStatus('${e.id}','purchase')">${purchaseTxt}</button>
         ${e.type!=='غیر حضوری'?`<button class="stat-pill ${e.attend==='انجام شد'?'ok':''}" onclick="cycleStatus('${e.id}','attend')">${attendTxt}</button>`:''}
