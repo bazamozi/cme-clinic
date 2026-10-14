@@ -117,9 +117,9 @@ textarea{resize:vertical;min-height:55px}
 .event-row.earned{border-right:3px solid var(--success);background:rgba(52,211,153,0.05)}
 .event-row.partial{border-right:3px solid var(--warn);background:rgba(251,191,36,0.04)}
 .event-row.failed{border-right:3px solid var(--danger);background:rgba(248,113,113,0.04)}
-.event-title{font-weight:700;font-size:16px;color:#fff}
-.event-meta{color:var(--muted);font-size:13px;margin-top:5px}
-.event-credit{font-size:13px;color:var(--muted);margin-top:5px}
+.event-title{font-weight:700;font-size:15px;color:#fff}
+.event-meta{color:var(--muted);font-size:15px;margin-top:5px;font-weight:600}
+.event-credit{font-size:15px;color:var(--muted);margin-top:5px;font-weight:600}
 .status-group{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px}
 .stat-pill{background:rgba(15,23,42,0.7);border:1px solid var(--border);color:var(--muted);border-radius:7px;padding:8px 4px;font-size:13px;cursor:pointer;font-family:inherit;text-align:center;font-weight:600}
 .stat-pill.ok{background:rgba(52,211,153,0.2);color:var(--success);border-color:rgba(52,211,153,0.5)}
@@ -671,8 +671,11 @@ function renderEventRow(e){
   else if(e.exam==='رد') examTxt = '📝 آزمون رد شده';
   return `
     <div class="event-row ${state}">
-      <div class="event-title">${e.num?'#'+esc(e.num)+' ':''}${e.title?esc(e.title):''}${!e.num&&!e.title?'رویداد':''}</div>
-      <div class="event-meta">${e.date?'📅 <span class="ltr">'+esc(e.date)+'</span>':''}${e.time?' ⏰ <span class="ltr">'+esc(e.time)+'</span>':''}</div>
+      <div class="event-title" style="display:flex;align-items:center;gap:8px;font-size:15px">
+        <span>${e.num?esc(e.num)+' ':''}${e.title?esc(e.title):''}${!e.num&&!e.title?'رویداد':''}</span>
+        ${e.num?`<button class="copy-btn" style="font-size:13px;padding:3px 8px" onclick="copyText('${esc(e.num)}',this)">📋</button>`:''}
+      </div>
+      <div class="event-meta" style="font-size:15px!important;font-weight:600;margin-top:5px">${e.date?'📅 <span class="ltr">'+esc(e.date)+'</span>':''}${e.time?' ⏰ <span class="ltr">'+esc(e.time)+'</span>':''}</div>
       <div class="event-credit"><span style="font-size:19px;font-weight:800;color:${earned?'var(--success)':(failed?'var(--danger)':'var(--muted)')}">${e.credit?num(e.credit):'—'} امتیاز</span></div>
       <div class="status-group" style="${e.type==='غیر حضوری'?'grid-template-columns:1fr 1fr':''}">
         <button class="stat-pill ${e.purchase==='انجام شد'?'ok':''}" onclick="cycleStatus('${e.id}','purchase')">${purchaseTxt}</button>
