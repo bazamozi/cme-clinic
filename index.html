@@ -659,6 +659,7 @@ function renderMain(){
             </div>
           </div>
           <div style="display:flex;gap:5px;flex-direction:column">
+            <button class="mini green" onclick="quickLogin('${esc(d.nat||'')}','${esc(d.pass||'')}','${esc(fullName(d))}')">🔗 ورود به آموزش مداوم</button>
             <button class="mini" onclick="openDoctorModal('${d.id}')">✏️ ویرایش</button>
             <button class="mini danger" onclick="delDoctor('${d.id}')">🗑 حذف</button>
           </div>
@@ -1194,6 +1195,70 @@ document.addEventListener('keydown', function(e){
 
 // چک ورود
 checkLogin();
+
+// ===== Quick Login to IRCME =====
+window.quickLogin = function(nat, pass, name){
+  if(!nat || !pass){
+    toast('⚠️ کد ملی یا رمز سامانه ثبت نشده');
+    return;
+  }
+  
+  // کپی کد ملی به کلیپ‌بورد
+  function copyToClip(text){
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.top = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      return true;
+    } catch(e){ return false; }
+  }
+  
+  // مودال راهنما
+  var html = `
+    <h2>🔗 ورود سریع به آموزش مداوم</h2>
+    <div style="background:linear-gradient(135deg,rgba(56,189,248,0.15),rgba(34,211,238,0.08));border:1px solid rgba(56,189,248,0.4);border-radius:12px;padding:14px;margin-bottom:14px">
+      <div style="font-weight:700;font-size:15px;color:var(--accent);margin-bottom:8px">👨‍⚕️ ${esc(name)}</div>
+      <div style="font-size:12px;color:var(--muted)">مراحل زیر رو دنبال کن 👇</div>
+    </div>
+    
+    <div class="sect">🔐 اطلاعات ورود</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div style="background:rgba(15,23,42,0.7);border:1px solid rgba(56,189,248,0.4);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:5px">کد ملی (نام کاربری)</div>
+        <div style="font-size:16px;font-weight:800;color:#fff;direction:ltr;margin-bottom:8px">${esc(nat)}</div>
+        <button class="mini green" style="width:100%" onclick="copyText('${esc(nat)}',this)">📋 کپی</button>
+      </div>
+      <div style="background:rgba(15,23,42,0.7);border:1px solid rgba(56,189,248,0.4);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:5px">رمز سامانه</div>
+        <div style="font-size:16px;font-weight:800;color:#fff;direction:ltr;margin-bottom:8px">${esc(pass)}</div>
+        <button class="mini green" style="width:100%" onclick="copyText('${esc(pass)}',this)">📋 کپی</button>
+      </div>
+    </div>
+    
+    <div class="sect">🚀 مرحله ۱: باز کردن سایت</div>
+    <a href="https://www.ircme.ir/" target="_blank" class="btn" style="display:block;text-align:center;text-decoration:none;margin-bottom:14px">🌐 باز کردن سایت آموزش مداوم</a>
+    
+    <div class="sect">📝 مرحله ۲: در سایت</div>
+    <div style="background:rgba(15,23,42,0.7);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:13px;line-height:2">
+      <div>1️⃣ روی دکمه <b>«کپی کد ملی»</b> اینجا بزن</div>
+      <div>2️⃣ در سایت، فیلد <b>نام کاربری</b> رو انتخاب کن و <b>⌘+V</b> بزن</div>
+      <div>3️⃣ روی دکمه <b>«کپی رمز سامانه»</b> اینجا بزن</div>
+      <div>4️⃣ در سایت، فیلد <b>رمز عبور</b> رو انتخاب کن و <b>⌘+V</b> بزن</div>
+      <div>5️⃣ کد امنیتی (کپچا) رو دستی وارد کن</div>
+      <div>6️⃣ روی <b>«ورود»</b> بزن ✅</div>
+    </div>
+    
+    <button class="btn ghost" style="margin-top:12px" onclick="closeModal()">بستن</button>
+  `;
+  
+  openModal(html);
+};
 </script>
 </body>
 </html>
