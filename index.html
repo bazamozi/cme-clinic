@@ -2,15 +2,11 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="بازآموزی">
-<meta name="theme-color" content="#0f172a">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>دفتر بازآموزی پزشکان</title>
 <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
 <style>
-:root{--bg1:#0f172a;--bg2:#1e293b;--card:rgba(255,255,255,0.06);--border:rgba(255,255,255,0.12);--accent:#38bdf8;--accent2:#22d3ee;--success:#34d399;--danger:#f87171;--warn:#fbbf24;--purple:#a78bfa;--text:#e2e8f0;--muted:#94a3b8}
+:root{--bg1:#0f172a;--bg2:#1e293b;--card:rgba(255,255,255,0.06);--border:rgba(255,255,255,0.12);--accent:#38bdf8;--accent2:#22d3ee;--success:#34d399;--danger:#f87171;--warn:#fbbf24;--purple:#a78bfa;--text:#e2e8f0;--muted:#94a3b8;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0;font-family:Vazirmatn,Tahoma,sans-serif}
 body{background:radial-gradient(1200px 600px at 80% -10%,#1e3a8a55,transparent 60%),radial-gradient(900px 500px at -10% 110%,#0e749055,transparent 60%),linear-gradient(160deg,var(--bg1),var(--bg2));color:var(--text);min-height:100vh;padding:14px}
 .wrap{max-width:1600px;margin:0 auto}
@@ -20,6 +16,14 @@ h1{font-size:17px;background:linear-gradient(90deg,var(--accent),var(--accent2))
 .tabs{display:flex;gap:6px;flex-wrap:wrap}
 .tab{padding:6px 13px;border-radius:9px;cursor:pointer;font-size:12.5px;font-weight:600;background:rgba(15,23,42,0.5);border:1px solid var(--border);color:var(--muted);transition:.25s;font-family:inherit}
 .tab.active{background:linear-gradient(135deg,rgba(56,189,248,0.25),rgba(34,211,238,0.15));color:var(--accent);border-color:rgba(56,189,248,0.5)}
+.user-picker{display:flex;gap:5px;align-items:center;background:rgba(15,23,42,0.7);border:1px solid var(--border);border-radius:10px;padding:4px 6px}
+.user-picker label{font-size:11px;color:var(--muted);padding:0 4px}
+.user-picker button{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;transition:.2s;font-weight:600}
+.user-picker button.active{background:linear-gradient(135deg,rgba(56,189,248,0.3),rgba(34,211,238,0.2));color:var(--accent);border-color:rgba(56,189,248,0.6)}
+.user-picker button:hover{color:var(--accent)}
+.owner-badge{display:inline-block;font-size:9.5px;padding:2px 8px;border-radius:20px;font-weight:700;margin-left:5px}
+.owner-badge.morteza{background:linear-gradient(135deg,rgba(56,189,248,0.3),rgba(34,211,238,0.2));color:var(--accent);border:1px solid rgba(56,189,248,0.4)}
+.owner-badge.parvin{background:linear-gradient(135deg,rgba(244,114,182,0.3),rgba(236,72,153,0.2));color:var(--pink);border:1px solid rgba(244,114,182,0.4)}
 .panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px}
 .panel h2{font-size:14px;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:8px}
 .panel h2::before{content:'';width:4px;height:16px;border-radius:2px;background:linear-gradient(180deg,var(--accent),var(--accent2))}
@@ -60,7 +64,7 @@ textarea{resize:vertical;min-height:55px}
 .ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
 .app{display:grid;grid-template-columns:320px 1fr;gap:12px}
 @media(max-width:900px){.app{grid-template-columns:1fr}}
-.sidebar{background:rgba(15,23,42,0.55);border:1px solid var(--border);border-radius:14px;padding:12px;height:calc(100vh - 140px);overflow:hidden;display:flex;flex-direction:column}
+.sidebar{background:rgba(15,23,42,0.55);border:1px solid var(--border);border-radius:14px;padding:12px;height:calc(100vh - 180px);overflow:hidden;display:flex;flex-direction:column}
 .sidebar-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px;flex-wrap:wrap}
 .sidebar-head h2{margin:0;font-size:14px;color:var(--accent)}
 .doc-list{flex:1;overflow-y:auto;padding-left:4px}
@@ -74,32 +78,21 @@ textarea{resize:vertical;min-height:55px}
 .doc-bar .fill.done{background:linear-gradient(90deg,#22c55e,#34d399)}
 .doc-meta{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px}
 .doc-meta b{color:var(--accent2)}
-.exam-badge{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0f172a;font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:5px;margin-right:6px}
-.offline-badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:5px;margin-right:6px}
+.exam-badge{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0f172a;font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:5px;margin-left:6px}
+.offline-badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:5px;margin-left:6px}
 .offline-badge.ok{background:linear-gradient(135deg,#22c55e,#34d399);color:#052e16}
 .offline-badge.wait{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0f172a}
-.main-area{background:rgba(15,23,42,0.55);border:1px solid var(--border);border-radius:14px;padding:14px;height:calc(100vh - 140px);overflow-y:auto;display:block;-webkit-overflow-scrolling:touch;transform:translateZ(0)}
+.main-area{background:rgba(15,23,42,0.55);border:1px solid var(--border);border-radius:14px;padding:14px;height:calc(100vh - 180px);overflow-y:auto;-webkit-overflow-scrolling:touch}
 .empty-state{text-align:center;color:var(--muted);padding:70px 20px}
 .empty-state .big{font-size:44px;display:block;margin-bottom:10px;opacity:.4}
 .doc-header{background:linear-gradient(135deg,rgba(56,189,248,0.12),rgba(34,211,238,0.04));border:1px solid rgba(56,189,248,0.3);border-radius:12px;padding:10px 14px;margin-bottom:10px}
 .doc-header .top{display:flex;justify-content:space-between;align-items:start;gap:10px;flex-wrap:wrap}
 .doc-header h2{color:#fff;font-size:16px;font-weight:700;margin:0}
 .doc-header .meta{color:var(--muted);font-size:12px;margin-top:5px;line-height:1.8}
-.doc-header.compact{padding:6px 10px;margin-bottom:6px}
-.doc-header.compact h2{font-size:14px;margin-bottom:2px}
-.doc-header.compact .meta{display:none}
-.doc-header.compact .credentials{display:none}
-.doc-header.compact .finance-row{display:none}
-.doc-header.compact .bank-row{display:none}
-.doc-header.compact .credits{margin-top:4px;gap:5px}
-.doc-header.compact .credit-box{padding:5px 4px}
-.doc-header.compact .credit-box .title{font-size:10px;margin-bottom:2px}
-.doc-header.compact .credit-box .val{font-size:16px}
 .credits{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:12px}
 @media(max-width:1100px){.credits{grid-template-columns:repeat(3,1fr)}}
 .credit-box{background:linear-gradient(160deg,rgba(15,23,42,0.85),rgba(30,41,59,0.85));border:1px solid rgba(56,189,248,0.18);border-radius:12px;padding:10px 8px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:70px}
 .credit-box .title{font-size:16px;color:#fff;font-weight:600;display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap}
-.credit-box .title .ico{font-size:16px}
 .credit-box .val{font-size:16px;font-weight:700;color:var(--accent);line-height:1;direction:ltr}
 .credit-box .val.success{color:var(--success)}
 .credit-box .val.danger{color:var(--danger)}
@@ -108,7 +101,7 @@ textarea{resize:vertical;min-height:55px}
 .cred-box{background:linear-gradient(135deg,rgba(15,23,42,0.9),rgba(30,41,59,0.9));border:1px solid rgba(56,189,248,0.4);border-radius:12px;padding:10px 18px;min-width:150px;text-align:center}
 .cred-label{font-size:13px;color:var(--accent2);font-weight:700;margin-bottom:6px}
 .cred-value{font-size:20px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px}
-.copy-btn{background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.4);color:var(--accent);padding:3px 8px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;margin-right:6px}
+.copy-btn{background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.4);color:var(--accent);padding:3px 8px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit}
 .copy-btn:hover{background:rgba(56,189,248,0.3);color:#fff}
 .copy-btn.copied{background:rgba(52,211,153,0.3);border-color:var(--success);color:var(--success)}
 .events-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
@@ -140,113 +133,41 @@ textarea{resize:vertical;min-height:55px}
 .type-pick{padding:9px 7px;border-radius:9px;cursor:pointer;font-size:11.5px;font-weight:600;background:rgba(15,23,42,0.5);border:1px solid var(--border);color:var(--muted);text-align:center;font-family:inherit}
 .type-pick.active{background:linear-gradient(135deg,rgba(56,189,248,0.25),rgba(34,211,238,0.15));color:var(--accent);border-color:rgba(56,189,248,0.5)}
 .type-pick .icon{font-size:18px;display:block;margin-bottom:2px}
-
 .mobile-nav{display:none}
-.back-btn{display:none}
 @media(max-width:768px){
-  body{padding:0 0 70px 0 !important}
-  .wrap{padding:6px}
-  header{padding:6px 12px;margin-bottom:6px;border-radius:10px}
-  h1{font-size:14px}
+  body{padding:6px 6px 70px 6px}
+  header{padding:6px 10px;border-radius:10px}
+  h1{font-size:13px}
   header .sub{font-size:10px}
   #mainTabs{display:none}
   #clock{display:none}
-  .app{display:block}
-  .sidebar{border-radius:10px;padding:10px;height:auto;max-height:none;overflow:visible}
-  .main-area{height:auto;max-height:none;border-radius:10px;padding:10px;margin-top:8px;transform:none;-webkit-overflow-scrolling:auto;overflow:visible}
-  .doc-list{overflow:visible;max-height:none;padding:0}
+  .user-picker button{padding:5px 10px;font-size:11px}
+  .app{grid-template-columns:1fr}
+  .sidebar{height:auto;max-height:none;overflow:visible}
+  .main-area{height:auto;max-height:none;overflow:visible}
+  .doc-list{overflow:visible;max-height:none}
   .app.has-selection .sidebar{display:none}
   .app.no-selection .main-area{display:none}
-  .back-btn{display:inline-flex !important;align-items:center;gap:5px;background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.4);color:var(--accent);padding:6px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:10px}
-  .mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:rgba(15,23,42,0.97);border-top:1px solid rgba(255,255,255,0.15);justify-content:space-around;padding:4px 0 max(4px,env(safe-area-inset-bottom));backdrop-filter:blur(20px);z-index:100}
-  .mobile-nav button{background:transparent;border:none;color:var(--muted);padding:6px 14px;font-family:inherit;font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border-radius:8px;transition:.2s}
+  .back-btn{display:inline-flex;align-items:center;gap:5px;background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.4);color:var(--accent);padding:6px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:10px}
+  .mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:rgba(15,23,42,0.97);border-top:1px solid rgba(255,255,255,0.15);justify-content:space-around;padding:6px 0;z-index:100}
+  .mobile-nav button{background:transparent;border:none;color:var(--muted);padding:6px 14px;font-family:inherit;font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border-radius:8px}
   .mobile-nav button.active{color:var(--accent);background:rgba(56,189,248,0.12)}
   .mobile-nav button .icon{font-size:20px;line-height:1}
   .credits{grid-template-columns:repeat(3,1fr);gap:6px}
-  .credit-box{padding:8px 4px;min-height:60px;gap:4px}
-  .credit-box .title{font-size:10.5px;gap:3px}
+  .credit-box{padding:8px 4px;min-height:60px}
+  .credit-box .title{font-size:10.5px}
   .credit-box .val{font-size:14px}
-  .credit-box .title .ico{font-size:12px}
-  .doc-header{padding:10px;border-radius:10px}
-  .doc-header h2{font-size:13px;line-height:1.6}
-  .doc-header .meta{font-size:10.5px;margin-top:3px}
-  .doc-header .top{display:block}
-  .doc-header .top > div:last-child{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;justify-content:flex-start !important;align-items:stretch !important}
-  .credentials{width:100%;flex-wrap:wrap;gap:6px}
-  .cred-box{padding:8px 10px;min-width:0;flex:1 1 45%}
-  .cred-value{font-size:15px}
-  .cred-label{font-size:10.5px;margin-bottom:4px}
-  .events-grid{grid-template-columns:1fr;gap:8px}
-  .ev-head{padding:8px 10px}
-  .ev-head h3{font-size:11.5px}
-  .ev-body{padding:6px 8px}
-  .event-row{padding:8px}
-  .event-title{font-size:11.5px}
-  .event-meta{font-size:10px}
-  .status-group{grid-template-columns:1fr 1fr 1fr !important;gap:3px}
-  .stat-pill{padding:7px 2px;font-size:9.5px}
-  .event-actions button{padding:5px 9px;font-size:11px}
   .stats{grid-template-columns:repeat(2,1fr);gap:6px}
-  .stat{padding:8px}
-  .stat .value{font-size:16px}
-  .stat .label{font-size:10px}
-  .mini{padding:6px 10px;font-size:11px}
-  input,select,textarea{font-size:16px !important;padding:9px 11px}
-  .modal{max-width:100%;border-radius:12px;padding:14px;max-height:88vh}
-  .modal h2{font-size:13px}
-  .btn{padding:11px;font-size:12.5px}
-  .info-cell{font-size:11.5px;padding:6px 7px}
-  .info-cell b{font-size:11.5px}
+  .events-grid{grid-template-columns:1fr}
+  .modal{max-width:100%;padding:14px}
+  input,select,textarea{font-size:16px!important}
 }
-
-.user-picker{display:flex;gap:6px;align-items:center;background:rgba(15,23,42,0.7);border:1px solid var(--border);border-radius:10px;padding:4px 6px}
-.user-picker label{font-size:11px;color:var(--muted);margin:0;padding:0 4px}
-.user-picker button{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;transition:.2s;font-weight:600}
-.user-picker button.active{background:linear-gradient(135deg,rgba(56,189,248,0.3),rgba(34,211,238,0.2));color:var(--accent);border-color:rgba(56,189,248,0.6)}
-.user-picker button:hover{color:var(--accent)}
-.owner-badge{display:inline-block;font-size:9.5px;padding:2px 8px;border-radius:20px;font-weight:700;margin-right:5px}
-.owner-badge.morteza{background:linear-gradient(135deg,rgba(56,189,248,0.3),rgba(34,211,238,0.2));color:var(--accent);border:1px solid rgba(56,189,248,0.4)}
-.owner-badge.parvin{background:linear-gradient(135deg,rgba(244,114,182,0.3),rgba(236,72,153,0.2));color:#f472b6;border:1px solid rgba(244,114,182,0.4)}
-.owner-badge.none{background:rgba(148,163,184,0.15);color:var(--muted);border:1px solid rgba(148,163,184,0.3)}
-@media(max-width:768px){
-  .user-picker{width:100%;justify-content:center;margin-top:4px}
-  .user-picker button{padding:5px 10px;font-size:11px}
-  .owner-badge{font-size:9px;padding:1px 6px}
-}
-
-.user-picker{display:flex;gap:6px;align-items:center;background:rgba(15,23,42,0.7);border:1px solid var(--border);border-radius:10px;padding:4px 6px}
-.user-picker label{font-size:11px;color:var(--muted);margin:0;padding:0 4px}
-.user-picker button{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;transition:.2s;font-weight:600}
-.user-picker button.active{background:linear-gradient(135deg,rgba(56,189,248,0.3),rgba(34,211,238,0.2));color:var(--accent);border-color:rgba(56,189,248,0.6)}
-.user-picker button:hover{color:var(--accent)}
-.owner-badge{display:inline-block;font-size:9.5px;padding:2px 8px;border-radius:20px;font-weight:700;margin-right:5px}
-.owner-badge.morteza{background:linear-gradient(135deg,rgba(56,189,248,0.3),rgba(34,211,238,0.2));color:var(--accent);border:1px solid rgba(56,189,248,0.4)}
-.owner-badge.parvin{background:linear-gradient(135deg,rgba(244,114,182,0.3),rgba(236,72,153,0.2));color:#f472b6;border:1px solid rgba(244,114,182,0.4)}
-.owner-badge.none{background:rgba(148,163,184,0.15);color:var(--muted);border:1px solid rgba(148,163,184,0.3)}
-@media(max-width:768px){
-  .user-picker{width:100%;justify-content:center;margin-top:4px}
-  .user-picker button{padding:5px 10px;font-size:11px}
-  .owner-badge{font-size:9px;padding:1px 6px}
-}
-
-.user-picker{display:flex;gap:6px;align-items:center;background:rgba(15,23,42,0.7);border:1px solid var(--border);border-radius:10px;padding:4px 6px}
-.user-picker label{font-size:11px;color:var(--muted);margin:0;padding:0 4px}
-.user-picker button{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;transition:.2s;font-weight:600}
-.user-picker button.active{background:linear-gradient(135deg,rgba(56,189,248,0.3),rgba(34,211,238,0.2));color:var(--accent);border-color:rgba(56,189,248,0.6)}
-.user-picker button:hover{color:var(--accent)}
-.owner-badge{display:inline-block;font-size:9.5px;padding:2px 8px;border-radius:20px;font-weight:700;margin-right:5px}
-.owner-badge.morteza{background:linear-gradient(135deg,rgba(56,189,248,0.3),rgba(34,211,238,0.2));color:var(--accent);border:1px solid rgba(56,189,248,0.4)}
-.owner-badge.parvin{background:linear-gradient(135deg,rgba(244,114,182,0.3),rgba(236,72,153,0.2));color:#f472b6;border:1px solid rgba(244,114,182,0.4)}
-.owner-badge.none{background:rgba(148,163,184,0.15);color:var(--muted);border:1px solid rgba(148,163,184,0.3)}
-@media(max-width:768px){
-  .user-picker{width:100%;justify-content:center;margin-top:4px}
-  .user-picker button{padding:5px 10px;font-size:11px}
-  .owner-badge{font-size:9px;padding:1px 6px}
-}
+.back-btn{display:none}
 </style>
 </head>
 <body>
 <div class="wrap">
+
 <header>
   <div>
     <h1>📚 دفتر بازآموزی پزشکان</h1>
@@ -259,9 +180,9 @@ textarea{resize:vertical;min-height:55px}
   </div>
   <div class="user-picker" id="userPicker">
     <label>👤</label>
-    <button data-user="morteza" onclick="window.switchUser('morteza'); return false;">مرتضی</button>
-    <button data-user="parvin" onclick="window.switchUser('parvin'); return false;">پروین</button>
-    <button data-user="all" onclick="window.switchUser('all'); return false;">همه</button>
+    <button data-user="morteza" onclick="switchUser('morteza')">مرتضی</button>
+    <button data-user="parvin" onclick="switchUser('parvin')">پروین</button>
+    <button data-user="all" onclick="switchUser('all')">همه</button>
   </div>
   <div class="sub" id="clock"></div>
 </header>
@@ -275,20 +196,17 @@ textarea{resize:vertical;min-height:55px}
 </div>
 
 <div class="tab-content hidden" id="tab-doctors">
-  <div class="app no-selection">
+  <div class="app no-selection" id="appContainer">
     <aside class="sidebar">
       <div class="sidebar-head">
         <h2>👨‍⚕️ پزشکان</h2>
         <button class="btn sm" onclick="openDoctorModal()">➕ جدید</button>
       </div>
-      <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" id="searchDoctor" placeholder="🔍 جستجو..." style="margin-bottom:9px">
+      <input id="searchDoctor" placeholder="🔍 جستجو..." style="margin-bottom:9px">
       <div class="doc-list" id="docList"></div>
     </aside>
-    <main class="main-area" id="mainArea" onscroll="toggleCompact(event)">
-      <div class="empty-state">
-        <span class="big">📖</span>
-        یک پزشک از ستون سمت راست انتخاب کنید
-      </div>
+    <main class="main-area" id="mainArea">
+      <div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>
     </main>
   </div>
 </div>
@@ -298,8 +216,8 @@ textarea{resize:vertical;min-height:55px}
     <h2>ثبت تماس جدید</h2>
     <form id="fCall">
       <div class="row">
-        <div><label>شماره تماس‌گیرنده</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" id="callPhone" required placeholder="0912..."></div>
-        <div><label>نام (خودکار)</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" id="callName" placeholder="—"></div>
+        <div><label>شماره تماس‌گیرنده</label><input id="callPhone" required placeholder="0912..."></div>
+        <div><label>نام (خودکار)</label><input id="callName" placeholder="—"></div>
       </div>
       <div id="callCreditInfo"></div>
       <div class="row">
@@ -329,7 +247,7 @@ textarea{resize:vertical;min-height:55px}
   <div class="panel">
     <h2>لیست تماس‌ها</h2>
     <div class="row" style="margin-bottom:10px">
-      <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" id="searchCall" placeholder="🔍 جستجو">
+      <input id="searchCall" placeholder="🔍 جستجو">
       <select id="filterCall">
         <option value="all">همه</option>
         <option value="pending">پیگیری‌نشده</option>
@@ -342,52 +260,36 @@ textarea{resize:vertical;min-height:55px}
 </div>
 
 </div>
+<nav class="mobile-nav">
+  <button data-tab="dash"><span class="icon">📊</span>داشبورد</button>
+  <button data-tab="doctors"><span class="icon">👨‍⚕️</span>پزشکان</button>
+  <button data-tab="calls"><span class="icon">📞</span>تماس‌ها</button>
+</nav>
 <div class="toast" id="toast"></div>
 <div id="modalHost"></div>
 
 <script>
+// ============================================
+// CONSTANTS & STATE
+// ============================================
 const K = 'cme4_data';
-let doctors = JSON.parse(localStorage.getItem(K)||'[]');
-let calls = JSON.parse(localStorage.getItem(K+'_calls')||'[]');
-window.currentUser = 'morteza';
-try { var __uc = localStorage.getItem('cme_current_user'); if(__uc) window.currentUser = __uc; } catch(e){}
-function myDoctors(){
-  if(window.currentUser === 'all') return doctors;
-  return doctors.filter(function(d){ return d.owner === window.currentUser; });
-}
-function myCalls(){
-  if(window.currentUser === 'all') return calls;
-  return calls.filter(function(c){ return c.owner === window.currentUser; });
-}
-window.__setSelDoc = function(v){ selectedDoctorId = v; };
-window.__getSelDoc = function(){ return selectedDoctorId; };
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwp_yjquh9tEXmy_rPIVCbjchFi6427qr2G73pOVVagD4PcPt2jSePBBtP-PG24jSot/exec';
 
+let doctors = [];
+let calls = [];
+let selectedDoctorId = null;
+let currentUser = 'morteza';
 
+try {
+  doctors = JSON.parse(localStorage.getItem(K)||'[]');
+  calls = JSON.parse(localStorage.getItem(K+'_calls')||'[]');
+  var savedU = localStorage.getItem('cme_current_user');
+  if(savedU) currentUser = savedU;
+} catch(e){}
 
-
-// فیلتر کردن پزشکان بر اساس کاربر فعلی
-
-
-
-
-
-
-// فیلتر کردن پزشکان بر اساس کاربر فعلی
-
-
-
-
-
-
-// فیلتر کردن پزشکان بر اساس کاربر فعلی
-
-
-
-const save = () => {
-  localStorage.setItem(K, JSON.stringify(doctors));
-  localStorage.setItem(K+'_calls', JSON.stringify(calls));
-  if(window.__pushToCloud) try{ window.__pushToCloud(); }catch(e){}
-};
+// ============================================
+// UTILITIES
+// ============================================
 const uid = () => Date.now()+Math.random().toString(36).slice(2,6);
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const toEnDigits = s => String(s??'').replace(/[۰-۹]/g,d=>'0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]).replace(/[٠-٩]/g,d=>'0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
@@ -397,13 +299,6 @@ const normPhone = p => toEnDigits(String(p||'')).replace(/\D/g,'');
 const typeIcon = t => t==='حضوری'?'🏢':t==='وبینار'?'💻':'📁';
 const fullName = d => ((d.firstName||'')+' '+(d.lastName||'')).trim()||'بی‌نام';
 
-document.addEventListener('input', e => {
-  const t = e.target;
-  if(!t || t.tagName !== 'INPUT') return;
-  const en = toEnDigits(t.value);
-  if(en !== t.value){ const pos = t.selectionStart; t.value = en; try{ t.setSelectionRange(pos,pos); }catch(_){} }
-});
-
 const MONTHS = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 const YEARS = []; for(let y=1400;y<=1415;y++) YEARS.push(y);
 const DAYS = []; for(let d=1;d<=31;d++) DAYS.push(d);
@@ -412,10 +307,55 @@ const MINUTES = []; for(let m=0;m<60;m+=5) MINUTES.push(String(m).padStart(2,'0'
 
 function parseDate(s){ const m = String(s||'').match(/(\d+)\/(\d+)\/(\d+)/); if(!m) return {y:1405,m:7,d:1}; return {y:+m[1],m:+m[2],d:+m[3]}; }
 function formatDate(y,m,d){ return `${y}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}`; }
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
-function tick(){const d=new Date();const p=x=>String(x).padStart(2,'0');document.getElementById('clock').textContent=`${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ساعت ${p(d.getHours())}:${p(d.getMinutes())}`;}
-setInterval(tick,30000); tick();
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200); }
+function tick(){ const d=new Date(); const p=x=>String(x).padStart(2,'0'); const el=document.getElementById('clock'); if(el) el.textContent=`${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ساعت ${p(d.getHours())}:${p(d.getMinutes())}`; }
 
+// تبدیل ارقام فارسی به انگلیسی در همه inputها
+document.addEventListener('input', e => {
+  const t = e.target;
+  if(!t || t.tagName !== 'INPUT') return;
+  const en = toEnDigits(t.value);
+  if(en !== t.value){ const pos = t.selectionStart; t.value = en; try{ t.setSelectionRange(pos,pos); }catch(_){} }
+});
+
+// ============================================
+// USER SYSTEM
+// ============================================
+window.switchUser = function(user){
+  currentUser = user;
+  try { localStorage.setItem('cme_current_user', user); } catch(e){}
+  selectedDoctorId = null;
+  
+  // پاک کردن پنل وسط
+  const ma = document.getElementById('mainArea');
+  if(ma) ma.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>';
+  
+  // آپدیت دکمه‌ها
+  document.querySelectorAll('.user-picker button').forEach(b=>{
+    if(b.dataset.user === user) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+  
+  // رندر
+  renderDash();
+  renderDocList();
+  renderCalls();
+  updateMobileSelection();
+  updateMobileNav();
+};
+
+function myDoctors(){
+  if(currentUser === 'all') return doctors;
+  return doctors.filter(d => d.owner === currentUser);
+}
+function myCalls(){
+  if(currentUser === 'all') return calls;
+  return calls.filter(c => c.owner === currentUser);
+}
+
+// ============================================
+// BUSINESS LOGIC
+// ============================================
 function eventCredit(e){
   if(e.purchase!=='انجام شد') return 0;
   if(e.type!=='غیر حضوری' && e.attend!=='انجام شد') return 0;
@@ -448,139 +388,128 @@ function offlinePurchasedToday(d){
   });
 }
 
+// ============================================
+// SAVE & SYNC
+// ============================================
+function save(){
+  try {
+    localStorage.setItem(K, JSON.stringify(doctors));
+    localStorage.setItem(K+'_calls', JSON.stringify(calls));
+  } catch(e){}
+  pushToCloud();
+}
 
+let _pushing = false;
+async function pushToCloud(){
+  if(_pushing) return;
+  _pushing = true;
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ doctors, calls })
+    });
+  } catch(e){}
+  finally { _pushing = false; }
+}
 
-setTimeout(()=>{
-  document.querySelectorAll('.user-picker button').forEach(b=>{
-    b.classList.toggle('active', b.dataset.user === window.currentUser);
+let _pulling = false;
+async function pullFromCloud(){
+  if(_pulling) return;
+  _pulling = true;
+  try {
+    const r = await fetch(SCRIPT_URL + '?t=' + Date.now());
+    const data = await r.json();
+    if(!data) return;
+    const remote = { doctors: data.doctors || [], calls: data.calls || [] };
+    const local = { doctors, calls };
+    if(JSON.stringify(remote) !== JSON.stringify(local)){
+      doctors = remote.doctors;
+      calls = remote.calls;
+      try {
+        localStorage.setItem(K, JSON.stringify(doctors));
+        localStorage.setItem(K+'_calls', JSON.stringify(calls));
+      } catch(e){}
+      renderAll();
+    }
+  } catch(e){}
+  finally { _pulling = false; }
+}
+
+// ============================================
+// NAVIGATION
+// ============================================
+window.switchTab = function(tabName){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden'));
+  
+  const tb = document.querySelector('.tab[data-tab="'+tabName+'"]');
+  if(tb) tb.classList.add('active');
+  const content = document.getElementById('tab-'+tabName);
+  if(content) content.classList.remove('hidden');
+  
+  // نوار موبایل
+  document.querySelectorAll('.mobile-nav button').forEach(x=>{
+    if(x.dataset.tab === tabName) x.classList.add('active');
+    else x.classList.remove('active');
   });
-}, 100);
-
-setTimeout(()=>{
-  document.querySelectorAll('.user-picker button').forEach(b=>{
-    b.classList.toggle('active', b.dataset.user === window.currentUser);
-  });
-}, 100);
-
-setTimeout(()=>{
-  document.querySelectorAll('.user-picker button').forEach(b=>{
-    b.classList.toggle('active', b.dataset.user === window.currentUser);
-  });
-}, 100);
-
-window.toggleCompact = function(e){
-  const el = e.target;
-  const h = el.querySelector('.doc-header');
-  if(!h) return;
-  if(el.scrollTop > 40) h.classList.add('compact');
-  else h.classList.remove('compact');
+  
+  // رندر
+  if(tabName === 'dash') renderDash();
+  if(tabName === 'doctors'){ renderDocList(); renderMain(); }
+  if(tabName === 'calls') renderCalls();
 };
 
-function openModal(html){
-  document.getElementById('modalHost').innerHTML = `<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal">${html}</div></div>`;
+function updateMobileNav(){
+  const activeTab = document.querySelector('.tab.active');
+  if(!activeTab) return;
+  const tabName = activeTab.dataset.tab;
+  document.querySelectorAll('.mobile-nav button').forEach(x=>{
+    if(x.dataset.tab === tabName) x.classList.add('active');
+    else x.classList.remove('active');
+  });
 }
-function closeModal(){ document.getElementById('modalHost').innerHTML=''; }
-window.closeModal = closeModal;
 
-window.copyText = (text, btn) => {
-  if(!text || text==='—'){ toast('⚠️ چیزی برای کپی نیست'); return; }
-  const done = () => {
-    const old = btn.textContent;
-    btn.textContent = '✅';
-    btn.classList.add('copied');
-    setTimeout(()=>{ btn.textContent = old; btn.classList.remove('copied'); }, 1500);
-    toast('📋 کپی شد');
-  };
-  const fallback = () => {
-    const ta = document.createElement('textarea');
-    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
-    document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); done(); } catch(e){ toast('❌ کپی نشد'); }
-    document.body.removeChild(ta);
-  };
-  if(navigator.clipboard && window.isSecureContext){
-    navigator.clipboard.writeText(text).then(done).catch(fallback);
-  } else fallback();
-};
-
-function openDoctorModal(editId){
-  const d = editId ? doctors.find(x=>x.id===editId) : null;
-  const c = d?.card || {}, f = d?.finance || {};
-  openModal(`
-    <h2>${d?'✏️ ویرایش':'➕ ثبت'} پزشک</h2>
-    <form id="mDoctorForm" autocomplete="off">
-      <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" type="hidden" id="mEditId" value="${d?.id||''}">
-      <div class="sect">👤 اطلاعات فردی</div>
-      <div class="row">
-        <div><label>نام *</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" id="mFirstName" required value="${esc(d?.firstName||'')}"></div>
-        <div><label>نام خانوادگی *</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" id="mLastName" required value="${esc(d?.lastName||'')}"></div>
+// ============================================
+// DASHBOARD
+// ============================================
+function renderDash(){
+  const myD = myDoctors();
+  const myC = myCalls();
+  const stats = [
+    { label:'پزشکان', value:myD.length },
+    { label:'کل رویدادها', value:myD.reduce((s,d)=>s+(d.events||[]).length,0) },
+    { label:'امتیاز کل', value:myD.reduce((s,d)=>s+totalEarned(d),0) },
+    { label:'پزشکان کامل', value:myD.filter(isComplete).length },
+    { label:'پزشکان ناقص', value:myD.filter(d=>!isComplete(d)).length },
+    { label:'مانده دریافتی', value:myD.reduce((s,d)=>{ const f=d.finance||{}; return s+Math.max(0,Number(f.total||0)-Number(f.paid||0)); },0) },
+    { label:'تماس‌های پیگیری‌نشده', value:myC.filter(c=>c.follow==='پیگیری‌نشده').length }
+  ];
+  document.getElementById('statsBar').innerHTML = stats.map(s=>`<div class="stat"><div class="label">${s.label}</div><div class="value">${num(s.value)}</div></div>`).join('');
+  const inc = myD.filter(d=>!isComplete(d)).slice(0,10);
+  document.getElementById('incomplete').innerHTML = inc.length ? inc.map(d=>{
+    const rem = remainingCredits(d);
+    return `<div style="background:rgba(15,23,42,0.6);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px">
+      <div style="font-weight:700;font-size:13px">${esc(fullName(d))} <span class="badge blue">${esc(d.spec||'')}</span> <span class="badge red">${num(rem)} کم</span></div>
+      <div style="color:var(--muted);font-size:11px;margin-top:5px">📞 <span class="ltr">${esc(d.phone)}</span> | 🎯 ${num(totalEarned(d))} از ${num(d.creditReq||0)}</div>
+      <div class="actions">
+        <button class="mini green" onclick="goDoctor('${d.id}')">👁 مشاهده</button>
       </div>
-      <div class="row">
-        <div><label>تخصص *</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" id="mSpec" required value="${esc(d?.spec||'')}"></div>
-        <div><label>کد ملی *</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mNat" required maxlength="10" value="${esc(d?.nat||'')}"></div>
-      </div>
-      <div class="row">
-        <div><label>شماره موبایل *</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mPhone" required value="${esc(d?.phone||'')}"></div>
-        <div><label>امتیاز درخواستی *</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mCreditReq" required value="${esc(d?.creditReq||'')}"></div>
-      </div>
-      <div class="row">
-        <div><label>رمز سامانه</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" id="mPass" value="${esc(d?.pass||'')}"></div>
-        <div><label>سال کارنامه</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mYear" value="${esc(d?.year||'')}"></div>
-      </div>
-      <div class="sect">💳 کارت بانکی (اختیاری)</div>
-      <div class="row">
-        <div><label>شماره کارت</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"></div>
-        <div><label>CVV2</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mCvv2" maxlength="4" value="${esc(c.cvv2||'')}"></div>
-      </div>
-      <div class="row">
-        <div><label>ماه انقضا (MM)</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mCardM" maxlength="2" value="${esc(c.m||'')}"></div>
-        <div><label>سال انقضا (YY)</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mCardY" maxlength="2" value="${esc(c.y||'')}"></div>
-      </div>
-      <div class="row">
-        <div><label>رمز دوم کارت</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mPass2" value="${esc(c.pass2||'')}"></div>
-        <div></div>
-      </div>
-      <div class="sect">💰 هزینه‌ها (تومان)</div>
-      <div class="row3">
-        <div><label>کل هزینه</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mTotal" value="${f.total?Number(f.total).toLocaleString('en-US'):''}"></div>
-        <div><label>پرداختی</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mPaid" value="${f.paid?Number(f.paid).toLocaleString('en-US'):''}"></div>
-        <div><label>باقی‌مانده</label><input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="mRem" disabled style="opacity:.7"></div>
-      </div>
-      <button class="btn" type="submit">${d?'💾 ذخیره':'➕ ثبت پزشک'}</button>
-      <button class="btn ghost" type="button" onclick="closeModal()">انصراف</button>
-    </form>
-  `);
-  const parseNum = inp => Number(String(inp.value).replace(/,/g,'').replace(/[^0-9]/g,'')) || 0;
-  const fmtNum = inp => { const v = String(inp.value).replace(/[^0-9]/g,''); inp.value = v ? parseInt(v).toLocaleString('en-US') : ''; };
-  const upd = () => { const t=parseNum(document.getElementById('mTotal')), p=parseNum(document.getElementById('mPaid')); document.getElementById('mRem').value = Math.max(0,t-p).toLocaleString('en-US'); };
-  document.getElementById('mTotal').addEventListener('input',function(){fmtNum(this);upd();});
-  document.getElementById('mPaid').addEventListener('input',function(){fmtNum(this);upd();});
-  upd();
-
-  document.getElementById('mDoctorForm').onsubmit = e => {
-    e.preventDefault();
-    const gv = id => toEnDigits(document.getElementById(id)?.value || '').trim();
-    const data = {
-      firstName:document.getElementById('mFirstName').value.trim(),
-      lastName:document.getElementById('mLastName').value.trim(),
-      spec:document.getElementById('mSpec').value.trim(),
-      nat:gv('mNat'), phone:gv('mPhone'), creditReq:Number(gv('mCreditReq')||0),
-      pass:document.getElementById('mPass').value, year:gv('mYear'),
-      card:{ num:gv('mCardNum'), m:gv('mCardM').padStart(2,'0'), y:gv('mCardY').padStart(2,'0'), cvv2:gv('mCvv2'), pass2:gv('mPass2') },
-      finance:{ total:parseNum(document.getElementById('mTotal')), paid:parseNum(document.getElementById('mPaid')) }
-    };
-    const id = document.getElementById('mEditId').value;
-    if(id){ Object.assign(doctors.find(x=>x.id===id), data); toast('✅ پزشک ویرایش شد'); }
-    else { const n = { id:uid(), ...data, owner:window.currentUser, events:[], createdAt:Date.now() }; doctors.unshift(n); selectedDoctorId = n.id; toast('✅ پزشک ثبت شد'); }
-    save(); closeModal(); render();
-  };
+    </div>`;
+  }).join('') : '<div class="empty">🎉 همه پزشکان کامل هستند</div>';
 }
-window.openDoctorModal = openDoctorModal;
 
+// ============================================
+// DOCTORS LIST
+// ============================================
 function renderDocList(){
-  const q = document.getElementById('searchDoctor').value.trim().toLowerCase();
+  const searchEl = document.getElementById('searchDoctor');
+  if(!searchEl) return;
+  const q = searchEl.value.trim().toLowerCase();
   const arr = myDoctors().filter(d => !q || fullName(d).toLowerCase().includes(q) || (d.spec||'').toLowerCase().includes(q) || (d.phone||'').includes(q) || (d.nat||'').includes(q));
   const el = document.getElementById('docList');
+  if(!el) return;
   if(!arr.length){ el.innerHTML='<div class="empty">پزشکی یافت نشد</div>'; return; }
   el.innerHTML = arr.map(d=>{
     const req = Number(d.creditReq||0), total = totalEarned(d);
@@ -592,11 +521,12 @@ function renderDocList(){
     return `
       <div class="doc-row ${selectedDoctorId===d.id?'active':''}" onclick="selectDoctor('${d.id}')">
         <div class="doc-name">
-          <span>${d.owner?`<span class="owner-badge ${d.owner}">${d.owner==='morteza'?'مرتضی':'پروین'}</span>`:''}${esc(fullName(d))}</span>
+          <span>${esc(fullName(d))}</span>
+          ${d.owner?`<span class="owner-badge ${d.owner}">${d.owner==='morteza'?'مرتضی':'پروین'}</span>`:''}
         </div>
         <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">
-          ${pendingExamWebinars(d)>0?`<span class="exam-badge">📝 آزمون باقی‌مانده: ${num(pendingExamWebinars(d))}</span>`:''}
-          ${hasOffline?(offlinePurchasedToday(d)?'<span class="offline-badge ok">✅ غیر حضوری: خرید شده</span>':'<span class="offline-badge wait">🛒 غیر حضوری: خرید نشده</span>'):''}
+          ${pendingExamWebinars(d)>0?`<span class="exam-badge">📝 آزمون: ${num(pendingExamWebinars(d))}</span>`:''}
+          ${hasOffline?(offlinePurchasedToday(d)?'<span class="offline-badge ok">✅ خرید شده</span>':'<span class="offline-badge wait">🛒 خرید نشده</span>'):''}
         </div>
         <div class="doc-spec">${esc(d.spec||'—')} ${complete?'<span class="badge green" style="margin:0 4px">✔</span>':''}${rem$>0?'<span class="badge yellow" style="margin:0 4px">💸</span>':''}</div>
         <div class="doc-bar"><div class="fill ${complete?'done':''}" style="width:${pct}%"></div></div>
@@ -611,8 +541,9 @@ function selectDoctor(id){
   renderMain();
   updateMobileSelection();
 }
-window.updateMobileSelection = function(){
-  const app = document.querySelector('.app');
+
+function updateMobileSelection(){
+  const app = document.getElementById('appContainer');
   if(!app) return;
   if(selectedDoctorId){
     app.classList.add('has-selection');
@@ -621,29 +552,27 @@ window.updateMobileSelection = function(){
     app.classList.remove('has-selection');
     app.classList.add('no-selection');
   }
-};
+}
+
 window.backToList = function(){
   selectedDoctorId = null;
   renderDocList();
   renderMain();
   updateMobileSelection();
 };
-window.selectDoctor = selectDoctor;
 
+// ============================================
+// DOCTOR DETAIL
+// ============================================
 function renderMain(){
   const el = document.getElementById('mainArea');
+  if(!el) return;
   if(!selectedDoctorId){
-    el.innerHTML = `<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>`;
+    el.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>';
     return;
   }
   const d = doctors.find(x=>x.id===selectedDoctorId);
   if(!d){ selectedDoctorId=null; renderMain(); return; }
-  // چک مالک
-  if(window.currentUser !== 'all' && d.owner && d.owner !== window.currentUser){
-    selectedDoctorId = null;
-    el.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>';
-    return;
-  }
   const cr = doctorCredits(d), total = totalEarned(d), req = Number(d.creditReq||0), rem = remainingCredits(d);
   const c = d.card||{}, f = d.finance||{};
   const rem$ = Math.max(0, Number(f.total||0)-Number(f.paid||0));
@@ -672,35 +601,33 @@ function renderMain(){
             </div>
           </div>
           <div style="display:flex;gap:5px;flex-direction:column">
-            <button class="mini green" onclick="callFromDetail('${esc(d.phone)}','${esc(fullName(d))}')">📞 تماس</button>
             <button class="mini" onclick="openDoctorModal('${d.id}')">✏️ ویرایش</button>
-            ${d.owner !== window.currentUser ? `<button class="mini" onclick="claimDoctor('${d.id}')">👤 انتقال به من</button>` : ''}
             <button class="mini danger" onclick="delDoctor('${d.id}')">🗑 حذف</button>
           </div>
         </div>
       </div>
       <div class="credits">
-        <div class="credit-box"><div class="title"><span class="ico">🎯</span>امتیاز درخواستی</div><div class="val neutral">${num(req)}</div></div>
-        <div class="credit-box"><div class="title"><span class="ico">✅</span>کسب‌شده</div><div class="val success">${num(total)}</div></div>
-        <div class="credit-box"><div class="title"><span class="ico">${rem>0?'⏳':'🎉'}</span>${rem>0?'باقی‌مانده':'کامل'}</div><div class="val ${rem>0?'danger':'success'}">${num(rem)}</div></div>
-        <div class="credit-box"><div class="title"><span class="ico">🏢</span>حضوری</div><div class="val">${num(cr['حضوری'])}</div></div>
-        <div class="credit-box"><div class="title"><span class="ico">💻</span>وبینار</div><div class="val">${num(cr['وبینار'])}</div></div>
-        <div class="credit-box"><div class="title"><span class="ico">📁</span>غیر حضوری</div><div class="val">${num(cr['غیر حضوری'])}</div></div>
+        <div class="credit-box"><div class="title">🎯 درخواستی</div><div class="val neutral">${num(req)}</div></div>
+        <div class="credit-box"><div class="title">✅ کسب‌شده</div><div class="val success">${num(total)}</div></div>
+        <div class="credit-box"><div class="title">${rem>0?'⏳ باقی‌مانده':'🎉 کامل'}</div><div class="val ${rem>0?'danger':'success'}">${num(rem)}</div></div>
+        <div class="credit-box"><div class="title">🏢 حضوری</div><div class="val">${num(cr['حضوری'])}</div></div>
+        <div class="credit-box"><div class="title">💻 وبینار</div><div class="val">${num(cr['وبینار'])}</div></div>
+        <div class="credit-box"><div class="title">📁 غیر حضوری</div><div class="val">${num(cr['غیر حضوری'])}</div></div>
       </div>
-      <div class="finance-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:10px">
-        <div class="info-cell">💰 کل هزینه: <b>${num(f.total||0)}</b></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:10px">
+        <div class="info-cell">💰 کل: <b>${num(f.total||0)}</b></div>
         <div class="info-cell">✅ پرداختی: <b style="color:var(--success)">${num(f.paid||0)}</b></div>
-        <div class="info-cell">⏳ باقی‌مانده: <b style="color:${rem$>0?'var(--danger)':'var(--success)'}">${num(rem$)}</b></div>
+        <div class="info-cell">⏳ باقی: <b style="color:${rem$>0?'var(--danger)':'var(--success)'}">${num(rem$)}</b></div>
       </div>
-      ${(c.num||c.cvv2||c.pass2||c.m||c.y)?`
-      <div class="bank-row" style="margin-top:8px">
+      ${(c.num||c.cvv2||c.pass2)?`
+      <div style="margin-top:8px">
         <button class="mini danger" onclick="toggleCard('card_${d.id}',this)">👁 نمایش کارت بانکی</button>
         <div id="card_${d.id}" class="hidden" style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:6px;margin-top:6px">
-          <div class="info-cell">شماره کارت: <b class="ltr">${esc(c.num||'—')}</b> <button class="copy-btn" onclick="copyText('${esc(c.num||'')}',this)">📋</button></div>
+          <div class="info-cell">شماره: <b class="ltr">${esc(c.num||'—')}</b></div>
           <div class="info-cell">ماه: <b class="ltr">${esc(c.m||'--')}</b></div>
           <div class="info-cell">سال: <b class="ltr">${esc(c.y||'--')}</b></div>
           <div class="info-cell">CVV2: <b class="ltr">${esc(c.cvv2||'—')}</b></div>
-          <div class="info-cell">رمز دوم: <b class="ltr">${esc(c.pass2||'—')}</b></div>
+          <div class="info-cell">رمز۲: <b class="ltr">${esc(c.pass2||'—')}</b></div>
         </div>
       </div>`:''}
     </div>
@@ -737,7 +664,6 @@ function renderEventRow(e){
   const state = eventState(e);
   const earned = state==='earned';
   const failed = state==='failed';
-  const label = earned?'✔ کسب شد' : failed?'✗ رد' : '⏳ در انتظار';
   const purchaseTxt = e.purchase==='انجام شد' ? '🛒 خرید شده' : '🛒 خرید نشده';
   const attendTxt = e.attend==='انجام شد' ? '🎟 شرکت شده' : '🎟 شرکت نشده';
   let examTxt = '📝 آزمون نداده';
@@ -746,8 +672,8 @@ function renderEventRow(e){
   return `
     <div class="event-row ${state}">
       <div class="event-title">${e.num?'#'+esc(e.num)+' ':''}${e.title?esc(e.title):''}${!e.num&&!e.title?'رویداد':''}</div>
-      <div class="event-meta">${e.date?'📅 <span class="ltr">'+esc(e.date)+'</span>':''}${e.time?' ⏰ <span class="ltr">'+esc(e.time)+'</span>':''}${!e.date&&!e.time?'بدون تاریخ':''}</div>
-      <div class="event-credit"><span style="font-size:15px;font-weight:800;color:${earned?'var(--success)':(failed?'var(--danger)':'var(--muted)')}">${e.credit?num(e.credit):'—'} امتیاز</span> <span style="font-size:11px;color:var(--muted);margin-right:6px">${label}</span></div>
+      <div class="event-meta">${e.date?'📅 <span class="ltr">'+esc(e.date)+'</span>':''}${e.time?' ⏰ <span class="ltr">'+esc(e.time)+'</span>':''}</div>
+      <div class="event-credit"><span style="font-size:15px;font-weight:800;color:${earned?'var(--success)':(failed?'var(--danger)':'var(--muted)')}">${e.credit?num(e.credit):'—'} امتیاز</span></div>
       <div class="status-group" style="${e.type==='غیر حضوری'?'grid-template-columns:1fr 1fr':''}">
         <button class="stat-pill ${e.purchase==='انجام شد'?'ok':''}" onclick="cycleStatus('${e.id}','purchase')">${purchaseTxt}</button>
         ${e.type!=='غیر حضوری'?`<button class="stat-pill ${e.attend==='انجام شد'?'ok':''}" onclick="cycleStatus('${e.id}','attend')">${attendTxt}</button>`:''}
@@ -760,17 +686,152 @@ function renderEventRow(e){
     </div>`;
 }
 
-window.toggleCard = (id, btn) => { const el = document.getElementById(id); el.classList.toggle('hidden'); btn.textContent = el.classList.contains('hidden') ? '👁 نمایش کارت بانکی' : '🙈 مخفی'; };
-window.cycleStatus = (eventId, field) => {
+window.cycleStatus = function(eventId, field){
   const d = doctors.find(x=>x.id===selectedDoctorId); if(!d) return;
   const e = (d.events||[]).find(x=>x.id===eventId); if(!e) return;
   if(field==='exam'){ const o=['ثبت نشده','قبول','رد']; e.exam = o[(o.indexOf(e.exam)+1)%3]; }
   else { e[field] = e[field]==='انجام شد' ? 'انجام نشد' : 'انجام شد'; }
   save(); renderMain(); renderDocList();
 };
-window.delEvent = (eventId) => { if(!confirm('حذف شود؟')) return; const d = doctors.find(x=>x.id===selectedDoctorId); if(!d) return; d.events = (d.events||[]).filter(x=>x.id!==eventId); save(); renderMain(); renderDocList(); };
 
-function openEventModal(editId, presetType){
+window.delEvent = function(eventId){
+  if(!confirm('حذف شود؟')) return;
+  const d = doctors.find(x=>x.id===selectedDoctorId); if(!d) return;
+  d.events = (d.events||[]).filter(x=>x.id!==eventId);
+  save(); renderMain(); renderDocList();
+};
+
+window.delDoctor = function(id){
+  if(!confirm('این پزشک حذف شود؟')) return;
+  doctors = doctors.filter(x=>x.id!==id);
+  if(selectedDoctorId===id) selectedDoctorId = null;
+  save(); renderAll();
+};
+
+window.goDoctor = function(id){
+  switchTab('doctors');
+  selectDoctor(id);
+};
+
+window.toggleCard = function(id, btn){
+  const el = document.getElementById(id);
+  el.classList.toggle('hidden');
+  btn.textContent = el.classList.contains('hidden') ? '👁 نمایش کارت بانکی' : '🙈 مخفی';
+};
+
+window.copyText = function(text, btn){
+  if(!text || text==='—'){ toast('⚠️ چیزی برای کپی نیست'); return; }
+  const done = () => {
+    const old = btn.textContent;
+    btn.textContent = '✅';
+    btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent = old; btn.classList.remove('copied'); }, 1500);
+    toast('📋 کپی شد');
+  };
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch(e){ toast('❌ کپی نشد'); }
+    document.body.removeChild(ta);
+  };
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).then(done).catch(fallback);
+  } else fallback();
+};
+
+// ============================================
+// MODALS
+// ============================================
+window.openModal = function(html){
+  document.getElementById('modalHost').innerHTML = `<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal">${html}</div></div>`;
+};
+window.closeModal = function(){ document.getElementById('modalHost').innerHTML=''; };
+
+window.openDoctorModal = function(editId){
+  const d = editId ? doctors.find(x=>x.id===editId) : null;
+  const c = d?.card || {}, f = d?.finance || {};
+  openModal(`
+    <h2>${d?'✏️ ویرایش':'➕ ثبت'} پزشک</h2>
+    <form id="mDoctorForm" autocomplete="off">
+      <input type="hidden" id="mEditId" value="${d?.id||''}">
+      <div class="sect">👤 اطلاعات فردی</div>
+      <div class="row">
+        <div><label>نام *</label><input autocomplete="off" id="mFirstName" required value="${esc(d?.firstName||'')}"></div>
+        <div><label>نام خانوادگی *</label><input autocomplete="off" id="mLastName" required value="${esc(d?.lastName||'')}"></div>
+      </div>
+      <div class="row">
+        <div><label>تخصص *</label><input autocomplete="off" id="mSpec" required value="${esc(d?.spec||'')}"></div>
+        <div><label>کد ملی *</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mNat" required maxlength="10" value="${esc(d?.nat||'')}"></div>
+      </div>
+      <div class="row">
+        <div><label>شماره موبایل *</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPhone" required value="${esc(d?.phone||'')}"></div>
+        <div><label>امتیاز درخواستی *</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCreditReq" required value="${esc(d?.creditReq||'')}"></div>
+      </div>
+      <div class="row">
+        <div><label>رمز سامانه</label><input autocomplete="off" id="mPass" value="${esc(d?.pass||'')}"></div>
+        <div><label>سال کارنامه</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mYear" value="${esc(d?.year||'')}"></div>
+      </div>
+      <div class="row">
+        <div><label>مالک</label>
+          <select id="mOwner">
+            <option value="morteza" ${(d?.owner||currentUser)==='morteza'?'selected':''}>مرتضی</option>
+            <option value="parvin" ${d?.owner==='parvin'?'selected':''}>پروین</option>
+          </select>
+        </div>
+        <div></div>
+      </div>
+      <div class="sect">💳 کارت بانکی (اختیاری)</div>
+      <div class="row">
+        <div><label>شماره کارت</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"></div>
+        <div><label>CVV2</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCvv2" maxlength="4" value="${esc(c.cvv2||'')}"></div>
+      </div>
+      <div class="row">
+        <div><label>ماه انقضا</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardM" maxlength="2" value="${esc(c.m||'')}"></div>
+        <div><label>سال انقضا</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardY" maxlength="2" value="${esc(c.y||'')}"></div>
+      </div>
+      <div class="row">
+        <div><label>رمز دوم کارت</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPass2" value="${esc(c.pass2||'')}"></div>
+        <div></div>
+      </div>
+      <div class="sect">💰 هزینه‌ها (تومان)</div>
+      <div class="row3">
+        <div><label>کل هزینه</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mTotal" value="${f.total?Number(f.total).toLocaleString('en-US'):''}"></div>
+        <div><label>پرداختی</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPaid" value="${f.paid?Number(f.paid).toLocaleString('en-US'):''}"></div>
+        <div><label>باقی‌مانده</label><input id="mRem" disabled style="opacity:.7"></div>
+      </div>
+      <button class="btn" type="submit">${d?'💾 ذخیره':'➕ ثبت پزشک'}</button>
+      <button class="btn ghost" type="button" onclick="closeModal()">انصراف</button>
+    </form>
+  `);
+  const parseNum = inp => Number(String(inp.value).replace(/,/g,'').replace(/[^0-9]/g,'')) || 0;
+  const fmtNum = inp => { const v = String(inp.value).replace(/[^0-9]/g,''); inp.value = v ? parseInt(v).toLocaleString('en-US') : ''; };
+  const upd = () => { const t=parseNum(document.getElementById('mTotal')), p=parseNum(document.getElementById('mPaid')); document.getElementById('mRem').value = Math.max(0,t-p).toLocaleString('en-US'); };
+  document.getElementById('mTotal').addEventListener('input',function(){fmtNum(this);upd();});
+  document.getElementById('mPaid').addEventListener('input',function(){fmtNum(this);upd();});
+  upd();
+
+  document.getElementById('mDoctorForm').onsubmit = e => {
+    e.preventDefault();
+    const gv = id => toEnDigits(document.getElementById(id)?.value || '').trim();
+    const data = {
+      firstName:document.getElementById('mFirstName').value.trim(),
+      lastName:document.getElementById('mLastName').value.trim(),
+      spec:document.getElementById('mSpec').value.trim(),
+      nat:gv('mNat'), phone:gv('mPhone'), creditReq:Number(gv('mCreditReq')||0),
+      pass:document.getElementById('mPass').value, year:gv('mYear'),
+      card:{ num:gv('mCardNum'), m:gv('mCardM').padStart(2,'0'), y:gv('mCardY').padStart(2,'0'), cvv2:gv('mCvv2'), pass2:gv('mPass2') },
+      finance:{ total:parseNum(document.getElementById('mTotal')), paid:parseNum(document.getElementById('mPaid')) },
+      owner: document.getElementById('mOwner').value
+    };
+    const id = document.getElementById('mEditId').value;
+    if(id){ Object.assign(doctors.find(x=>x.id===id), data); toast('✅ ویرایش شد'); }
+    else { const n = { id:uid(), ...data, events:[], createdAt:Date.now() }; doctors.unshift(n); selectedDoctorId = n.id; toast('✅ ثبت شد'); }
+    save(); closeModal(); renderAll();
+  };
+};
+
+window.openEventModal = function(editId, presetType){
   const d = doctors.find(x=>x.id===selectedDoctorId);
   if(!d){ toast('⚠️ ابتدا یک پزشک انتخاب کنید'); return; }
   const existing = editId ? (d.events||[]).find(x=>x.id===editId) : null;
@@ -803,30 +864,30 @@ function openEventModal(editId, presetType){
     if(type==='غیر حضوری'){
       document.getElementById('dynFields').innerHTML = `
         <label>شناسه برنامه *</label>
-        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
+        <input autocomplete="off" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
         <label>امتیاز</label>
-        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">
-        <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:8px;padding:7px;font-size:11px;color:var(--warn);margin-top:7px">📁 غیر حضوری نیازی به تاریخ و ساعت ندارد</div>`;
+        <input autocomplete="off" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">
+        <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:8px;padding:7px;font-size:11px;color:var(--warn);margin-top:7px">📁 نیازی به تاریخ و ساعت ندارد</div>`;
     } else if(type==='حضوری'){
       document.getElementById('dynFields').innerHTML = `
         <label>شناسه برنامه *</label>
-        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
+        <input autocomplete="off" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
         <label>عنوان رویداد *</label>
-        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" id="eTitle" required value="${esc(e.title||'')}">
+        <input autocomplete="off" id="eTitle" required value="${esc(e.title||'')}">
         <label>تاریخ (شمسی)</label>
         <div class="row3">${sel('eYear',YEARS,pd.y)}${sel('eMonth',MONTHS.map((m,i)=>({v:i+1,l:m})),pd.m)}${sel('eDay',DAYS,pd.d)}</div>
         <label>امتیاز</label>
-        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">`;
+        <input autocomplete="off" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">`;
     } else {
       document.getElementById('dynFields').innerHTML = `
         <label>شناسه برنامه *</label>
-        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
+        <input autocomplete="off" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
         <label>تاریخ (شمسی)</label>
         <div class="row3">${sel('eYear',YEARS,pd.y)}${sel('eMonth',MONTHS.map((m,i)=>({v:i+1,l:m})),pd.m)}${sel('eDay',DAYS,pd.d)}</div>
         <label>ساعت</label>
         <div class="row">${sel('eHour',HOURS,eh||'20')}${sel('eMin',MINUTES,(em||'00').padStart(2,'0'))}</div>
         <label>امتیاز</label>
-        <input autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">`;
+        <input autocomplete="off" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">`;
     }
   }
   renderDynFields();
@@ -838,55 +899,24 @@ function openEventModal(editId, presetType){
     if(type==='غیر حضوری'){ data.num = gv('eNum'); data.title=''; data.date=''; data.time=''; }
     else if(type==='حضوری'){ data.num = gv('eNum'); data.title = document.getElementById('eTitle').value.trim(); data.date = formatDate(gv('eYear'),gv('eMonth'),gv('eDay')); data.time=''; }
     else { data.num = gv('eNum'); data.title=''; data.date = formatDate(gv('eYear'),gv('eMonth'),gv('eDay')); data.time = gv('eHour')+':'+gv('eMin'); }
-    if(isEdit){ Object.assign(existing, data); toast('✅ رویداد ویرایش شد'); }
+    if(isEdit){ Object.assign(existing, data); toast('✅ ویرایش شد'); }
     else {
       if(type==='غیر حضوری' && offlinePurchasedToday(d)){
-        if(!confirm('⚠️ امروز یک برنامه غیر حضوری خریده‌اید. ادامه؟')) return;
+        if(!confirm('⚠️ امروز غیر حضوری خریده‌اید. ادامه؟')) return;
       }
       d.events.unshift({ id:uid(), ...data, purchase:'انجام نشد', attend:'انجام نشد', exam:'ثبت نشده', createdAt:Date.now() });
-      toast('✅ رویداد اضافه شد');
+      toast('✅ اضافه شد');
     }
-    save(); closeModal(); renderMain(); renderDocList(); renderDash();
+    save(); closeModal(); renderMain(); renderDocList();
   };
-}
-window.openEventModal = openEventModal;
-
-
-window.claimDoctor = id => {
-  const d = doctors.find(x=>x.id===id);
-  if(!d) return;
-  const oldOwner = d.owner || 'نامشخص';
-  if(!confirm(`این پزشک به «${window.currentUser === 'morteza' ? 'مرتضی' : 'پروین'}» منتقل شود؟`)) return;
-  d.owner = window.currentUser;
-  save();
-  render();
-  toast('✅ انتقال انجام شد');
 };
 
-window.claimDoctor = id => {
-  const d = doctors.find(x=>x.id===id);
-  if(!d) return;
-  const oldOwner = d.owner || 'نامشخص';
-  if(!confirm(`این پزشک به «${window.currentUser === 'morteza' ? 'مرتضی' : 'پروین'}» منتقل شود؟`)) return;
-  d.owner = window.currentUser;
-  save();
-  render();
-  toast('✅ انتقال انجام شد');
-};
+// ============================================
+// CALLS
+// ============================================
+const callPhoneEl = document.getElementById('callPhone');
+if(callPhoneEl) callPhoneEl.addEventListener('input', updateCallInfo);
 
-window.claimDoctor = id => {
-  const d = doctors.find(x=>x.id===id);
-  if(!d) return;
-  const oldOwner = d.owner || 'نامشخص';
-  if(!confirm(`این پزشک به «${window.currentUser === 'morteza' ? 'مرتضی' : 'پروین'}» منتقل شود؟`)) return;
-  d.owner = window.currentUser;
-  save();
-  render();
-  toast('✅ انتقال انجام شد');
-};
-window.delDoctor = id => { if(!confirm('این پزشک حذف شود؟')) return; doctors = doctors.filter(x=>x.id!==id); if(selectedDoctorId===id) selectedDoctorId = null; save(); render(); };
-
-document.getElementById('callPhone').addEventListener('input', updateCallInfo);
 function updateCallInfo(){
   const p = normPhone(document.getElementById('callPhone').value);
   const el = document.getElementById('callCreditInfo');
@@ -906,12 +936,14 @@ function updateCallInfo(){
 
 document.getElementById('fCall').onsubmit = e => {
   e.preventDefault();
-  calls.unshift({ id:uid(), owner:window.currentUser, phone:toEnDigits(document.getElementById('callPhone').value.trim()), name:document.getElementById('callName').value.trim(), subject:document.getElementById('callSubject').value, follow:document.getElementById('callFollow').value, note:document.getElementById('callNote').value.trim(), createdAt:Date.now() });
-  save(); e.target.reset(); document.getElementById('callCreditInfo').innerHTML=''; render(); toast('📞 تماس ثبت شد');
+  calls.unshift({ id:uid(), owner:currentUser, phone:toEnDigits(document.getElementById('callPhone').value.trim()), name:document.getElementById('callName').value.trim(), subject:document.getElementById('callSubject').value, follow:document.getElementById('callFollow').value, note:document.getElementById('callNote').value.trim(), createdAt:Date.now() });
+  save(); e.target.reset(); document.getElementById('callCreditInfo').innerHTML=''; renderCalls(); toast('📞 ثبت شد');
 };
 
 function renderCalls(){
-  const q = document.getElementById('searchCall').value.trim().toLowerCase();
+  const searchEl = document.getElementById('searchCall');
+  if(!searchEl) return;
+  const q = searchEl.value.trim().toLowerCase();
   const f = document.getElementById('filterCall').value;
   const arr = myCalls().filter(c=>{
     if(f==='pending' && c.follow!=='پیگیری‌نشده') return false;
@@ -930,221 +962,64 @@ function renderCalls(){
       ${c.note?`<div style="background:rgba(56,189,248,0.08);padding:6px 10px;border-radius:8px;border-right:3px solid var(--accent);margin-top:6px;font-size:12px">${esc(c.note)}</div>`:''}</div>
       <div><span class="badge ${fCls[c.follow]||'gray'}">${esc(c.follow)}</span></div>
     </div>
-    <div class="actions"><button class="mini" onclick="cycleFollow('${c.id}')">تغییر پیگیری</button><button class="mini danger" onclick="delCall('${c.id}')">🗑 حذف</button></div>
+    <div class="actions">
+      <button class="mini" onclick="cycleFollow('${c.id}')">تغییر پیگیری</button>
+      <button class="mini danger" onclick="delCall('${c.id}')">🗑 حذف</button>
+    </div>
   </div>`).join('');
 }
-window.cycleFollow = id => { const c=calls.find(x=>x.id===id); if(!c) return; const o=['پیگیری‌نشده','در حال پیگیری','پیگیری‌شده']; c.follow=o[(o.indexOf(c.follow)+1)%3]; save(); render(); };
-window.delCall = id => { if(!confirm('حذف شود؟')) return; calls=calls.filter(x=>x.id!==id); save(); render(); };
-window.callFromDetail = (phone,name) => {
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  document.querySelector('[data-tab="calls"]').classList.add('active');
-  document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden'));
-  document.getElementById('tab-calls').classList.remove('hidden');
-  document.getElementById('callPhone').value = phone;
-  updateCallInfo();
-  document.getElementById('callNote').focus();
+
+window.cycleFollow = function(id){
+  const c=calls.find(x=>x.id===id); if(!c) return;
+  const o=['پیگیری‌نشده','در حال پیگیری','پیگیری‌شده'];
+  c.follow=o[(o.indexOf(c.follow)+1)%3];
+  save(); renderCalls();
+};
+window.delCall = function(id){
+  if(!confirm('حذف شود؟')) return;
+  calls=calls.filter(x=>x.id!==id);
+  save(); renderCalls();
 };
 
-/* ===== Google Sheets Sync ===== */
-(function(){
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwp_yjquh9tEXmy_rPIVCbjchFi6427qr2G73pOVVagD4PcPt2jSePBBtP-PG24jSot/exec';
-  let _pushing = false;
-  let _pulling = false;
+// ============================================
+// RENDER ALL
+// ============================================
+function renderAll(){
+  renderDash();
+  renderDocList();
+  renderMain();
+  renderCalls();
+}
 
-  window.__pushToCloud = async function(){
-    if(_pushing) return;
-    _pushing = true;
-    try {
-      await fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ doctors, calls })
-      });
-    } catch(e){ console.log('push error:', e.message); }
-    finally { _pushing = false; }
-  };
+// ============================================
+// EVENT LISTENERS
+// ============================================
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick = () => switchTab(t.dataset.tab);
+});
+document.querySelectorAll('.mobile-nav button').forEach(b=>{
+  b.onclick = () => switchTab(b.dataset.tab);
+});
+document.getElementById('searchDoctor').addEventListener('input', renderDocList);
+document.getElementById('searchCall').addEventListener('input', renderCalls);
+document.getElementById('filterCall').addEventListener('change', renderCalls);
 
-  async function pullFromCloud(){
-    if(_pulling) return;
-    _pulling = true;
-    try {
-      const r = await fetch(SCRIPT_URL + '?t=' + Date.now());
-      const data = await r.json();
-      if(!data) return;
-      const remote = { doctors: data.doctors || [], calls: data.calls || [] };
-      const local = { doctors, calls };
-      const rStr = JSON.stringify(remote), lStr = JSON.stringify(local);
-      if(rStr !== lStr){
-        doctors = remote.doctors;
-        calls = remote.calls;
-        localStorage.setItem(K, JSON.stringify(doctors));
-        localStorage.setItem(K+'_calls', JSON.stringify(calls));
-        render();
-      }
-    } catch(e){}
-    finally { _pulling = false; }
-  }
-
-  // اولین pull بعد از ۵۰۰ میلی‌ثانیه
-  setTimeout(pullFromCloud, 500);
-  // هر ۵ ثانیه چک کن
-  setInterval(pullFromCloud, 5000);
-  // هر بار برگشتن به تب
-  document.addEventListener('visibilitychange', () => { if(!document.hidden) pullFromCloud(); });
-  console.log('✅ Google Sheets Sync فعال شد');
-})();
-
-
-
-
-
-
-
-</script>
-<nav class="mobile-nav" id="mobileNav">
-  <button data-tab="dash" class="active"><span class="icon">📊</span>داشبورد</button>
-  <button data-tab="doctors"><span class="icon">👨‍⚕️</span>پزشکان</button>
-  <button data-tab="calls"><span class="icon">📞</span>تماس‌ها</button>
-</nav>
-
-
-
-<script>
-// جلوگیری از autocomplete Safari
-(function(){
-  function applyReadonly(){
-    document.querySelectorAll('input:not([type=checkbox]):not([type=radio]):not([type=hidden])').forEach(function(inp){
-      if(!inp.hasAttribute('readonly')) inp.setAttribute('readonly','readonly');
-    });
-  }
-  document.addEventListener('focusin', function(e){
-    if(e.target.tagName === 'INPUT') e.target.removeAttribute('readonly');
-  });
-  document.addEventListener('focusout', function(e){
-    if(e.target.tagName === 'INPUT') e.target.setAttribute('readonly','readonly');
-  });
-  // روی همه inputهای جدید هم اعمال کن
-  var observer = new MutationObserver(function(){
-    applyReadonly();
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
-  setTimeout(applyReadonly, 100);
-  setTimeout(applyReadonly, 500);
-})();
-
-
-
-
-// ===== Navigation System (مطمئن) =====
-window.switchTab = function(tabName){
-  try {
-    // غیرفعال کردن همه تب‌ها
-    document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
-    document.querySelectorAll('.tab-content').forEach(function(x){ x.classList.add('hidden'); });
-    
-    // فعال کردن تب انتخاب‌شده
-    var tb = document.querySelector('.tab[data-tab="' + tabName + '"]');
-    if(tb) tb.classList.add('active');
-    var content = document.getElementById('tab-' + tabName);
-    if(content) content.classList.remove('hidden');
-    
-    // نوار پایین موبایل
-    document.querySelectorAll('.mobile-nav button').forEach(function(x){
-      if(x.dataset.tab === tabName) x.classList.add('active');
-      else x.classList.remove('active');
-    });
-    
-    // رندر محتوا
-    if(tabName === 'dash'){
-      try { if(typeof renderDash === 'function') renderDash(); } catch(e){ console.log('renderDash err:', e.message); }
-    } else if(tabName === 'doctors'){
-      try { if(typeof renderDocList === 'function') renderDocList(); } catch(e){ console.log('renderDocList err:', e.message); }
-      try { if(typeof renderMain === 'function') renderMain(); } catch(e){ console.log('renderMain err:', e.message); }
-    } else if(tabName === 'calls'){
-      try { if(typeof renderCalls === 'function') renderCalls(); } catch(e){ console.log('renderCalls err:', e.message); }
-    }
-  } catch(e){
-    console.log('switchTab error:', e.message);
-  }
-};
-
-// اتصال تب‌های بالا
-document.querySelectorAll('.tab').forEach(function(t){
-  t.onclick = function(e){
-    e.preventDefault();
-    window.switchTab(t.dataset.tab);
-  };
+// ============================================
+// INIT
+// ============================================
+document.querySelectorAll('.user-picker button').forEach(b=>{
+  if(b.dataset.user === currentUser) b.classList.add('active');
+  else b.classList.remove('active');
 });
 
-// اتصال نوار پایین
-document.querySelectorAll('.mobile-nav button').forEach(function(b){
-  b.onclick = function(e){
-    e.preventDefault();
-    window.switchTab(b.dataset.tab);
-  };
-});
+tick();
+setInterval(tick, 30000);
+renderAll();
 
-window.switchTab = window.switchTab || function(t){ console.log("switchTab not ready"); };
-
-// ===== Expose functions to window =====
-window.openDoctorModal = openDoctorModal;
-window.openModal = openModal;
-window.closeModal = closeModal;
-window.selectDoctor = selectDoctor;
-window.openEventModal = openEventModal;
-window.delDoctor = delDoctor;
-window.delEvent = delEvent;
-window.cycleStatus = cycleStatus;
-window.copyText = copyText;
-window.toggleCard = toggleCard;
-window.callFromDetail = callFromDetail;
-window.goDoctor = goDoctor;
-window.cycleFollow = cycleFollow;
-window.delCall = delCall;
-window.backToList = backToList;
-window.updateMobileSelection = updateMobileSelection;
-window.render = render;
-window.renderDash = renderDash;
-window.renderDocList = renderDocList;
-window.renderMain = renderMain;
-window.renderCalls = renderCalls;
-window.claimDoctor = claimDoctor;
-window.toggleCompact = toggleCompact;
-
-window.switchUser = function(user){
-  window.currentUser = user;
-  try { localStorage.setItem('cme_current_user', user); } catch(e){}
-  
-  // 1) پاک کردن مستقیم selectedDoctorId
-  try { selectedDoctorId = null; } catch(e){}
-  
-  // 2) پاک کردن پنل وسط از کارنامه‌ی قبلی
-  var ma = document.getElementById('mainArea');
-  if(ma){
-    ma.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>';
-  }
-  
-  // 3) آپدیت دکمه‌های پیکر
-  document.querySelectorAll('.user-picker button').forEach(function(b){
-    if(b.dataset.user === user) b.classList.add('active');
-    else b.classList.remove('active');
-  });
-  
-  // 4) رندر تب‌های مختلف
-  try { renderDash(); } catch(e){}
-  try { renderDocList(); } catch(e){}
-  try { renderCalls(); } catch(e){}
-  
-  // 5) دوباره پنل وسط رو خالی کن (چون renderDash ممکنه mainArea رو پر کنه)
-  if(ma){
-    ma.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>';
-  }
-  
-  // 6) آپدیت موبایل
-  if(typeof updateMobileSelection === 'function') updateMobileSelection();
-};
+// Google Sheets Sync
+setTimeout(pullFromCloud, 500);
+setInterval(pullFromCloud, 5000);
+document.addEventListener('visibilitychange', () => { if(!document.hidden) pullFromCloud(); });
 </script>
-
 </body>
 </html>
