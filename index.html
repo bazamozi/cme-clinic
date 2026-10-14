@@ -198,6 +198,51 @@ textarea{resize:vertical;min-height:55px}
   .info-cell{font-size:11.5px;padding:6px 7px}
   .info-cell b{font-size:11.5px}
 }
+
+.user-picker{display:flex;gap:6px;align-items:center;background:rgba(15,23,42,0.7);border:1px solid var(--border);border-radius:10px;padding:4px 6px}
+.user-picker label{font-size:11px;color:var(--muted);margin:0;padding:0 4px}
+.user-picker button{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;transition:.2s;font-weight:600}
+.user-picker button.active{background:linear-gradient(135deg,rgba(56,189,248,0.3),rgba(34,211,238,0.2));color:var(--accent);border-color:rgba(56,189,248,0.6)}
+.user-picker button:hover{color:var(--accent)}
+.owner-badge{display:inline-block;font-size:9.5px;padding:2px 8px;border-radius:20px;font-weight:700;margin-right:5px}
+.owner-badge.morteza{background:linear-gradient(135deg,rgba(56,189,248,0.3),rgba(34,211,238,0.2));color:var(--accent);border:1px solid rgba(56,189,248,0.4)}
+.owner-badge.parvin{background:linear-gradient(135deg,rgba(244,114,182,0.3),rgba(236,72,153,0.2));color:#f472b6;border:1px solid rgba(244,114,182,0.4)}
+.owner-badge.none{background:rgba(148,163,184,0.15);color:var(--muted);border:1px solid rgba(148,163,184,0.3)}
+@media(max-width:768px){
+  .user-picker{width:100%;justify-content:center;margin-top:4px}
+  .user-picker button{padding:5px 10px;font-size:11px}
+  .owner-badge{font-size:9px;padding:1px 6px}
+}
+
+.user-picker{display:flex;gap:6px;align-items:center;background:rgba(15,23,42,0.7);border:1px solid var(--border);border-radius:10px;padding:4px 6px}
+.user-picker label{font-size:11px;color:var(--muted);margin:0;padding:0 4px}
+.user-picker button{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;transition:.2s;font-weight:600}
+.user-picker button.active{background:linear-gradient(135deg,rgba(56,189,248,0.3),rgba(34,211,238,0.2));color:var(--accent);border-color:rgba(56,189,248,0.6)}
+.user-picker button:hover{color:var(--accent)}
+.owner-badge{display:inline-block;font-size:9.5px;padding:2px 8px;border-radius:20px;font-weight:700;margin-right:5px}
+.owner-badge.morteza{background:linear-gradient(135deg,rgba(56,189,248,0.3),rgba(34,211,238,0.2));color:var(--accent);border:1px solid rgba(56,189,248,0.4)}
+.owner-badge.parvin{background:linear-gradient(135deg,rgba(244,114,182,0.3),rgba(236,72,153,0.2));color:#f472b6;border:1px solid rgba(244,114,182,0.4)}
+.owner-badge.none{background:rgba(148,163,184,0.15);color:var(--muted);border:1px solid rgba(148,163,184,0.3)}
+@media(max-width:768px){
+  .user-picker{width:100%;justify-content:center;margin-top:4px}
+  .user-picker button{padding:5px 10px;font-size:11px}
+  .owner-badge{font-size:9px;padding:1px 6px}
+}
+
+.user-picker{display:flex;gap:6px;align-items:center;background:rgba(15,23,42,0.7);border:1px solid var(--border);border-radius:10px;padding:4px 6px}
+.user-picker label{font-size:11px;color:var(--muted);margin:0;padding:0 4px}
+.user-picker button{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer;transition:.2s;font-weight:600}
+.user-picker button.active{background:linear-gradient(135deg,rgba(56,189,248,0.3),rgba(34,211,238,0.2));color:var(--accent);border-color:rgba(56,189,248,0.6)}
+.user-picker button:hover{color:var(--accent)}
+.owner-badge{display:inline-block;font-size:9.5px;padding:2px 8px;border-radius:20px;font-weight:700;margin-right:5px}
+.owner-badge.morteza{background:linear-gradient(135deg,rgba(56,189,248,0.3),rgba(34,211,238,0.2));color:var(--accent);border:1px solid rgba(56,189,248,0.4)}
+.owner-badge.parvin{background:linear-gradient(135deg,rgba(244,114,182,0.3),rgba(236,72,153,0.2));color:#f472b6;border:1px solid rgba(244,114,182,0.4)}
+.owner-badge.none{background:rgba(148,163,184,0.15);color:var(--muted);border:1px solid rgba(148,163,184,0.3)}
+@media(max-width:768px){
+  .user-picker{width:100%;justify-content:center;margin-top:4px}
+  .user-picker button{padding:5px 10px;font-size:11px}
+  .owner-badge{font-size:9px;padding:1px 6px}
+}
 </style>
 </head>
 <body>
@@ -211,6 +256,21 @@ textarea{resize:vertical;min-height:55px}
     <button class="tab active" data-tab="dash">📊 داشبورد</button>
     <button class="tab" data-tab="doctors">👨‍⚕️ دفتر پزشکان</button>
     <button class="tab" data-tab="calls">📞 تماس‌ها</button>
+  </div>
+  <div class="user-picker" id="userPicker">
+    <label>👤</label>
+    <button data-user="morteza" class="active" onclick="switchUser('morteza')">مرتضی</button>
+    <button data-user="parvin" onclick="switchUser('parvin')">پروین</button>
+  </div>
+  <div class="user-picker" id="userPicker">
+    <label>👤</label>
+    <button data-user="morteza" class="active" onclick="switchUser('morteza')">مرتضی</button>
+    <button data-user="parvin" onclick="switchUser('parvin')">پروین</button>
+  </div>
+  <div class="user-picker" id="userPicker">
+    <label>👤</label>
+    <button data-user="morteza" class="active" onclick="switchUser('morteza')">مرتضی</button>
+    <button data-user="parvin" onclick="switchUser('parvin')">پروین</button>
   </div>
   <div class="sub" id="clock"></div>
 </header>
@@ -299,6 +359,66 @@ const K = 'cme4_data';
 let doctors = JSON.parse(localStorage.getItem(K)||'[]');
 let calls = JSON.parse(localStorage.getItem(K+'_calls')||'[]');
 let selectedDoctorId = null;
+let currentUser = localStorage.getItem('cme_current_user') || 'morteza';
+
+window.switchUser = function(user){
+  currentUser = user;
+  localStorage.setItem('cme_current_user', user);
+  selectedDoctorId = null;
+  document.querySelectorAll('.user-picker button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.user === user);
+  });
+  if(typeof updateMobileSelection === 'function') updateMobileSelection();
+  render();
+};
+
+// فیلتر کردن پزشکان بر اساس کاربر فعلی
+function myDoctors(){
+  return doctors.filter(d => !d.owner || d.owner === currentUser);
+}
+function myCalls(){
+  return calls.filter(c => !c.owner || c.owner === currentUser);
+}
+let currentUser = localStorage.getItem('cme_current_user') || 'morteza';
+
+window.switchUser = function(user){
+  currentUser = user;
+  localStorage.setItem('cme_current_user', user);
+  selectedDoctorId = null;
+  document.querySelectorAll('.user-picker button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.user === user);
+  });
+  if(typeof updateMobileSelection === 'function') updateMobileSelection();
+  render();
+};
+
+// فیلتر کردن پزشکان بر اساس کاربر فعلی
+function myDoctors(){
+  return doctors.filter(d => !d.owner || d.owner === currentUser);
+}
+function myCalls(){
+  return calls.filter(c => !c.owner || c.owner === currentUser);
+}
+let currentUser = localStorage.getItem('cme_current_user') || 'morteza';
+
+window.switchUser = function(user){
+  currentUser = user;
+  localStorage.setItem('cme_current_user', user);
+  selectedDoctorId = null;
+  document.querySelectorAll('.user-picker button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.user === user);
+  });
+  if(typeof updateMobileSelection === 'function') updateMobileSelection();
+  render();
+};
+
+// فیلتر کردن پزشکان بر اساس کاربر فعلی
+function myDoctors(){
+  return doctors.filter(d => !d.owner || d.owner === currentUser);
+}
+function myCalls(){
+  return calls.filter(c => !c.owner || c.owner === currentUser);
+}
 
 const save = () => {
   localStorage.setItem(K, JSON.stringify(doctors));
@@ -372,6 +492,24 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
   document.getElementById('tab-'+t.dataset.tab).classList.remove('hidden');
   render();
 });
+
+setTimeout(()=>{
+  document.querySelectorAll('.user-picker button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.user === currentUser);
+  });
+}, 100);
+
+setTimeout(()=>{
+  document.querySelectorAll('.user-picker button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.user === currentUser);
+  });
+}, 100);
+
+setTimeout(()=>{
+  document.querySelectorAll('.user-picker button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.user === currentUser);
+  });
+}, 100);
 
 window.toggleCompact = function(e){
   const el = e.target;
@@ -476,7 +614,7 @@ function openDoctorModal(editId){
     };
     const id = document.getElementById('mEditId').value;
     if(id){ Object.assign(doctors.find(x=>x.id===id), data); toast('✅ پزشک ویرایش شد'); }
-    else { const n = { id:uid(), ...data, events:[], createdAt:Date.now() }; doctors.unshift(n); selectedDoctorId = n.id; toast('✅ پزشک ثبت شد'); }
+    else { const n = { id:uid(), ...data, owner:currentUser, events:[], createdAt:Date.now() }; doctors.unshift(n); selectedDoctorId = n.id; toast('✅ پزشک ثبت شد'); }
     save(); closeModal(); render();
   };
 }
@@ -484,7 +622,7 @@ window.openDoctorModal = openDoctorModal;
 
 function renderDocList(){
   const q = document.getElementById('searchDoctor').value.trim().toLowerCase();
-  const arr = doctors.filter(d => !q || fullName(d).toLowerCase().includes(q) || (d.spec||'').toLowerCase().includes(q) || (d.phone||'').includes(q) || (d.nat||'').includes(q));
+  const arr = myDoctors().filter(d => !q || fullName(d).toLowerCase().includes(q) || (d.spec||'').toLowerCase().includes(q) || (d.phone||'').includes(q) || (d.nat||'').includes(q));
   const el = document.getElementById('docList');
   if(!arr.length){ el.innerHTML='<div class="empty">پزشکی یافت نشد</div>'; return; }
   el.innerHTML = arr.map(d=>{
@@ -496,7 +634,9 @@ function renderDocList(){
     const hasOffline = (d.events||[]).some(e=>e.type==='غیر حضوری');
     return `
       <div class="doc-row ${selectedDoctorId===d.id?'active':''}" onclick="selectDoctor('${d.id}')">
-        <div class="doc-name"><span>${esc(fullName(d))}</span></div>
+        <div class="doc-name">
+          <span>${d.owner?`<span class="owner-badge ${d.owner}">${d.owner==='morteza'?'مرتضی':'پروین'}</span>`:''}${esc(fullName(d))}</span>
+        </div>
         <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">
           ${pendingExamWebinars(d)>0?`<span class="exam-badge">📝 آزمون باقی‌مانده: ${num(pendingExamWebinars(d))}</span>`:''}
           ${hasOffline?(offlinePurchasedToday(d)?'<span class="offline-badge ok">✅ غیر حضوری: خرید شده</span>':'<span class="offline-badge wait">🛒 غیر حضوری: خرید نشده</span>'):''}
@@ -571,6 +711,7 @@ function renderMain(){
           <div style="display:flex;gap:5px;flex-direction:column">
             <button class="mini green" onclick="callFromDetail('${esc(d.phone)}','${esc(fullName(d))}')">📞 تماس</button>
             <button class="mini" onclick="openDoctorModal('${d.id}')">✏️ ویرایش</button>
+            ${d.owner !== currentUser ? `<button class="mini" onclick="claimDoctor('${d.id}')">👤 انتقال به من</button>` : ''}
             <button class="mini danger" onclick="delDoctor('${d.id}')">🗑 حذف</button>
           </div>
         </div>
@@ -747,6 +888,39 @@ function openEventModal(editId, presetType){
 }
 window.openEventModal = openEventModal;
 
+
+window.claimDoctor = id => {
+  const d = doctors.find(x=>x.id===id);
+  if(!d) return;
+  const oldOwner = d.owner || 'نامشخص';
+  if(!confirm(`این پزشک به «${currentUser === 'morteza' ? 'مرتضی' : 'پروین'}» منتقل شود؟`)) return;
+  d.owner = currentUser;
+  save();
+  render();
+  toast('✅ انتقال انجام شد');
+};
+
+window.claimDoctor = id => {
+  const d = doctors.find(x=>x.id===id);
+  if(!d) return;
+  const oldOwner = d.owner || 'نامشخص';
+  if(!confirm(`این پزشک به «${currentUser === 'morteza' ? 'مرتضی' : 'پروین'}» منتقل شود؟`)) return;
+  d.owner = currentUser;
+  save();
+  render();
+  toast('✅ انتقال انجام شد');
+};
+
+window.claimDoctor = id => {
+  const d = doctors.find(x=>x.id===id);
+  if(!d) return;
+  const oldOwner = d.owner || 'نامشخص';
+  if(!confirm(`این پزشک به «${currentUser === 'morteza' ? 'مرتضی' : 'پروین'}» منتقل شود؟`)) return;
+  d.owner = currentUser;
+  save();
+  render();
+  toast('✅ انتقال انجام شد');
+};
 window.delDoctor = id => { if(!confirm('این پزشک حذف شود؟')) return; doctors = doctors.filter(x=>x.id!==id); if(selectedDoctorId===id) selectedDoctorId = null; save(); render(); };
 
 document.getElementById('callPhone').addEventListener('input', updateCallInfo);
@@ -769,14 +943,14 @@ function updateCallInfo(){
 
 document.getElementById('fCall').onsubmit = e => {
   e.preventDefault();
-  calls.unshift({ id:uid(), phone:toEnDigits(document.getElementById('callPhone').value.trim()), name:document.getElementById('callName').value.trim(), subject:document.getElementById('callSubject').value, follow:document.getElementById('callFollow').value, note:document.getElementById('callNote').value.trim(), createdAt:Date.now() });
+  calls.unshift({ id:uid(), owner:currentUser, phone:toEnDigits(document.getElementById('callPhone').value.trim()), name:document.getElementById('callName').value.trim(), subject:document.getElementById('callSubject').value, follow:document.getElementById('callFollow').value, note:document.getElementById('callNote').value.trim(), createdAt:Date.now() });
   save(); e.target.reset(); document.getElementById('callCreditInfo').innerHTML=''; render(); toast('📞 تماس ثبت شد');
 };
 
 function renderCalls(){
   const q = document.getElementById('searchCall').value.trim().toLowerCase();
   const f = document.getElementById('filterCall').value;
-  const arr = calls.filter(c=>{
+  const arr = myCalls().filter(c=>{
     if(f==='pending' && c.follow!=='پیگیری‌نشده') return false;
     if(f==='doing' && c.follow!=='در حال پیگیری') return false;
     if(f==='done' && c.follow!=='پیگیری‌شده') return false;
@@ -809,17 +983,19 @@ window.callFromDetail = (phone,name) => {
 };
 
 function renderDash(){
+  const myD = myDoctors();
+  const myC = myCalls();
   const stats = [
-    { label:'پزشکان', value:doctors.length },
-    { label:'کل رویدادها', value:doctors.reduce((s,d)=>s+(d.events||[]).length,0) },
-    { label:'امتیاز کل', value:doctors.reduce((s,d)=>s+totalEarned(d),0) },
-    { label:'پزشکان کامل', value:doctors.filter(isComplete).length },
-    { label:'پزشکان ناقص', value:doctors.filter(d=>!isComplete(d)).length },
-    { label:'مانده دریافتی', value:doctors.reduce((s,d)=>{ const f=d.finance||{}; return s+Math.max(0,Number(f.total||0)-Number(f.paid||0)); },0) },
-    { label:'تماس‌های پیگیری‌نشده', value:calls.filter(c=>c.follow==='پیگیری‌نشده').length }
+    { label:'پزشکان', value:myD.length },
+    { label:'کل رویدادها', value:myD.reduce((s,d)=>s+(d.events||[]).length,0) },
+    { label:'امتیاز کل', value:myD.reduce((s,d)=>s+totalEarned(d),0) },
+    { label:'پزشکان کامل', value:myD.filter(isComplete).length },
+    { label:'پزشکان ناقص', value:myD.filter(d=>!isComplete(d)).length },
+    { label:'مانده دریافتی', value:myD.reduce((s,d)=>{ const f=d.finance||{}; return s+Math.max(0,Number(f.total||0)-Number(f.paid||0)); },0) },
+    { label:'تماس‌های پیگیری‌نشده', value:myC.filter(c=>c.follow==='پیگیری‌نشده').length }
   ];
   document.getElementById('statsBar').innerHTML = stats.map(s=>`<div class="stat"><div class="label">${s.label}</div><div class="value">${num(s.value)}</div></div>`).join('');
-  const inc = doctors.filter(d=>!isComplete(d)).slice(0,10);
+  const inc = myD.filter(d=>!isComplete(d)).slice(0,10);
   document.getElementById('incomplete').innerHTML = inc.length ? inc.map(d=>{ const rem = remainingCredits(d); return `<div style="background:rgba(15,23,42,0.6);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px"><div style="font-weight:700;font-size:13px">${esc(fullName(d))} <span class="badge blue">${esc(d.spec||'')}</span> <span class="badge red">${num(rem)} کم</span></div><div style="color:var(--muted);font-size:11px;margin-top:5px">📞 <span class="ltr">${esc(d.phone)}</span> | 🎯 ${num(totalEarned(d))} از ${num(d.creditReq||0)}</div><div class="actions"><button class="mini green" onclick="callFromDetail('${esc(d.phone)}','${esc(fullName(d))}')">📞 تماس</button><button class="mini" onclick="goDoctor('${d.id}')">👁 مشاهده</button></div></div>`; }).join('') : '<div class="empty">🎉 همه پزشکان کامل هستند</div>';
 }
 window.goDoctor = id => {
