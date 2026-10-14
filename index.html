@@ -259,9 +259,9 @@ textarea{resize:vertical;min-height:55px}
   </div>
   <div class="user-picker" id="userPicker">
     <label>👤</label>
-    <button data-user="morteza" class="active" onclick="switchUser('morteza')">مرتضی</button>
-    <button data-user="parvin" onclick="switchUser('parvin')">پروین</button>
-    <button data-user="all" onclick="switchUser('all')">همه</button>
+    <button data-user="morteza" onclick="window.switchUser('morteza'); return false;">مرتضی</button>
+    <button data-user="parvin" onclick="window.switchUser('parvin'); return false;">پروین</button>
+    <button data-user="all" onclick="window.switchUser('all'); return false;">همه</button>
   </div>
   <div class="sub" id="clock"></div>
 </header>
@@ -1034,47 +1034,7 @@ render();
   <button data-tab="calls"><span class="icon">📞</span>تماس‌ها</button>
 </nav>
 
-<script id="userSystemScript">
-window.switchUser = function(user){
-  window.currentUser = user;
-  try { localStorage.setItem('cme_current_user', user); } catch(e){}
-  if(typeof selectedDoctorId !== 'undefined') window.selectedDoctorId = null;
-  document.querySelectorAll('.user-picker button').forEach(function(b){
-    if(b.dataset.user === user) b.classList.add('active');
-    else b.classList.remove('active');
-  });
-  if(typeof updateMobileSelection === 'function') updateMobileSelection();
-  if(typeof render === 'function') render();
-};
 
-window.myDoctors = function(){
-  if(window.currentUser === 'all') return doctors;
-  return doctors.filter(function(d){ return d.owner === window.currentUser; });
-};
-
-window.myCalls = function(){
-  if(window.currentUser === 'all') return calls;
-  return calls.filter(function(c){ return c.owner === window.currentUser; });
-};
-
-window.deleteNoOwnerDoctors = function(){
-  var before = doctors.length;
-  doctors = doctors.filter(function(d){ return d.owner === 'morteza' || d.owner === 'parvin'; });
-  var after = doctors.length;
-  localStorage.setItem(K, JSON.stringify(doctors));
-  if(window.__pushToCloud) window.__pushToCloud();
-  if(typeof render === 'function') render();
-  console.log('حذف شد: ' + (before - after) + ' دکتر. باقی‌مانده: ' + after);
-  return before - after;
-};
-
-setTimeout(function(){
-  document.querySelectorAll('.user-picker button').forEach(function(b){
-    if(b.dataset.user === window.currentUser) b.classList.add('active');
-    else b.classList.remove('active');
-  });
-}, 500);
-</script>
 
 <script>
 // جلوگیری از autocomplete Safari
@@ -1097,6 +1057,52 @@ setTimeout(function(){
   observer.observe(document.body, { childList: true, subtree: true });
   setTimeout(applyReadonly, 100);
   setTimeout(applyReadonly, 500);
+})();
+</script>
+<script>
+// ===== User Switcher - Direct =====
+(function(){
+  function getCurrentUser(){
+    try { return localStorage.getItem('cme_current_user') || 'morteza'; } catch(e) { return 'morteza'; }
+  }
+
+  function clearPanel(){
+    var ma = document.getElementById('mainArea');
+    if(ma){
+      ma.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>';
+    }
+    // پاک کردن selectedDoctorId
+    try {
+      if(typeof selectedDoctorId !== 'undefined') selectedDoctorId = null;
+    } catch(e){}
+  }
+
+  function updateButtons(user){
+    document.querySelectorAll('.user-picker button').forEach(function(b){
+      if(b.dataset.user === user) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+  }
+
+  window.switchUser = function(user){
+    try { localStorage.setItem('cme_current_user', user); } catch(e){}
+    // پاک کردن پنل وسط
+    clearPanel();
+    // اگه render هست، صدا بزن
+    if(typeof render === 'function'){
+      try { render(); } catch(e){}
+    }
+    // دوباره پنل رو خالی کن (چون render ممکنه پر کنه)
+    setTimeout(clearPanel, 0);
+    updateButtons(user);
+  };
+
+  // اعمال دکمه فعال در شروع
+  document.addEventListener('DOMContentLoaded', function(){
+    updateButtons(getCurrentUser());
+  });
+  setTimeout(function(){ updateButtons(getCurrentUser()); }, 300);
+  setTimeout(function(){ updateButtons(getCurrentUser()); }, 1000);
 })();
 </script>
 </body>
