@@ -710,7 +710,17 @@ function renderMain(){
 }
 
 function renderEventSection(d, type, icon, color){
-  const evs = (d.events||[]).filter(e=>e.type===type).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  const evs = (d.events||[]).filter(e=>e.type===type).sort((a,b)=>{
+    // اگه هر دو تاریخ دارن → مرتب‌سازی صعودی بر اساس تاریخ (نزدیک‌ترین بالا)
+    if(a.date && b.date){
+      return a.date.localeCompare(b.date);
+    }
+    // اگه فقط یکی تاریخ داره → اون بالا
+    if(a.date && !b.date) return -1;
+    if(!a.date && b.date) return 1;
+    // اگه هیچ‌کدام تاریخ ندارن → newest اول
+    return (b.createdAt||0)-(a.createdAt||0);
+  });
   const totalCredit = evs.reduce((s,e)=>s+eventCredit(e),0);
   const sumAllCredit = evs.reduce((s,e)=>s+Number(e.credit||0),0);
   return `
