@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>دفتر بازآموزی پزشکان</title>
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+<style>
+:root{--bg1:#0f172a;--bg2:#1e293b;--card:rgba(255,255,255,0.06);--border:rgba(255,255,255,0.12);--accent:#38bdf8;--accent2:#22d3ee;--success:#34d399;--danger:#f87171;--warn:#fbbf24;--purple:#a78bfa;--text:#e2e8f0;--muted:#94a3b8}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Vazirmatn,Tahoma,sans-serif}
+body{background:radial-gradient(1200px 600px at 80% -10%,#1e3a8a55,transparent 60%),radial-gradient(900px 500px at -10% 110%,#0e749055,transparent 60%),linear-gradient(160deg,var(--bg1),var(--bg2));color:var(--text);min-height:100vh;padding:14px}
+.wrap{max-width:1600px;margin:0 auto}
+header{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:8px 18px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+h1{font-size:17px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--muted);font-size:11.5px;margin-top:3px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{padding:6px 13px;border-radius:9px;cursor:pointer;font-size:12.5px;font-weight:600;background:rgba(15,23,42,0.5);border:1px solid var(--border);color:var(--muted);transition:.25s;font-family:inherit}
+.tab.active{background:linear-gradient(135deg,rgba(56,189,248,0.25),rgba(34,211,238,0.15));color:var(--accent);border-color:rgba(56,189,248,0.5)}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px}
+.panel h2{font-size:14px;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.panel h2::before{content:'';width:4px;height:16px;border-radius:2px;background:linear-gradient(180deg,var(--accent),var(--accent2))}
+.sect{font-size:11.5px;color:var(--accent2);font-weight:700;margin:10px 0 5px;padding-right:8px;border-right:3px solid var(--accent2)}
+label{display:block;font-size:11.5px;color:var(--muted);margin:7px 0 3px}
+input,select,textarea{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:rgba(15,23,42,0.7);color:var(--text);font-family:inherit;font-size:12.5px;outline:none;transition:.2s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(56,189,248,0.15)}
+select{cursor:pointer}
+textarea{resize:vertical;min-height:55px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+@media(max-width:700px){.row,.row3{grid-template-columns:1fr 1fr}}
+.btn{width:100%;margin-top:9px;padding:10px;border:none;border-radius:9px;cursor:pointer;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#062334;font-weight:700;font-family:inherit;font-size:12.5px;transition:.2s}
+.btn:hover{transform:translateY(-2px)}
+.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn.sm{width:auto;padding:5px 11px;margin:0;font-size:11.5px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px}
+.stat{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:11px;padding:10px;text-align:center}
+.stat .label{color:var(--muted);font-size:10.5px}
+.stat .value{font-size:20px;font-weight:700;color:var(--accent);margin-top:3px}
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;margin:2px}
+.badge.blue{background:rgba(56,189,248,0.18);color:var(--accent)}
+.badge.green{background:rgba(52,211,153,0.18);color:var(--success)}
+.badge.red{background:rgba(248,113,113,0.18);color:var(--danger)}
+.badge.yellow{background:rgba(251,191,36,0.18);color:var(--warn)}
+.badge.gray{background:rgba(148,163,184,0.18);color:var(--muted)}
+.actions{margin-top:7px;display:flex;gap:5px;flex-wrap:wrap}
+.mini{border:1px solid var(--border);background:transparent;color:var(--muted);padding:4px 9px;border-radius:7px;font-size:11px;cursor:pointer;font-family:inherit;transition:.2s}
+.mini:hover{color:var(--accent);border-color:var(--accent)}
+.mini.danger:hover{color:var(--danger);border-color:var(--danger)}
+.mini.green:hover{color:var(--success);border-color:var(--success)}
+.empty{text-align:center;color:var(--muted);padding:20px;font-size:12px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(120%);background:linear-gradient(135deg,#0e7490,#155e75);color:#fff;padding:10px 20px;border-radius:10px;font-size:12.5px;transition:.4s;z-index:9999}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.hidden{display:none}
+.info-cell{background:rgba(15,23,42,0.5);border:1px solid var(--border);border-radius:8px;padding:6px 9px;font-size:13px}
+.info-cell b{color:var(--accent2);font-size:13px}
+.ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
+.app{display:grid;grid-template-columns:320px 1fr;gap:12px}
+@media(max-width:900px){.app{grid-template-columns:1fr}}
+.sidebar{background:rgba(15,23,42,0.55);border:1px solid var(--border);border-radius:14px;padding:12px;height:calc(100vh - 140px);overflow:hidden;display:flex;flex-direction:column}
+.sidebar-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px;flex-wrap:wrap}
+.sidebar-head h2{margin:0;font-size:14px;color:var(--accent)}
+.doc-list{flex:1;overflow-y:auto;padding-left:4px}
+.doc-row{background:rgba(15,23,42,0.55);border:1px solid var(--border);border-radius:10px;padding:10px 11px;margin-bottom:7px;cursor:pointer;transition:.2s}
+.doc-row:hover{border-color:rgba(56,189,248,0.4);background:rgba(15,23,42,0.8)}
+.doc-row.active{border-color:var(--accent);background:linear-gradient(135deg,rgba(56,189,248,0.15),rgba(34,211,238,0.05))}
+.doc-name{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:15px;font-weight:700}
+.doc-spec{color:var(--muted);font-size:10.5px;margin-top:2px}
+.doc-bar{height:4px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-top:7px}
+.doc-bar .fill{height:100%;background:linear-gradient(90deg,var(--success),var(--accent2));transition:.4s}
+.doc-bar .fill.done{background:linear-gradient(90deg,#22c55e,#34d399)}
+.doc-meta{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px}
+.doc-meta b{color:var(--accent2)}
+.exam-badge{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0f172a;font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:5px;margin-right:6px}
+.offline-badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:5px;margin-right:6px}
+.offline-badge.ok{background:linear-gradient(135deg,#22c55e,#34d399);color:#052e16}
+.offline-badge.wait{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0f172a}
+.main-area{background:rgba(15,23,42,0.55);border:1px solid var(--border);border-radius:14px;padding:14px;height:calc(100vh - 140px);overflow-y:auto;display:block;-webkit-overflow-scrolling:touch;transform:translateZ(0)}
+.empty-state{text-align:center;color:var(--muted);padding:70px 20px}
+.empty-state .big{font-size:44px;display:block;margin-bottom:10px;opacity:.4}
+.doc-header{background:linear-gradient(135deg,rgba(56,189,248,0.12),rgba(34,211,238,0.04));border:1px solid rgba(56,189,248,0.3);border-radius:12px;padding:10px 14px;margin-bottom:10px}
+.doc-header .top{display:flex;justify-content:space-between;align-items:start;gap:10px;flex-wrap:wrap}
+.doc-header h2{color:#fff;font-size:16px;font-weight:700;margin:0}
+.doc-header .meta{color:var(--muted);font-size:12px;margin-top:5px;line-height:1.8}
+.doc-header.compact{padding:6px 10px;margin-bottom:6px}
+.doc-header.compact h2{font-size:14px;margin-bottom:2px}
+.doc-header.compact .meta{display:none}
+.doc-header.compact .credentials{display:none}
+.doc-header.compact .finance-row{display:none}
+.doc-header.compact .bank-row{display:none}
+.doc-header.compact .credits{margin-top:4px;gap:5px}
+.doc-header.compact .credit-box{padding:5px 4px}
+.doc-header.compact .credit-box .title{font-size:10px;margin-bottom:2px}
+.doc-header.compact .credit-box .val{font-size:16px}
+.credits{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:12px}
+@media(max-width:1100px){.credits{grid-template-columns:repeat(3,1fr)}}
+.credit-box{background:linear-gradient(160deg,rgba(15,23,42,0.85),rgba(30,41,59,0.85));border:1px solid rgba(56,189,248,0.18);border-radius:12px;padding:10px 8px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:70px}
+.credit-box .title{font-size:16px;color:#fff;font-weight:600;display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap}
+.credit-box .title .ico{font-size:16px}
+.credit-box .val{font-size:16px;font-weight:700;color:var(--accent);line-height:1;direction:ltr}
+.credit-box .val.success{color:var(--success)}
+.credit-box .val.danger{color:var(--danger)}
+.credit-box .val.neutral{color:#e2e8f0}
+.credentials{display:flex;gap:10px;flex-wrap:wrap}
+.cred-box{background:linear-gradient(135deg,rgba(15,23,42,0.9),rgba(30,41,59,0.9));border:1px solid rgba(56,189,248,0.4);border-radius:12px;padding:10px 18px;min-width:150px;text-align:center}
+.cred-label{font-size:13px;color:var(--accent2);font-weight:700;margin-bottom:6px}
+.cred-value{font-size:20px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px}
+.copy-btn{background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.4);color:var(--accent);padding:3px 8px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;margin-right:6px}
+.copy-btn:hover{background:rgba(56,189,248,0.3);color:#fff}
+.copy-btn.copied{background:rgba(52,211,153,0.3);border-color:var(--success);color:var(--success)}
+.events-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:1100px){.events-grid{grid-template-columns:1fr}}
+.ev-section{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:rgba(15,23,42,0.35)}
+.ev-head{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:rgba(15,23,42,0.7);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:6px}
+.ev-head h3{font-size:12.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ev-head .count{background:rgba(56,189,248,0.2);color:var(--accent);padding:1px 7px;border-radius:10px;font-size:10.5px;font-weight:600}
+.ev-head .add-btn{background:transparent;border:1px solid var(--accent);color:var(--accent);padding:3px 9px;border-radius:7px;font-size:10.5px;cursor:pointer;font-family:inherit}
+.ev-head .add-btn:hover{background:rgba(56,189,248,0.15)}
+.ev-body{padding:8px 10px}
+.event-row{background:rgba(15,23,42,0.5);border:1px solid var(--border);border-radius:9px;padding:9px 10px;margin-bottom:7px}
+.event-row.earned{border-right:3px solid var(--success);background:rgba(52,211,153,0.05)}
+.event-row.partial{border-right:3px solid var(--warn);background:rgba(251,191,36,0.04)}
+.event-row.failed{border-right:3px solid var(--danger);background:rgba(248,113,113,0.04)}
+.event-title{font-weight:600;font-size:12.5px;color:#fff}
+.event-meta{color:var(--muted);font-size:10.5px;margin-top:3px}
+.event-credit{font-size:11px;color:var(--muted);margin-top:3px}
+.status-group{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:7px}
+.stat-pill{background:rgba(15,23,42,0.7);border:1px solid var(--border);color:var(--muted);border-radius:7px;padding:5px 4px;font-size:10.5px;cursor:pointer;font-family:inherit;text-align:center;font-weight:500}
+.stat-pill.ok{background:rgba(52,211,153,0.2);color:var(--success);border-color:rgba(52,211,153,0.5)}
+.stat-pill.no{background:rgba(248,113,113,0.2);color:var(--danger);border-color:rgba(248,113,113,0.5)}
+.stat-pill.neu{background:rgba(148,163,184,0.15);color:var(--muted)}
+.event-actions{display:flex;gap:4px;margin-top:6px;justify-content:flex-end}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:linear-gradient(160deg,#0f172a,#1e293b);border:1px solid var(--border);border-radius:14px;padding:18px;max-width:580px;width:100%;max-height:92vh;overflow-y:auto}
+.modal h2{color:var(--accent);font-size:14px;margin-bottom:10px}
+.type-picker{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:10px}
+.type-pick{padding:9px 7px;border-radius:9px;cursor:pointer;font-size:11.5px;font-weight:600;background:rgba(15,23,42,0.5);border:1px solid var(--border);color:var(--muted);text-align:center;font-family:inherit}
+.type-pick.active{background:linear-gradient(135deg,rgba(56,189,248,0.25),rgba(34,211,238,0.15));color:var(--accent);border-color:rgba(56,189,248,0.5)}
+.type-pick .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>📚 دفتر بازآموزی پزشکان</h1>
+    <div class="sub">حضوری 🏢 | وبینار 💻 | غیر حضوری 📁</div>
+  </div>
+  <div class="tabs" id="mainTabs">
+    <button class="tab active" data-tab="dash">📊 داشبورد</button>
+    <button class="tab" data-tab="doctors">👨‍⚕️ دفتر پزشکان</button>
+    <button class="tab" data-tab="calls">📞 تماس‌ها</button>
+  </div>
+  <div class="sub" id="clock"></div>
+</header>
+
+<div class="tab-content" id="tab-dash">
+  <div class="stats" id="statsBar"></div>
+  <div class="panel" style="margin-top:12px">
+    <h2>⚠️ پزشکانی که امتیازشان کامل نیست</h2>
+    <div id="incomplete"></div>
+  </div>
+</div>
+
+<div class="tab-content hidden" id="tab-doctors">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <h2>👨‍⚕️ پزشکان</h2>
+        <button class="btn sm" onclick="openDoctorModal()">➕ جدید</button>
+      </div>
+      <input id="searchDoctor" placeholder="🔍 جستجو..." style="margin-bottom:9px">
+      <div class="doc-list" id="docList"></div>
+    </aside>
+    <main class="main-area" id="mainArea" onscroll="toggleCompact(event)">
+      <div class="empty-state">
+        <span class="big">📖</span>
+        یک پزشک از ستون سمت راست انتخاب کنید
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="tab-content hidden" id="tab-calls">
+  <div class="panel">
+    <h2>ثبت تماس جدید</h2>
+    <form id="fCall">
+      <div class="row">
+        <div><label>شماره تماس‌گیرنده</label><input id="callPhone" required placeholder="0912..."></div>
+        <div><label>نام (خودکار)</label><input id="callName" placeholder="—"></div>
+      </div>
+      <div id="callCreditInfo"></div>
+      <div class="row">
+        <div><label>موضوع تماس</label>
+          <select id="callSubject">
+            <option>پرسش امتیاز مورد نیاز</option>
+            <option>ثبت‌نام در دوره</option>
+            <option>سؤال درباره دوره</option>
+            <option>درخواست گواهی</option>
+            <option>پیگیری پرداخت</option>
+            <option>سایر</option>
+          </select>
+        </div>
+        <div><label>وضعیت پیگیری</label>
+          <select id="callFollow">
+            <option>پیگیری‌نشده</option>
+            <option>در حال پیگیری</option>
+            <option>پیگیری‌شده</option>
+          </select>
+        </div>
+      </div>
+      <label>یادداشت</label>
+      <textarea id="callNote"></textarea>
+      <button class="btn" type="submit">📞 ثبت تماس</button>
+    </form>
+  </div>
+  <div class="panel">
+    <h2>لیست تماس‌ها</h2>
+    <div class="row" style="margin-bottom:10px">
+      <input id="searchCall" placeholder="🔍 جستجو">
+      <select id="filterCall">
+        <option value="all">همه</option>
+        <option value="pending">پیگیری‌نشده</option>
+        <option value="doing">در حال پیگیری</option>
+        <option value="done">پیگیری‌شده</option>
+      </select>
+    </div>
+    <div id="listCalls"></div>
+  </div>
+</div>
+
+</div>
+<div class="toast" id="toast"></div>
+<div id="modalHost"></div>
+
+<script>
+const K = 'cme4_data';
+let doctors = JSON.parse(localStorage.getItem(K)||'[]');
+let calls = JSON.parse(localStorage.getItem(K+'_calls')||'[]');
+let selectedDoctorId = null;
+
+const save = () => {
+  localStorage.setItem(K, JSON.stringify(doctors));
+  localStorage.setItem(K+'_calls', JSON.stringify(calls));
+  if(window.__pushToCloud) try{ window.__pushToCloud(); }catch(e){}
+};
+const uid = () => Date.now()+Math.random().toString(36).slice(2,6);
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toEnDigits = s => String(s??'').replace(/[۰-۹]/g,d=>'0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]).replace(/[٠-٩]/g,d=>'0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
+const num = n => toEnDigits(Number(n||0).toLocaleString('en-US'));
+const dt = ts => { const d = new Date(ts); const p = x=>String(x).padStart(2,'0'); return `${p(d.getHours())}:${p(d.getMinutes())} - ${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())}`; };
+const normPhone = p => toEnDigits(String(p||'')).replace(/\D/g,'');
+const typeIcon = t => t==='حضوری'?'🏢':t==='وبینار'?'💻':'📁';
+const fullName = d => ((d.firstName||'')+' '+(d.lastName||'')).trim()||'بی‌نام';
+
+document.addEventListener('input', e => {
+  const t = e.target;
+  if(!t || t.tagName !== 'INPUT') return;
+  const en = toEnDigits(t.value);
+  if(en !== t.value){ const pos = t.selectionStart; t.value = en; try{ t.setSelectionRange(pos,pos); }catch(_){} }
+});
+
+const MONTHS = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const YEARS = []; for(let y=1400;y<=1415;y++) YEARS.push(y);
+const DAYS = []; for(let d=1;d<=31;d++) DAYS.push(d);
+const HOURS = []; for(let h=0;h<24;h++) HOURS.push(String(h).padStart(2,'0'));
+const MINUTES = []; for(let m=0;m<60;m+=5) MINUTES.push(String(m).padStart(2,'0'));
+
+function parseDate(s){ const m = String(s||'').match(/(\d+)\/(\d+)\/(\d+)/); if(!m) return {y:1405,m:7,d:1}; return {y:+m[1],m:+m[2],d:+m[3]}; }
+function formatDate(y,m,d){ return `${y}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}`; }
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
+function tick(){const d=new Date();const p=x=>String(x).padStart(2,'0');document.getElementById('clock').textContent=`${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ساعت ${p(d.getHours())}:${p(d.getMinutes())}`;}
+setInterval(tick,30000); tick();
+
+function eventCredit(e){
+  if(e.purchase!=='انجام شد') return 0;
+  if(e.type!=='غیر حضوری' && e.attend!=='انجام شد') return 0;
+  if(e.exam==='رد') return 0;
+  return Number(e.credit||0);
+}
+function eventState(e){
+  if(e.purchase!=='انجام شد') return 'partial';
+  if(e.type!=='غیر حضوری' && e.attend!=='انجام شد') return 'partial';
+  if(e.exam==='رد') return 'failed';
+  return 'earned';
+}
+function doctorCredits(d){
+  const r = { 'حضوری':0, 'وبینار':0, 'غیر حضوری':0 };
+  (d.events||[]).forEach(e=>{ if(r[e.type]!==undefined) r[e.type] += eventCredit(e); });
+  return r;
+}
+function totalEarned(d){ const c=doctorCredits(d); return c['حضوری']+c['وبینار']+c['غیر حضوری']; }
+function remainingCredits(d){ return Math.max(0, Number(d.creditReq||0) - totalEarned(d)); }
+function isComplete(d){ return remainingCredits(d)===0 && Number(d.creditReq||0)>0; }
+function pendingExamWebinars(d){
+  return (d.events||[]).filter(e=> e.type==='وبینار' && e.purchase==='انجام شد' && e.attend==='انجام شد' && e.exam==='ثبت نشده').length;
+}
+function offlinePurchasedToday(d){
+  const t=new Date(); const y=t.getFullYear(), m=t.getMonth(), day=t.getDate();
+  return (d.events||[]).some(e=>{
+    if(e.type!=='غیر حضوری' || e.purchase!=='انجام شد') return false;
+    const d2=new Date(e.createdAt);
+    return d2.getFullYear()===y && d2.getMonth()===m && d2.getDate()===day;
+  });
+}
+
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden'));
+  document.getElementById('tab-'+t.dataset.tab).classList.remove('hidden');
+  render();
+});
+
+window.toggleCompact = function(e){
+  const el = e.target;
+  const h = el.querySelector('.doc-header');
+  if(!h) return;
+  if(el.scrollTop > 40) h.classList.add('compact');
+  else h.classList.remove('compact');
+};
+
+function openModal(html){
+  document.getElementById('modalHost').innerHTML = `<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal">${html}</div></div>`;
+}
+function closeModal(){ document.getElementById('modalHost').innerHTML=''; }
+window.closeModal = closeModal;
+
+window.copyText = (text, btn) => {
+  if(!text || text==='—'){ toast('⚠️ چیزی برای کپی نیست'); return; }
+  const done = () => {
+    const old = btn.textContent;
+    btn.textContent = '✅';
+    btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent = old; btn.classList.remove('copied'); }, 1500);
+    toast('📋 کپی شد');
+  };
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch(e){ toast('❌ کپی نشد'); }
+    document.body.removeChild(ta);
+  };
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).then(done).catch(fallback);
+  } else fallback();
+};
+
+function openDoctorModal(editId){
+  const d = editId ? doctors.find(x=>x.id===editId) : null;
+  const c = d?.card || {}, f = d?.finance || {};
+  openModal(`
+    <h2>${d?'✏️ ویرایش':'➕ ثبت'} پزشک</h2>
+    <form id="mDoctorForm" autocomplete="off">
+      <input type="hidden" id="mEditId" value="${d?.id||''}">
+      <div class="sect">👤 اطلاعات فردی</div>
+      <div class="row">
+        <div><label>نام *</label><input id="mFirstName" required value="${esc(d?.firstName||'')}"></div>
+        <div><label>نام خانوادگی *</label><input id="mLastName" required value="${esc(d?.lastName||'')}"></div>
+      </div>
+      <div class="row">
+        <div><label>تخصص *</label><input id="mSpec" required value="${esc(d?.spec||'')}"></div>
+        <div><label>کد ملی *</label><input dir="ltr" style="text-align:center" id="mNat" required maxlength="10" value="${esc(d?.nat||'')}"></div>
+      </div>
+      <div class="row">
+        <div><label>شماره موبایل *</label><input dir="ltr" style="text-align:center" id="mPhone" required value="${esc(d?.phone||'')}"></div>
+        <div><label>امتیاز درخواستی *</label><input dir="ltr" style="text-align:center" id="mCreditReq" required value="${esc(d?.creditReq||'')}"></div>
+      </div>
+      <div class="row">
+        <div><label>رمز سامانه</label><input id="mPass" value="${esc(d?.pass||'')}"></div>
+        <div><label>سال کارنامه</label><input dir="ltr" style="text-align:center" id="mYear" value="${esc(d?.year||'')}"></div>
+      </div>
+      <div class="sect">💳 کارت بانکی (اختیاری)</div>
+      <div class="row">
+        <div><label>شماره کارت</label><input dir="ltr" style="text-align:center" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"></div>
+        <div><label>CVV2</label><input dir="ltr" style="text-align:center" id="mCvv2" maxlength="4" value="${esc(c.cvv2||'')}"></div>
+      </div>
+      <div class="row">
+        <div><label>ماه انقضا (MM)</label><input dir="ltr" style="text-align:center" id="mCardM" maxlength="2" value="${esc(c.m||'')}"></div>
+        <div><label>سال انقضا (YY)</label><input dir="ltr" style="text-align:center" id="mCardY" maxlength="2" value="${esc(c.y||'')}"></div>
+      </div>
+      <div class="row">
+        <div><label>رمز دوم کارت</label><input dir="ltr" style="text-align:center" id="mPass2" value="${esc(c.pass2||'')}"></div>
+        <div></div>
+      </div>
+      <div class="sect">💰 هزینه‌ها (تومان)</div>
+      <div class="row3">
+        <div><label>کل هزینه</label><input dir="ltr" style="text-align:center" id="mTotal" value="${f.total?Number(f.total).toLocaleString('en-US'):''}"></div>
+        <div><label>پرداختی</label><input dir="ltr" style="text-align:center" id="mPaid" value="${f.paid?Number(f.paid).toLocaleString('en-US'):''}"></div>
+        <div><label>باقی‌مانده</label><input dir="ltr" style="text-align:center" id="mRem" disabled style="opacity:.7"></div>
+      </div>
+      <button class="btn" type="submit">${d?'💾 ذخیره':'➕ ثبت پزشک'}</button>
+      <button class="btn ghost" type="button" onclick="closeModal()">انصراف</button>
+    </form>
+  `);
+  const parseNum = inp => Number(String(inp.value).replace(/,/g,'').replace(/[^0-9]/g,'')) || 0;
+  const fmtNum = inp => { const v = String(inp.value).replace(/[^0-9]/g,''); inp.value = v ? parseInt(v).toLocaleString('en-US') : ''; };
+  const upd = () => { const t=parseNum(document.getElementById('mTotal')), p=parseNum(document.getElementById('mPaid')); document.getElementById('mRem').value = Math.max(0,t-p).toLocaleString('en-US'); };
+  document.getElementById('mTotal').addEventListener('input',function(){fmtNum(this);upd();});
+  document.getElementById('mPaid').addEventListener('input',function(){fmtNum(this);upd();});
+  upd();
+
+  document.getElementById('mDoctorForm').onsubmit = e => {
+    e.preventDefault();
+    const gv = id => toEnDigits(document.getElementById(id)?.value || '').trim();
+    const data = {
+      firstName:document.getElementById('mFirstName').value.trim(),
+      lastName:document.getElementById('mLastName').value.trim(),
+      spec:document.getElementById('mSpec').value.trim(),
+      nat:gv('mNat'), phone:gv('mPhone'), creditReq:Number(gv('mCreditReq')||0),
+      pass:document.getElementById('mPass').value, year:gv('mYear'),
+      card:{ num:gv('mCardNum'), m:gv('mCardM').padStart(2,'0'), y:gv('mCardY').padStart(2,'0'), cvv2:gv('mCvv2'), pass2:gv('mPass2') },
+      finance:{ total:parseNum(document.getElementById('mTotal')), paid:parseNum(document.getElementById('mPaid')) }
+    };
+    const id = document.getElementById('mEditId').value;
+    if(id){ Object.assign(doctors.find(x=>x.id===id), data); toast('✅ پزشک ویرایش شد'); }
+    else { const n = { id:uid(), ...data, events:[], createdAt:Date.now() }; doctors.unshift(n); selectedDoctorId = n.id; toast('✅ پزشک ثبت شد'); }
+    save(); closeModal(); render();
+  };
+}
+window.openDoctorModal = openDoctorModal;
+
+function renderDocList(){
+  const q = document.getElementById('searchDoctor').value.trim().toLowerCase();
+  const arr = doctors.filter(d => !q || fullName(d).toLowerCase().includes(q) || (d.spec||'').toLowerCase().includes(q) || (d.phone||'').includes(q) || (d.nat||'').includes(q));
+  const el = document.getElementById('docList');
+  if(!arr.length){ el.innerHTML='<div class="empty">پزشکی یافت نشد</div>'; return; }
+  el.innerHTML = arr.map(d=>{
+    const req = Number(d.creditReq||0), total = totalEarned(d);
+    const pct = req ? Math.min(100, Math.round(total/req*100)) : 0;
+    const complete = isComplete(d);
+    const f = d.finance||{};
+    const rem$ = Math.max(0, Number(f.total||0)-Number(f.paid||0));
+    const hasOffline = (d.events||[]).some(e=>e.type==='غیر حضوری');
+    return `
+      <div class="doc-row ${selectedDoctorId===d.id?'active':''}" onclick="selectDoctor('${d.id}')">
+        <div class="doc-name"><span>${esc(fullName(d))}</span></div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">
+          ${pendingExamWebinars(d)>0?`<span class="exam-badge">📝 آزمون باقی‌مانده: ${num(pendingExamWebinars(d))}</span>`:''}
+          ${hasOffline?(offlinePurchasedToday(d)?'<span class="offline-badge ok">✅ غیر حضوری: خرید شده</span>':'<span class="offline-badge wait">🛒 غیر حضوری: خرید نشده</span>'):''}
+        </div>
+        <div class="doc-spec">${esc(d.spec||'—')} ${complete?'<span class="badge green" style="margin:0 4px">✔</span>':''}${rem$>0?'<span class="badge yellow" style="margin:0 4px">💸</span>':''}</div>
+        <div class="doc-bar"><div class="fill ${complete?'done':''}" style="width:${pct}%"></div></div>
+        <div class="doc-meta"><span>🎯 <b>${num(total)}</b> از ${num(req)}</span><span>${pct}%</span></div>
+      </div>`;
+  }).join('');
+}
+
+function selectDoctor(id){
+  selectedDoctorId = id;
+  renderDocList();
+  renderMain();
+}
+window.selectDoctor = selectDoctor;
+
+function renderMain(){
+  const el = document.getElementById('mainArea');
+  if(!selectedDoctorId){
+    el.innerHTML = `<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>`;
+    return;
+  }
+  const d = doctors.find(x=>x.id===selectedDoctorId);
+  if(!d){ selectedDoctorId=null; renderMain(); return; }
+  const cr = doctorCredits(d), total = totalEarned(d), req = Number(d.creditReq||0), rem = remainingCredits(d);
+  const c = d.card||{}, f = d.finance||{};
+  const rem$ = Math.max(0, Number(f.total||0)-Number(f.paid||0));
+  const complete = rem===0 && req>0;
+
+  el.innerHTML = `
+    <div class="doc-header">
+      <div class="top">
+        <div>
+          <h2>👨‍⚕️ ${esc(fullName(d))} <span class="badge blue">${esc(d.spec||'—')}</span>
+            ${complete?'<span class="badge green">✔ امتیاز کامل</span>':'<span class="badge red">⚠️ '+num(rem)+' امتیاز کم</span>'}
+            ${rem$>0?'<span class="badge yellow">💸 بدهکار</span>':''}
+          </h2>
+          <div class="meta">📞 <span class="ltr">${esc(d.phone)}</span> ${d.year?' | 📅 <span class="ltr">'+esc(d.year)+'</span>':''}</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+          <div class="credentials">
+            <div class="cred-box">
+              <div class="cred-label">رمز سامانه</div>
+              <div class="cred-value ltr"><span>${esc(d.pass||'—')}</span><button class="copy-btn" onclick="copyText('${esc(d.pass||'')}',this)">📋</button></div>
+            </div>
+            <div class="cred-box">
+              <div class="cred-label">کد ملی</div>
+              <div class="cred-value ltr"><span>${esc(d.nat||'—')}</span><button class="copy-btn" onclick="copyText('${esc(d.nat||'')}',this)">📋</button></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:5px;flex-direction:column">
+            <button class="mini green" onclick="callFromDetail('${esc(d.phone)}','${esc(fullName(d))}')">📞 تماس</button>
+            <button class="mini" onclick="openDoctorModal('${d.id}')">✏️ ویرایش</button>
+            <button class="mini danger" onclick="delDoctor('${d.id}')">🗑 حذف</button>
+          </div>
+        </div>
+      </div>
+      <div class="credits">
+        <div class="credit-box"><div class="title"><span class="ico">🎯</span>امتیاز درخواستی</div><div class="val neutral">${num(req)}</div></div>
+        <div class="credit-box"><div class="title"><span class="ico">✅</span>کسب‌شده</div><div class="val success">${num(total)}</div></div>
+        <div class="credit-box"><div class="title"><span class="ico">${rem>0?'⏳':'🎉'}</span>${rem>0?'باقی‌مانده':'کامل'}</div><div class="val ${rem>0?'danger':'success'}">${num(rem)}</div></div>
+        <div class="credit-box"><div class="title"><span class="ico">🏢</span>حضوری</div><div class="val">${num(cr['حضوری'])}</div></div>
+        <div class="credit-box"><div class="title"><span class="ico">💻</span>وبینار</div><div class="val">${num(cr['وبینار'])}</div></div>
+        <div class="credit-box"><div class="title"><span class="ico">📁</span>غیر حضوری</div><div class="val">${num(cr['غیر حضوری'])}</div></div>
+      </div>
+      <div class="finance-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:10px">
+        <div class="info-cell">💰 کل هزینه: <b>${num(f.total||0)}</b></div>
+        <div class="info-cell">✅ پرداختی: <b style="color:var(--success)">${num(f.paid||0)}</b></div>
+        <div class="info-cell">⏳ باقی‌مانده: <b style="color:${rem$>0?'var(--danger)':'var(--success)'}">${num(rem$)}</b></div>
+      </div>
+      ${(c.num||c.cvv2||c.pass2||c.m||c.y)?`
+      <div class="bank-row" style="margin-top:8px">
+        <button class="mini danger" onclick="toggleCard('card_${d.id}',this)">👁 نمایش کارت بانکی</button>
+        <div id="card_${d.id}" class="hidden" style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:6px;margin-top:6px">
+          <div class="info-cell">شماره کارت: <b class="ltr">${esc(c.num||'—')}</b> <button class="copy-btn" onclick="copyText('${esc(c.num||'')}',this)">📋</button></div>
+          <div class="info-cell">ماه: <b class="ltr">${esc(c.m||'--')}</b></div>
+          <div class="info-cell">سال: <b class="ltr">${esc(c.y||'--')}</b></div>
+          <div class="info-cell">CVV2: <b class="ltr">${esc(c.cvv2||'—')}</b></div>
+          <div class="info-cell">رمز دوم: <b class="ltr">${esc(c.pass2||'—')}</b></div>
+        </div>
+      </div>`:''}
+    </div>
+    <div class="events-grid">
+      ${renderEventSection(d, 'وبینار', '💻', 'var(--purple)')}
+      ${renderEventSection(d, 'غیر حضوری', '📁', 'var(--warn)')}
+      ${renderEventSection(d, 'حضوری', '🏢', 'var(--accent)')}
+    </div>
+  `;
+}
+
+function renderEventSection(d, type, icon, color){
+  const evs = (d.events||[]).filter(e=>e.type===type).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  const totalCredit = evs.reduce((s,e)=>s+eventCredit(e),0);
+  const sumAllCredit = evs.reduce((s,e)=>s+Number(e.credit||0),0);
+  return `
+    <div class="ev-section">
+      <div class="ev-head" style="border-right:3px solid ${color}">
+        <h3>${icon} ${type} <span class="count">${num(evs.length)}</span></h3>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <div style="background:linear-gradient(135deg,rgba(56,189,248,0.25),rgba(34,211,238,0.12));border:1px solid rgba(56,189,248,0.5);border-radius:8px;padding:3px 10px;font-size:13px;font-weight:800;color:var(--accent)">جمع: ${num(sumAllCredit)}</div>
+          ${totalCredit>0?`<div style="background:linear-gradient(135deg,rgba(52,211,153,0.3),rgba(34,211,238,0.15));border:1px solid rgba(52,211,153,0.6);border-radius:8px;padding:3px 9px;font-size:12.5px;font-weight:800;color:var(--success)">✔ ${num(totalCredit)}</div>`:''}
+          <button class="add-btn" onclick="openEventModal(null, '${type}')">➕</button>
+        </div>
+      </div>
+      <div class="ev-body">
+        ${evs.length ? evs.map(e=>renderEventRow(e)).join('') : `<div class="empty">هنوز ${type}ی ثبت نشده</div>`}
+      </div>
+    </div>
+  `;
+}
+
+function renderEventRow(e){
+  const state = eventState(e);
+  const earned = state==='earned';
+  const failed = state==='failed';
+  const label = earned?'✔ کسب شد' : failed?'✗ رد' : '⏳ در انتظار';
+  const purchaseTxt = e.purchase==='انجام شد' ? '🛒 خرید شده' : '🛒 خرید نشده';
+  const attendTxt = e.attend==='انجام شد' ? '🎟 شرکت شده' : '🎟 شرکت نشده';
+  let examTxt = '📝 آزمون نداده';
+  if(e.exam==='قبول') examTxt = '📝 آزمون داده شده';
+  else if(e.exam==='رد') examTxt = '📝 آزمون رد شده';
+  return `
+    <div class="event-row ${state}">
+      <div class="event-title">${e.num?'#'+esc(e.num)+' ':''}${e.title?esc(e.title):''}${!e.num&&!e.title?'رویداد':''}</div>
+      <div class="event-meta">${e.date?'📅 <span class="ltr">'+esc(e.date)+'</span>':''}${e.time?' ⏰ <span class="ltr">'+esc(e.time)+'</span>':''}${!e.date&&!e.time?'بدون تاریخ':''}</div>
+      <div class="event-credit"><span style="font-size:15px;font-weight:800;color:${earned?'var(--success)':(failed?'var(--danger)':'var(--muted)')}">${e.credit?num(e.credit):'—'} امتیاز</span> <span style="font-size:11px;color:var(--muted);margin-right:6px">${label}</span></div>
+      <div class="status-group" style="${e.type==='غیر حضوری'?'grid-template-columns:1fr 1fr':''}">
+        <button class="stat-pill ${e.purchase==='انجام شد'?'ok':''}" onclick="cycleStatus('${e.id}','purchase')">${purchaseTxt}</button>
+        ${e.type!=='غیر حضوری'?`<button class="stat-pill ${e.attend==='انجام شد'?'ok':''}" onclick="cycleStatus('${e.id}','attend')">${attendTxt}</button>`:''}
+        <button class="stat-pill ${e.exam==='قبول'?'ok':e.exam==='رد'?'no':'neu'}" onclick="cycleStatus('${e.id}','exam')">${examTxt}</button>
+      </div>
+      <div class="event-actions">
+        <button class="mini" onclick="openEventModal('${e.id}')">✏️</button>
+        <button class="mini danger" onclick="delEvent('${e.id}')">🗑</button>
+      </div>
+    </div>`;
+}
+
+window.toggleCard = (id, btn) => { const el = document.getElementById(id); el.classList.toggle('hidden'); btn.textContent = el.classList.contains('hidden') ? '👁 نمایش کارت بانکی' : '🙈 مخفی'; };
+window.cycleStatus = (eventId, field) => {
+  const d = doctors.find(x=>x.id===selectedDoctorId); if(!d) return;
+  const e = (d.events||[]).find(x=>x.id===eventId); if(!e) return;
+  if(field==='exam'){ const o=['ثبت نشده','قبول','رد']; e.exam = o[(o.indexOf(e.exam)+1)%3]; }
+  else { e[field] = e[field]==='انجام شد' ? 'انجام نشد' : 'انجام شد'; }
+  save(); renderMain(); renderDocList();
+};
+window.delEvent = (eventId) => { if(!confirm('حذف شود؟')) return; const d = doctors.find(x=>x.id===selectedDoctorId); if(!d) return; d.events = (d.events||[]).filter(x=>x.id!==eventId); save(); renderMain(); renderDocList(); };
+
+function openEventModal(editId, presetType){
+  const d = doctors.find(x=>x.id===selectedDoctorId);
+  if(!d){ toast('⚠️ ابتدا یک پزشک انتخاب کنید'); return; }
+  const existing = editId ? (d.events||[]).find(x=>x.id===editId) : null;
+  const isEdit = !!existing;
+  let type = existing?.type || presetType || 'وبینار';
+  openModal(`
+    <h2>${isEdit?'✏️ ویرایش':'➕ افزودن'} رویداد — ${esc(fullName(d))}</h2>
+    <div class="type-picker">
+      <button type="button" class="type-pick ${type==='وبینار'?'active':''}" data-t="وبینار"><span class="icon">💻</span>وبینار</button>
+      <button type="button" class="type-pick ${type==='حضوری'?'active':''}" data-t="حضوری"><span class="icon">🏢</span>حضوری</button>
+      <button type="button" class="type-pick ${type==='غیر حضوری'?'active':''}" data-t="غیر حضوری"><span class="icon">📁</span>غیر حضوری</button>
+    </div>
+    <form id="mEventForm" autocomplete="off">
+      <div id="dynFields"></div>
+      <button class="btn" type="submit">${isEdit?'💾 ذخیره':'➕ افزودن'}</button>
+      <button class="btn ghost" type="button" onclick="closeModal()">انصراف</button>
+    </form>
+  `);
+  document.querySelectorAll('.type-pick').forEach(b=>b.onclick=()=>{
+    type = b.dataset.t;
+    document.querySelectorAll('.type-pick').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    renderDynFields();
+  });
+  function sel(id, opts, cur){ return `<select id="${id}">${opts.map(o=>{const v=o.v!==undefined?o.v:o;const l=o.l!==undefined?o.l:o;return `<option value="${v}" ${String(v)===String(cur)?'selected':''}>${l}</option>`;}).join('')}</select>`; }
+  function renderDynFields(){
+    const e = existing || {};
+    const pd = parseDate(e.date);
+    const [eh, em] = (e.time||'20:00').split(':');
+    if(type==='غیر حضوری'){
+      document.getElementById('dynFields').innerHTML = `
+        <label>شناسه برنامه *</label>
+        <input dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
+        <label>امتیاز</label>
+        <input dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">
+        <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:8px;padding:7px;font-size:11px;color:var(--warn);margin-top:7px">📁 غیر حضوری نیازی به تاریخ و ساعت ندارد</div>`;
+    } else if(type==='حضوری'){
+      document.getElementById('dynFields').innerHTML = `
+        <label>شناسه برنامه *</label>
+        <input dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
+        <label>عنوان رویداد *</label>
+        <input id="eTitle" required value="${esc(e.title||'')}">
+        <label>تاریخ (شمسی)</label>
+        <div class="row3">${sel('eYear',YEARS,pd.y)}${sel('eMonth',MONTHS.map((m,i)=>({v:i+1,l:m})),pd.m)}${sel('eDay',DAYS,pd.d)}</div>
+        <label>امتیاز</label>
+        <input dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">`;
+    } else {
+      document.getElementById('dynFields').innerHTML = `
+        <label>شناسه برنامه *</label>
+        <input dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
+        <label>تاریخ (شمسی)</label>
+        <div class="row3">${sel('eYear',YEARS,pd.y)}${sel('eMonth',MONTHS.map((m,i)=>({v:i+1,l:m})),pd.m)}${sel('eDay',DAYS,pd.d)}</div>
+        <label>ساعت</label>
+        <div class="row">${sel('eHour',HOURS,eh||'20')}${sel('eMin',MINUTES,(em||'00').padStart(2,'0'))}</div>
+        <label>امتیاز</label>
+        <input dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">`;
+    }
+  }
+  renderDynFields();
+  document.getElementById('mEventForm').onsubmit = ev => {
+    ev.preventDefault();
+    if(!d.events) d.events = [];
+    const gv = id => toEnDigits(document.getElementById(id)?.value || '').trim();
+    let data = { type, credit:Number(gv('eCredit')||0) };
+    if(type==='غیر حضوری'){ data.num = gv('eNum'); data.title=''; data.date=''; data.time=''; }
+    else if(type==='حضوری'){ data.num = gv('eNum'); data.title = document.getElementById('eTitle').value.trim(); data.date = formatDate(gv('eYear'),gv('eMonth'),gv('eDay')); data.time=''; }
+    else { data.num = gv('eNum'); data.title=''; data.date = formatDate(gv('eYear'),gv('eMonth'),gv('eDay')); data.time = gv('eHour')+':'+gv('eMin'); }
+    if(isEdit){ Object.assign(existing, data); toast('✅ رویداد ویرایش شد'); }
+    else {
+      if(type==='غیر حضوری' && offlinePurchasedToday(d)){
+        if(!confirm('⚠️ امروز یک برنامه غیر حضوری خریده‌اید. ادامه؟')) return;
+      }
+      d.events.unshift({ id:uid(), ...data, purchase:'انجام نشد', attend:'انجام نشد', exam:'ثبت نشده', createdAt:Date.now() });
+      toast('✅ رویداد اضافه شد');
+    }
+    save(); closeModal(); renderMain(); renderDocList(); renderDash();
+  };
+}
+window.openEventModal = openEventModal;
+
+window.delDoctor = id => { if(!confirm('این پزشک حذف شود؟')) return; doctors = doctors.filter(x=>x.id!==id); if(selectedDoctorId===id) selectedDoctorId = null; save(); render(); };
+
+document.getElementById('callPhone').addEventListener('input', updateCallInfo);
+function updateCallInfo(){
+  const p = normPhone(document.getElementById('callPhone').value);
+  const el = document.getElementById('callCreditInfo');
+  if(!p){ el.innerHTML=''; document.getElementById('callName').value=''; return; }
+  const d = doctors.find(x=>normPhone(x.phone)===p);
+  if(!d){ el.innerHTML='<div style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.35);border-radius:12px;padding:14px"><h3 style="color:var(--danger);font-size:14px">❌ این شماره در لیست پزشکان نیست</h3></div>'; return; }
+  document.getElementById('callName').value = fullName(d);
+  const cr = doctorCredits(d), req = Number(d.creditReq||0), total = totalEarned(d), rem = remainingCredits(d);
+  el.innerHTML = `<div style="background:linear-gradient(135deg,rgba(56,189,248,0.12),rgba(34,211,238,0.05));border:1px solid rgba(56,189,248,0.35);border-radius:12px;padding:14px;margin-bottom:10px">
+    <h3 style="color:var(--accent);font-size:14px;margin-bottom:8px">👨‍⚕️ ${esc(fullName(d))} — ${esc(d.spec||'')}</h3>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">درخواستی: <b style="color:var(--accent)">${num(req)}</b> | کسب‌شده: <b style="color:var(--success)">${num(total)}</b> | کمبود: <b style="color:${rem>0?'var(--danger)':'var(--success)'}">${num(rem)}</b></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+      ${['حضوری','وبینار','غیر حضوری'].map(k=>`<div style="background:rgba(15,23,42,0.7);border:1px solid var(--border);border-radius:9px;padding:8px;text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">${typeIcon(k)} ${k}</div><div style="font-size:14px;font-weight:700;color:var(--accent)">${num(cr[k])}</div></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+document.getElementById('fCall').onsubmit = e => {
+  e.preventDefault();
+  calls.unshift({ id:uid(), phone:toEnDigits(document.getElementById('callPhone').value.trim()), name:document.getElementById('callName').value.trim(), subject:document.getElementById('callSubject').value, follow:document.getElementById('callFollow').value, note:document.getElementById('callNote').value.trim(), createdAt:Date.now() });
+  save(); e.target.reset(); document.getElementById('callCreditInfo').innerHTML=''; render(); toast('📞 تماس ثبت شد');
+};
+
+function renderCalls(){
+  const q = document.getElementById('searchCall').value.trim().toLowerCase();
+  const f = document.getElementById('filterCall').value;
+  const arr = calls.filter(c=>{
+    if(f==='pending' && c.follow!=='پیگیری‌نشده') return false;
+    if(f==='doing' && c.follow!=='در حال پیگیری') return false;
+    if(f==='done' && c.follow!=='پیگیری‌شده') return false;
+    if(q && !(c.phone.includes(q) || (c.name||'').toLowerCase().includes(q) || c.subject.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  const el = document.getElementById('listCalls');
+  if(!arr.length){ el.innerHTML='<div class="empty">تماسی یافت نشد</div>'; return; }
+  const fCls = { 'پیگیری‌نشده':'red', 'در حال پیگیری':'yellow', 'پیگیری‌شده':'green' };
+  el.innerHTML = arr.map(c=>`<div style="background:rgba(15,23,42,0.6);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+      <div><div style="font-weight:700;font-size:13.5px">${c.name?esc(c.name):'ناشناس'} <span class="badge blue ltr">${esc(c.phone)}</span></div>
+      <div style="color:var(--muted);font-size:11px;margin-top:5px">🎯 ${esc(c.subject)} | 🕒 <span class="ltr">${dt(c.createdAt)}</span></div>
+      ${c.note?`<div style="background:rgba(56,189,248,0.08);padding:6px 10px;border-radius:8px;border-right:3px solid var(--accent);margin-top:6px;font-size:12px">${esc(c.note)}</div>`:''}</div>
+      <div><span class="badge ${fCls[c.follow]||'gray'}">${esc(c.follow)}</span></div>
+    </div>
+    <div class="actions"><button class="mini" onclick="cycleFollow('${c.id}')">تغییر پیگیری</button><button class="mini danger" onclick="delCall('${c.id}')">🗑 حذف</button></div>
+  </div>`).join('');
+}
+window.cycleFollow = id => { const c=calls.find(x=>x.id===id); if(!c) return; const o=['پیگیری‌نشده','در حال پیگیری','پیگیری‌شده']; c.follow=o[(o.indexOf(c.follow)+1)%3]; save(); render(); };
+window.delCall = id => { if(!confirm('حذف شود؟')) return; calls=calls.filter(x=>x.id!==id); save(); render(); };
+window.callFromDetail = (phone,name) => {
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelector('[data-tab="calls"]').classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden'));
+  document.getElementById('tab-calls').classList.remove('hidden');
+  document.getElementById('callPhone').value = phone;
+  updateCallInfo();
+  document.getElementById('callNote').focus();
+};
+
+function renderDash(){
+  const stats = [
+    { label:'پزشکان', value:doctors.length },
+    { label:'کل رویدادها', value:doctors.reduce((s,d)=>s+(d.events||[]).length,0) },
+    { label:'امتیاز کل', value:doctors.reduce((s,d)=>s+totalEarned(d),0) },
+    { label:'پزشکان کامل', value:doctors.filter(isComplete).length },
+    { label:'پزشکان ناقص', value:doctors.filter(d=>!isComplete(d)).length },
+    { label:'مانده دریافتی', value:doctors.reduce((s,d)=>{ const f=d.finance||{}; return s+Math.max(0,Number(f.total||0)-Number(f.paid||0)); },0) },
+    { label:'تماس‌های پیگیری‌نشده', value:calls.filter(c=>c.follow==='پیگیری‌نشده').length }
+  ];
+  document.getElementById('statsBar').innerHTML = stats.map(s=>`<div class="stat"><div class="label">${s.label}</div><div class="value">${num(s.value)}</div></div>`).join('');
+  const inc = doctors.filter(d=>!isComplete(d)).slice(0,10);
+  document.getElementById('incomplete').innerHTML = inc.length ? inc.map(d=>{ const rem = remainingCredits(d); return `<div style="background:rgba(15,23,42,0.6);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px"><div style="font-weight:700;font-size:13px">${esc(fullName(d))} <span class="badge blue">${esc(d.spec||'')}</span> <span class="badge red">${num(rem)} کم</span></div><div style="color:var(--muted);font-size:11px;margin-top:5px">📞 <span class="ltr">${esc(d.phone)}</span> | 🎯 ${num(totalEarned(d))} از ${num(d.creditReq||0)}</div><div class="actions"><button class="mini green" onclick="callFromDetail('${esc(d.phone)}','${esc(fullName(d))}')">📞 تماس</button><button class="mini" onclick="goDoctor('${d.id}')">👁 مشاهده</button></div></div>`; }).join('') : '<div class="empty">🎉 همه پزشکان کامل هستند</div>';
+}
+window.goDoctor = id => {
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelector('[data-tab="doctors"]').classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden'));
+  document.getElementById('tab-doctors').classList.remove('hidden');
+  selectDoctor(id);
+};
+
+function render(){ renderDash(); renderDocList(); renderMain(); renderCalls(); }
+document.getElementById('searchDoctor').addEventListener('input', renderDocList);
+document.getElementById('searchCall').addEventListener('input', renderCalls);
+document.getElementById('filterCall').addEventListener('change', renderCalls);
+
+render();
+
+/* ====== Google Sheets Sync ====== */
+(function(){
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwp_yjquh9tEXmy_rPIVCbjchFi6427qr2G73pOVVagD4PcPt2jSePBBtP-PG24jSot/exec';
+  let _pushing = false;
+  let _pulling = false;
+
+  window.__pushToCloud = async function(){
+    if(_pushing) return;
+    _pushing = true;
+    try {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ doctors, calls })
+      });
+    } catch(e){ console.log('push error:', e.message); }
+    finally { _pushing = false; }
+  };
+
+  async function pullFromCloud(){
+    if(_pulling) return;
+    _pulling = true;
+    try {
+      const r = await fetch(SCRIPT_URL + '?t=' + Date.now());
+      const data = await r.json();
+      if(!data) return;
+      const remote = { doctors: data.doctors || [], calls: data.calls || [] };
+      const local = { doctors, calls };
+      const rStr = JSON.stringify(remote), lStr = JSON.stringify(local);
+      if(rStr !== lStr){
+        doctors = remote.doctors;
+        calls = remote.calls;
+        localStorage.setItem(K, JSON.stringify(doctors));
+        localStorage.setItem(K+'_calls', JSON.stringify(calls));
+        render();
+      }
+    } catch(e){}
+    finally { _pulling = false; }
+  }
+
+  // اولین pull بعد از ۵۰۰ میلی‌ثانیه
+  setTimeout(pullFromCloud, 500);
+  // هر ۵ ثانیه چک کن
+  setInterval(pullFromCloud, 5000);
+  // هر بار برگشتن به تب
+  document.addEventListener('visibilitychange', () => { if(!document.hidden) pullFromCloud(); });
+  console.log('✅ Google Sheets Sync فعال شد');
+})();
+
+</script>
+</body>
+</html>
