@@ -163,9 +163,38 @@ textarea{resize:vertical;min-height:55px}
   input,select,textarea{font-size:16px!important}
 }
 .back-btn{display:none}
+
+/* ===== Login Screen ===== */
+#loginScreen{position:fixed;inset:0;background:linear-gradient(160deg,#0f172a,#1e293b);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px}
+#loginScreen.hidden{display:none}
+.login-box{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:20px;padding:30px;max-width:380px;width:100%;backdrop-filter:blur(14px);box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.login-box h1{text-align:center;font-size:24px;margin-bottom:8px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.login-box .subtitle{text-align:center;color:var(--muted);font-size:13px;margin-bottom:24px}
+.login-box label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:600}
+.login-box input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:rgba(15,23,42,0.7);color:var(--text);font-family:inherit;font-size:14px;outline:none;margin-bottom:14px;transition:.2s}
+.login-box input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(56,189,248,0.15)}
+.login-box button{width:100%;padding:13px;border:none;border-radius:10px;cursor:pointer;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#062334;font-weight:700;font-family:inherit;font-size:15px;margin-top:6px;transition:.2s}
+.login-box button:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(56,189,248,0.3)}
+.login-error{background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.4);color:var(--danger);padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:14px;text-align:center;display:none}
+.login-error.show{display:block}
+.logout-btn{background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.4);color:var(--danger);padding:6px 14px;border-radius:9px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:600;transition:.2s}
+.logout-btn:hover{background:rgba(248,113,113,0.3)}
 </style>
 </head>
 <body>
+<div id="loginScreen">
+  <div class="login-box">
+    <h1>🔐 ورود به سیستم</h1>
+    <div class="subtitle">دفتر بازآموزی پزشکان</div>
+    <div class="login-error" id="loginError">❌ نام کاربری یا رمز عبور اشتباه است</div>
+    <label>نام کاربری</label>
+    <input id="loginUser" type="text" placeholder="morteza یا parvin" autocomplete="off">
+    <label>رمز عبور</label>
+    <input id="loginPass" type="password" placeholder="رمز عبور" autocomplete="off">
+    <button onclick="doLogin()">ورود</button>
+  </div>
+</div>
+
 <div class="wrap">
 
 <header>
@@ -184,6 +213,7 @@ textarea{resize:vertical;min-height:55px}
     <button data-user="parvin" onclick="switchUser('parvin')">پروین</button>
     <button data-user="all" onclick="switchUser('all')">همه</button>
   </div>
+  <button class="logout-btn" onclick="doLogout()">🚪 خروج</button>
   <div class="sub" id="clock"></div>
 </header>
 
@@ -1059,6 +1089,83 @@ renderAll();
 setTimeout(pullFromCloud, 500);
 setInterval(pullFromCloud, 5000);
 document.addEventListener('visibilitychange', () => { if(!document.hidden) pullFromCloud(); });
+
+// ===== Login System =====
+var USERS = {
+  'morteza': { pass: 'morteza123', name: 'مرتضی' },
+  'parvin': { pass: 'parvin123', name: 'پروین' }
+};
+
+window.doLogin = function(){
+  var u = document.getElementById('loginUser').value.trim().toLowerCase();
+  var p = document.getElementById('loginPass').value;
+  var errEl = document.getElementById('loginError');
+  
+  if(USERS[u] && USERS[u].pass === p){
+    // ورود موفق
+    try {
+      localStorage.setItem('cme_logged_in', u);
+    } catch(e){}
+    errEl.classList.remove('show');
+    document.getElementById('loginScreen').classList.add('hidden');
+    // تنظیم کاربر فعال
+    currentUser = u;
+    try { localStorage.setItem('cme_current_user', u); } catch(e){}
+    document.querySelectorAll('.user-picker button').forEach(function(b){
+      if(b.dataset.user === u) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+    renderAll();
+    updateMobileSelection();
+    toast('👋 خوش آمدید ' + USERS[u].name);
+  } else {
+    errEl.classList.add('show');
+    document.getElementById('loginPass').value = '';
+  }
+};
+
+window.doLogout = function(){
+  if(!confirm('از سیستم خارج می‌شوید؟')) return;
+  try {
+    localStorage.removeItem('cme_logged_in');
+    localStorage.removeItem('cme_current_user');
+  } catch(e){}
+  location.reload();
+};
+
+// چک کردن وضعیت ورود در بارگذاری
+function checkLogin(){
+  var logged = null;
+  try { logged = localStorage.getItem('cme_logged_in'); } catch(e){}
+  
+  if(logged && USERS[logged]){
+    // قبلاً وارد شده
+    document.getElementById('loginScreen').classList.add('hidden');
+    currentUser = logged;
+    try { localStorage.setItem('cme_current_user', logged); } catch(e){}
+    document.querySelectorAll('.user-picker button').forEach(function(b){
+      if(b.dataset.user === logged) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+  } else {
+    // نیاز به ورود
+    document.getElementById('loginScreen').classList.remove('hidden');
+    setTimeout(function(){
+      var u = document.getElementById('loginUser');
+      if(u) u.focus();
+    }, 100);
+  }
+}
+
+// Enter برای ورود
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Enter' && !document.getElementById('loginScreen').classList.contains('hidden')){
+    doLogin();
+  }
+});
+
+// چک ورود
+checkLogin();
 </script>
 </body>
 </html>
