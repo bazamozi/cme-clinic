@@ -1015,6 +1015,40 @@ render();
   console.log('✅ Google Sheets Sync فعال شد');
 })();
 
+
+/* ===== User System ===== */
+var currentUser = 'morteza';
+try { var _savedUser = localStorage.getItem('cme_current_user'); if(_savedUser) currentUser = _savedUser; } catch(e){}
+
+window.switchUser = function(user){
+  currentUser = user;
+  try { localStorage.setItem('cme_current_user', user); } catch(e){}
+  selectedDoctorId = null;
+  document.querySelectorAll('.user-picker button').forEach(function(b){
+    if(b.dataset.user === user) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+  if(typeof updateMobileSelection === 'function') updateMobileSelection();
+  render();
+};
+
+function myDoctors(){
+  if(currentUser === 'all') return doctors;
+  return doctors.filter(function(d){ return d.owner === currentUser; });
+}
+
+function myCalls(){
+  if(currentUser === 'all') return calls;
+  return calls.filter(function(c){ return c.owner === currentUser; });
+}
+
+setTimeout(function(){
+  document.querySelectorAll('.user-picker button').forEach(function(b){
+    if(b.dataset.user === currentUser) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+}, 300);
+
 </script>
 <nav class="mobile-nav" id="mobileNav">
   <button data-tab="dash" class="active"><span class="icon">📊</span>داشبورد</button>
