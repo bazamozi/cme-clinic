@@ -2,13 +2,13 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>دفتر بازآموزی پزشکان</title>
 <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
 <style>
 :root{--bg1:#0f172a;--bg2:#1e293b;--card:rgba(255,255,255,0.06);--border:rgba(255,255,255,0.12);--accent:#38bdf8;--accent2:#22d3ee;--success:#34d399;--danger:#f87171;--warn:#fbbf24;--purple:#a78bfa;--text:#e2e8f0;--muted:#94a3b8;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0;font-family:Vazirmatn,Tahoma,sans-serif}
-body{background:radial-gradient(1200px 600px at 80% -10%,#1e3a8a55,transparent 60%),radial-gradient(900px 500px at -10% 110%,#0e749055,transparent 60%),linear-gradient(160deg,var(--bg1),var(--bg2));color:var(--text);min-height:100vh;padding:14px}
+body{background:radial-gradient(1200px 600px at 80% -10%,#1e3a8a55,transparent 60%),radial-gradient(900px 500px at -10% 110%,#0e749055,transparent 60%),linear-gradient(160deg,var(--bg1),var(--bg2));color:var(--text);min-height:100vh;padding:14px;overflow-x:hidden;max-width:100vw}
 .wrap{max-width:1600px;margin:0 auto}
 header{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:8px 18px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
 h1{font-size:17px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -135,6 +135,34 @@ textarea{resize:vertical;min-height:55px}
 .type-pick .icon{font-size:18px;display:block;margin-bottom:2px}
 .mobile-nav{display:none}
 @media(max-width:768px){
+  /* ===== Fix overflow in detail view ===== */
+  html, body{overflow-x:hidden!important;max-width:100vw}
+  .wrap{overflow-x:hidden;max-width:100%}
+  .main-area{overflow-x:hidden!important;max-width:100%}
+  .doc-header{overflow-x:hidden;max-width:100%}
+  .credits{grid-template-columns:repeat(3,1fr)!important;gap:6px}
+  .credit-box .title{font-size:11px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .credit-box .val{font-size:14px!important}
+  .info-cell{font-size:12px!important;padding:6px 8px!important}
+  .info-cell b{font-size:12px!important}
+  /* کارت بانکی: ۲ ستونه */
+  #card_ + div{grid-template-columns:1fr 1fr!important}
+  .bank-row > div[style*="grid-template-columns:1.4fr 1fr 1fr 1fr 1fr"]{grid-template-columns:1fr 1fr!important}
+  /* سه جعبه مالی: ۳ ستونه اما کوچکتر */
+  .doc-header > div[style*="grid-template-columns:1fr 1fr 1fr"]{grid-template-columns:1fr 1fr 1fr!important;gap:5px!important}
+  /* credentials */
+  .credentials{flex-wrap:wrap!important;width:100%}
+  .cred-box{flex:1 1 45%;min-width:0!important}
+  .cred-value{font-size:16px!important}
+  /* دکمه‌های ویرایش/حذف */
+  .doc-header .top > div:last-child{width:100%;flex-direction:row!important;flex-wrap:wrap;justify-content:flex-start!important;margin-top:8px}
+  /* events grid */
+  .events-grid{grid-template-columns:1fr!important}
+  /* info-cell در bank */
+  .info-cell{word-break:break-word;overflow-wrap:anywhere}
+  /* هر grid فیکس شده */
+  [style*="grid-template-columns"]{max-width:100%;overflow:hidden}
+
   body{padding:6px 6px 70px 6px}
   header{padding:6px 10px;border-radius:10px}
   h1{font-size:13px}
