@@ -1078,6 +1078,31 @@ document.querySelectorAll('.mobile-nav button').forEach(function(b){
 });
 
 window.switchTab = window.switchTab || function(t){ console.log("switchTab not ready"); };
+
+// ===== Expose functions to window =====
+window.openDoctorModal = openDoctorModal;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.selectDoctor = selectDoctor;
+window.openEventModal = openEventModal;
+window.delDoctor = delDoctor;
+window.delEvent = delEvent;
+window.cycleStatus = cycleStatus;
+window.copyText = copyText;
+window.toggleCard = toggleCard;
+window.callFromDetail = callFromDetail;
+window.goDoctor = goDoctor;
+window.cycleFollow = cycleFollow;
+window.delCall = delCall;
+window.backToList = backToList;
+window.updateMobileSelection = updateMobileSelection;
+window.render = render;
+window.renderDash = renderDash;
+window.renderDocList = renderDocList;
+window.renderMain = renderMain;
+window.renderCalls = renderCalls;
+window.claimDoctor = claimDoctor;
+window.toggleCompact = toggleCompact;
 </script>
 
 </body>
