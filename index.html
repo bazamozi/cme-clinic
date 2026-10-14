@@ -2,7 +2,11 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="بازآموزی">
+<meta name="theme-color" content="#0f172a">
 <title>دفتر بازآموزی پزشکان</title>
 <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
 <style>
@@ -136,6 +140,64 @@ textarea{resize:vertical;min-height:55px}
 .type-pick{padding:9px 7px;border-radius:9px;cursor:pointer;font-size:11.5px;font-weight:600;background:rgba(15,23,42,0.5);border:1px solid var(--border);color:var(--muted);text-align:center;font-family:inherit}
 .type-pick.active{background:linear-gradient(135deg,rgba(56,189,248,0.25),rgba(34,211,238,0.15));color:var(--accent);border-color:rgba(56,189,248,0.5)}
 .type-pick .icon{font-size:18px;display:block;margin-bottom:2px}
+
+.mobile-nav{display:none}
+.back-btn{display:none}
+@media(max-width:768px){
+  body{padding:0 0 70px 0 !important}
+  .wrap{padding:6px}
+  header{padding:6px 12px;margin-bottom:6px;border-radius:10px}
+  h1{font-size:14px}
+  header .sub{font-size:10px}
+  #mainTabs{display:none}
+  #clock{display:none}
+  .app{display:block}
+  .sidebar{border-radius:10px;padding:10px;height:auto;max-height:none;overflow:visible}
+  .main-area{height:auto;max-height:none;border-radius:10px;padding:10px;margin-top:8px;transform:none;-webkit-overflow-scrolling:auto;overflow:visible}
+  .doc-list{overflow:visible;max-height:none;padding:0}
+  .app.has-selection .sidebar{display:none}
+  .app.no-selection .main-area{display:none}
+  .back-btn{display:inline-flex !important;align-items:center;gap:5px;background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.4);color:var(--accent);padding:6px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:10px}
+  .mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:rgba(15,23,42,0.97);border-top:1px solid rgba(255,255,255,0.15);justify-content:space-around;padding:4px 0 max(4px,env(safe-area-inset-bottom));backdrop-filter:blur(20px);z-index:100}
+  .mobile-nav button{background:transparent;border:none;color:var(--muted);padding:6px 14px;font-family:inherit;font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border-radius:8px;transition:.2s}
+  .mobile-nav button.active{color:var(--accent);background:rgba(56,189,248,0.12)}
+  .mobile-nav button .icon{font-size:20px;line-height:1}
+  .credits{grid-template-columns:repeat(3,1fr);gap:6px}
+  .credit-box{padding:8px 4px;min-height:60px;gap:4px}
+  .credit-box .title{font-size:10.5px;gap:3px}
+  .credit-box .val{font-size:14px}
+  .credit-box .title .ico{font-size:12px}
+  .doc-header{padding:10px;border-radius:10px}
+  .doc-header h2{font-size:13px;line-height:1.6}
+  .doc-header .meta{font-size:10.5px;margin-top:3px}
+  .doc-header .top{display:block}
+  .doc-header .top > div:last-child{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;justify-content:flex-start !important;align-items:stretch !important}
+  .credentials{width:100%;flex-wrap:wrap;gap:6px}
+  .cred-box{padding:8px 10px;min-width:0;flex:1 1 45%}
+  .cred-value{font-size:15px}
+  .cred-label{font-size:10.5px;margin-bottom:4px}
+  .events-grid{grid-template-columns:1fr;gap:8px}
+  .ev-head{padding:8px 10px}
+  .ev-head h3{font-size:11.5px}
+  .ev-body{padding:6px 8px}
+  .event-row{padding:8px}
+  .event-title{font-size:11.5px}
+  .event-meta{font-size:10px}
+  .status-group{grid-template-columns:1fr 1fr 1fr !important;gap:3px}
+  .stat-pill{padding:7px 2px;font-size:9.5px}
+  .event-actions button{padding:5px 9px;font-size:11px}
+  .stats{grid-template-columns:repeat(2,1fr);gap:6px}
+  .stat{padding:8px}
+  .stat .value{font-size:16px}
+  .stat .label{font-size:10px}
+  .mini{padding:6px 10px;font-size:11px}
+  input,select,textarea{font-size:16px !important;padding:9px 11px}
+  .modal{max-width:100%;border-radius:12px;padding:14px;max-height:88vh}
+  .modal h2{font-size:13px}
+  .btn{padding:11px;font-size:12.5px}
+  .info-cell{font-size:11.5px;padding:6px 7px}
+  .info-cell b{font-size:11.5px}
+}
 </style>
 </head>
 <body>
@@ -162,7 +224,7 @@ textarea{resize:vertical;min-height:55px}
 </div>
 
 <div class="tab-content hidden" id="tab-doctors">
-  <div class="app">
+  <div class="app no-selection">
     <aside class="sidebar">
       <div class="sidebar-head">
         <h2>👨‍⚕️ پزشکان</h2>
@@ -450,7 +512,25 @@ function selectDoctor(id){
   selectedDoctorId = id;
   renderDocList();
   renderMain();
+  updateMobileSelection();
 }
+window.updateMobileSelection = function(){
+  const app = document.querySelector('.app');
+  if(!app) return;
+  if(selectedDoctorId){
+    app.classList.add('has-selection');
+    app.classList.remove('no-selection');
+  } else {
+    app.classList.remove('has-selection');
+    app.classList.add('no-selection');
+  }
+};
+window.backToList = function(){
+  selectedDoctorId = null;
+  renderDocList();
+  renderMain();
+  updateMobileSelection();
+};
 window.selectDoctor = selectDoctor;
 
 function renderMain(){
@@ -467,6 +547,7 @@ function renderMain(){
   const complete = rem===0 && req>0;
 
   el.innerHTML = `
+    <button class="back-btn" onclick="backToList()">← بازگشت به لیست</button>
     <div class="doc-header">
       <div class="top">
         <div>
@@ -807,5 +888,10 @@ render();
 })();
 
 </script>
+<nav class="mobile-nav" id="mobileNav">
+  <button data-tab="dash" class="active"><span class="icon">📊</span>داشبورد</button>
+  <button data-tab="doctors"><span class="icon">👨‍⚕️</span>پزشکان</button>
+  <button data-tab="calls"><span class="icon">📞</span>تماس‌ها</button>
+</nav>
 </body>
 </html>
