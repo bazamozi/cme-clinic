@@ -1242,7 +1242,7 @@ window.quickLogin = function(nat, pass, name){
     </div>
     
     <div class="sect">🚀 مرحله ۱: باز کردن سایت</div>
-    <button onclick="window.open('https://www.ircme.ir/App_Web/(Guest)/Membership/Login.aspx?CenterID=25&u='+encodeURIComponent(nat)+'&p='+encodeURIComponent(pass),'_blank')" class="btn" style="display:block;width:100%;text-align:center;text-decoration:none;margin-bottom:14px">🚀 ورود خودکار به سایت</button>
+    <button type="button" onclick="openIRCME('${esc(nat||'')}','${esc(pass||'')}')" class="btn" style="display:block;width:100%;text-align:center;margin-bottom:14px;cursor:pointer">🚀 ورود خودکار به سایت</button>
     
     <div class="sect">📝 مرحله ۲: در سایت</div>
     <div style="background:rgba(15,23,42,0.7);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:13px;line-height:2">
@@ -1258,6 +1258,25 @@ window.quickLogin = function(nat, pass, name){
   `;
   
   openModal(html);
+};
+
+// ===== Open IRCME Login =====
+window.openIRCME = function(nat, pass){
+  if(!nat || !pass){
+    toast('⚠️ کد ملی یا رمز سامانه موجود نیست');
+    return;
+  }
+  var url = 'https://www.ircme.ir/App_Web/%28Guest%29/Membership/Login.aspx?CenterID=25&u=' + encodeURIComponent(nat) + '&p=' + encodeURIComponent(pass);
+  console.log('🔗 باز کردن:', url);
+  
+  // روش ۱: window.open
+  var w = window.open(url, '_blank');
+  
+  // اگه popup بلاک شد، روش ۲: location.href
+  if(!w || w.closed || typeof w.closed === 'undefined'){
+    console.log('⚠️ popup بلاک شد، روش جایگزین');
+    window.location.href = url;
+  }
 };
 </script>
 </body>
