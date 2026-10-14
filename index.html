@@ -1316,6 +1316,62 @@ window.openIRCME = function(nat, pass){
     window.location.href = url;
   }
 };
+
+/* ===== Auto Attend System ===== */
+function getShamsiToday(){
+  try {
+    var s = new Intl.DateTimeFormat('fa-IR', {
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(new Date());
+    s = toEnDigits(s);
+    // اطمینان از فرمت صحیح
+    return s;
+  } catch(e){
+    console.log('خطا در تاریخ شمسی:', e);
+    return null;
+  }
+}
+
+function autoAttendEvents(){
+  var today = getShamsiToday();
+  if(!today) return;
+  
+  var changed = 0;
+  doctors.forEach(function(doc){
+    (doc.events||[]).forEach(function(e){
+      // فقط رویدادهایی که خرید شدن و شرکت نشدن و تاریخشون گذشته
+      if(e.purchase === 'انجام شد' && e.attend === 'انجام نشد' && e.date && e.date.length >= 8){
+        // مقایسه: اگه امروز بعد از تاریخ رویداد باشه
+        if(today > e.date){
+          e.attend = 'انجام شد';
+          changed++;
+        }
+      }
+    });
+  });
+  
+  if(changed > 0){
+    save();
+    renderAll();
+    toast('✅ ' + changed + ' رویداد خودکار به «شرکت شده» تغییر یافت');
+    console.log('Auto-attend:', changed, 'events. Today:', today);
+  }
+}
+
+// تست دستی - می‌تونی در Console بزنی: testAutoAttend()
+window.testAutoAttend = function(){
+  console.log('امروز (شمسی):', getShamsiToday());
+  autoAttendEvents();
+};
+
+// اجرا در بارگذاری
+setTimeout(autoAttendEvents, 2000);
+// هر ۱ دقیقه چک کن
+setInterval(autoAttendEvents, 60000);
+// هر بار برگشتن به تب
+document.addEventListener('visibilitychange', function(){
+  if(!document.hidden) autoAttendEvents();
+});
 </script>
 </body>
 </html>
