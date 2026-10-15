@@ -207,6 +207,12 @@ textarea{resize:vertical;min-height:55px}
 .login-error.show{display:block}
 .logout-btn{background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.4);color:var(--danger);padding:6px 14px;border-radius:9px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:600;transition:.2s}
 .logout-btn:hover{background:rgba(248,113,113,0.3)}
+
+.save-btn-header{background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.4);color:var(--success);padding:6px 14px;border-radius:9px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:600;transition:.2s}
+.save-btn-header:hover{background:rgba(52,211,153,0.3);transform:translateY(-1px)}
+.save-btn-header:active{transform:scale(0.97)}
+.save-btn-header.saved{background:rgba(52,211,153,0.5);color:#fff}
+@media(max-width:768px){.save-btn-header{padding:5px 10px;font-size:11px}}
 </style>
 </head>
 <body>
@@ -241,6 +247,8 @@ textarea{resize:vertical;min-height:55px}
     <button data-user="parvin" onclick="switchUser('parvin')">پروین</button>
     <button data-user="all" onclick="switchUser('all')">همه</button>
   </div>
+  <button class="save-btn-header" onclick="manualSave()">💾 ذخیره</button>
+  <button class="save-btn-header" onclick="manualBackup()" style="background:rgba(167,139,250,0.15);border-color:rgba(167,139,250,0.4);color:var(--purple)">📦 پشتیبان</button>
   <button class="logout-btn" onclick="doLogout()">🚪 خروج</button>
   <div class="sub" id="clock"></div>
 </header>
@@ -1483,6 +1491,148 @@ window.forcePull = async function(){
   await pullFromCloud();
   console.log('✅ Pull انجام شد');
   toast('✅ دریافت از سرور');
+};
+
+// ===== ذخیره دستی =====
+window.manualSave = async function(){
+  try {
+    // 1) ذخیره محلی
+    localStorage.setItem(K, JSON.stringify(doctors));
+    localStorage.setItem(K+'_calls', JSON.stringify(calls));
+    localStorage.setItem(K+'_updatedAt', String(Date.now()));
+    console.log('💾 ذخیره محلی انجام شد');
+    
+    // 2) Push به سرور
+    toast('⏳ در حال ارسال به سرور...');
+    await pushToCloud();
+    
+    // 3) نمایش موفقیت
+    toast('✅ ذخیره کامل شد — داده‌ها محفوظ هستند');
+    
+    // 4) چشمک سبز روی دکمه
+    var btns = document.querySelectorAll('.save-btn-header');
+    btns.forEach(function(b){
+      if(b.textContent.includes('ذخیره')){
+        var old = b.textContent;
+        b.textContent = '✅ ذخیره شد';
+        b.classList.add('saved');
+        setTimeout(function(){
+          b.textContent = old;
+          b.classList.remove('saved');
+        }, 2000);
+      }
+    });
+    
+    console.log('✅ ذخیره کامل — تعداد پزشکان:', doctors.length, '| تماس‌ها:', calls.length);
+  } catch(e){
+    console.error('خطا در ذخیره:', e);
+    toast('❌ خطا در ذخیره — دوباره تلاش کن');
+  }
+};
+
+// ===== پشتیبان دستی =====
+window.manualBackup = function(){
+  try {
+    var backup = {
+      doctors: doctors,
+      calls: calls,
+      savedAt: new Date().toISOString(),
+      version: 'v3',
+      count: {
+        doctors: doctors.length,
+        calls: calls.length
+      }
+    };
+    
+    var json = JSON.stringify(backup);
+    var sizeKB = Math.round(json.length / 1024);
+    
+    // 1) ذخیره محلی به عنوان پشتیبان
+    var today = new Date().toISOString().split('T')[0];
+    var timestamp = Date.now();
+    var backupKey = K + '_manual_' + today + '_' + timestamp;
+    
+    try {
+      localStorage.setItem(backupKey, json);
+      console.log('💾 پشتیبان محلی ذخیره شد:', backupKey);
+    } catch(e){
+      console.log('localStorage پر شده، فقط دانلود می‌کنم');
+    }
+    
+    // 2) دانلود فایل
+    var filename = 'cme-backup-' + today + '-' + timestamp + '.json';
+    var blob = new Blob([json], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast('✅ پشتیبان دانلود شد — ' + sizeKB + ' KB');
+    console.log('📦 پشتیبان: ' + filename);
+    console.log('  - پزشکان:', doctors.length);
+    console.log('  - تماس‌ها:', calls.length);
+    console.log('  - حجم:', sizeKB, 'KB');
+    
+    // 3) چشمک روی دکمه
+    var btns = document.querySelectorAll('.save-btn-header');
+    btns.forEach(function(b){
+      if(b.textContent.includes('پشتیبان')){
+        var old = b.textContent;
+        b.textContent = '✅ ذخیره شد';
+        b.classList.add('saved');
+        setTimeout(function(){
+          b.textContent = old;
+          b.classList.remove('saved');
+        }, 2000);
+      }
+    });
+  } catch(e){
+    console.error('خطا در پشتیبان:', e);
+    toast('❌ خطا در پشتیبان‌گیری');
+  }
+};
+
+// ===== بازگردانی از پشتیبان =====
+window.restoreFromBackup = function(){
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      try {
+        var backup = JSON.parse(ev.target.result);
+        if(!backup.doctors){
+          toast('❌ فایل پشتیبان معتبر نیست');
+          return;
+        }
+        var msg = '⚠️ این کار همه داده‌های فعلی را پاک می‌کند و با پشتیبان جایگزین می‌کند.\n\n';
+        msg += '📦 پشتیبان: ' + (backup.savedAt || 'نامشخص') + '\n';
+        msg += '👨‍⚕️ پزشکان: ' + (backup.doctors || []).length + '\n';
+        msg += '📞 تماس‌ها: ' + (backup.calls || []).length + '\n\n';
+        msg += 'ادامه؟';
+        if(!confirm(msg)) return;
+        
+        doctors = backup.doctors || [];
+        calls = backup.calls || [];
+        save();
+        renderAll();
+        toast('✅ بازگردانی انجام شد');
+        console.log('✅ بازگردانی: ' + doctors.length + ' پزشک');
+      } catch(err){
+        toast('❌ خطا در خواندن فایل');
+        console.error(err);
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
 };
 </script>
 </body>
