@@ -982,7 +982,7 @@ window.openDoctorModal = function(editId){
       pass:document.getElementById('mPass').value, year:gv('mYear'),
       card:{ num:gv('mCardNum'), m:gv('mCardM').padStart(2,'0'), y:gv('mCardY').padStart(2,'0'), cvv2:gv('mCvv2'), pass2:gv('mPass2') },
       finance:{ total:parseNum(document.getElementById('mTotal')), paid:parseNum(document.getElementById('mPaid')) },
-      owner: document.getElementById('mOwner').value
+      owner: (document.getElementById('mOwner') ? document.getElementById('mOwner').value : (window.currentUser || 'morteza'))
     };
     const id = document.getElementById('mEditId').value;
     if(id){ Object.assign(doctors.find(x=>x.id===id), data); toast('✅ ویرایش شد'); }
