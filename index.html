@@ -936,7 +936,6 @@ window.openDoctorModal = function(editId){
         <div><label>موبایل</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPhone" value="${esc(d?.phone||'')}"></div>
         <div><label>سال کارنامه</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mYear" value="${esc(d?.year||'')}"></div>
       </div>
-       (اختیاری)</div>
       <div class="row">
         <div><label>شماره کارت</label><div style="display:flex;gap:6px"><input autocomplete="off" dir="ltr" style="text-align:center;flex:1" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"><button type="button" class="copy-btn" style="padding:8px 12px;font-size:14px" onclick="copyText(document.getElementById('mCardNum').value,this)">📋</button></div></div>
         <div><label>CVV2</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCvv2" maxlength="4" value="${esc(c.cvv2||'')}"></div>
