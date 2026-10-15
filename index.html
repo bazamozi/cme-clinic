@@ -247,6 +247,7 @@ textarea{resize:vertical;min-height:55px}
     <button data-user="parvin" onclick="switchUser('parvin')">پروین</button>
     <button data-user="all" onclick="switchUser('all')">همه</button>
   </div>
+  <div id="autoSaveIndicator" style="background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.4);color:var(--success);padding:6px 12px;border-radius:9px;font-size:11.5px;font-weight:600;transition:.3s">💾 ذخیره خودکار فعال</div>
   <button class="save-btn-header" onclick="manualSave()">💾 ذخیره</button>
   <button class="save-btn-header" onclick="manualBackup()" style="background:rgba(167,139,250,0.15);border-color:rgba(167,139,250,0.4);color:var(--purple)">📦 پشتیبان</button>
   <button class="save-btn-header" onclick="restoreFromBackup()" style="background:rgba(251,191,36,0.15);border-color:rgba(251,191,36,0.4);color:var(--warn)">♻️ بازگردانی</button>
@@ -472,23 +473,71 @@ function offlinePurchasedToday(d){
 // ============================================
 // SAVE & SYNC
 // ============================================
+// ===== ذخیره خودکار با Debounce =====
+var _saveTimer = null;
+var _lastSaveStatus = 'idle'; // idle | saving | saved
+
 function save(){
+  // 1) ذخیره فوری در localStorage (سریع)
   try {
     var now = Date.now();
     localStorage.setItem(K, JSON.stringify(doctors));
     localStorage.setItem(K+'_calls', JSON.stringify(calls));
     localStorage.setItem(K+'_updatedAt', String(now));
   } catch(e){}
-  pushToCloud();
+  
+  // 2) نمایش نشانگر «در حال ذخیره»
+  showSaveIndicator('saving');
+  
+  // 3) ارسال به سرور با تاخیر (debounce) — تا اگه چند تغییر سریع داشتی، یک بار بفرسته
+  if(_saveTimer) clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(function(){
+    pushToCloud().then(function(){
+      showSaveIndicator('saved');
+      console.log('✅ ذخیره خودکار انجام شد');
+    }).catch(function(){
+      showSaveIndicator('error');
+    });
+  }, 800); // 0.8 ثانیه صبر می‌کنه
+}
+
+// ===== نشانگر وضعیت ذخیره =====
+function showSaveIndicator(status){
+  var btn = document.getElementById('autoSaveIndicator');
+  if(!btn) return;
+  
+  if(status === 'saving'){
+    btn.textContent = '⏳ در حال ذخیره...';
+    btn.style.background = 'rgba(251,191,36,0.15)';
+    btn.style.borderColor = 'rgba(251,191,36,0.4)';
+    btn.style.color = 'var(--warn)';
+  } else if(status === 'saved'){
+    btn.textContent = '✅ ذخیره شد';
+    btn.style.background = 'rgba(52,211,153,0.3)';
+    btn.style.borderColor = 'rgba(52,211,153,0.6)';
+    btn.style.color = 'var(--success)';
+    // بعد از ۲ ثانیه به حالت آماده برگرده
+    setTimeout(function(){
+      btn.textContent = '💾 ذخیره خودکار فعال';
+      btn.style.background = 'rgba(52,211,153,0.15)';
+      btn.style.borderColor = 'rgba(52,211,153,0.4)';
+      btn.style.color = 'var(--success)';
+    }, 2000);
+  } else if(status === 'error'){
+    btn.textContent = '❌ خطا در ذخیره';
+    btn.style.background = 'rgba(248,113,113,0.15)';
+    btn.style.borderColor = 'rgba(248,113,113,0.4)';
+    btn.style.color = 'var(--danger)';
+  }
 }
 
 function getLocalTimestamp(){
   try { return Number(localStorage.getItem(K+'_updatedAt') || 0); } catch(e){ return 0; }
 }
 
-let _pushing = false;
+var _pushing = false;
 async function pushToCloud(){
-  if(_pushing) return;
+  if(_pushing) return Promise.resolve();
   _pushing = true;
   try {
     var ts = Date.now();
@@ -500,8 +549,10 @@ async function pushToCloud(){
     });
     localStorage.setItem(K+'_updatedAt', String(ts));
     console.log('☁️ داده‌ها به سرور فرستاده شد - ' + new Date().toLocaleString('fa-IR'));
+    return Promise.resolve();
   } catch(e){
     console.log('⚠️ ارسال به سرور ناموفق:', e.message);
+    return Promise.reject(e);
   }
   finally { _pushing = false; }
 }
@@ -1635,6 +1686,48 @@ window.restoreFromBackup = function(){
   };
   input.click();
 };
+
+// ===== ذخیره خودکار قبل از بستن صفحه =====
+window.addEventListener('beforeunload', function(e){
+  // ذخیره فوری محلی
+  try {
+    localStorage.setItem(K, JSON.stringify(doctors));
+    localStorage.setItem(K+'_calls', JSON.stringify(calls));
+    localStorage.setItem(K+'_updatedAt', String(Date.now()));
+  } catch(err){}
+  
+  // ارسال به سرور (sync — چون فرصت کمه)
+  try {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', SCRIPT_URL, false); // sync
+    xhr.setRequestHeader('Content-Type', 'text/plain;charset=utf-8');
+    xhr.send(JSON.stringify({ doctors: doctors, calls: calls, updatedAt: Date.now() }));
+    console.log('✅ ذخیره نهایی قبل از بستن انجام شد');
+  } catch(err){
+    console.log('خطا در ذخیره نهایی:', err);
+  }
+});
+
+// ===== ذخیره خودکار هر ۵ دقیقه (در پس‌زمینه) =====
+setInterval(function(){
+  if(doctors.length > 0){
+    console.log('🔄 ذخیره خودکار دوره‌ای');
+    pushToCloud();
+  }
+}, 5 * 60 * 1000); // 5 minutes
+
+// ===== ذخیره وقتی کاربر از تب خارج میشه =====
+document.addEventListener('visibilitychange', function(){
+  if(document.hidden){
+    try {
+      localStorage.setItem(K, JSON.stringify(doctors));
+      localStorage.setItem(K+'_calls', JSON.stringify(calls));
+      localStorage.setItem(K+'_updatedAt', String(Date.now()));
+    } catch(e){}
+    pushToCloud();
+    console.log('💾 ذخیره خودکار (خروج از تب)');
+  }
+});
 </script>
 </body>
 </html>
