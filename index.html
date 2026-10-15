@@ -1452,6 +1452,38 @@ window.restoreBackup = function(dateStr){
 };
 
 setTimeout(autoBackup, 1000);
+
+/* ===== توابع مدیریت داده ===== */
+window.showDataSize = function(){
+  var doctorsJSON = JSON.stringify(doctors);
+  var callsJSON = JSON.stringify(calls);
+  var total = doctorsJSON.length + callsJSON.length;
+  var capacity = 8 * 1024 * 1024; // 8 MB
+  var percent = Math.round(total / capacity * 100);
+  
+  console.log('📊 وضعیت داده‌ها:');
+  console.log('  - پزشکان: ' + doctors.length + ' (' + Math.round(doctorsJSON.length/1024) + ' KB)');
+  console.log('  - تماس‌ها: ' + calls.length + ' (' + Math.round(callsJSON.length/1024) + ' KB)');
+  console.log('  - مجموع: ' + Math.round(total/1024) + ' KB');
+  console.log('  - ظرفیت: 8 MB');
+  console.log('  - مصرف: ' + percent + '%');
+  console.log('  - باقی‌مانده: ' + Math.round((capacity-total)/1024) + ' KB');
+  return { size: total, capacity: capacity, percent: percent };
+};
+
+window.forcePush = async function(){
+  console.log('🔄 شروع push دستی...');
+  await pushToCloud();
+  console.log('✅ Push انجام شد');
+  toast('✅ ارسال به سرور');
+};
+
+window.forcePull = async function(){
+  console.log('🔄 شروع pull دستی...');
+  await pullFromCloud();
+  console.log('✅ Pull انجام شد');
+  toast('✅ دریافت از سرور');
+};
 </script>
 </body>
 </html>
