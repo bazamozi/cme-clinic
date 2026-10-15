@@ -465,10 +465,16 @@ function offlinePurchasedToday(d){
 // ============================================
 function save(){
   try {
+    var now = Date.now();
     localStorage.setItem(K, JSON.stringify(doctors));
     localStorage.setItem(K+'_calls', JSON.stringify(calls));
+    localStorage.setItem(K+'_updatedAt', String(now));
   } catch(e){}
   pushToCloud();
+}
+
+function getLocalTimestamp(){
+  try { return Number(localStorage.getItem(K+'_updatedAt') || 0); } catch(e){ return 0; }
 }
 
 let _pushing = false;
@@ -476,13 +482,18 @@ async function pushToCloud(){
   if(_pushing) return;
   _pushing = true;
   try {
+    var ts = Date.now();
     await fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ doctors, calls })
+      body: JSON.stringify({ doctors, calls, updatedAt: ts })
     });
-  } catch(e){}
+    localStorage.setItem(K+'_updatedAt', String(ts));
+    console.log('☁️ داده‌ها به سرور فرستاده شد - ' + new Date().toLocaleString('fa-IR'));
+  } catch(e){
+    console.log('⚠️ ارسال به سرور ناموفق:', e.message);
+  }
   finally { _pushing = false; }
 }
 
@@ -494,14 +505,30 @@ async function pullFromCloud(){
     const r = await fetch(SCRIPT_URL + '?t=' + Date.now());
     const data = await r.json();
     if(!data) return;
+
+    var remoteTs = Number(data.updatedAt || 0);
+    var localTs = getLocalTimestamp();
+
+    console.log('🔍 مقایسه زمان - محلی:', localTs, 'سرور:', remoteTs);
+
+    // اگه local جدیدتره → اول push کن (سرور قدیمی رو نادیده بگیر)
+    if(localTs > remoteTs && localTs > 0){
+      console.log('⬆️ داده‌های محلی جدیدترن — ارسال به سرور');
+      await pushToCloud();
+      return;
+    }
+
+    // اگه remote جدیدتر یا مساویه → pull کن
     const remote = { doctors: data.doctors || [], calls: data.calls || [] };
     const local = { doctors, calls };
     if(JSON.stringify(remote) !== JSON.stringify(local)){
+      console.log('⬇️ داده‌های سرور جدیدترن — بروزرسانی از سرور');
       doctors = remote.doctors;
       calls = remote.calls;
       try {
         localStorage.setItem(K, JSON.stringify(doctors));
         localStorage.setItem(K+'_calls', JSON.stringify(calls));
+        localStorage.setItem(K+'_updatedAt', String(remoteTs));
       } catch(e){}
       renderAll();
     }
@@ -1375,6 +1402,66 @@ setInterval(autoAttendEvents, 60000);
 document.addEventListener('visibilitychange', function(){
   if(!document.hidden) autoAttendEvents();
 });
+
+/* ===== Auto Backup ===== */
+function autoBackup(){
+  try {
+    var today = new Date().toISOString().split('T')[0]; // 2025-10-15
+    var backupKey = K + '_backup_' + today;
+    // اگه امروز backup نگرفته
+    if(!localStorage.getItem(backupKey)){
+      var backup = {
+        doctors: doctors,
+        calls: calls,
+        savedAt: new Date().toISOString()
+      };
+      localStorage.setItem(backupKey, JSON.stringify(backup));
+      console.log('💾 پشتیبان روزانه ساخته شد:', backupKey);
+      
+      // پاک کردن پشتیبان‌های قدیمی‌تر از ۷ روز
+      var keys = Object.keys(localStorage);
+      var cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 7);
+      keys.forEach(function(k){
+        if(k.indexOf(K + '_backup_') === 0){
+          var dateStr = k.replace(K + '_backup_', '');
+          var d = new Date(dateStr);
+          if(d < cutoff){
+            localStorage.removeItem(k);
+            console.log('🗑 پشتیبان قدیمی حذف شد:', k);
+          }
+        }
+      });
+    }
+  } catch(e){ console.log('خطا در پشتیبان‌گیری:', e); }
+}
+
+window.showBackups = function(){
+  var keys = Object.keys(localStorage).filter(function(k){ return k.indexOf(K + '_backup_') === 0; });
+  console.log('📦 پشتیبان‌های موجود:');
+  keys.forEach(function(k){
+    var size = localStorage.getItem(k).length;
+    console.log('  -', k, '(' + Math.round(size/1024) + ' KB)');
+  });
+  return keys;
+};
+
+window.restoreBackup = function(dateStr){
+  try {
+    var key = K + '_backup_' + dateStr;
+    var data = localStorage.getItem(key);
+    if(!data){ console.log('پشتیبان پیدا نشد'); return false; }
+    var backup = JSON.parse(data);
+    doctors = backup.doctors || [];
+    calls = backup.calls || [];
+    save();
+    renderAll();
+    toast('✅ از پشتیبان ' + dateStr + ' بازگردانی شد');
+    return true;
+  } catch(e){ console.log('خطا:', e); return false; }
+};
+
+setTimeout(autoBackup, 1000);
 </script>
 </body>
 </html>
