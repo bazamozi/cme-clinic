@@ -700,7 +700,7 @@ function renderMain(){
             </div>
           </div>
           <div style="display:flex;gap:5px;flex-direction:column">
-            <button class="mini green" onclick="quickLogin('${esc(d.nat||'')}','${esc(d.pass||'')}','${esc(fullName(d))}')">🔗 ورود به آموزش مداوم</button>
+            <button class="mini green" onclick="openIRCME('${esc(d.nat||'')}','${esc(d.pass||'')}')">🔗 ورود به آموزش مداوم</button>
             <button class="mini" onclick="openDoctorModal('${d.id}')">✏️ ویرایش</button>
             <button class="mini danger" onclick="delDoctor('${d.id}')">🗑 حذف</button>
           </div>
