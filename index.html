@@ -416,25 +416,28 @@ function myCalls(){
 // ============================================
 function eventCredit(e){
   if(e.purchase!=='انجام شد') return 0;
-  if(e.type==='وبینار'){
-    if(e.attend!=='انجام شد') return 0;
-    if(e.exam==='رد') return 0;
-  }
   if(e.type==='حضوری'){
     if(e.attend!=='انجام شد') return 0;
+    return Number(e.credit||0);
   }
-  // غیر حضوری: فقط خرید کافیه
+  // وبینار و غیر حضوری: خرید + شرکت + آزمون (نه رد)
+  if(e.type==='وبینار'){
+    if(e.attend!=='انجام شد') return 0;
+  }
+  if(e.exam==='رد') return 0;
   return Number(e.credit||0);
 }
 function eventState(e){
   if(e.purchase!=='انجام شد') return 'partial';
-  if(e.type==='وبینار'){
-    if(e.attend!=='انجام شد') return 'partial';
-    if(e.exam==='رد') return 'failed';
-  }
   if(e.type==='حضوری'){
     if(e.attend!=='انجام شد') return 'partial';
+    return 'earned';
   }
+  if(e.type==='وبینار'){
+    if(e.attend!=='انجام شد') return 'partial';
+  }
+  if(e.exam==='رد') return 'failed';
+  if(e.exam==='ثبت نشده') return 'partial';
   return 'earned';
 }
 function doctorCredits(d){
@@ -713,15 +716,15 @@ function renderMain(){
 // بررسی کامل بودن همه وضعیت‌ها
 function eventComplete(e){
   if(e.purchase !== 'انجام شد') return false;
-  if(e.type === 'وبینار'){
-    if(e.attend !== 'انجام شد') return false;
-    if(e.exam === 'رد') return false;
-    if(e.exam === 'ثبت نشده') return false;
-  }
   if(e.type === 'حضوری'){
     if(e.attend !== 'انجام شد') return false;
+    return true;
   }
-  // غیر حضوری: فقط خرید کافیه
+  if(e.type === 'وبینار'){
+    if(e.attend !== 'انجام شد') return false;
+  }
+  if(e.exam === 'رد') return false;
+  if(e.exam === 'ثبت نشده') return false;
   return true;
 }
 
@@ -776,10 +779,10 @@ function renderEventRow(e){
       </div>
       <div class="event-meta" style="font-size:15px!important;font-weight:600;margin-top:5px">${e.date?'📅 <span class="ltr">'+esc(e.date)+'</span>':''}${e.time?' ⏰ <span class="ltr">'+esc(e.time)+'</span>':''}</div>
       <div class="event-credit"><span style="font-size:19px;font-weight:800;color:${earned?'var(--success)':(failed?'var(--danger)':'var(--muted)')}">${e.credit?num(e.credit):'—'} امتیاز</span></div>
-      <div class="status-group" style="${e.type==='وبینار'?'grid-template-columns:1fr 1fr 1fr':(e.type==='غیر حضوری'?'grid-template-columns:1fr 1fr':'grid-template-columns:1fr 1fr')}">
+      <div class="status-group" style="${e.type==='حضوری'?'grid-template-columns:1fr 1fr':'grid-template-columns:1fr 1fr 1fr'}">
         <button class="stat-pill ${e.purchase==='انجام شد'?'ok':''}" onclick="cycleStatus('${e.id}','purchase')">${purchaseTxt}</button>
         ${e.type!=='غیر حضوری'?`<button class="stat-pill ${e.attend==='انجام شد'?'ok':''}" onclick="cycleStatus('${e.id}','attend')">${attendTxt}</button>`:''}
-        ${e.type==='وبینار'?`<button class="stat-pill ${e.exam==='قبول'?'ok':e.exam==='رد'?'no':'neu'}" onclick="cycleStatus('${e.id}','exam')">${examTxt}</button>`:''}
+        ${e.type!=='حضوری'?`<button class="stat-pill ${e.exam==='قبول'?'ok':e.exam==='رد'?'no':'neu'}" onclick="cycleStatus('${e.id}','exam')">${examTxt}</button>`:''}
       </div>
       <div class="event-actions">
         <button class="mini" onclick="openEventModal('${e.id}')">✏️</button>
@@ -1007,7 +1010,7 @@ window.openEventModal = function(editId, presetType){
         <input autocomplete="off" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
         <label>امتیاز</label>
         <input autocomplete="off" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">
-        <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:8px;padding:7px;font-size:11px;color:var(--warn);margin-top:7px">📁 نیازی به تاریخ و ساعت ندارد</div>`;
+        <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:8px;padding:7px;font-size:11px;color:var(--warn);margin-top:7px">📁 غیر حضوری: خرید + آزمون (نیازی به تاریخ و ساعت ندارد)</div>`;
     } else if(type==='حضوری'){
       document.getElementById('dynFields').innerHTML = `
         <label>شناسه برنامه *</label>
