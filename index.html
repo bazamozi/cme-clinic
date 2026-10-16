@@ -417,104 +417,101 @@ html.is-logged-in #loginScreen{display:none!important}
 
 
 <style>
-/* 🎯 تب‌های رویداد — ریسپانسیو */
-.event-tabs-wrapper {
-  margin-top: 14px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(0, 217, 255, 0.15);
-}
-.event-tabs {
-  display: flex;
-  gap: 6px;
-  padding: 8px;
-  background: linear-gradient(90deg, rgba(15,23,42,0.9), rgba(30,41,59,0.9));
-  border-bottom: 2px solid rgba(0, 217, 255, 0.25);
-}
-.ev-tab {
-  flex: 1;
-  padding: 11px 8px;
-  border-radius: 8px;
-  font-weight: 800;
-  font-size: 13px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.2s ease;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1.5px solid rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
-.ev-tab:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateY(-1px);
-}
-.ev-tab[data-evtype="وبینار"].active {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(139, 92, 246, 0.1));
-  border-color: #a78bfa;
-  color: #a78bfa;
-  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.35);
-}
-.ev-tab[data-evtype="غیر حضوری"].active {
-  background: linear-gradient(135deg, rgba(255, 193, 7, 0.25), rgba(255, 193, 7, 0.1));
-  border-color: #ffc107;
-  color: #ffc107;
-  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.35);
-}
-.ev-tab[data-evtype="حضوری"].active {
-  background: linear-gradient(135deg, rgba(0, 255, 136, 0.25), rgba(0, 255, 136, 0.1));
-  border-color: #00ff88;
-  color: #00ff88;
-  box-shadow: 0 4px 15px rgba(0, 255, 136, 0.35);
-}
-.ev-tab-content {
-  display: block;
-  padding: 4px;
-}
-.ev-tab-content.hidden {
-  display: none !important;
-}
 
-/* 🚀 موبایل: تب‌ها مخفی، همه بخش‌ها نشون داده بشن */
-@media (max-width: 768px) {
-  .event-tabs {
-    display: none !important;
-  }
-  .ev-tab-content {
-    display: block !important;
-    padding: 0 !important;
-    border-bottom: 2px dashed rgba(0, 217, 255, 0.15);
-    margin-bottom: 6px;
-  }
-  .ev-tab-content:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-  }
-  .ev-tab-content.hidden {
-    display: block !important;
-  }
-  .event-tabs-wrapper {
-    margin-top: 10px;
-  }
-}
-</style>
 
 <style>
-/* 🎯 همه بخش‌ها یکجا — بدون تب */
+
+
+<style>
+/* 🎯 سه بخش رویداد — افقی، ۳ ستون */
+
+/* تب‌ها مخفی */
 .event-tabs { display: none !important; }
-.ev-tab-content { display: block !important; padding: 6px 0 !important; }
-.ev-tab-content.hidden { display: block !important; }
-.ev-tab-content:not(:last-child) {
-  border-bottom: 2px dashed rgba(0, 217, 255, 0.15);
-  padding-bottom: 14px !important;
-  margin-bottom: 14px;
+.ev-tab { display: none !important; }
+
+/* wrapper اصلی: grid 3 ستونه */
+.event-tabs-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+  border: none !important;
+  background: transparent !important;
+  align-items: start;
+}
+
+/* هر ستون */
+.event-tabs-wrapper .ev-tab-content,
+.ev-tab-content,
+.ev-tab-content.hidden {
+  display: block !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  min-width: 0;
+}
+
+/* هدر و بدنه هر ستون */
+.ev-section {
+  border-radius: 12px;
+  border: 1px solid rgba(0, 217, 255, 0.18);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.4));
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* هدر هر بخش */
+.ev-section .ev-head {
+  padding: 10px 12px;
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.7));
+  border-bottom: 1px solid rgba(0, 217, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ev-section .ev-head h3 {
+  margin: 0;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+}
+
+.ev-section .ev-head h3 .count {
+  background: rgba(0, 217, 255, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(0, 217, 255, 0.4);
+  border-radius: 20px;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.ev-section .ev-body {
+  padding: 8px;
+  flex: 1;
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+/* موبایل: عمودی برگردون */
+@media (max-width: 900px) {
+  .event-tabs-wrapper {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .ev-section .ev-body {
+    max-height: none;
+  }
 }
 </style>
+
 </head>
 <body>
 
