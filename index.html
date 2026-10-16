@@ -640,6 +640,7 @@ html.is-logged-in #loginScreen{display:none!important}
 }
 </style>
 
+
 <style id="mfb-css">
 @media (max-width: 900px) {
   #mobileFilterBar {
@@ -651,6 +652,8 @@ html.is-logged-in #loginScreen{display:none!important}
     border-bottom: 2px solid rgba(0, 217, 255, 0.35);
     box-shadow: 0 6px 20px rgba(0,0,0,0.75);
     direction: rtl;
+    will-change: transform;
+    transform: translateZ(0);
   }
   #mobileFilterBar .mfb-user {
     display: flex; gap: 4px; margin-bottom: 6px;
@@ -660,6 +663,7 @@ html.is-logged-in #loginScreen{display:none!important}
     background: rgba(255,255,255,0.05); color: #94a3b8;
     border: 1px solid rgba(255,255,255,0.15); border-radius: 6px;
     font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
   }
   #mobileFilterBar .mfb-user button.on {
     background: rgba(56,189,248,0.25); color: #38bdf8; border-color: #38bdf8;
@@ -671,6 +675,7 @@ html.is-logged-in #loginScreen{display:none!important}
     border: 1.5px solid rgba(255,255,255,0.15); border-radius: 8px;
     font-size: 11px; font-weight: 800; cursor: pointer; font-family: inherit;
     min-height: 42px; display: flex; align-items: center; justify-content: center; gap: 4px;
+    -webkit-tap-highlight-color: transparent;
   }
   #mobileFilterBar .mfb-filters button .cnt {
     background: rgba(255,255,255,0.15); border-radius: 10px;
@@ -3833,10 +3838,11 @@ setTimeout(function(){
 
 
 
+
 <script id="mfb-js">
 (function(){
-  if(window._mfbV6) return;
-  window._mfbV6 = true;
+  if(window._mfbV7) return;
+  window._mfbV7 = true;
 
   var BAR_HTML = '<div class="mfb-user">' +
     '<button type="button" data-u="morteza">مرتضی</button>' +
@@ -3849,10 +3855,13 @@ setTimeout(function(){
     '<button type="button" data-f="pending">⏳ بلاتکلیف<span class="cnt" id="mfb_cnt_pending">0</span></button>' +
     '</div>';
 
+  var _rafPending = false;
+  var _lastShow = null;
+
   function removeBar(){
     var b = document.getElementById('mobileFilterBar');
     if(b && b.parentNode) b.parentNode.removeChild(b);
-    document.body.classList.remove('has-mfb');
+    if(document.body.classList.contains('has-mfb')) document.body.classList.remove('has-mfb');
   }
 
   function addBar(){
@@ -3862,94 +3871,103 @@ setTimeout(function(){
       b.id = 'mobileFilterBar';
       b.innerHTML = BAR_HTML;
       document.body.appendChild(b);
+      document.body.classList.add('has-mfb');
     }
-    document.body.classList.add('has-mfb');
     return b;
   }
 
-  // 🎯 تشخیص قطعی
+  // 🎯 سریع و سبک
   function shouldShow(){
-    // موبایل؟
     if(window.innerWidth > 900) return false;
-
-    // مودال باز؟
     if(document.body.classList.contains('modal-open')) return false;
+    
     var mh = document.getElementById('modalHost');
     if(mh && mh.children.length > 0) return false;
-    var bg = document.querySelector('.modal-bg');
-    if(bg){
-      var st = getComputedStyle(bg);
-      if(st.display !== 'none' && st.visibility !== 'hidden' && parseFloat(st.opacity) > 0.1) return false;
-    }
-
+    
     var ma = document.getElementById('mainArea');
     if(!ma) return false;
-
-    // 🎯 اگه فرم ثبت/ویرایش پزشک هست → نشون نده
-    var txt = (ma.textContent || '');
-    if(txt.indexOf('ثبت پزشک') !== -1) return false;
-    if(txt.indexOf('ویرایش پزشک') !== -1) return false;
-    if(txt.indexOf('اطلاعات فردی') !== -1 && txt.indexOf('هزینه‌ها') !== -1) return false;
-
-    // 🎯 اگه inputهای خالی زیاد داره (فرم) → نشون نده
-    var inputs = ma.querySelectorAll('input[type="text"], input[type="tel"], input[type="password"], input[type="number"], input:not([type])');
-    var emptyInputs = 0;
-    for(var i = 0; i < inputs.length; i++){
-      var v = (inputs[i].value || '').trim();
-      if(v === '') emptyInputs++;
-    }
-    if(emptyInputs > 3) return false;
-
-    // 🎯 باید دکمه بازگشت داشته باشه (پروفایل)
     if(!ma.querySelector('.back-btn')) return false;
-
+    
+    // چک سریع: اگه فرم هست (با data-attr یا کلاس خاص) → نشون نده
+    if(ma.querySelector('form, .form-grid, input[name="lname"], input[name="family"]')) {
+      // فقط اگه بیش از ۵ input داره
+      var cnt = ma.querySelectorAll('input, select, textarea').length;
+      if(cnt > 5) return false;
+    }
+    
     return true;
   }
 
   function refresh(){
-    var show = shouldShow();
-    var bar = document.getElementById('mobileFilterBar');
-
-    if(show){
-      if(!bar) bar = addBar();
-      // آپدیت
+    if(_rafPending) return;
+    _rafPending = true;
+    requestAnimationFrame(function(){
+      _rafPending = false;
+      var show = shouldShow();
+      
+      // 🎯 اگه حالت عوض نشده، فقط محتوا آپدیت کن (نه حذف/اضافه)
+      var has = !!document.getElementById('mobileFilterBar');
+      
+      if(show && !has){
+        addBar();
+        _lastShow = true;
+      } else if(!show && has){
+        removeBar();
+        _lastShow = false;
+        return;
+      } else if(!show && !has){
+        return; // هیچی
+      }
+      
+      // آپدیت وضعیت (فقط اگه bar هست)
+      var bar = document.getElementById('mobileFilterBar');
+      if(!bar) return;
+      
+      // 🎯 فقط کلاس فعال رو عوض کن اگه عوض شده
       var u = window.currentUser || 'all';
       bar.querySelectorAll('.mfb-user button').forEach(function(b){
-        if(b.dataset.u === u) b.classList.add('on');
-        else b.classList.remove('on');
+        var on = (b.dataset.u === u);
+        if(b.classList.contains('on') !== on){
+          if(on) b.classList.add('on'); else b.classList.remove('on');
+        }
       });
       var f = window._docFilter || 'active';
       bar.querySelectorAll('.mfb-filters button').forEach(function(b){
-        if(b.dataset.f === f) b.classList.add('on');
-        else b.classList.remove('on');
+        var on = (b.dataset.f === f);
+        if(b.classList.contains('on') !== on){
+          if(on) b.classList.add('on'); else b.classList.remove('on');
+        }
       });
+      
+      // شمارنده‌ها
       try {
         var docs = (typeof myDoctors === 'function') ? myDoctors() : [];
         var counts = {active:0, done:0, pending:0};
-        docs.forEach(function(d){
-          var s = (typeof getDoctorStatus === 'function') ? getDoctorStatus(d) : 'pending';
+        for(var i=0; i<docs.length; i++){
+          var s = (typeof getDoctorStatus === 'function') ? getDoctorStatus(docs[i]) : 'pending';
           if(counts[s] !== undefined) counts[s]++;
-        });
-        ['active','done','pending'].forEach(function(k){
-          var el = document.getElementById('mfb_cnt_' + k);
-          if(el) el.textContent = counts[k];
-        });
+        }
+        var el;
+        el = document.getElementById('mfb_cnt_active');
+        if(el && el.textContent !== String(counts.active)) el.textContent = counts.active;
+        el = document.getElementById('mfb_cnt_done');
+        if(el && el.textContent !== String(counts.done)) el.textContent = counts.done;
+        el = document.getElementById('mfb_cnt_pending');
+        if(el && el.textContent !== String(counts.pending)) el.textContent = counts.pending;
       } catch(e){}
-    } else {
-      removeBar();
-    }
+    });
   }
 
   window.updateMobileFilterBar = refresh;
 
-  // کلیک
+  // کلیک با delegation
   document.addEventListener('click', function(e){
     var b = e.target.closest && e.target.closest('#mobileFilterBar .mfb-user button');
     if(b && b.dataset.u){
       e.preventDefault(); e.stopPropagation();
       if(typeof switchUser === 'function') switchUser(b.dataset.u);
       if(typeof backToList === 'function') backToList();
-      setTimeout(refresh, 200);
+      setTimeout(refresh, 250);
       return;
     }
     var fb = e.target.closest && e.target.closest('#mobileFilterBar .mfb-filters button');
@@ -3957,33 +3975,59 @@ setTimeout(function(){
       e.preventDefault(); e.stopPropagation();
       if(typeof setDocFilter === 'function') setDocFilter(fb.dataset.f);
       if(typeof backToList === 'function') backToList();
-      setTimeout(refresh, 200);
+      setTimeout(refresh, 250);
       return;
     }
   }, true);
 
-  // 🎯 پایش چند لایه
+  // 🎯 Debounced trigger
+  var _debTimer = null;
+  function debouncedRefresh(){
+    if(_debTimer) clearTimeout(_debTimer);
+    _debTimer = setTimeout(refresh, 200);
+  }
+
   setTimeout(function(){
     var ma = document.getElementById('mainArea');
     var mh = document.getElementById('modalHost');
     
+    // 🎯 MutationObserver سبک — فقط childList، بدون subtree و characterData
     if(ma){
-      new MutationObserver(function(){ refresh(); })
-        .observe(ma, {childList:true, subtree:true, characterData:true});
+      new MutationObserver(debouncedRefresh)
+        .observe(ma, {childList:true, subtree:false});
     }
     if(mh){
-      new MutationObserver(function(){ refresh(); setTimeout(refresh, 50); setTimeout(refresh, 200); })
-        .observe(mh, {childList:true, subtree:false, attributes:true});
+      new MutationObserver(debouncedRefresh)
+        .observe(mh, {childList:true, subtree:false});
     }
-    new MutationObserver(function(){ refresh(); setTimeout(refresh, 50); })
-      .observe(document.body, {attributes:true, attributeFilter:['class']});
+    // body class تغییر (فقط modal-open)
+    new MutationObserver(function(muts){
+      for(var i=0; i<muts.length; i++){
+        if(muts[i].attributeName === 'class'){
+          debouncedRefresh();
+          return;
+        }
+      }
+    }).observe(document.body, {attributes:true, attributeFilter:['class']});
     
     refresh();
-    setInterval(refresh, 300);
+    
+    // 🎯 setInterval خیلی کند — هر ۳ ثانیه، فقط اگه tab فعاله
+    setInterval(function(){
+      if(document.hidden) return;
+      refresh();
+    }, 3000);
+    
   }, 1000);
 
-  window.addEventListener('resize', function(){ setTimeout(refresh, 100); });
-  console.log('✅ Mobile Filter Bar v6 — حذف کامل از DOM');
+  // فقط resize (نه scroll)
+  var _resTimer = null;
+  window.addEventListener('resize', function(){
+    if(_resTimer) clearTimeout(_resTimer);
+    _resTimer = setTimeout(refresh, 200);
+  });
+
+  console.log('✅ Mobile Filter Bar v7 — بهینه');
 })();
 </script>
 </body>
