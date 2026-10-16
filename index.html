@@ -711,16 +711,15 @@ html.is-logged-in #loginScreen{display:none!important}
 
 
 
+
+
 <style id="bank-card-css">
 /* ============================================
-   🎯 کارت بانکی — هم‌عرض ردیف مالی، ۵ کادر جدا
-   شماره کارت: 1/3 | بقیه: 1/6 هر کدوم (رمز دوم کمی بزرگ‌تر)
+   🎯 کارت بانکی — فونت بزرگ‌تر، بدون دکمه کپی
    ============================================ */
 
-/* کارت کلی */
 .bank-card-display {
   display: grid !important;
-  /* 1 + 0.5 + 0.5 + 0.5 + 0.6 = 3.1 */
   grid-template-columns: 1fr 0.5fr 0.5fr 0.5fr 0.6fr !important;
   gap: 8px !important;
   align-items: stretch !important;
@@ -739,14 +738,13 @@ html.is-logged-in #loginScreen{display:none!important}
   display: grid !important;
 }
 
-/* 🎯 هر کادر جدا با border */
 .bank-card-display .bank-cell-compact {
   display: flex !important;
-  flex-direction: row !important;   /* افقی */
+  flex-direction: row !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 6px !important;
-  padding: 10px 12px !important;
+  padding: 12px 14px !important;
   margin: 0 !important;
   background: rgba(15, 23, 42, 0.5) !important;
   border: 1px solid rgba(0, 217, 255, 0.18) !important;
@@ -756,40 +754,42 @@ html.is-logged-in #loginScreen{display:none!important}
   box-sizing: border-box !important;
 }
 
-/* برچسب */
+/* 🎯 برچسب — دو برابر */
 .bank-card-display .bank-cell-compact .label {
-  font-size: 12px !important;
+  font-size: 22px !important;
   color: #94a3b8 !important;
   font-weight: 700 !important;
   white-space: nowrap !important;
   margin: 0 !important;
   padding: 0 !important;
   flex-shrink: 0 !important;
+  line-height: 1.2 !important;
 }
 
 .bank-card-display .bank-cell-compact .label::after {
   content: ':' !important;
-  margin-right: 2px !important;
+  margin-right: 3px !important;
   color: #64748b !important;
 }
 
-/* مقدار */
+/* 🎯 مقدار — دو برابر */
 .bank-card-display .bank-cell-compact .value {
-  font-size: 13px !important;
+  font-size: 24px !important;
   color: #e2e8f0 !important;
   font-weight: 800 !important;
   font-family: 'SF Mono', Menlo, Consolas, monospace !important;
-  letter-spacing: 0.3px !important;
+  letter-spacing: 0.5px !important;
   white-space: nowrap !important;
   margin: 0 !important;
   padding: 0 !important;
   min-width: 0 !important;
+  line-height: 1.2 !important;
 }
 
-/* 🎯 شماره کارت — استایل آبی */
+/* شماره کارت */
 .bank-card-display .bank-cell-compact.card-number {
   justify-content: flex-start !important;
-  gap: 8px !important;
+  gap: 10px !important;
   background: rgba(0, 217, 255, 0.08) !important;
   border: 1px solid rgba(0, 217, 255, 0.3) !important;
 }
@@ -799,33 +799,24 @@ html.is-logged-in #loginScreen{display:none!important}
 }
 
 .bank-card-display .bank-cell-compact.card-number .value {
-  font-size: 14px !important;
   color: #38bdf8 !important;
-  letter-spacing: 1px !important;
+  letter-spacing: 1.5px !important;
   overflow: visible !important;
 }
 
-/* دکمه کپی */
-.bank-card-display .copy-inline {
-  font-size: 10.5px !important;
-  padding: 2px 8px !important;
-  border-radius: 4px !important;
-  cursor: pointer !important;
-  background: rgba(0, 217, 255, 0.15) !important;
-  color: #38bdf8 !important;
-  border: 1px solid rgba(0, 217, 255, 0.4) !important;
-  font-weight: 700 !important;
-  margin: 0 !important;
-  margin-right: auto !important;
-  flex-shrink: 0 !important;
+/* 🎯 حذف کامل دکمه کپی */
+.bank-card-display .copy-inline,
+.bank-card-display button.copy-inline,
+.bank-card-display .copy-btn {
+  display: none !important;
 }
 
-/* 🎯 مخفی کردن دکمه نمایش کارت */
+/* 🎯 مخفی کردن دکمه نمایش کارت بانکی */
 button[onclick*="toggleCard"] {
   display: none !important;
 }
 
-/* موبایل */
+/* موبایل — یک مقدار کوچک‌تر ولی بازم بزرگ */
 @media (max-width: 768px) {
   .bank-card-display {
     grid-template-columns: 1fr 1fr 1fr 1fr !important;
@@ -834,23 +825,23 @@ button[onclick*="toggleCard"] {
   
   .bank-card-display .bank-cell-compact.card-number {
     grid-column: 1 / -1 !important;
-    justify-content: space-between !important;
+    justify-content: center !important;
   }
   
   .bank-card-display .bank-cell-compact {
-    padding: 8px 10px !important;
+    padding: 10px 12px !important;
   }
   
   .bank-card-display .bank-cell-compact .label {
-    font-size: 11px !important;
+    font-size: 16px !important;
   }
   
   .bank-card-display .bank-cell-compact .value {
-    font-size: 12px !important;
+    font-size: 18px !important;
   }
   
   .bank-card-display .bank-cell-compact.card-number .value {
-    font-size: 13px !important;
+    font-size: 18px !important;
   }
 }
 </style>
@@ -4492,6 +4483,75 @@ window.isDone = isDone;
   }, 1500);
   
   console.log('✅ Bank Card Show v2 فعال');
+})();
+</script>
+
+<script id="bank-card-final-v2">
+(function(){
+  if(window._bankCardV2) return;
+  window._bankCardV2 = true;
+  
+  function apply(){
+    try {
+      // کارت‌ها رو نشون بده
+      document.querySelectorAll('.bank-card-display').forEach(function(card){
+        card.classList.remove('hidden');
+        card.removeAttribute('hidden');
+        
+        // 🎯 حذف دکمه‌های کپی داخل کارت
+        card.querySelectorAll('.copy-inline, button.copy-btn, .copy-btn').forEach(function(btn){
+          btn.remove();
+        });
+        
+        // 🎯 درست کردن ترتیب فیلدها برای نمایش افقی
+        card.querySelectorAll('.bank-cell-compact').forEach(function(cell){
+          cell.style.setProperty('display', 'flex', 'important');
+          cell.style.setProperty('flex-direction', 'row', 'important');
+          cell.style.setProperty('align-items', 'center', 'important');
+          cell.style.setProperty('justify-content', 'center', 'important');
+          cell.style.setProperty('gap', '6px', 'important');
+          
+          // label بزرگ
+          var lbl = cell.querySelector('.label');
+          if(lbl){
+            lbl.style.setProperty('font-size', '22px', 'important');
+            lbl.style.setProperty('display', 'inline-block', 'important');
+          }
+          
+          // value بزرگ
+          var val = cell.querySelector('.value');
+          if(val){
+            val.style.setProperty('font-size', '24px', 'important');
+            val.style.setProperty('display', 'inline-block', 'important');
+          }
+        });
+      });
+      
+      // دکمه نمایش کارت رو حذف کن
+      document.querySelectorAll('button').forEach(function(b){
+        var t = (b.textContent || '').trim();
+        if((t.indexOf('نمایش کارت') !== -1 || t.indexOf('کارت بانکی') !== -1) && t.length < 30){
+          b.style.setProperty('display', 'none', 'important');
+        }
+      });
+    } catch(e){}
+  }
+  
+  [200, 500, 1000, 2000, 3000].forEach(function(t){ setTimeout(apply, t); });
+  setInterval(apply, 2500);
+  
+  setTimeout(function(){
+    var ma = document.getElementById('mainArea');
+    if(ma){
+      var deb;
+      new MutationObserver(function(){
+        clearTimeout(deb);
+        deb = setTimeout(apply, 150);
+      }).observe(ma, {childList: true, subtree: false});
+    }
+  }, 1500);
+  
+  console.log('✅ Bank Card v2 — فونت بزرگ، بدون کپی');
 })();
 </script>
 
