@@ -711,6 +711,150 @@ html.is-logged-in #loginScreen{display:none!important}
 
 
 
+<style id="bank-card-css">
+/* ============================================
+   🎯 کارت بانکی — هم‌عرض ردیف مالی، ۵ کادر جدا
+   شماره کارت: 1/3 | بقیه: 1/6 هر کدوم (رمز دوم کمی بزرگ‌تر)
+   ============================================ */
+
+/* کارت کلی */
+.bank-card-display {
+  display: grid !important;
+  /* 1 + 0.5 + 0.5 + 0.5 + 0.6 = 3.1 */
+  grid-template-columns: 1fr 0.5fr 0.5fr 0.5fr 0.6fr !important;
+  gap: 8px !important;
+  align-items: stretch !important;
+  margin-top: 10px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  direction: rtl !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.bank-card-display.hidden {
+  display: grid !important;
+}
+
+/* 🎯 هر کادر جدا با border */
+.bank-card-display .bank-cell-compact {
+  display: flex !important;
+  flex-direction: row !important;   /* افقی */
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 10px 12px !important;
+  margin: 0 !important;
+  background: rgba(15, 23, 42, 0.5) !important;
+  border: 1px solid rgba(0, 217, 255, 0.18) !important;
+  border-radius: 8px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* برچسب */
+.bank-card-display .bank-cell-compact .label {
+  font-size: 12px !important;
+  color: #94a3b8 !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.bank-card-display .bank-cell-compact .label::after {
+  content: ':' !important;
+  margin-right: 2px !important;
+  color: #64748b !important;
+}
+
+/* مقدار */
+.bank-card-display .bank-cell-compact .value {
+  font-size: 13px !important;
+  color: #e2e8f0 !important;
+  font-weight: 800 !important;
+  font-family: 'SF Mono', Menlo, Consolas, monospace !important;
+  letter-spacing: 0.3px !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-width: 0 !important;
+}
+
+/* 🎯 شماره کارت — استایل آبی */
+.bank-card-display .bank-cell-compact.card-number {
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  background: rgba(0, 217, 255, 0.08) !important;
+  border: 1px solid rgba(0, 217, 255, 0.3) !important;
+}
+
+.bank-card-display .bank-cell-compact.card-number .label {
+  color: #38bdf8 !important;
+}
+
+.bank-card-display .bank-cell-compact.card-number .value {
+  font-size: 14px !important;
+  color: #38bdf8 !important;
+  letter-spacing: 1px !important;
+  overflow: visible !important;
+}
+
+/* دکمه کپی */
+.bank-card-display .copy-inline {
+  font-size: 10.5px !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  background: rgba(0, 217, 255, 0.15) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(0, 217, 255, 0.4) !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+  margin-right: auto !important;
+  flex-shrink: 0 !important;
+}
+
+/* 🎯 مخفی کردن دکمه نمایش کارت */
+button[onclick*="toggleCard"] {
+  display: none !important;
+}
+
+/* موبایل */
+@media (max-width: 768px) {
+  .bank-card-display {
+    grid-template-columns: 1fr 1fr 1fr 1fr !important;
+    gap: 6px !important;
+  }
+  
+  .bank-card-display .bank-cell-compact.card-number {
+    grid-column: 1 / -1 !important;
+    justify-content: space-between !important;
+  }
+  
+  .bank-card-display .bank-cell-compact {
+    padding: 8px 10px !important;
+  }
+  
+  .bank-card-display .bank-cell-compact .label {
+    font-size: 11px !important;
+  }
+  
+  .bank-card-display .bank-cell-compact .value {
+    font-size: 12px !important;
+  }
+  
+  .bank-card-display .bank-cell-compact.card-number .value {
+    font-size: 13px !important;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -4307,165 +4451,47 @@ window.isDone = isDone;
 
 
 
-<script id="bank-card-final">
-// 🎯 کارت بانکی — دقیقاً هم‌عرض ردیف مالی، تقسیم داخلی مشخص
+
+
+<script id="bank-card-show">
 (function(){
-  if(window._bankCardFinal) return;
-  window._bankCardFinal = true;
+  if(window._bankCardShowV2) return;
+  window._bankCardShowV2 = true;
   
-  function fix(){
+  function show(){
     try {
-      // ۱. حذف دکمه "نمایش کارت بانکی"
-      document.querySelectorAll('button').forEach(function(btn){
-        var t = (btn.textContent || '').trim();
+      // کارت‌ها رو نشون بده
+      document.querySelectorAll('.bank-card-display').forEach(function(el){
+        el.classList.remove('hidden');
+        el.removeAttribute('hidden');
+      });
+      // دکمه نمایش کارت رو مخفی کن
+      document.querySelectorAll('button').forEach(function(b){
+        var t = (b.textContent || '').trim();
         if((t.indexOf('نمایش کارت') !== -1 || t.indexOf('کارت بانکی') !== -1) && t.length < 30){
-          btn.style.setProperty('display', 'none', 'important');
+          b.style.setProperty('display', 'none', 'important');
         }
       });
-      
-      // ۲. پیدا کردن ردیف مالی برای هم‌عرض شدن
-      var financeRow = document.querySelector('.doc-header .credits ~ div[style*="grid-template-columns"]') 
-                    || document.querySelector('.doc-header div[style*="grid-template-columns:1fr 1fr 1fr"]')
-                    || document.querySelector('.doc-header div[style*="grid-template-columns: 1fr 1fr 1fr"]');
-      
-      // ۳. کارت‌های بانکی
-      document.querySelectorAll('.bank-card-display').forEach(function(card){
-        // نمایش
-        card.classList.remove('hidden');
-        card.removeAttribute('hidden');
-        
-        // والد → block, 100%
-        var p = card.parentElement;
-        if(p && p !== document.body){
-          p.style.setProperty('display', 'block', 'important');
-          p.style.setProperty('width', '100%', 'important');
-          p.style.setProperty('box-sizing', 'border-box', 'important');
-          p.style.setProperty('padding', '0', 'important');
-          p.style.setProperty('margin', '10px 0 0 0', 'important');
-        }
-        
-        // 🎯 کارت بانکی: کل عرض، تقسیم داخلی
-        card.style.setProperty('display', 'grid', 'important');
-        card.style.setProperty('grid-template-columns', 
-          'minmax(0, 33.333%) minmax(0, 15.9%) minmax(0, 15.9%) minmax(0, 15.9%) minmax(0, 19%)', 
-          'important');
-        card.style.setProperty('gap', '6px', 'important');
-        card.style.setProperty('width', '100%', 'important');
-        card.style.setProperty('max-width', '100%', 'important');
-        card.style.setProperty('min-width', '0', 'important');
-        card.style.setProperty('box-sizing', 'border-box', 'important');
-        card.style.setProperty('padding', '10px 12px', 'important');
-        card.style.setProperty('margin', '0', 'important');
-        card.style.setProperty('background', 'rgba(15, 23, 42, 0.5)', 'important');
-        card.style.setProperty('border', '1px solid rgba(0, 217, 255, 0.18)', 'important');
-        card.style.setProperty('border-radius', '8px', 'important');
-        card.style.setProperty('direction', 'rtl', 'important');
-        
-        // ۴. ستون‌های داخلی
-        card.querySelectorAll('.bank-cell-compact').forEach(function(cell){
-          cell.style.setProperty('display', 'flex', 'important');
-          cell.style.setProperty('align-items', 'center', 'important');
-          cell.style.setProperty('justify-content', 'center', 'important');
-          cell.style.setProperty('gap', '4px', 'important');
-          cell.style.setProperty('padding', '0', 'important');
-          cell.style.setProperty('margin', '0', 'important');
-          cell.style.setProperty('background', 'transparent', 'important');
-          cell.style.setProperty('border', 'none', 'important');
-          cell.style.setProperty('min-width', '0', 'important');
-          cell.style.setProperty('overflow', 'hidden', 'important');
-          cell.style.setProperty('white-space', 'nowrap', 'important');
-          cell.style.setProperty('box-sizing', 'border-box', 'important');
-          
-          var lbl = cell.querySelector('.label');
-          if(lbl){
-            lbl.style.setProperty('font-size', '11px', 'important');
-            lbl.style.setProperty('color', '#94a3b8', 'important');
-            lbl.style.setProperty('font-weight', '700', 'important');
-            lbl.style.setProperty('white-space', 'nowrap', 'important');
-            lbl.style.setProperty('margin', '0', 'important');
-            lbl.style.setProperty('padding', '0', 'important');
-            lbl.style.setProperty('flex-shrink', '0', 'important');
-          }
-          
-          var val = cell.querySelector('.value');
-          if(val){
-            val.style.setProperty('font-size', '12.5px', 'important');
-            val.style.setProperty('color', '#e2e8f0', 'important');
-            val.style.setProperty('font-weight', '800', 'important');
-            val.style.setProperty('font-family', "'SF Mono', Menlo, Consolas, monospace", 'important');
-            val.style.setProperty('white-space', 'nowrap', 'important');
-            val.style.setProperty('overflow', 'hidden', 'important');
-            val.style.setProperty('text-overflow', 'ellipsis', 'important');
-            val.style.setProperty('margin', '0', 'important');
-            val.style.setProperty('padding', '0', 'important');
-            val.style.setProperty('min-width', '0', 'important');
-          }
-        });
-        
-        // ۵. شماره کارت (ستون اول)
-        var numCell = card.querySelector('.bank-cell-compact.card-number');
-        if(numCell){
-          numCell.style.setProperty('justify-content', 'space-between', 'important');
-          numCell.style.setProperty('gap', '6px', 'important');
-          numCell.style.setProperty('padding', '5px 10px', 'important');
-          numCell.style.setProperty('background', 'rgba(0, 217, 255, 0.08)', 'important');
-          numCell.style.setProperty('border', '1px solid rgba(0, 217, 255, 0.25)', 'important');
-          numCell.style.setProperty('border-radius', '6px', 'important');
-          
-          var nLbl = numCell.querySelector('.label');
-          if(nLbl){
-            nLbl.style.setProperty('color', '#38bdf8', 'important');
-            nLbl.style.setProperty('font-size', '11px', 'important');
-            nLbl.style.setProperty('flex-shrink', '0', 'important');
-          }
-          
-          var nVal = numCell.querySelector('.value');
-          if(nVal){
-            nVal.style.setProperty('font-size', '13.5px', 'important');
-            nVal.style.setProperty('color', '#38bdf8', 'important');
-            nVal.style.setProperty('letter-spacing', '0.6px', 'important');
-            nVal.style.setProperty('flex', '1 1 auto', 'important');
-            nVal.style.setProperty('text-align', 'center', 'important');
-            nVal.style.setProperty('overflow', 'visible', 'important');
-            nVal.style.setProperty('text-overflow', 'clip', 'important');
-          }
-        }
-        
-        // ۶. رمز دوم (ستون آخر) — کمی بزرگ‌تر
-        var lastCell = card.querySelectorAll('.bank-cell-compact');
-        if(lastCell.length > 0){
-          var pinCell = lastCell[lastCell.length - 1];
-          if(pinCell !== numCell){
-            pinCell.style.setProperty('justify-content', 'center', 'important');
-          }
-        }
-      });
-    } catch(e){ console.warn('bankCard:', e); }
+    } catch(e){}
   }
   
-  // اجرای چندباره
-  [200, 500, 1000, 2000, 3000].forEach(function(t){ setTimeout(fix, t); });
-  setInterval(fix, 2500);
+  setTimeout(show, 300);
+  setTimeout(show, 1000);
+  setTimeout(show, 2500);
+  setInterval(show, 2500);
   
-  // Observer روی mainArea
   setTimeout(function(){
     var ma = document.getElementById('mainArea');
     if(ma){
-      var deb;
+      var t;
       new MutationObserver(function(){
-        clearTimeout(deb);
-        deb = setTimeout(fix, 150);
+        clearTimeout(t);
+        t = setTimeout(show, 150);
       }).observe(ma, {childList: true, subtree: false});
     }
-  }, 1000);
+  }, 1500);
   
-  var rt;
-  window.addEventListener('resize', function(){
-    clearTimeout(rt);
-    rt = setTimeout(fix, 200);
-  });
-  
-  console.log('✅ Bank Card Final فعال — 33% کارت + تقسیم 4 تایی');
+  console.log('✅ Bank Card Show v2 فعال');
 })();
 </script>
 
