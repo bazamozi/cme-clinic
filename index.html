@@ -2196,50 +2196,9 @@ var USERS = {
   'parvin': { pass: 'parvin123', name: 'پروین' }
 };
 
-window.doLogin = function(){
-  var userEl = document.getElementById('loginUser');
-  var passEl = document.getElementById('loginPass');
-  var errEl = document.getElementById('loginError');
-  var screenEl = document.getElementById('loginScreen');
-  
-  if(!userEl || !passEl || !screenEl){ alert('فیلدهای لاگین پیدا نشد'); return; }
-  
-  var u = userEl.value.trim().toLowerCase();
-  var p = passEl.value;
-  
-  if(USERS[u] && USERS[u].pass === p){
-    try { localStorage.setItem('cme_logged_in', u); } catch(e){}
-    if(errEl) errEl.classList.remove('show');
-    screenEl.classList.add('hidden');
-    document.documentElement.setAttribute('data-logged', '1');
-    if(typeof currentUser !== 'undefined') window.currentUser = u;
-    try { localStorage.setItem('cme_current_user', u); } catch(e){}
-    
-    document.querySelectorAll('.user-picker button').forEach(function(b){
-      if(b.dataset.user === u) b.classList.add('active');
-      else b.classList.remove('active');
-    });
-    
-    if(typeof renderAll === 'function') renderAll();
-    if(typeof updateMobileSelection === 'function') updateMobileSelection();
-    if(typeof toast === 'function') toast('👋 خوش آمدید ' + USERS[u].name);
-    console.log('✅ ورود موفق:', u);
-  } else {
-    if(errEl) errEl.classList.add('show');
-    passEl.value = '';
-    console.log('❌ ورود ناموفق');
-  }
-};
 
-window.doLogout = function(){
-  if(!confirm('از سیستم خارج می‌شوید؟')) return;
-  try {
-    localStorage.removeItem('cme_logged_in');
-    localStorage.removeItem('cme_current_user');
-  } catch(e){}
-  document.documentElement.removeAttribute('data-logged');
-  location.reload();
-};
+
+
 
 // Enter برای ورود
 document.addEventListener('keydown', function(e){
@@ -2267,52 +2226,9 @@ var USERS = {
   'parvin': { pass: 'parvin123', name: 'پروین' }
 };
 
-window.doLogin = function(){
-  var userEl = document.getElementById('loginUser');
-  var passEl = document.getElementById('loginPass');
-  var errEl = document.getElementById('loginError');
-  var screenEl = document.getElementById('loginScreen');
-  
-  if(!userEl || !passEl || !screenEl){
-    alert('فیلدهای لاگین پیدا نشد');
-    return;
-  }
-  
-  var u = userEl.value.trim().toLowerCase();
-  var p = passEl.value;
-  
-  if(USERS[u] && USERS[u].pass === p){
-    try { localStorage.setItem('cme_logged_in', u); } catch(e){}
-    if(errEl) errEl.classList.remove('show');
-    screenEl.classList.add('hidden');
-    try { localStorage.setItem('cme_current_user', u); } catch(e){}
-    
-    if(typeof currentUser !== 'undefined') window.currentUser = u;
-    
-    document.querySelectorAll('.user-picker button').forEach(function(b){
-      if(b.dataset.user === u) b.classList.add('active');
-      else b.classList.remove('active');
-    });
-    
-    if(typeof renderAll === 'function') renderAll();
-    if(typeof updateMobileSelection === 'function') updateMobileSelection();
-    if(typeof toast === 'function') toast('👋 خوش آمدید ' + USERS[u].name);
-    console.log('✅ ورود موفق:', u);
-  } else {
-    if(errEl) errEl.classList.add('show');
-    passEl.value = '';
-    console.log('❌ ورود ناموفق:', u);
-  }
-};
 
-window.doLogout = function(){
-  if(!confirm('از سیستم خارج می‌شوید؟')) return;
-  try {
-    localStorage.removeItem('cme_logged_in');
-    localStorage.removeItem('cme_current_user');
-  } catch(e){}
-  location.reload();
-};
+
+
 
 document.addEventListener('keydown', function(e){
   if(e.key === 'Enter'){
@@ -2521,6 +2437,86 @@ setTimeout(function(){
   checkLogin();
   console.log('✅ Missing Functions Loaded');
 }, 100);
+</script>
+<script>
+/* ===== Login / Logout (Robust) ===== */
+function doLogin(){
+  try {
+    var userEl = document.getElementById('loginUser');
+    var passEl = document.getElementById('loginPass');
+    var errEl = document.getElementById('loginError');
+    var screenEl = document.getElementById('loginScreen');
+    
+    if(!userEl || !passEl || !screenEl){
+      alert('فیلدهای ورود پیدا نشد');
+      return;
+    }
+    
+    var u = userEl.value.trim().toLowerCase();
+    var p = passEl.value;
+    var USERS = {
+      'morteza': { pass: 'MN13601353', name: 'مرتضی' },
+      'parvin': { pass: 'parvin123', name: 'پروین' }
+    };
+    
+    console.log('🔐 تلاش ورود:', u);
+    
+    if(USERS[u] && USERS[u].pass === p){
+      // ذخیره
+      try {
+        localStorage.setItem('cme_logged_in', u);
+        localStorage.setItem('cme_current_user', u);
+      } catch(e){}
+      
+      // مخفی کردن صفحه ورود
+      screenEl.classList.add('hidden');
+      screenEl.style.display = 'none';
+      
+      // مخفی کردن با HTML attribute
+      document.documentElement.classList.add('is-logged-in');
+      
+      // پاک کردن خطا
+      if(errEl) errEl.classList.remove('show');
+      
+      // تنظیم کاربر
+      if(typeof currentUser !== 'undefined') window.currentUser = u;
+      
+      // آپدیت دکمه‌های پیکر
+      document.querySelectorAll('.user-picker button').forEach(function(b){
+        if(b.dataset.user === u) b.classList.add('active');
+        else b.classList.remove('active');
+      });
+      
+      // رندر مجدد
+      if(typeof renderAll === 'function') renderAll();
+      if(typeof updateMobileSelection === 'function') updateMobileSelection();
+      if(typeof toast === 'function') toast('👋 خوش آمدید ' + USERS[u].name);
+      
+      console.log('✅ ورود موفق:', u);
+    } else {
+      if(errEl) errEl.classList.add('show');
+      passEl.value = '';
+      console.log('❌ ورود ناموفق');
+    }
+  } catch(e){
+    console.log('خطا در doLogin:', e.message);
+    alert('خطا: ' + e.message);
+  }
+}
+
+function doLogout(){
+  if(!confirm('از سیستم خارج می‌شوید؟')) return;
+  try {
+    localStorage.removeItem('cme_logged_in');
+    localStorage.removeItem('cme_current_user');
+  } catch(e){}
+  document.documentElement.classList.remove('is-logged-in');
+  location.reload();
+}
+
+window.doLogin = doLogin;
+window.doLogout = doLogout;
+console.log('✅ Login System Loaded');
 </script>
 </body>
 </html>
