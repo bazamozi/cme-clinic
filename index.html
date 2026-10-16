@@ -440,6 +440,80 @@ html.is-logged-in #loginScreen{display:none!important}
   .bank-cell-compact{min-height:65px!important;padding:8px 8px!important}
   .bank-cell-compact.card-number{min-height:75px!important}
 }
+
+/* ===== Doctors Filter Tabs ===== */
+.doc-filter-tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:5px;
+  margin-bottom:9px;
+}
+.doc-filter-tabs button{
+  background:rgba(15,23,42,0.6);
+  border:1px solid var(--border);
+  color:var(--muted);
+  padding:8px 4px;
+  border-radius:9px;
+  font-size:11px;
+  font-family:inherit;
+  cursor:pointer;
+  font-weight:700;
+  transition:.2s;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  line-height:1.2;
+}
+.doc-filter-tabs button .cnt{
+  background:rgba(56,189,248,0.2);
+  color:var(--accent);
+  padding:1px 7px;
+  border-radius:10px;
+  font-size:10px;
+  font-weight:800;
+  margin-top:2px;
+}
+.doc-filter-tabs button.active{
+  background:linear-gradient(135deg,rgba(56,189,248,0.3),rgba(34,211,238,0.2));
+  color:var(--accent);
+  border-color:rgba(56,189,248,0.5);
+}
+.doc-filter-tabs button.active .cnt{
+  background:rgba(56,189,248,0.5);
+  color:#fff;
+}
+.doc-filter-tabs button.done.active{
+  background:linear-gradient(135deg,rgba(52,211,153,0.3),rgba(34,211,238,0.15));
+  color:var(--success);
+  border-color:rgba(52,211,153,0.5);
+}
+.doc-filter-tabs button.pending.active{
+  background:linear-gradient(135deg,rgba(251,191,36,0.3),rgba(245,158,11,0.2));
+  color:var(--warn);
+  border-color:rgba(251,191,36,0.5);
+}
+
+.doc-row.status-done{border-right:3px solid var(--success)}
+.doc-row.status-pending{border-right:3px solid var(--warn)}
+.doc-row.status-active{border-right:3px solid var(--accent)}
+
+.status-badge{
+  display:inline-block;
+  font-size:9px;
+  padding:2px 7px;
+  border-radius:20px;
+  font-weight:700;
+  margin-right:4px;
+}
+.status-badge.done{background:rgba(52,211,153,0.2);color:var(--success)}
+.status-badge.pending{background:rgba(251,191,36,0.2);color:var(--warn)}
+.status-badge.active{background:rgba(56,189,248,0.2);color:var(--accent)}
+
+@media(max-width:768px){
+  .doc-filter-tabs button{padding:7px 3px;font-size:10px}
+  .doc-filter-tabs button .cnt{font-size:9px}
+}
 </style>
 </head>
 <body>
@@ -511,6 +585,11 @@ html.is-logged-in #loginScreen{display:none!important}
         <button class="btn sm" onclick="openDoctorModal()">➕ جدید</button>
       </div>
       <input id="searchDoctor" placeholder="🔍 جستجو..." style="margin-bottom:9px">
+      <div class="doc-filter-tabs" id="docFilterTabs">
+        <button data-filter="active" class="active" onclick="setDocFilter('active')">⚡ در حال اجرا<span class="cnt" id="cntActive">0</span></button>
+        <button data-filter="done" class="done" onclick="setDocFilter('done')">✅ اتمام<span class="cnt" id="cntDone">0</span></button>
+        <button data-filter="pending" class="pending" onclick="setDocFilter('pending')">⏳ بلاتکلیف<span class="cnt" id="cntPending">0</span></button>
+      </div>
       <div class="doc-list" id="docList"></div>
     </aside>
     <main class="main-area" id="mainArea">
@@ -952,10 +1031,17 @@ function renderDash(){
 // DOCTORS LIST
 // ============================================
 function renderDocList(){
+  updateFilterCounts();
   const searchEl = document.getElementById('searchDoctor');
   if(!searchEl) return;
   const q = searchEl.value.trim().toLowerCase();
-  const arr = myDoctors().filter(d => !q || fullName(d).toLowerCase().includes(q) || (d.spec||'').toLowerCase().includes(q) || (d.phone||'').includes(q) || (d.nat||'').includes(q));
+  const arr = myDoctors().filter(d => {
+    // فیلتر بر اساس تب
+    if(getDoctorStatus(d) !== _docFilter) return false;
+    // فیلتر جستجو
+    if(!q) return true;
+    return fullName(d).toLowerCase().includes(q) || (d.spec||'').toLowerCase().includes(q) || (d.phone||'').includes(q) || (d.nat||'').includes(q);
+  });
   const el = document.getElementById('docList');
   if(!el) return;
   if(!arr.length){ el.innerHTML='<div class="empty">پزشکی یافت نشد</div>'; return; }
@@ -967,7 +1053,7 @@ function renderDocList(){
     const rem$ = Math.max(0, Number(f.total||0)-Number(f.paid||0));
     const hasOffline = (d.events||[]).some(e=>e.type==='غیر حضوری');
     return `
-      <div class="doc-row ${selectedDoctorId===d.id?'active':''}" onclick="selectDoctor('${d.id}')">
+      <div class="doc-row status-${getDoctorStatus(d)} ${selectedDoctorId===d.id?'active':''}" onclick="selectDoctor('${d.id}')">
         <div class="doc-name">
           <span>${esc(fullName(d))}</span>
           ${d.owner?`<span class="owner-badge ${d.owner}">${d.owner==='morteza'?'مرتضی':'پروین'}</span>`:''}
@@ -2390,6 +2476,45 @@ if(document.readyState === 'loading'){
 }
 console.log('✅ Login System v2 بارگذاری شد');
 setTimeout(checkLogin, 100);
+
+/* ===== Doctors Filter System ===== */
+var _docFilter = 'active';  // پیش‌فرض: در حال اجرا
+
+window.getDoctorStatus = function(d){
+  // 1) تکمیل‌شده
+  if(typeof isComplete === 'function' && isComplete(d)) return 'done';
+  
+  // 2) در حال اجرا: حداقل یک رویداد یا پرداخت داره
+  var hasEvents = (d.events || []).length > 0;
+  var hasPaid = (d.finance && Number(d.finance.paid || 0) > 0);
+  if(hasEvents || hasPaid) return 'active';
+  
+  // 3) بلاتکلیف: تازه اضافه شده، نه رویداد نه پرداخت
+  return 'pending';
+};
+
+window.setDocFilter = function(filter){
+  _docFilter = filter;
+  document.querySelectorAll('.doc-filter-tabs button').forEach(function(b){
+    if(b.dataset.filter === filter) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+  renderDocList();
+};
+
+window.updateFilterCounts = function(){
+  var all = myDoctors();
+  var counts = { active: 0, done: 0, pending: 0 };
+  all.forEach(function(d){
+    counts[getDoctorStatus(d)]++;
+  });
+  var ce = document.getElementById('cntActive');
+  var cd = document.getElementById('cntDone');
+  var cp = document.getElementById('cntPending');
+  if(ce) ce.textContent = counts.active;
+  if(cd) cd.textContent = counts.done;
+  if(cp) cp.textContent = counts.pending;
+};
 </script>
 </body>
 </html>
