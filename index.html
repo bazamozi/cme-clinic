@@ -535,6 +535,7 @@ let calls = [];
 let selectedDoctorId = null;
 var _dataLoaded = false;
 var _lastKnownDoctorCount = 0;
+var _alertShowing = false;
 var _lastKnownCallCount = 0;
 
 // بارگذاری تعداد قبلی
@@ -746,16 +747,30 @@ async function pushToCloud(force){
   if(!force && !isSafeToPush()){
     console.error('🛑 push متوقف شد — داده‌های مشکوک');
     showSaveIndicator('error');
-    toast('⚠️ هشدار: داده‌ها مشکوک به دستکاری — push متوقف شد');
     
-    // پیام هشدار در Console
-    if(confirm('⚠️ هشدار امنیتی!\n\nتعداد داده‌ها یهو کم شده:\n' +
-              'پزشکان فعلی: ' + (doctors || []).length + '\n' +
-              'پزشکان قبلی: ' + _lastKnownDoctorCount + '\n\n' +
-              'می‌خوای از سرور بازگردانی کنم؟')){
-      // بازگردانی از سرور
-      pullFromCloud(true);
+    // ⚠️ جلوگیری از dialog تکراری
+    if(_alertShowing){
+      return Promise.reject(new Error('Already showing alert'));
     }
+    _alertShowing = true;
+    
+    toast('⚠️ هشدار: داده‌ها مشکوک — push متوقف شد');
+    
+    setTimeout(function(){
+      if(confirm('⚠️ هشدار امنیتی!\n\nتعداد داده‌ها یهو کم شده:\n' +
+                'پزشکان فعلی: ' + (doctors || []).length + '\n' +
+                'پزشکان قبلی: ' + _lastKnownDoctorCount + '\n\n' +
+                'می‌خوای از سرور بازگردانی کنم؟')){
+        // ✅ کاربر OK زد → بازگردانی
+        _alertShowing = false;
+        _dataLoaded = false;  // موقتاً غیرفعال
+        pullFromCloud(true);
+      } else {
+        // ❌ کاربر Cancel زد → فقط alert رو ببند
+        _alertShowing = false;
+      }
+    }, 100);
+    
     return Promise.reject(new Error('Unsafe push blocked'));
   }
   
@@ -816,6 +831,8 @@ async function pullFromCloud(){
       
       // 🛡️ بعد از pull، count ها رو به‌روز کن
       updateKnownCounts();
+      _alertShowing = false;  // ← ریست
+      _dataLoaded = true;
       console.log('✅ pull انجام شد و count ها به‌روز شدند');
     }
   } catch(e){}
@@ -2200,6 +2217,46 @@ setTimeout(function(){
     console.log('📊 Initial counts: ' + (doctors||[]).length + ' doctors, ' + (calls||[]).length + ' calls');
   }
 }, 3000);
+
+// ===== 🆘 ریست فوری (اضطراری) =====
+window.emergencyReset = function(){
+  console.log('🆘 ریست اضطراری');
+  _alertShowing = false;
+  _dataLoaded = false;
+  _pushing = false;
+  
+  // بستن همه dialogها
+  if(window.confirm){ 
+    // کاری نمی‌تونیم بکنیم، ولی flag رو ریست کردیم
+  }
+  
+  toast('✅ ریست شد — در حال بازگردانی...');
+  
+  // pull از سرور
+  setTimeout(function(){
+    _dataLoaded = true;
+    pullFromCloud(true);
+  }, 500);
+};
+
+// ===== 🚫 غیرفعال کردن محافظ موقت =====
+window.disableSafety = function(){
+  _lastKnownDoctorCount = 0;
+  _lastKnownCallCount = 0;
+  _alertShowing = false;
+  localStorage.setItem(K + '_lastCount', '0');
+  localStorage.setItem(K + '_lastCallCount', '0');
+  console.log('🚫 محافظ غیرفعال شد');
+  toast('✅ محافظ غیرفعال شد');
+};
+
+// ===== ✅ فعال کردن محافظ =====
+window.enableSafety = function(){
+  updateKnownCounts();
+  _alertShowing = false;
+  console.log('✅ محافظ فعال شد — ' + _lastKnownDoctorCount + ' پزشک ثبت شد');
+  toast('✅ محافظ فعال شد');
+};
 </script>
 </body>
 </html>
