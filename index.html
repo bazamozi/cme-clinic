@@ -916,48 +916,8 @@ function quickJumpToEvent(type){
 }
 
 
-function updateFilterCounts(){
-  try {
-    var all = window.doctors || [];
-    if(!all.length){
-      // اگه doctors خالی بود، از localStorage بخون
-      try {
-        var cached = JSON.parse(localStorage.getItem('cme_doctors') || '[]');
-        if(cached.length) all = cached;
-      } catch(e){}
-    }
-    
-    var counts = {active: 0, done: 0, pending: 0};
-    for(var i = 0; i < all.length; i++){
-      var st = getDoctorStatus(all[i]);
-      if(counts[st] !== undefined) counts[st]++;
-    }
-    
-    // نوشتن مستقیم در DOM
-    var elA = document.getElementById('cntActive');
-    var elD = document.getElementById('cntDone');
-    var elP = document.getElementById('cntPending');
-    if(elA) elA.textContent = counts.active;
-    if(elD) elD.textContent = counts.done;
-    if(elP) elP.textContent = counts.pending;
-    
-    // چک کن اگه ID کار نکرد، با data-filter امتحان کن
-    if(!elA || !elD || !elP){
-      document.querySelectorAll('[data-filter]').forEach(function(btn){
-        var f = btn.getAttribute('data-filter');
-        var cnt = btn.querySelector('.cnt');
-        if(cnt && counts[f] !== undefined){
-          cnt.textContent = counts[f];
-        }
-      });
-    }
-    
-    return counts;
-  } catch(e){
-    console.warn('updateFilterCounts error:', e);
-  }
-}
-window.updateFilterCounts = updateFilterCounts;
+
+
 
 // 🎯 اجرای مداوم — هر ۱ ثانیه (قوی در برابر خطا)
 if(!window._cntInterval){
@@ -1012,6 +972,14 @@ function checkLogin(){
     }
   } catch(e){}
 }
+
+// 🎯 getter برای دسترسی به همه پزشکان از هر اسکریپت
+window._getAllDoctors = function(){
+  try {
+    if(typeof doctors !== 'undefined' && Array.isArray(doctors)) return doctors;
+  } catch(e){}
+  return [];
+};
 
 function myDoctors(){
   var u = (typeof window.currentUser !== 'undefined' && window.currentUser) ? window.currentUser : 'all';
@@ -2450,7 +2418,7 @@ console.log('✅ Login System بارگذاری شد');
 // اتصال به window
 window.getDoctorStatus = getDoctorStatus;
 window.setDocFilter = setDocFilter;
-window.updateFilterCounts = updateFilterCounts;
+
 </script>
 <script>
 /* ===== Login System (قطعی v2) ===== */
@@ -2627,7 +2595,7 @@ function switchUser(user){
 }
 
 // اتصال به window
-window.updateFilterCounts = updateFilterCounts;
+
 window.getDoctorStatus = getDoctorStatus;
 window.setDocFilter = setDocFilter;
 window.checkLogin = checkLogin;
@@ -2770,7 +2738,7 @@ window.showDataSize = function(){
   }
 };
 
-window.updateFilterCounts = updateFilterCounts;
+
 
 window.checkLogin = function(){
   try {
@@ -3024,48 +2992,8 @@ function getDoctorStatus(d){
 window.getDoctorStatus = getDoctorStatus;
 
 // ✅ updateFilterCounts — همه پزشکان (نه فیلتر بر اساس کاربر)
-function updateFilterCounts(){
-  try {
-    var all = window.doctors || [];
-    if(!all.length){
-      // اگه doctors خالی بود، از localStorage بخون
-      try {
-        var cached = JSON.parse(localStorage.getItem('cme_doctors') || '[]');
-        if(cached.length) all = cached;
-      } catch(e){}
-    }
-    
-    var counts = {active: 0, done: 0, pending: 0};
-    for(var i = 0; i < all.length; i++){
-      var st = getDoctorStatus(all[i]);
-      if(counts[st] !== undefined) counts[st]++;
-    }
-    
-    // نوشتن مستقیم در DOM
-    var elA = document.getElementById('cntActive');
-    var elD = document.getElementById('cntDone');
-    var elP = document.getElementById('cntPending');
-    if(elA) elA.textContent = counts.active;
-    if(elD) elD.textContent = counts.done;
-    if(elP) elP.textContent = counts.pending;
-    
-    // چک کن اگه ID کار نکرد، با data-filter امتحان کن
-    if(!elA || !elD || !elP){
-      document.querySelectorAll('[data-filter]').forEach(function(btn){
-        var f = btn.getAttribute('data-filter');
-        var cnt = btn.querySelector('.cnt');
-        if(cnt && counts[f] !== undefined){
-          cnt.textContent = counts[f];
-        }
-      });
-    }
-    
-    return counts;
-  } catch(e){
-    console.warn('updateFilterCounts error:', e);
-  }
-}
-window.updateFilterCounts = updateFilterCounts;
+
+
 
 // 🎯 اجرای مداوم — هر ۱ ثانیه (قوی در برابر خطا)
 if(!window._cntInterval){
@@ -3102,7 +3030,7 @@ setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 500);
 setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 1500);
 setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 3000);
 
-window.updateFilterCounts = updateFilterCounts;
+
 
 // ✅ showDataSize
 function showDataSize(){
@@ -3187,5 +3115,76 @@ setTimeout(function(){
 
 </script>
 
+<script>
+// ============================================
+// 🎯 updateFilterCounts — نسخه نهایی
+// ============================================
+function updateFilterCounts(){
+  try {
+    var all = [];
+    // از getter استفاده کن
+    if(typeof window._getAllDoctors === 'function'){
+      all = window._getAllDoctors() || [];
+    }
+    // fallback
+    if(!all.length){
+      try {
+        if(typeof doctors !== 'undefined' && Array.isArray(doctors)) all = doctors;
+      } catch(e){}
+    }
+    if(!all.length){
+      try {
+        var cached = JSON.parse(localStorage.getItem('cme_doctors') || '[]');
+        if(cached.length) all = cached;
+      } catch(e){}
+    }
+    
+    var counts = {active: 0, done: 0, pending: 0};
+    for(var i = 0; i < all.length; i++){
+      var st = (typeof getDoctorStatus === 'function') 
+               ? getDoctorStatus(all[i]) 
+               : 'pending';
+      if(counts[st] !== undefined) counts[st]++;
+    }
+    
+    // نوشتن در DOM
+    var elA = document.getElementById('cntActive');
+    var elD = document.getElementById('cntDone');
+    var elP = document.getElementById('cntPending');
+    if(elA) elA.textContent = counts.active;
+    if(elD) elD.textContent = counts.done;
+    if(elP) elP.textContent = counts.pending;
+    
+    // fallback با data-filter
+    document.querySelectorAll('[data-filter]').forEach(function(btn){
+      var f = btn.getAttribute('data-filter');
+      var cnt = btn.querySelector('.cnt');
+      if(cnt && counts[f] !== undefined){
+        cnt.textContent = counts[f];
+      }
+    });
+    
+    return counts;
+  } catch(e){
+    console.warn('updateFilterCounts error:', e);
+  }
+}
+window.updateFilterCounts = updateFilterCounts;
+
+// 🎯 اجرای مداوم
+if(!window._cntIntervalV2){
+  window._cntIntervalV2 = setInterval(function(){
+    try { updateFilterCounts(); } catch(e){}
+  }, 1000);
+}
+
+// اجرای اولیه با تأخیر
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 500);
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 1500);
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 3000);
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 5000);
+
+console.log('✅ updateFilterCounts v2 loaded');
+</script>
 </body>
 </html>
