@@ -4175,6 +4175,81 @@ function getDoctorStatus(d){
 window.getDoctorStatus = getDoctorStatus;
 window.isDone = isDone;
 
+
+
+// ============================================
+// 🎯 Auto-Save Hook v2 — ذخیره خودکار در localStorage
+// مشکل: تابع تیک، doctors رو آپدیت می‌کنه ولی localStorage نه
+// راه‌حل: هر تغییر doctors → فوری localStorage
+// ============================================
+
+(function(){
+  if(window._autoSaveHookV2) return;
+  window._autoSaveHookV2 = true;
+  
+  var lastHash = '';
+  var lastSave = 0;
+  
+  // 🎯 hash سریع فقط از فیلدهای مهم
+  function calcHash(){
+    try {
+      var d = (typeof doctors !== 'undefined' && Array.isArray(doctors)) ? doctors : [];
+      var s = d.length + '|';
+      for(var i = 0; i < d.length; i++){
+        var doc = d[i];
+        var evs = doc.events || [];
+        s += (doc.id || '') + ':' + evs.length + ';';
+        for(var j = 0; j < evs.length; j++){
+          var e = evs[j];
+          s += (e.purchase||'') + ',' + (e.attend||'') + ',' + (e.exam||'') + '/';
+        }
+      }
+      return s;
+    } catch(err){ return ''; }
+  }
+  
+  lastHash = calcHash();
+  
+  // 🎯 هر ۸۰۰ms چک کن
+  setInterval(function(){
+    try {
+      var h = calcHash();
+      if(h !== lastHash){
+        var now = Date.now();
+        if(now - lastSave < 400) return; // throttle
+        lastSave = now;
+        lastHash = h;
+        
+        // ۱. ذخیره فوری در localStorage
+        try {
+          localStorage.setItem('cme_doctors', JSON.stringify(doctors));
+          console.log('💾 auto-save localStorage — ' + doctors.length + ' پزشک');
+        } catch(e){
+          console.warn('localStorage save failed:', e);
+        }
+        
+        // ۲. push به سرور (با تأخیر کوتاه)
+        setTimeout(function(){
+          if(typeof window.triggerAutoSave === 'function'){
+            window.triggerAutoSave('tick-changed');
+          } else if(typeof window.pushToCloud === 'function'){
+            window.pushToCloud(true);
+          }
+        }, 300);
+        
+        // ۳. snapshot
+        try {
+          if(typeof window.takeSnapshot === 'function'){
+            window.takeSnapshot();
+          }
+        } catch(e){}
+      }
+    } catch(e){}
+  }, 800);
+  
+  console.log('✅ Auto-Save Hook v2 فعال — localStorage + push');
+})();
+
 </script>
 
 </body>
