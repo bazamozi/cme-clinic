@@ -610,6 +610,42 @@ document.addEventListener('input', e => {
 // ============================================
 
 
+function updateFilterCounts(){
+  try {
+    if(typeof myDoctors !== 'function') return;
+    var all = myDoctors();
+    var counts = { active: 0, done: 0, pending: 0 };
+    all.forEach(function(d){
+      var st = (typeof getDoctorStatus === 'function') ? getDoctorStatus(d) : 'active';
+      if(counts[st] !== undefined) counts[st]++;
+    });
+    var ce = document.getElementById('cntActive');
+    var cd = document.getElementById('cntDone');
+    var cp = document.getElementById('cntPending');
+    if(ce) ce.textContent = counts.active;
+    if(cd) cd.textContent = counts.done;
+    if(cp) cp.textContent = counts.pending;
+  } catch(e){}
+}
+
+function checkLogin(){
+  try {
+    var logged = localStorage.getItem('cme_logged_in');
+    var screenEl = document.getElementById('loginScreen');
+    if(!screenEl) return;
+    if(logged === 'morteza' || logged === 'parvin'){
+      screenEl.classList.add('hidden');
+      screenEl.style.display = 'none';
+      document.documentElement.classList.add('is-logged-in');
+      if(typeof currentUser !== 'undefined') window.currentUser = logged;
+    } else {
+      screenEl.classList.remove('hidden');
+      screenEl.style.display = 'flex';
+      document.documentElement.classList.remove('is-logged-in');
+    }
+  } catch(e){}
+}
+
 function myDoctors(){
   if(currentUser === 'all') return doctors;
   return doctors.filter(d => d.owner === currentUser);
@@ -2076,23 +2112,7 @@ var _docFilter = 'active';  // پیش‌فرض: در حال اجرا
 /* ===== ALL MISSING FUNCTIONS ===== */
 
 // 1) updateFilterCounts
-function updateFilterCounts(){
-  try {
-    if(typeof myDoctors !== 'function') return;
-    var all = myDoctors();
-    var counts = { active: 0, done: 0, pending: 0 };
-    all.forEach(function(d){
-      var st = (typeof getDoctorStatus === 'function') ? getDoctorStatus(d) : 'active';
-      if(counts[st] !== undefined) counts[st]++;
-    });
-    var ce = document.getElementById('cntActive');
-    var cd = document.getElementById('cntDone');
-    var cp = document.getElementById('cntPending');
-    if(ce) ce.textContent = counts.active;
-    if(cd) cd.textContent = counts.done;
-    if(cp) cp.textContent = counts.pending;
-  } catch(e){ console.log('updateFilterCounts err:', e.message); }
-}
+// transferred
 
 // 2) getDoctorStatus
 function getDoctorStatus(d){
@@ -2126,23 +2146,7 @@ function setDocFilter(filter){
 }
 
 // 4) checkLogin
-function checkLogin(){
-  try {
-    var logged = localStorage.getItem('cme_logged_in');
-    var screenEl = document.getElementById('loginScreen');
-    if(!screenEl) return;
-    if(logged === 'morteza' || logged === 'parvin'){
-      screenEl.classList.add('hidden');
-      screenEl.style.display = 'none';
-      document.documentElement.classList.add('is-logged-in');
-      if(typeof currentUser !== 'undefined') window.currentUser = logged;
-    } else {
-      screenEl.classList.remove('hidden');
-      screenEl.style.display = 'flex';
-      document.documentElement.classList.remove('is-logged-in');
-    }
-  } catch(e){ console.log('checkLogin err:', e.message); }
-}
+// transferred
 
 // 5) manualSave
 function manualSave(){
