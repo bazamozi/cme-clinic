@@ -504,6 +504,17 @@ html.is-logged-in #loginScreen{display:none!important}
 }
 </style>
 
+<style>
+/* 🎯 همه بخش‌ها یکجا — بدون تب */
+.event-tabs { display: none !important; }
+.ev-tab-content { display: block !important; padding: 6px 0 !important; }
+.ev-tab-content.hidden { display: block !important; }
+.ev-tab-content:not(:last-child) {
+  border-bottom: 2px dashed rgba(0, 217, 255, 0.15);
+  padding-bottom: 14px !important;
+  margin-bottom: 14px;
+}
+</style>
 </head>
 <body>
 
@@ -817,8 +828,9 @@ function checkLogin(){
 }
 
 function myDoctors(){
-  if(currentUser === 'all') return doctors;
-  return doctors.filter(d => d.owner === currentUser);
+  var u = (typeof window.currentUser !== 'undefined' && window.currentUser) ? window.currentUser : 'all';
+  if(u === 'all') return doctors.slice();
+  return doctors.filter(function(d){ return d.owner === u; });
 }
 function myCalls(){
   if(currentUser === 'all') return calls;
@@ -1112,7 +1124,7 @@ function renderDocList(){
   const q = searchEl.value.trim().toLowerCase();
   const arr = myDoctors().filter(d => {
     // فیلتر بر اساس تب
-    if(getDoctorStatus(d) !== _docFilter) return false;
+    if(window._docFilter && window._docFilter !== 'all' && getDoctorStatus(d) !== window._docFilter) return false;
     // فیلتر جستجو
     if(!q) return true;
     return fullName(d).toLowerCase().includes(q) || (d.spec||'').toLowerCase().includes(q) || (d.phone||'').includes(q) || (d.nat||'').includes(q);
@@ -2427,8 +2439,11 @@ function switchUser(user){
     if(b.dataset.user === user) b.classList.add('active');
     else b.classList.remove('active');
   });
+  if(typeof updateFilterCounts === 'function') updateFilterCounts();
+  if(typeof renderDocList === 'function') renderDocList();
   if(typeof updateMobileSelection === 'function') updateMobileSelection();
   if(typeof renderAll === 'function') renderAll();
+  console.log('✅ کاربر:', user, '| پزشکان:', (typeof myDoctors === 'function' ? myDoctors().length : '?'));
 }
 
 // اتصال به window
@@ -2534,162 +2549,20 @@ console.log('✅ Login System Loaded');
 
 if (typeof window.getDoctorStatus === 'undefined') {
   window.getDoctorStatus = function(d){
-    try {
-      if(!d) return 'pending';
-      var events = d.events || d.courses || [];
-      if(!events.length){
-        return (d.paid && d.paid > 0) ? 'active' : 'pending';
-      }
-      var hasPaid = (d.paid && d.paid > 0) || (d.totalCost && d.paid && d.paid >= d.totalCost);
-      var allComplete = events.every(function(ev){
-        return ev && (ev.buy === true || ev.status === 'buy') && 
-               (ev.attend === true || ev.status === 'attend') && 
-               (ev.exam === true || ev.status === 'exam' || ev.type === 'inperson');
-      });
-      if(hasPaid || events.some(function(ev){ 
-        return ev.buy === true || ev.attend === true || ev.exam === true; 
-      })){
-        return allComplete ? 'done' : 'active';
-      }
-      return 'pending';
-    } catch(e){ 
-      console.warn('getDoctorStatus error:', e);
-      return 'pending'; 
-    }
-  };
-}
-
-if (typeof window.showDataSize === 'undefined') {
-  window.showDataSize = function(){
-    try {
-      var docs = (typeof myDoctors === 'function') ? myDoctors() : (window.doctors || []);
-      var sizeKB = (JSON.stringify(docs).length / 1024).toFixed(2);
-      var counts = { active: 0, done: 0, pending: 0 };
-      docs.forEach(function(d){
-        var st = window.getDoctorStatus(d);
-        if(counts[st] !== undefined) counts[st]++;
-      });
-      console.log('═══════════════════════════════');
-      console.log('📊 وضعیت داده‌ها');
-      console.log('═══════════════════════════════');
-      console.log('👥 کل پزشکان:', docs.length);
-      console.log('📦 حجم داده:', sizeKB, 'KB');
-      console.log('⚡ در حال اجرا:', counts.active);
-      console.log('✅ اتمام:', counts.done);
-      console.log('⏳ بلاتکلیف:', counts.pending);
-      console.log('═══════════════════════════════');
-      return { count: docs.length, sizeKB: sizeKB, counts: counts };
-    } catch(e){
-      console.error('❌ خطا:', e);
-    }
-  };
-}
-
-if (typeof window.updateFilterCounts === 'undefined') {
-  window.updateFilterCounts = function(){
-    try {
-      if(typeof myDoctors !== 'function') return;
-      var all = myDoctors();
-      var counts = { active: 0, done: 0, pending: 0 };
-      all.forEach(function(d){
-        var st = window.getDoctorStatus(d);
-        if(counts[st] !== undefined) counts[st]++;
-      });
-      var map = { cntActive: counts.active, cntDone: counts.done, cntPending: counts.pending };
-      Object.keys(map).forEach(function(id){
-        var el = document.getElementById(id);
-        if(el) el.textContent = map[id];
-      });
-      // به‌روزرسانی شمارنده‌های کلاس‌محور
-      var el2 = document.querySelector('[data-count="active"]');
-      if(el2) el2.textContent = counts.active;
-      var el3 = document.querySelector('[data-count="done"]');
-      if(el3) el3.textContent = counts.done;
-      var el4 = document.querySelector('[data-count="pending"]');
-      if(el4) el4.textContent = counts.pending;
-      console.log('✅ شمارنده‌ها به‌روز شد:', counts);
-      return counts;
-    } catch(e){
-      console.warn('updateFilterCounts error:', e);
-    }
-  };
-}
-
-if (typeof window.checkLogin === 'undefined') {
-  window.checkLogin = function(){
-    try {
-      var logged = localStorage.getItem('cme_logged_in');
-      var screenEl = document.getElementById('loginScreen');
-      if(!screenEl) return;
-      if(logged === 'morteza' || logged === 'parvin'){
-        screenEl.classList.add('hidden');
-        screenEl.style.display = 'none';
-        document.documentElement.classList.add('is-logged-in');
-        if(typeof currentUser !== 'undefined') window.currentUser = logged;
-      } else {
-        screenEl.classList.remove('hidden');
-        screenEl.style.display = 'flex';
-        document.documentElement.classList.remove('is-logged-in');
-      }
-    } catch(e){ console.warn('checkLogin error:', e); }
-  };
-}
-
-// اتصال قوی به window
-window.getDoctorStatus = window.getDoctorStatus || getDoctorStatus;
-window.showDataSize = window.showDataSize || showDataSize;
-window.updateFilterCounts = window.updateFilterCounts || updateFilterCounts;
-window.checkLogin = window.checkLogin || checkLogin;
-
-console.log('✅ Missing Functions Loaded');
-
-
-
-
-
-// ============================================
-// 🚀 توابع کمکی — نسخه نهایی
-// ============================================
-
-window.getDoctorStatus = function(d){
   try {
     if(!d) return 'pending';
-    var events = d.events || d.courses || [];
-    
-    // اگه رویدادی نیست
-    if(!events.length){
-      return (d.paid && d.paid > 0) ? 'active' : 'pending';
-    }
-    
-    // چک کن همه رویدادها کامل هستن
+    var events = (d.events || []).filter(function(e){ return e && e.type; });
+    if(events.length === 0) return 'pending';
     var allComplete = events.every(function(ev){
-      if(!ev) return false;
-      // حضوری: فقط buy + attend
-      if(ev.type === 'inperson'){
-        return (ev.buy === true || ev.status === 'buy') && 
-               (ev.attend === true || ev.status === 'attend');
+      if(ev.type === 'حضوری'){
+        return ev.buy === true && ev.attend === true;
       }
-      // وبینار و غیرحضوری: buy + attend + exam
-      return (ev.buy === true || ev.status === 'buy') && 
-             (ev.attend === true || ev.status === 'attend') && 
-             (ev.exam === true || ev.status === 'exam');
+      return ev.buy === true && ev.attend === true && ev.exam === true;
     });
-    
-    // آیا هیچ اقدامی شده؟
-    var hasAnyAction = events.some(function(ev){
-      return ev && (ev.buy === true || ev.attend === true || ev.exam === true ||
-                    ev.status === 'buy' || ev.status === 'attend' || ev.status === 'exam');
-    });
-    
-    var hasPaid = (d.paid && d.paid > 0);
-    
-    if(hasPaid || hasAnyAction){
-      return allComplete ? 'done' : 'active';
-    }
-    return 'pending';
-  } catch(e){ 
+    return allComplete ? 'done' : 'active';
+  } catch(e){
     console.warn('getDoctorStatus error:', e);
-    return 'pending'; 
+    return 'pending';
   }
 };
 
@@ -2784,6 +2657,41 @@ window.switchEventTab = function(type, btn){
     var content = document.querySelector('.ev-tab-content[data-evtype="'+type+'"]');
     if(content) content.classList.remove('hidden');
   } catch(e){ console.error('switchEventTab:', e); }
+};
+
+
+// 🎯 setDocFilter
+window.setDocFilter = function(filter){
+  window._docFilter = filter;
+  document.querySelectorAll('[onclick*="setDocFilter"]').forEach(function(b){
+    var oc = b.getAttribute('onclick') || '';
+    if(oc.indexOf("'" + filter + "'") !== -1){
+      b.classList.add('active');
+    } else {
+      b.classList.remove('active');
+    }
+  });
+  if(typeof renderDocList === 'function') renderDocList();
+  if(typeof updateFilterCounts === 'function') updateFilterCounts();
+  console.log('✅ فیلتر:', filter, '| پزشکان نمایش:', (typeof myDoctors === 'function' ? myDoctors().filter(function(d){ return window.getDoctorStatus(d) === filter; }).length : '?'));
+};
+
+if(typeof window._docFilter === 'undefined') window._docFilter = 'active';
+
+// 🔍 دیباگ
+window.debugUsers = function(){
+  console.log('═══════════════════════════════');
+  console.log('currentUser:', window.currentUser);
+  console.log('_docFilter:', window._docFilter);
+  var docs = window.doctors || [];
+  console.log('کل پزشکان:', docs.length);
+  var byOwner = {};
+  docs.forEach(function(d){ byOwner[d.owner||'?'] = (byOwner[d.owner||'?']||0)+1; });
+  console.log('به تفکیک مالک:', byOwner);
+  var byStatus = {active:0, done:0, pending:0};
+  docs.forEach(function(d){ var s = window.getDoctorStatus(d); if(byStatus[s]!==undefined) byStatus[s]++; });
+  console.log('به تفکیک وضعیت:', byStatus);
+  console.log('═══════════════════════════════');
 };
 
 </script>
