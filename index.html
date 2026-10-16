@@ -717,15 +717,19 @@ html.is-logged-in #loginScreen{display:none!important}
 
 
 
+
+
+
+
 <style id="bank-card-css">
 /* ============================================
-   🎯 کارت بانکی — فونت‌ها متناسب، شماره کارت کامل
+   🎯 کارت بانکی — همه فونت‌ها یکسان، شماره کارت کامل
    ============================================ */
 
 .bank-card-display {
   display: grid !important;
-  grid-template-columns: 2.4fr 0.95fr 0.95fr 0.95fr 1.1fr !important;
-  gap: 6px !important;
+  grid-template-columns: 2.6fr 0.9fr 0.9fr 0.9fr 1.05fr !important;
+  gap: 5px !important;
   align-items: stretch !important;
   margin-top: 10px !important;
   padding: 0 !important;
@@ -747,7 +751,7 @@ html.is-logged-in #loginScreen{display:none!important}
   align-items: center !important;
   justify-content: center !important;
   gap: 4px !important;
-  padding: 10px 8px !important;
+  padding: 9px 7px !important;
   margin: 0 !important;
   background: rgba(15, 23, 42, 0.5) !important;
   border: 1px solid rgba(0, 217, 255, 0.18) !important;
@@ -758,9 +762,9 @@ html.is-logged-in #loginScreen{display:none!important}
   white-space: nowrap !important;
 }
 
-/* 🎯 برچسب — فونت کوچک‌تر برای جا شدن */
+/* 🎯 برچسب — همه یکسان 11.5px */
 .bank-card-display .bank-cell-compact .label {
-  font-size: 13px !important;
+  font-size: 11.5px !important;
   color: #94a3b8 !important;
   font-weight: 700 !important;
   white-space: nowrap !important;
@@ -776,9 +780,9 @@ html.is-logged-in #loginScreen{display:none!important}
   color: #64748b !important;
 }
 
-/* مقدار */
+/* 🎯 مقدار — همه یکسان 11.5px */
 .bank-card-display .bank-cell-compact .value {
-  font-size: 14px !important;
+  font-size: 11.5px !important;
   color: #e2e8f0 !important;
   font-weight: 800 !important;
   font-family: 'SF Mono', Menlo, Consolas, monospace !important;
@@ -790,7 +794,7 @@ html.is-logged-in #loginScreen{display:none!important}
   line-height: 1.2 !important;
 }
 
-/* 🎯 شماره کارت — ساختار جمع و جور */
+/* 🎯 شماره کارت */
 .bank-card-display .bank-cell-compact.card-number {
   display: flex !important;
   align-items: center !important;
@@ -804,13 +808,13 @@ html.is-logged-in #loginScreen{display:none!important}
 /* آیکون */
 .bank-card-display .bank-cell-compact.card-number > .icon,
 .bank-card-display .bank-cell-compact.card-number .bank-icon {
-  font-size: 14px !important;
+  font-size: 12px !important;
   flex-shrink: 0 !important;
 }
 
-/* برچسب "شماره کارت" */
+/* برچسب "شماره کارت" — هم‌اندازه بقیه */
 .bank-card-display .bank-cell-compact.card-number .label {
-  font-size: 12px !important;
+  font-size: 11.5px !important;
   color: #38bdf8 !important;
   font-weight: 700 !important;
   flex-shrink: 0 !important;
@@ -821,15 +825,15 @@ html.is-logged-in #loginScreen{display:none!important}
   color: #38bdf8 !important;
 }
 
-/* عدد */
+/* 🎯 عدد — هم‌اندازه بقیه */
 .bank-card-display .bank-cell-compact.card-number .value {
-  font-size: 13px !important;
+  font-size: 11.5px !important;
   color: #38bdf8 !important;
-  letter-spacing: 0.3px !important;
+  letter-spacing: 0.2px !important;
   flex: 1 1 auto !important;
   min-width: 0 !important;
   text-align: center !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   text-overflow: clip !important;
   white-space: nowrap !important;
 }
@@ -840,7 +844,7 @@ html.is-logged-in #loginScreen{display:none!important}
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  font-size: 11px !important;
+  font-size: 10.5px !important;
   padding: 3px 6px !important;
   border-radius: 4px !important;
   cursor: pointer !important;
@@ -873,7 +877,7 @@ button[onclick*="toggleCard"] {
 @media (max-width: 768px) {
   .bank-card-display {
     grid-template-columns: 1fr 1fr 1fr 1fr !important;
-    gap: 5px !important;
+    gap: 4px !important;
   }
   
   .bank-card-display .bank-cell-compact.card-number {
@@ -882,20 +886,14 @@ button[onclick*="toggleCard"] {
   }
   
   .bank-card-display .bank-cell-compact {
-    padding: 8px 10px !important;
+    padding: 8px 8px !important;
   }
   
-  .bank-card-display .bank-cell-compact .label {
-    font-size: 12px !important;
-  }
-  
-  .bank-card-display .bank-cell-compact .value {
-    font-size: 12px !important;
-  }
-  
+  .bank-card-display .bank-cell-compact .label,
+  .bank-card-display .bank-cell-compact .value,
   .bank-card-display .bank-cell-compact.card-number .label,
   .bank-card-display .bank-cell-compact.card-number .value {
-    font-size: 12px !important;
+    font-size: 11px !important;
   }
 }
 </style>
