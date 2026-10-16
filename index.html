@@ -919,8 +919,8 @@ button[onclick*="toggleCard"] {
 }
 </style>
 
+
 <style id="vip-customer-css">
-/* ⭐ فیلتر مشتری ثابت */
 button[data-filter="vip"] {
   background: linear-gradient(135deg, rgba(255,193,7,0.15), rgba(255,193,7,0.05)) !important;
   border: 1.5px solid rgba(255,193,7,0.5) !important;
@@ -930,8 +930,6 @@ button[data-filter="vip"].active {
   background: linear-gradient(135deg, rgba(255,193,7,0.35), rgba(255,193,7,0.15)) !important;
   box-shadow: 0 0 12px rgba(255,193,7,0.5) !important;
 }
-
-/* ⭐ badge مشتری ثابت */
 .vip-badge {
   display: inline-flex;
   align-items: center;
@@ -944,8 +942,6 @@ button[data-filter="vip"].active {
   font-weight: 800;
   margin-right: 4px;
 }
-
-/* ⏰ یادآوری سر رسید */
 .vip-reminder {
   display: inline-block;
   background: rgba(239,68,68,0.2);
@@ -957,22 +953,8 @@ button[data-filter="vip"].active {
   font-weight: 800;
   margin-top: 5px;
 }
-.vip-reminder.warning {
-  background: rgba(255,193,7,0.2);
-  color: #ffc107;
-  border-color: rgba(255,193,7,0.6);
-}
-.vip-reminder.info {
-  background: rgba(56,189,248,0.15);
-  color: #38bdf8;
-  border-color: rgba(56,189,248,0.5);
-}
-
-/* موبایل */
-@media (max-width: 768px) {
-  .vip-badge { font-size: 9.5px; padding: 1px 6px; }
-  .vip-reminder { font-size: 10.5px; }
-}
+.vip-reminder.warning { background: rgba(255,193,7,0.2); color: #ffc107; border-color: rgba(255,193,7,0.6); }
+.vip-reminder.info { background: rgba(56,189,248,0.15); color: #38bdf8; border-color: rgba(56,189,248,0.5); }
 </style>
 </head>
 <body>
@@ -4795,100 +4777,139 @@ window.isDone = isDone;
 })();
 </script>
 
+
 <script id="vip-customer-js">
 (function(){
-  if(window._vipV2) return;
-  window._vipV2 = true;
+  if(window._vipFinalV8) return;
+  window._vipFinalV8 = true;
+
+  // ═══════════════════════════════════
+  // ۱. ذخیره VIP قبل از بسته شدن modal
+  // ═══════════════════════════════════
   
-  // ═══════════════════════════════════════════
-  // ۱. ذخیره کردن doctor id فعلی موقع باز کردن فرم
-  // ═══════════════════════════════════════════
-  window._editingDoctorId = window._editingDoctorId || null;
-  
-  var _hookInterval = setInterval(function(){
-    if(typeof window.openDoctorModal === 'function' && !window._vip_hooked_open){
-      window._vip_hooked_open = true;
-      clearInterval(_hookInterval);
-      var _orig = window.openDoctorModal;
-      window.openDoctorModal = function(id){
-        window._editingDoctorId = id || null;
-        var r = _orig.apply(this, arguments);
-        setTimeout(fillVipFields, 200);
-        return r;
-      };
-      console.log('✅ openDoctorModal hook شد');
-    }
-  }, 500);
-  
-  // ═══════════════════════════════════════════
-  // ۲. پر کردن فیلدهای VIP
-  // ═══════════════════════════════════════════
-  function fillVipFields(){
-    try {
-      var id = window._editingDoctorId;
-      var d = id ? (window.doctors||[]).find(function(x){ return x.id === id; }) : null;
+  // کلیک روی دکمه ذخیره → pending بساز
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest && e.target.closest('button');
+    if(!btn) return;
+    var txt = (btn.textContent || '').trim();
+    // دکمه ثبت پزشک یا ذخیره
+    if(txt.indexOf('ثبت پزشک') !== -1 || txt.indexOf('ذخیره') !== -1){
       var cb = document.getElementById('mVip');
-      var dt = document.getElementById('mVipDate');
-      if(cb) cb.checked = !!(d && d.vip);
-      if(dt) dt.value = (d && d.vipDate) || '';
-    } catch(e){}
-  }
-  
-  // ═══════════════════════════════════════════
-  // ۳. ذخیره VIP موقع saveDoctor
-  // ═══════════════════════════════════════════
-  var _saveHook = setInterval(function(){
-    if(typeof window.saveDoctor === 'function' && !window._vip_hooked_save){
-      window._vip_hooked_save = true;
-      clearInterval(_saveHook);
-      var _origSave = window.saveDoctor;
-      window.saveDoctor = function(){
-        // قبل از ذخیره، مقادیر رو بگیر
-        var cb = document.getElementById('mVip');
+      if(cb){
         var dt = document.getElementById('mVipDate');
-        var vipVal = cb ? cb.checked : false;
-        var dateVal = dt ? dt.value.trim() : '';
-        
-        // بعد از ذخیره، آخرین پزشک رو آپدیت کن
-        var r = _origSave.apply(this, arguments);
-        
-        setTimeout(function(){
-          try {
-            var id = window._editingDoctorId;
-            var doctor = null;
-            if(id){
-              doctor = (window.doctors||[]).find(function(x){ return x.id === id; });
-            }
-            // اگه id نبود، آخرین پزشک رو بگیر (اضافه جدید)
-            if(!doctor && window.doctors && window.doctors.length){
-              doctor = window.doctors[window.doctors.length - 1];
-            }
-            if(doctor){
-              doctor.vip = vipVal;
-              doctor.vipDate = dateVal;
-              console.log('⭐ VIP set:', doctor.fname || doctor.firstName, '→', vipVal, dateVal);
-            }
-            // رندر و ذخیره
-            if(typeof renderDocList === 'function') renderDocList();
-            if(typeof updateFilterCounts === 'function') updateFilterCounts();
-            if(typeof window.triggerAutoSave === 'function') window.triggerAutoSave('vip-save');
-            else if(typeof window.pushToCloud === 'function') window.pushToCloud(true);
-          } catch(e){ console.warn('vip save:', e); }
-        }, 400);
-        
-        return r;
-      };
-      console.log('✅ saveDoctor hook شد');
+        window._pendingVipData = {
+          vip: cb.checked,
+          vipDate: dt ? dt.value.trim() : '',
+          beforeIds: (window.doctors || []).map(function(d){ return d.id; }),
+          time: Date.now()
+        };
+        console.log('📝 VIP pending ثبت شد:', window._pendingVipData.vip, '| date:', window._pendingVipData.vipDate);
+      }
     }
-  }, 500);
-  
-  // ═══════════════════════════════════════════
-  // ۴. محاسبه روزهای مانده (پشتیبانی شمسی و میلادی)
-  // ═══════════════════════════════════════════
+  }, true);
+
+  // MutationObserver روی modalHost
+  function watchModal(){
+    var mh = document.getElementById('modalHost');
+    if(!mh){
+      setTimeout(watchModal, 500);
+      return;
+    }
+    console.log('👁 modalHost پیدا شد');
+    
+    var wasOpen = false;
+    new MutationObserver(function(){
+      var hasContent = mh.children.length > 0;
+      
+      // modal باز شد
+      if(hasContent && !wasOpen){
+        wasOpen = true;
+        // اگه doctor جدید داره باز میشه، فرم رو خالی کن
+        // (فیلدها خودشون خالی میشن)
+      }
+      
+      // modal بسته شد
+      if(!hasContent && wasOpen){
+        wasOpen = false;
+        console.log('🚪 modal بسته شد');
+        setTimeout(applyPendingVip, 200);
+      }
+    }).observe(mh, {childList: true, subtree: false});
+  }
+  setTimeout(watchModal, 1500);
+
+  // ═══════════════════════════════════
+  // ۲. اعمال VIP روی doctor جدید
+  // ═══════════════════════════════════
+  function applyPendingVip(){
+    var data = window._pendingVipData;
+    if(!data) return;
+    if(Date.now() - data.time > 8000) { window._pendingVipData = null; return; }
+    
+    var all = window.doctors || [];
+    var target = null;
+    
+    // diff — doctor جدید
+    for(var i = all.length - 1; i >= 0; i--){
+      if(data.beforeIds.indexOf(all[i].id) === -1){
+        target = all[i];
+        break;
+      }
+    }
+    // آخرین
+    if(!target && all.length > 0) target = all[all.length - 1];
+    
+    if(!target){ console.warn('❌ target پیدا نشد'); return; }
+    
+    target.vip = data.vip;
+    target.vipDate = data.vipDate;
+    console.log('⭐ VIP applied:', (target.fname||target.firstName||'?'), '| vip:', target.vip, '| date:', target.vipDate);
+    
+    window._pendingVipData = null;
+    
+    // ذخیره محلی فوری
+    try { localStorage.setItem('cme_doctors', JSON.stringify(window.doctors)); } catch(e){}
+    
+    // رندر
+    setTimeout(function(){
+      if(typeof renderDocList === 'function') renderDocList();
+      if(typeof updateFilterCounts === 'function') updateFilterCounts();
+    }, 100);
+    
+    // push به سرور
+    setTimeout(function(){
+      if(typeof window.triggerAutoSave === 'function') window.triggerAutoSave('vip-save');
+      else if(typeof window.pushToCloud === 'function') window.pushToCloud(true);
+    }, 500);
+  }
+  window._applyPendingVip = applyPendingVip;
+
+  // ═══════════════════════════════════
+  // ۳. فیلتر VIP — کلیک
+  // ═══════════════════════════════════
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest && e.target.closest('[data-filter="vip"]');
+    if(!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    
+    window._docFilter = 'vip';
+    
+    document.querySelectorAll('[data-filter]').forEach(function(b){
+      if(b.getAttribute('data-filter') === 'vip') b.classList.add('active');
+      else b.classList.remove('active');
+    });
+    
+    renderVipList();
+  }, true);
+
+  // ═══════════════════════════════════
+  // ۴. رندر VIP
+  // ═══════════════════════════════════
   function daysUntil(dateStr){
     if(!dateStr) return null;
     try {
-      var s = String(dateStr).trim().replace(/[\-]/g, '/');
+      var s = String(dateStr).trim().replace(/\-/g, '/');
       var parts = s.split('/');
       if(parts.length !== 3) return null;
       var a = parseInt(parts[0]), b = parseInt(parts[1]), cc = parseInt(parts[2]);
@@ -4897,237 +4918,101 @@ window.isDone = isDone;
       var target, today = new Date();
       today.setHours(0,0,0,0);
       
-      // تشخیص شمسی یا میلادی: شمسی سالش بین 1390-1420، میلادی 2020-2050
       if(a >= 1380 && a <= 1450){
-        // شمسی → تبدیل به میلادی
-        target = jalaliToGregorian(a, b, cc);
+        var jy = a + 1595;
+        var dd = -355668 + (365 * jy) + Math.floor(jy/33)*8 + Math.floor(((jy%33)+3)/4) + cc;
+        dd += (b < 7) ? (b-1)*31 : ((b-7)*30+186);
+        var gy = 400 * Math.floor(dd/146097);
+        dd = dd % 146097;
+        if(dd > 36524){ gy += 100*Math.floor(--dd/36524); dd = dd%36524; if(dd>=365) dd++; }
+        gy += 4*Math.floor(dd/1461);
+        dd = dd % 1461;
+        if(dd > 365){ gy += Math.floor((dd-1)/365); dd = (dd-1)%365; }
+        var gd = dd + 1;
+        var sa = [0,31,((gy%4===0&&gy%100!==0)||(gy%400===0))?29:28,31,30,31,30,31,31,30,31,30,31];
+        var gm = 0;
+        for(gm=0; gm<13 && gd>sa[gm]; gm++) gd -= sa[gm];
+        target = new Date(gy, gm-1, gd);
       } else {
-        // میلادی
-        target = new Date(a, b - 1, cc);
+        target = new Date(a, b-1, cc);
       }
       if(!target || isNaN(target.getTime())) return null;
       target.setHours(0,0,0,0);
       return Math.floor((target - today) / 86400000);
     } catch(e){ return null; }
   }
-  
-  // تبدیل شمسی به میلادی
-  function jalaliToGregorian(jy, jm, jd){
+
+  function renderVipList(){
     try {
-      jy += 1595;
-      var days = -355668 + (365 * jy) + (Math.floor(jy / 33) * 8) + Math.floor(((jy % 33) + 3) / 4) + jd;
-      days += (jm < 7) ? (jm - 1) * 31 : ((jm - 7) * 30 + 186);
-      var gy = 400 * Math.floor(days / 146097);
-      days = days % 146097;
-      if(days > 36524){
-        gy += 100 * Math.floor(--days / 36524);
-        days = days % 36524;
-        if(days >= 365) days++;
-      }
-      gy += 4 * Math.floor(days / 1461);
-      days = days % 1461;
-      if(days > 365){
-        gy += Math.floor((days - 1) / 365);
-        days = (days - 1) % 365;
-      }
-      var gd = days + 1;
-      var sal_a = [0, 31, ((gy % 4 === 0 && gy % 100 !== 0) || (gy % 400 === 0)) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-      var gm = 0;
-      for(gm = 0; gm < 13 && gd > sal_a[gm]; gm++) gd -= sal_a[gm];
-      return new Date(gy, gm - 1, gd);
-    } catch(e){ return null; }
-  }
-  
-  // ═══════════════════════════════════════════
-  // ۵. بازنویسی setDocFilter برای فیلتر VIP
-  // ═══════════════════════════════════════════
-  var _filterHook = setInterval(function(){
-    if(typeof window.setDocFilter === 'function' && !window._vip_hooked_filter){
-      window._vip_hooked_filter = true;
-      clearInterval(_filterHook);
-      var _origFilter = window.setDocFilter;
-      window.setDocFilter = function(filter){
-        if(filter === 'vip'){
-          window._docFilter = 'vip';
-          document.querySelectorAll('[data-filter]').forEach(function(b){
-            if(b.getAttribute('data-filter') === 'vip') b.classList.add('active');
-            else b.classList.remove('active');
-          });
-          if(typeof renderDocList === 'function') renderDocList();
-          if(typeof updateFilterCounts === 'function') updateFilterCounts();
-          return;
-        }
-        return _origFilter.apply(this, arguments);
-      };
-      console.log('✅ setDocFilter hook شد');
-    }
-  }, 500);
-  
-  // ═══════════════════════════════════════════
-  // ۶. بازنویسی renderDocList برای VIP
-  // ═══════════════════════════════════════════
-  var _renderHook = setInterval(function(){
-    if(typeof window.renderDocList === 'function' && !window._vip_hooked_render){
-      window._vip_hooked_render = true;
-      clearInterval(_renderHook);
-      var _origRender = window.renderDocList;
+      var q = (document.getElementById('searchDoctor') || {}).value || '';
+      q = q.trim().toLowerCase();
       
-      window.renderDocList = function(){
-        if(window._docFilter === 'vip'){
-          try {
-            var q = (document.getElementById('searchDoctor') || {}).value;
-            q = (q || '').trim().toLowerCase();
-            var all = (typeof myDoctors === 'function') ? myDoctors() : (window.doctors || []);
-            var arr = all.filter(function(d){
-              if(!d.vip) return false;
-              if(!q) return true;
-              var name = ((d.fname||d.firstName||'') + ' ' + (d.lname||d.lastName||'')).toLowerCase();
-              return name.indexOf(q) !== -1;
-            });
-            var el = document.getElementById('docList');
-            if(!el) return;
-            if(!arr.length){ el.innerHTML = '<div class="empty">⭐ مشتری ثابتی پیدا نشد</div>'; return; }
-            el.innerHTML = arr.map(function(d){ return _renderVipRow(d); }).join('');
-            return;
-          } catch(e){ console.warn('vip render:', e); }
-        }
-        return _origRender.apply(this, arguments);
-      };
-      console.log('✅ renderDocList hook شد');
-    }
-  }, 500);
-  
-  // ساخت کارت VIP
-  function _renderVipRow(d){
-    try {
-      var req = Number(d.creditReq||0), total = (typeof totalEarned === 'function') ? totalEarned(d) : 0;
-      var pct = req ? Math.min(100, Math.round(total/req*100)) : 0;
-      var complete = (typeof isComplete === 'function') ? isComplete(d) : false;
-      var f = d.finance || {};
-      var rem$ = Math.max(0, Number(f.total||0) - Number(f.paid||0));
-      var status = (typeof getDoctorStatus === 'function') ? getDoctorStatus(d) : 'active';
-      var name = (d.fname||d.firstName||'') + ' ' + (d.lname||d.lastName||'');
+      var all = (typeof window.myDoctors === 'function') ? window.myDoctors() : (window.doctors || []);
+      var arr = all.filter(function(d){
+        if(!d.vip) return false;
+        if(!q) return true;
+        var name = ((d.fname||d.firstName||'') + ' ' + (d.lname||d.lastName||'')).toLowerCase();
+        return name.indexOf(q) !== -1;
+      });
       
-      // یادآوری
-      var reminder = '';
-      var days = daysUntil(d.vipDate);
-      if(days !== null){
-        if(days < 0){
-          reminder = '<div class="vip-reminder">⏰ ' + Math.abs(days) + ' روز گذشته!</div>';
-        } else if(days === 0){
-          reminder = '<div class="vip-reminder">🔥 امروز سر رسید!</div>';
-        } else if(days <= 7){
-          reminder = '<div class="vip-reminder">⏰ ' + days + ' روز تا سر رسید</div>';
-        } else if(days <= 30){
-          reminder = '<div class="vip-reminder warning">📅 ' + days + ' روز مانده</div>';
-        } else {
-          reminder = '<div class="vip-reminder info">📅 ' + days + ' روز مانده</div>';
-        }
+      var el = document.getElementById('docList');
+      if(!el) return;
+      
+      if(!arr.length){
+        el.innerHTML = '<div class="empty">⭐ مشتری ثابتی پیدا نشد</div>';
+        return;
       }
       
-      return '<div class="doc-row status-' + status + ' ' + (window.selectedDoctorId === d.id ? 'active' : '') + '" onclick="selectDoctor(\'' + d.id + '\')">' +
-        '<div class="doc-name">' +
-          '<span>' + name + '</span>' +
-          '<span class="vip-badge">⭐ مشتری ثابت</span>' +
-          (d.owner ? '<span class="owner-badge ' + d.owner + '">' + (d.owner === 'morteza' ? 'مرتضی' : 'پروین') + '</span>' : '') +
-        '</div>' +
-        reminder +
-        '<div class="doc-spec">' + (d.spec || '—') + '</div>' +
-        '<div class="doc-bar"><div class="fill ' + (complete ? 'done' : '') + '" style="width:' + pct + '%"></div></div>' +
-        '<div class="doc-meta"><span>🎯 <b>' + total + '</b> از ' + req + '</span><span>' + pct + '%</span></div>' +
-      '</div>';
-    } catch(e){ return ''; }
-  }
-  
-  // ═══════════════════════════════════════════
-  // ۷. شمارش VIP در updateFilterCounts
-  // ═══════════════════════════════════════════
-  var _countHook = setInterval(function(){
-    if(typeof window.updateFilterCounts === 'function' && !window._vip_hooked_count){
-      window._vip_hooked_count = true;
-      clearInterval(_countHook);
-      var _origCount = window.updateFilterCounts;
-      window.updateFilterCounts = function(){
-        try {
-          _origCount.apply(this, arguments);
-          var all = (typeof myDoctors === 'function') ? myDoctors() : [];
-          var vipCount = all.filter(function(d){ return d.vip; }).length;
-          var el = document.getElementById('cntVip');
-          if(el) el.textContent = vipCount;
-        } catch(e){}
-      };
-      console.log('✅ updateFilterCounts hook شد');
-    }
-  }, 500);
-  
-  // ═══════════════════════════════════════════
-  // ۸. رندر badge VIP روی کارت‌های عادی
-  // ═══════════════════════════════════════════
-  // این کار با MutationObserver انجام میشه
-  function addVipBadges(){
-    try {
-      document.querySelectorAll('.doc-row').forEach(function(row){
-        // پیدا کردن id پزشک از onclick
-        var oc = row.getAttribute('onclick') || '';
-        var m = oc.match(/selectDoctor\('([^']+)'\)/);
-        if(!m) return;
-        var doc = (window.doctors||[]).find(function(x){ return x.id === m[1]; });
-        if(!doc || !doc.vip) return;
+      el.innerHTML = arr.map(function(d){
+        var name = (d.fname||d.firstName||'') + ' ' + (d.lname||d.lastName||'');
+        var req = Number(d.creditReq||0);
+        var total = (typeof totalEarned === 'function') ? totalEarned(d) : 0;
+        var pct = req ? Math.min(100, Math.round(total/req*100)) : 0;
+        var status = (typeof getDoctorStatus === 'function') ? getDoctorStatus(d) : 'active';
+        var complete = (typeof isComplete === 'function') ? isComplete(d) : false;
         
-        // اگه badge قبلاً هست، skip
-        if(row.querySelector('.vip-badge')) return;
-        
-        // اضافه کردن badge به doc-name
-        var nameEl = row.querySelector('.doc-name');
-        if(nameEl){
-          var badge = document.createElement('span');
-          badge.className = 'vip-badge';
-          badge.textContent = '⭐ مشتری ثابت';
-          nameEl.appendChild(badge);
-        }
-        
-        // اضافه کردن reminder
-        if(!row.querySelector('.vip-reminder')){
-          var days = daysUntil(doc.vipDate);
+        var reminderHtml = '';
+        if(d.vipDate){
+          var days = daysUntil(d.vipDate);
           if(days !== null){
-            var rem = document.createElement('div');
-            if(days < 0){
-              rem.className = 'vip-reminder';
-              rem.textContent = '⏰ ' + Math.abs(days) + ' روز گذشته!';
-            } else if(days === 0){
-              rem.className = 'vip-reminder';
-              rem.textContent = '🔥 امروز سر رسید!';
-            } else if(days <= 7){
-              rem.className = 'vip-reminder';
-              rem.textContent = '⏰ ' + days + ' روز تا سر رسید';
-            } else if(days <= 30){
-              rem.className = 'vip-reminder warning';
-              rem.textContent = '📅 ' + days + ' روز مانده';
-            } else {
-              rem.className = 'vip-reminder info';
-              rem.textContent = '📅 ' + days + ' روز مانده';
-            }
-            // اضافه کردن بعد از name
-            var nameBlock = row.querySelector('.doc-name');
-            if(nameBlock && nameBlock.parentNode){
-              nameBlock.parentNode.insertBefore(rem, nameBlock.nextSibling);
-            }
+            if(days < 0) reminderHtml = '<div class="vip-reminder">⏰ ' + Math.abs(days) + ' روز گذشته!</div>';
+            else if(days === 0) reminderHtml = '<div class="vip-reminder">🔥 امروز سر رسید!</div>';
+            else if(days <= 7) reminderHtml = '<div class="vip-reminder">⏰ ' + days + ' روز تا سر رسید</div>';
+            else if(days <= 30) reminderHtml = '<div class="vip-reminder warning">📅 ' + days + ' روز مانده</div>';
+            else reminderHtml = '<div class="vip-reminder info">📅 ' + days + ' روز مانده</div>';
           }
         }
-      });
-    } catch(e){}
+        
+        return '<div class="doc-row status-' + status + ' ' + (window.selectedDoctorId === d.id ? 'active' : '') + '" onclick="selectDoctor(\'' + d.id + '\')">' +
+          '<div class="doc-name">' +
+            '<span>' + name + '</span>' +
+            '<span class="vip-badge">⭐ مشتری ثابت</span>' +
+            (d.owner ? '<span class="owner-badge ' + d.owner + '">' + (d.owner === 'morteza' ? 'مرتضی' : 'پروین') + '</span>' : '') +
+          '</div>' +
+          reminderHtml +
+          '<div class="doc-spec">' + (d.spec || '—') + '</div>' +
+          '<div class="doc-bar"><div class="fill ' + (complete ? 'done' : '') + '" style="width:' + pct + '%"></div></div>' +
+          '<div class="doc-meta"><span>🎯 <b>' + total + '</b> از ' + req + '</span><span>' + pct + '%</span></div>' +
+        '</div>';
+      }).join('');
+    } catch(e){ console.warn('renderVipList:', e); }
   }
-  
-  // هر ۲ ثانیه چک کن
-  setInterval(addVipBadges, 2000);
-  
-  // اجرای اولیه
-  setTimeout(function(){
-    if(typeof updateFilterCounts === 'function') updateFilterCounts();
-    addVipBadges();
+  window._renderVipList = renderVipList;
+
+  // ═══════════════════════════════════
+  // ۵. شمارش VIP
+  // ═══════════════════════════════════
+  setInterval(function(){
+    try {
+      if(document.hidden) return;
+      var all = (typeof window.myDoctors === 'function') ? window.myDoctors() : (window.doctors || []);
+      var vipCount = all.filter(function(d){ return d.vip; }).length;
+      var el = document.getElementById('cntVip');
+      if(el && el.textContent !== String(vipCount)) el.textContent = vipCount;
+    } catch(e){}
   }, 2000);
-  
-  console.log('✅ VIP System v2 فعال');
+
+  console.log('✅ VIP Final v8 — با MutationObserver');
 })();
 </script>
 </body>
