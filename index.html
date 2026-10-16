@@ -483,16 +483,7 @@ html.is-logged-in #loginScreen{display:none!important}
 </div>
 
 
-<!-- 🚀 نوار پرش سریع رویداد -->
-<div id="eventQuickJump" style="position:sticky;top:0;z-index:999;background:linear-gradient(90deg,#1a1a2e,#16213e);padding:8px;display:none;gap:6px;justify-content:center;border-bottom:1px solid rgba(0,217,255,0.3);box-shadow:0 2px 10px rgba(0,217,255,0.15);margin:8px 0;">
-  <button type="button" onclick="quickJumpToEvent('webinar')" style="flex:1;padding:10px 6px;background:rgba(0,217,255,0.15);color:#00d9ff;border:1px solid #00d9ff;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;font-family:inherit;">💻 وبینار</button>
-  <button type="button" onclick="quickJumpToEvent('inperson')" style="flex:1;padding:10px 6px;background:rgba(0,255,136,0.15);color:#00ff88;border:1px solid #00ff88;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;font-family:inherit;">🏢 حضوری</button>
-  <button type="button" onclick="quickJumpToEvent('noninperson')" style="flex:1;padding:10px 6px;background:rgba(255,0,255,0.15);color:#ff00ff;border:1px solid #ff00ff;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;font-family:inherit;">📁 غیرحضوری</button>
-</div>
-<style>
-@media (max-width: 900px) { #eventQuickJump { display: flex !important; } }
-#eventQuickJump button:active { transform: scale(0.95); filter: brightness(1.3); }
-</style>
+
 
 <div class="tabs" id="mainTabs">
     <button class="tab active" data-tab="dash">📊 داشبورد</button>
@@ -2763,6 +2754,68 @@ if (typeof window.checkLogin === 'undefined') {
 }
 
 console.log('✅ Missing Functions Loaded');
+
+
+// 🚀 پرش سریع به تب رویداد (موبایل)
+window.quickJumpToEvent = function(type){
+  try {
+    var keywords = {
+      'webinar': ['وبینار', 'webinar'],
+      'inperson': ['حضوری', 'inperson'],
+      'noninperson': ['غیرحضوری', 'غیر حضوری', 'noninperson']
+    };
+    var kws = keywords[type] || [];
+    
+    // ۱. جستجو با data-attribute
+    var dataSelectors = {
+      'webinar': '[data-tab="webinar"], [data-event="webinar"]',
+      'inperson': '[data-tab="inperson"], [data-event="inperson"]',
+      'noninperson': '[data-tab="noninperson"], [data-event="noninperson"]'
+    };
+    var el = document.querySelector(dataSelectors[type]);
+    if(el){
+      el.scrollIntoView({behavior:'smooth', block:'center'});
+      setTimeout(function(){ el.click(); }, 150);
+      if(typeof el.onclick === 'function') el.onclick();
+      return true;
+    }
+    
+    // ۲. جستجو با متن دکمه‌ها
+    var all = document.querySelectorAll('button, .tab, [role="tab"], [onclick], a[href*="#"]');
+    for(var i = 0; i < all.length; i++){
+      var t = all[i];
+      var txt = (t.textContent || '').trim();
+      for(var k = 0; k < kws.length; k++){
+        if(txt.indexOf(kws[k]) !== -1 && txt.length < 40){
+          t.scrollIntoView({behavior:'smooth', block:'center'});
+          var clickFn = t.onclick;
+          setTimeout(function(){ 
+            t.click();
+            if(typeof clickFn === 'function') clickFn();
+          }, 150);
+          return true;
+        }
+      }
+    }
+    
+    // ۳. اگه فقط باید اسکرول کنیم
+    var area = document.querySelector('#eventList, #events, [id*="event"]');
+    if(area){
+      area.scrollIntoView({behavior:'smooth', block:'start'});
+      // حالا داخل تب‌ها بگرد
+      setTimeout(function(){
+        var tabs = document.querySelectorAll('[onclick*="Tab"], [onclick*="tab"]');
+        tabs.forEach(function(tb){
+          if(tb.textContent.indexOf(kws[0]) !== -1) tb.click();
+        });
+      }, 300);
+    }
+    return true;
+  } catch(e){
+    console.error('❌ پرش:', e);
+    return false;
+  }
+};
 
 </script>
 </body>
