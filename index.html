@@ -3185,6 +3185,80 @@ setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 3000);
 setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 5000);
 
 console.log('✅ updateFilterCounts v2 loaded');
+
+// ═══════════════════════════════════════════════
+// 🔄 Auto-sync — pull خودکار از سرور در لود
+// ═══════════════════════════════════════════════
+
+window.syncNow = async function(){
+  try {
+    if(typeof SCRIPT_URL === 'undefined'){
+      console.warn('❌ SCRIPT_URL تعریف نشده');
+      return;
+    }
+    console.log('🔄 Sync now...');
+    var localCount = 0;
+    try { localCount = (typeof doctors !== 'undefined' && doctors) ? doctors.length : 0; } catch(e){}
+    console.log('   محلی:', localCount);
+    
+    var resp = await fetch(SCRIPT_URL + '?action=data&t=' + Date.now());
+    var data = await resp.json();
+    var serverDocs = data.doctors || [];
+    console.log('   سرور:', serverDocs.length);
+    
+    if(serverDocs.length > localCount){
+      console.log('📥 سرور بیشتر — pull...');
+      if(typeof doctors !== 'undefined'){
+        try {
+          // جایگزینی کامل
+          doctors.length = 0;
+          serverDocs.forEach(function(d){ doctors.push(d); });
+        } catch(e){
+          window.doctors = serverDocs;
+        }
+      }
+      try { localStorage.setItem('cme_doctors', JSON.stringify(serverDocs)); } catch(e){}
+      if(typeof renderAll === 'function') renderAll();
+      if(typeof renderDocList === 'function') renderDocList();
+      if(typeof updateFilterCounts === 'function') updateFilterCounts();
+      console.log('✅ Pulled:', serverDocs.length, 'پزشک');
+      return { pulled: true, count: serverDocs.length };
+    } 
+    else if(localCount > serverDocs.length){
+      console.log('⚠️ محلی بیشتر — نیاز به push');
+      console.log('   دستور: pushToCloud(true)');
+      return { needsPush: true, local: localCount, server: serverDocs.length };
+    } 
+    else {
+      console.log('✅ همگام هستن:', localCount);
+      return { synced: true, count: localCount };
+    }
+  } catch(e){
+    console.error('syncNow error:', e);
+    return { error: e.message };
+  }
+};
+
+// 🎯 اجرای خودکار بعد از لود
+(function(){
+  setTimeout(async function(){
+    try {
+      await window.syncNow();
+    } catch(e){}
+  }, 3000);
+})();
+
+// 🎯 دکمه کوچیک "همگام‌سازی" در هدر (اگه خواستی)
+window.syncNow();
+
+
+// 🎯 هر ۵ دقیقه sync
+if(!window._syncInterval){
+  window._syncInterval = setInterval(function(){
+    try { if(typeof syncNow === 'function') syncNow(); } catch(e){}
+  }, 5 * 60 * 1000);
+}
+
 </script>
 </body>
 </html>
