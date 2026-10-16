@@ -2287,5 +2287,102 @@ document.addEventListener('keydown', function(e){
 checkLogin();
 console.log('✅ Login System بارگذاری شد');
 </script>
+<script>
+/* ===== Login System (قطعی v2) ===== */
+var USERS = {
+  'morteza': { pass: 'MN13601353', name: 'مرتضی' },
+  'parvin': { pass: 'parvin123', name: 'پروین' }
+};
+
+window.doLogin = function(){
+  var userEl = document.getElementById('loginUser');
+  var passEl = document.getElementById('loginPass');
+  var errEl = document.getElementById('loginError');
+  var screenEl = document.getElementById('loginScreen');
+  
+  if(!userEl || !passEl || !screenEl){
+    alert('فیلدهای لاگین پیدا نشد');
+    return;
+  }
+  
+  var u = userEl.value.trim().toLowerCase();
+  var p = passEl.value;
+  
+  if(USERS[u] && USERS[u].pass === p){
+    try { localStorage.setItem('cme_logged_in', u); } catch(e){}
+    if(errEl) errEl.classList.remove('show');
+    screenEl.classList.add('hidden');
+    try { localStorage.setItem('cme_current_user', u); } catch(e){}
+    
+    if(typeof currentUser !== 'undefined') window.currentUser = u;
+    
+    document.querySelectorAll('.user-picker button').forEach(function(b){
+      if(b.dataset.user === u) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+    
+    if(typeof renderAll === 'function') renderAll();
+    if(typeof updateMobileSelection === 'function') updateMobileSelection();
+    if(typeof toast === 'function') toast('👋 خوش آمدید ' + USERS[u].name);
+    console.log('✅ ورود موفق:', u);
+  } else {
+    if(errEl) errEl.classList.add('show');
+    passEl.value = '';
+    console.log('❌ ورود ناموفق:', u);
+  }
+};
+
+window.doLogout = function(){
+  if(!confirm('از سیستم خارج می‌شوید؟')) return;
+  try {
+    localStorage.removeItem('cme_logged_in');
+    localStorage.removeItem('cme_current_user');
+  } catch(e){}
+  location.reload();
+};
+
+function checkLogin(){
+  var logged = null;
+  try { logged = localStorage.getItem('cme_logged_in'); } catch(e){}
+  
+  var screenEl = document.getElementById('loginScreen');
+  if(!screenEl){ console.log('loginScreen نیست'); return; }
+  
+  if(logged && USERS[logged]){
+    screenEl.classList.add('hidden');
+    if(typeof currentUser !== 'undefined') window.currentUser = logged;
+    try { localStorage.setItem('cme_current_user', logged); } catch(e){}
+    document.querySelectorAll('.user-picker button').forEach(function(b){
+      if(b.dataset.user === logged) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+    console.log('✅ کاربر وارد شده:', logged);
+  } else {
+    screenEl.classList.remove('hidden');
+    setTimeout(function(){
+      var u = document.getElementById('loginUser');
+      if(u) u.focus();
+    }, 100);
+    console.log('🔐 نیاز به ورود');
+  }
+}
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Enter'){
+    var screen = document.getElementById('loginScreen');
+    if(screen && !screen.classList.contains('hidden')){
+      if(typeof window.doLogin === 'function') window.doLogin();
+    }
+  }
+});
+
+// اجرا در بارگذاری
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', checkLogin);
+} else {
+  checkLogin();
+}
+console.log('✅ Login System v2 بارگذاری شد');
+</script>
 </body>
 </html>
