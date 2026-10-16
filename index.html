@@ -4031,13 +4031,103 @@ setTimeout(function(){
 })();
 </script>
 
-<!-- 🚀 Instant Pull — pull سریع در لود اولیه (بدون تداخل با کد موجود) -->
+
+
+
+<!-- 🛡 Pull Race Guard — جلوگیری از برگشت داده قدیمی بعد از تغییر -->
 <script>
 (function(){
-  if(window._instantPull) return;
-  window._instantPull = true;
+  if(window._raceGuard) return;
+  window._raceGuard = true;
 
-  // 🎯 pull سریع ۲۰۰ms بعد از لود — قبل از اینکه کاربر متوجه تأخیر بشه
+  // 🎯 زمان آخرین تغییر کاربر
+  window._lastUserMutation = window._lastUserMutation || 0;
+  // 🎯 آیا سرور داره اعمال میشه؟
+  window._applyingServerData = false;
+
+  // 🛡 ۱. hook روی triggerAutoSave — علامت‌گذاری تغییر کاربر
+  var _origTrigger = window.triggerAutoSave;
+  if(typeof _origTrigger === 'function' && !window._triggerHooked){
+    window._triggerHooked = true;
+    window.triggerAutoSave = function(reason){
+      // 🎯 اگه این تغییر از pull خودمون اومده، نادیده بگیر
+      if(window._applyingServerData){
+        console.log('⏭ auto-save از pull — نادیده گرفته شد');
+        return;
+      }
+      window._lastUserMutation = Date.now();
+      console.log('🛡 user mutation ثبت شد:', reason);
+      return _origTrigger.apply(this, arguments);
+    };
+  }
+
+  // 🛡 ۲. hook روی safePull — قبل از اعمال، چک کن تغییر کاربر نبوده
+  var _pullInterval = setInterval(function(){
+    var _origPull = window.safePull;
+    if(typeof _origPull !== 'function') return;
+    if(window._pullHooked) { clearInterval(_pullInterval); return; }
+    window._pullHooked = true;
+    clearInterval(_pullInterval);
+
+    window.safePull = async function(){
+      // اگه ۵ ثانیه اخیر تغییر کاربر داشتیم، pull نکن
+      var sinceMutation = Date.now() - (window._lastUserMutation || 0);
+      if(sinceMutation < 5000){
+        console.log('⏭ pull skip — کاربر ' + Math.round(sinceMutation/1000) + ' ثانیه پیش تغییر داد');
+        return { skipped: 'recent-mutation' };
+      }
+
+      // علامت‌گذاری که داریم داده سرور رو اعمال می‌کنیم
+      var result = await _origPull.apply(this, arguments);
+      
+      // اگه pull چیزی اعمال کرد، flag بذار
+      if(result && result.pulled){
+        window._applyingServerData = true;
+        setTimeout(function(){
+          window._applyingServerData = false;
+        }, 800);
+      }
+      
+      return result;
+    };
+    console.log('✅ safePull hooked با race guard');
+  }, 500);
+
+  // 🛡 ۳. hook روی pushToCloud — وقتی push شد، همه pull‌های قدیمی بی‌اعتبار میشن
+  var _pushInterval = setInterval(function(){
+    var _origPush = window.pushToCloud;
+    if(typeof _origPush !== 'function') return;
+    if(window._pushHooked) { clearInterval(_pushInterval); return; }
+    window._pushHooked = true;
+    clearInterval(_pushInterval);
+
+    window.pushToCloud = async function(){
+      var result = await _origPush.apply(this, arguments);
+      // بعد از push موفق، ۱۰ ثانیه pull نکن
+      window._lastUserMutation = Date.now();
+      console.log('🛡 push موفق → pull موقتاً غیرفعال');
+      return result;
+    };
+    console.log('✅ pushToCloud hooked');
+  }, 500);
+
+  // 🛡 ۴. hook مستقیم روی delDoctor/saveDoctor
+  ['delDoctor', 'saveDoctor', 'editDoctor', 'addDoctor'].forEach(function(fn){
+    var _iv = setInterval(function(){
+      if(typeof window[fn] !== 'function') return;
+      if(window['_race_' + fn]) { clearInterval(_iv); return; }
+      window['_race_' + fn] = true;
+      clearInterval(_iv);
+      var orig = window[fn];
+      window[fn] = function(){
+        window._lastUserMutation = Date.now();
+        console.log('🛡 ' + fn + ' → mutation ثبت شد');
+        return orig.apply(this, arguments);
+      };
+    }, 500);
+  });
+
+  // 🛡 ۵. Instant Pull — ولی با احترام به mutation
   function doInstantPull(){
     try {
       if(typeof window.safePull === 'function'){
@@ -4046,7 +4136,6 @@ setTimeout(function(){
     } catch(e){}
   }
 
-  // اولین pull — سریع
   if(document.readyState === 'complete'){
     setTimeout(doInstantPull, 200);
   } else {
@@ -4054,32 +4143,9 @@ setTimeout(function(){
       setTimeout(doInstantPull, 200);
     });
   }
-  
-  // pull دوم — برای اطمینان
-  setTimeout(doInstantPull, 800);
-  setTimeout(doInstantPull, 1500);
+  setTimeout(doInstantPull, 1000);
 
-  // 🎯 push خودکار بعد از delete (فوری‌تر از triggerAutoSave)
-  document.addEventListener('click', function(e){
-    var btn = e.target.closest && e.target.closest('[onclick*="delDoctor"], [onclick*="deleteDoctor"], button[title*="حذف"]');
-    if(btn){
-      // ۳۰۰ms بعد، push فوری
-      setTimeout(function(){
-        try {
-          if(typeof window.safePush === 'function') window.safePush('after-delete');
-          if(typeof window.triggerAutoSave === 'function') window.triggerAutoSave('after-delete');
-        } catch(e){}
-      }, 300);
-      // ۱ ثانیه بعد هم دوباره — برای اطمینان
-      setTimeout(function(){
-        try {
-          if(typeof window.safePush === 'function') window.safePush('after-delete-2');
-        } catch(e){}
-      }, 1000);
-    }
-  }, true);
-
-  console.log('✅ Instant Pull فعال');
+  console.log('✅ Race Guard فعال');
 })();
 </script>
 
