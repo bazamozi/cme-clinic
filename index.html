@@ -695,6 +695,128 @@ html.is-logged-in #loginScreen{display:none!important}
   }
 }
 </style>
+<style id="bank-card-css">
+/* ============================================
+   🎯 کارت بانکی — افقی و فشرده
+   ============================================ */
+
+.bank-card-display {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  align-items: stretch !important;
+  margin-top: 8px !important;
+  padding: 8px !important;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.4)) !important;
+  border: 1px solid rgba(0, 217, 255, 0.2) !important;
+  border-radius: 10px !important;
+  direction: rtl !important;
+}
+
+.bank-card-display.hidden {
+  display: none !important;
+}
+
+.bank-card-display .bank-cell-compact {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+  padding: 6px 10px !important;
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 8px !important;
+  min-width: 0 !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+.bank-card-display .bank-cell-compact .label {
+  font-size: 10.5px !important;
+  color: #94a3b8 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap !important;
+}
+
+.bank-card-display .bank-cell-compact .value {
+  font-size: 13px !important;
+  color: #e2e8f0 !important;
+  font-weight: 800 !important;
+  font-family: 'SF Mono', Menlo, Consolas, monospace !important;
+  letter-spacing: 0.5px !important;
+  white-space: nowrap !important;
+}
+
+.bank-card-display .bank-cell-compact.card-number {
+  flex: 1 1 auto !important;
+  min-width: 200px !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+.bank-card-display .bank-cell-compact.card-number .label {
+  font-size: 11px !important;
+}
+
+.bank-card-display .bank-cell-compact.card-number .value {
+  font-size: 14px !important;
+  letter-spacing: 1.2px !important;
+  color: #38bdf8 !important;
+}
+
+.bank-card-display .copy-inline {
+  font-size: 11px !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  background: rgba(0, 217, 255, 0.15) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(0, 217, 255, 0.4) !important;
+  font-weight: 700 !important;
+  transition: all 0.15s !important;
+}
+
+.bank-card-display .copy-inline:hover {
+  background: rgba(0, 217, 255, 0.3) !important;
+}
+
+.bank-card-display .copy-inline:active {
+  transform: scale(0.94) !important;
+}
+
+/* موبایل — همه چیز یه ردیف ولی با wrap */
+@media (max-width: 768px) {
+  .bank-card-display {
+    gap: 6px !important;
+    padding: 6px !important;
+  }
+  
+  .bank-card-display .bank-cell-compact {
+    padding: 5px 8px !important;
+  }
+  
+  .bank-card-display .bank-cell-compact .value {
+    font-size: 12px !important;
+  }
+  
+  .bank-card-display .bank-cell-compact.card-number {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    padding: 6px 10px !important;
+  }
+  
+  .bank-card-display .bank-cell-compact.card-number .value {
+    font-size: 13px !important;
+  }
+}
+</style>
+
 </head>
 <body>
 
