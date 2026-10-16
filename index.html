@@ -2445,63 +2445,6 @@ window.doLogin = doLogin;
 window.doLogout = doLogout;
 console.log('✅ Login System Loaded');
 
-// 🚀 پرش سریع به تب رویداد
-window.quickJumpToEvent = function(type){
-  try {
-    var keywords = {
-      'webinar': ['وبینار', 'webinar'],
-      'inperson': ['حضوری', 'inperson', 'in-person', 'حضوری'],
-      'noninperson': ['غیرحضوری', 'غیر حضوری', 'noninperson', 'non-inperson']
-    };
-    
-    var kws = keywords[type] || [];
-    var allClickable = document.querySelectorAll('button, .tab, [role="tab"], [onclick]');
-    var found = false;
-    
-    // اول با data-attribute بگرد
-    var dataSelectors = {
-      'webinar': '[data-tab="webinar"], [data-event="webinar"], [data-type="webinar"]',
-      'inperson': '[data-tab="inperson"], [data-event="inperson"], [data-type="inperson"]',
-      'noninperson': '[data-tab="noninperson"], [data-event="noninperson"], [data-type="noninperson"]'
-    };
-    
-    var dataEl = document.querySelector(dataSelectors[type]);
-    if(dataEl){
-      dataEl.scrollIntoView({behavior:'smooth', block:'center'});
-      setTimeout(function(){ dataEl.click(); }, 150);
-      found = true;
-      console.log('🎯 پرش موفق (data-attr) به:', type);
-      return true;
-    }
-    
-    // بعد با متن بگرد
-    for(var i = 0; i < allClickable.length; i++){
-      var el = allClickable[i];
-      var txt = (el.textContent || '').trim();
-      for(var k = 0; k < kws.length; k++){
-        if(txt.indexOf(kws[k]) !== -1 && txt.length < 40){
-          el.scrollIntoView({behavior:'smooth', block:'center'});
-          setTimeout(function(){ el.click(); }, 150);
-          found = true;
-          console.log('🎯 پرش موفق (متن) به:', type, '- دکمه:', txt.slice(0, 30));
-          return true;
-        }
-      }
-    }
-    
-    if(!found){
-      console.log('⚠️ تب پیدا نشد:', type);
-      // اسکرول به بخش رویدادها
-      var evtArea = document.querySelector('#eventList, #events, .event-tabs, [id*="event"]');
-      if(evtArea) evtArea.scrollIntoView({behavior:'smooth', block:'start'});
-    }
-    return found;
-  } catch(e){
-    console.error('❌ خطای پرش:', e);
-    return false;
-  }
-};
-
 
 // ============================================
 // 🚀 توابع کمکی اضافه شده (Fix Missing Functions)
@@ -2620,140 +2563,7 @@ console.log('✅ Missing Functions Loaded');
 
 
 // 🚀 پرش سریع به تب رویداد
-window.quickJumpToEvent = function(type){
-  try {
-    var keywords = {
-      'webinar': ['وبینار', 'webinar'],
-      'inperson': ['حضوری', 'inperson', 'in-person'],
-      'noninperson': ['غیرحضوری', 'غیر حضوری', 'noninperson', 'non-inperson']
-    };
-    var kws = keywords[type] || [];
-    
-    // ۱. با data-attribute
-    var dataSelectors = {
-      'webinar': '[data-tab="webinar"], [data-event="webinar"], [data-type="webinar"]',
-      'inperson': '[data-tab="inperson"], [data-event="inperson"], [data-type="inperson"]',
-      'noninperson': '[data-tab="noninperson"], [data-event="noninperson"], [data-type="noninperson"]'
-    };
-    var dataEl = document.querySelector(dataSelectors[type]);
-    if(dataEl){
-      dataEl.scrollIntoView({behavior:'smooth', block:'center'});
-      setTimeout(function(){ dataEl.click(); }, 150);
-      console.log('🎯 پرش:', type);
-      return true;
-    }
-    
-    // ۲. با متن
-    var allClickable = document.querySelectorAll('button, .tab, [role="tab"], [onclick]');
-    for(var i = 0; i < allClickable.length; i++){
-      var el = allClickable[i];
-      var txt = (el.textContent || '').trim();
-      for(var k = 0; k < kws.length; k++){
-        if(txt.indexOf(kws[k]) !== -1 && txt.length < 40){
-          el.scrollIntoView({behavior:'smooth', block:'center'});
-          setTimeout(function(){ el.click(); }, 150);
-          console.log('🎯 پرش:', type);
-          return true;
-        }
-      }
-    }
-    console.log('⚠️ تب پیدا نشد:', type);
-    return false;
-  } catch(e){
-    console.error('❌', e);
-    return false;
-  }
-};
 
-
-// 🚀 Missing Functions
-if (typeof window.getDoctorStatus === 'undefined') {
-  window.getDoctorStatus = function(d){
-    try {
-      if(!d) return 'pending';
-      var events = d.events || d.courses || [];
-      if(!events.length){
-        return (d.paid && d.paid > 0) ? 'active' : 'pending';
-      }
-      var hasPaid = (d.paid && d.paid > 0);
-      var allComplete = events.every(function(ev){
-        return ev && (ev.buy === true || ev.status === 'buy') && 
-               (ev.attend === true || ev.status === 'attend') && 
-               (ev.exam === true || ev.status === 'exam' || ev.type === 'inperson');
-      });
-      if(hasPaid || events.some(function(ev){ 
-        return ev.buy === true || ev.attend === true || ev.exam === true; 
-      })){
-        return allComplete ? 'done' : 'active';
-      }
-      return 'pending';
-    } catch(e){ return 'pending'; }
-  };
-}
-
-if (typeof window.showDataSize === 'undefined') {
-  window.showDataSize = function(){
-    try {
-      var docs = (typeof myDoctors === 'function') ? myDoctors() : (window.doctors || []);
-      var sizeKB = (JSON.stringify(docs).length / 1024).toFixed(2);
-      var counts = { active: 0, done: 0, pending: 0 };
-      docs.forEach(function(d){
-        var st = window.getDoctorStatus(d);
-        if(counts[st] !== undefined) counts[st]++;
-      });
-      console.log('═══════════════════════════════');
-      console.log('📊 وضعیت داده‌ها');
-      console.log('👥 کل پزشکان:', docs.length);
-      console.log('📦 حجم داده:', sizeKB, 'KB');
-      console.log('⚡ در حال اجرا:', counts.active);
-      console.log('✅ اتمام:', counts.done);
-      console.log('⏳ بلاتکلیف:', counts.pending);
-      console.log('═══════════════════════════════');
-      return { count: docs.length, sizeKB: sizeKB, counts: counts };
-    } catch(e){ console.error('❌', e); }
-  };
-}
-
-if (typeof window.updateFilterCounts === 'undefined') {
-  window.updateFilterCounts = function(){
-    try {
-      if(typeof myDoctors !== 'function') return;
-      var all = myDoctors();
-      var counts = { active: 0, done: 0, pending: 0 };
-      all.forEach(function(d){
-        var st = window.getDoctorStatus(d);
-        if(counts[st] !== undefined) counts[st]++;
-      });
-      var map = { cntActive: counts.active, cntDone: counts.done, cntPending: counts.pending };
-      Object.keys(map).forEach(function(id){
-        var el = document.getElementById(id);
-        if(el) el.textContent = map[id];
-      });
-      return counts;
-    } catch(e){ console.warn('updateFilterCounts error:', e); }
-  };
-}
-
-if (typeof window.checkLogin === 'undefined') {
-  window.checkLogin = function(){
-    try {
-      var logged = localStorage.getItem('cme_logged_in');
-      var screenEl = document.getElementById('loginScreen');
-      if(!screenEl) return;
-      if(logged === 'morteza' || logged === 'parvin'){
-        screenEl.classList.add('hidden');
-        screenEl.style.display = 'none';
-        document.documentElement.classList.add('is-logged-in');
-      } else {
-        screenEl.classList.remove('hidden');
-        screenEl.style.display = 'flex';
-        document.documentElement.classList.remove('is-logged-in');
-      }
-    } catch(e){}
-  };
-}
-
-console.log('✅ Missing Functions Loaded');
 
 
 // 🚀 پرش سریع به تب رویداد (موبایل)
@@ -2816,6 +2626,132 @@ window.quickJumpToEvent = function(type){
     return false;
   }
 };
+
+
+// ============================================
+// 🚀 توابع کمکی — نسخه نهایی
+// ============================================
+
+window.getDoctorStatus = function(d){
+  try {
+    if(!d) return 'pending';
+    var events = d.events || d.courses || [];
+    
+    // اگه رویدادی نیست
+    if(!events.length){
+      return (d.paid && d.paid > 0) ? 'active' : 'pending';
+    }
+    
+    // چک کن همه رویدادها کامل هستن
+    var allComplete = events.every(function(ev){
+      if(!ev) return false;
+      // حضوری: فقط buy + attend
+      if(ev.type === 'inperson'){
+        return (ev.buy === true || ev.status === 'buy') && 
+               (ev.attend === true || ev.status === 'attend');
+      }
+      // وبینار و غیرحضوری: buy + attend + exam
+      return (ev.buy === true || ev.status === 'buy') && 
+             (ev.attend === true || ev.status === 'attend') && 
+             (ev.exam === true || ev.status === 'exam');
+    });
+    
+    // آیا هیچ اقدامی شده؟
+    var hasAnyAction = events.some(function(ev){
+      return ev && (ev.buy === true || ev.attend === true || ev.exam === true ||
+                    ev.status === 'buy' || ev.status === 'attend' || ev.status === 'exam');
+    });
+    
+    var hasPaid = (d.paid && d.paid > 0);
+    
+    if(hasPaid || hasAnyAction){
+      return allComplete ? 'done' : 'active';
+    }
+    return 'pending';
+  } catch(e){ 
+    console.warn('getDoctorStatus error:', e);
+    return 'pending'; 
+  }
+};
+
+window.showDataSize = function(){
+  try {
+    var docs = (typeof myDoctors === 'function') ? myDoctors() : (window.doctors || []);
+    var sizeKB = (JSON.stringify(docs).length / 1024).toFixed(2);
+    var counts = { active: 0, done: 0, pending: 0 };
+    docs.forEach(function(d){
+      var st = window.getDoctorStatus(d);
+      if(counts[st] !== undefined) counts[st]++;
+    });
+    console.log('═══════════════════════════════');
+    console.log('📊 وضعیت داده‌ها');
+    console.log('═══════════════════════════════');
+    console.log('👥 کل پزشکان:', docs.length);
+    console.log('📦 حجم داده:', sizeKB, 'KB');
+    console.log('⚡ در حال اجرا:', counts.active);
+    console.log('✅ اتمام:', counts.done);
+    console.log('⏳ بلاتکلیف:', counts.pending);
+    console.log('═══════════════════════════════');
+    return { count: docs.length, sizeKB: sizeKB, counts: counts };
+  } catch(e){ 
+    console.error('❌ showDataSize:', e); 
+  }
+};
+
+window.updateFilterCounts = function(){
+  try {
+    if(typeof myDoctors !== 'function') return;
+    var all = myDoctors();
+    var counts = { active: 0, done: 0, pending: 0 };
+    all.forEach(function(d){
+      var st = window.getDoctorStatus(d);
+      if(counts[st] !== undefined) counts[st]++;
+    });
+    
+    // به‌روزرسانی شمارنده‌های فیلتر
+    var ids = { 
+      'cntActive': counts.active, 
+      'cntDone': counts.done, 
+      'cntPending': counts.pending 
+    };
+    Object.keys(ids).forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.textContent = ids[id];
+    });
+    
+    console.log('✅ شمارنده‌ها:', counts);
+    return counts;
+  } catch(e){ 
+    console.warn('updateFilterCounts error:', e); 
+  }
+};
+
+window.checkLogin = function(){
+  try {
+    var logged = localStorage.getItem('cme_logged_in');
+    var screenEl = document.getElementById('loginScreen');
+    if(!screenEl) return;
+    if(logged === 'morteza' || logged === 'parvin'){
+      screenEl.classList.add('hidden');
+      screenEl.style.display = 'none';
+      document.documentElement.classList.add('is-logged-in');
+    } else {
+      screenEl.classList.remove('hidden');
+      screenEl.style.display = 'flex';
+      document.documentElement.classList.remove('is-logged-in');
+    }
+  } catch(e){}
+};
+
+// فراخوانی خودکار
+setTimeout(function(){
+  try {
+    if(typeof updateFilterCounts === 'function') updateFilterCounts();
+    if(typeof renderAll === 'function') renderAll();
+  } catch(e){}
+}, 500);
+
+console.log('✅ Helpers Loaded v3');
 
 </script>
 </body>
