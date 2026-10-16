@@ -2799,27 +2799,115 @@ window.debugUsers = function(){
 };
 
 
-// 🎯 در بارگذاری، تب وبینار فعال باشه (برای موبایل)
-if(typeof window._evTabInit === 'undefined'){
-  window._evTabInit = true;
-  document.addEventListener('DOMContentLoaded', function(){
-    setTimeout(function(){
+
+
+// 🎯 switchEventTab — نسخه پایدار
+window.switchEventTab = function(type, btn){
+  try {
+    console.log('🎯 switchEventTab:', type, '| موبایل؟', window.innerWidth <= 900);
+    
+    // ۱. آپدیت دکمه‌ها
+    document.querySelectorAll('.ev-tab').forEach(function(b){
+      b.classList.remove('active');
+      if(b.dataset.evtype === type) b.classList.add('active');
+    });
+
+    // ۲. در موبایل: محتوا عوض کن
+    if(window.innerWidth <= 900){
+      document.querySelectorAll('.ev-tab-content').forEach(function(ct){
+        ct.classList.add('hidden');
+        ct.classList.remove('active');
+      });
+      var target = document.querySelector('.ev-tab-content[data-evtype="'+type+'"]');
+      if(target){
+        target.classList.remove('hidden');
+        target.classList.add('active');
+        console.log('✅ نمایش:', type);
+      } else {
+        console.warn('❌ پیدا نشد:', type);
+      }
+    }
+  } catch(e){ console.error('switchEventTab:', e); }
+};
+
+// 🎯 بعد از هر renderMain، تب پیش‌فرض رو فعال کن
+function ensureEvTabActive(){
+  try {
+    if(window.innerWidth > 900) return; // فقط موبایل
+    var contents = document.querySelectorAll('.ev-tab-content');
+    if(!contents.length) return;
+    
+    // اگه هیچ محتوایی active نیست، وبینار رو فعال کن
+    var activeContent = document.querySelector('.ev-tab-content.active');
+    if(!activeContent){
+      contents.forEach(function(ct){
+        ct.classList.add('hidden');
+        ct.classList.remove('active');
+      });
       var first = document.querySelector('.ev-tab-content[data-evtype="وبینار"]');
-      if(first){ first.classList.add('active'); first.classList.remove('hidden'); }
-      var firstBtn = document.querySelector('.ev-tab[data-evtype="وبینار"]');
-      if(firstBtn) firstBtn.classList.add('active');
-    }, 300);
-  });
-  // اگه DOMContentLoaded قبلاً رخ داده
-  if(document.readyState === 'complete' || document.readyState === 'interactive'){
-    setTimeout(function(){
-      var first = document.querySelector('.ev-tab-content[data-evtype="وبینار"]');
-      if(first){ first.classList.add('active'); first.classList.remove('hidden'); }
-      var firstBtn = document.querySelector('.ev-tab[data-evtype="وبینار"]');
-      if(firstBtn) firstBtn.classList.add('active');
-    }, 300);
+      if(first){
+        first.classList.remove('hidden');
+        first.classList.add('active');
+      }
+    }
+    
+    // سینک دکمه‌ها با محتوای فعال
+    var currentActive = document.querySelector('.ev-tab-content.active');
+    if(currentActive){
+      var activeType = currentActive.dataset.evtype;
+      document.querySelectorAll('.ev-tab').forEach(function(t){
+        if(t.dataset.evtype === activeType) t.classList.add('active');
+        else t.classList.remove('active');
+      });
+    }
+  } catch(e){ console.warn('ensureEvTabActive:', e); }
+}
+
+// 🎯 Event Delegation — کلیک روی تب‌ها (backup)
+if(typeof window._evTabDelegated === 'undefined'){
+  window._evTabDelegated = true;
+  document.addEventListener('click', function(e){
+    var tab = e.target.closest && e.target.closest('.ev-tab');
+    if(tab && tab.dataset && tab.dataset.evtype){
+      window.switchEventTab(tab.dataset.evtype, tab);
+    }
+  }, true);
+}
+
+// 🎯 Monkey-patch renderMain برای اجرای ensureEvTabActive
+if(typeof window._renderMainPatched === 'undefined'){
+  window._renderMainPatched = true;
+  var _origRenderMain = window.renderMain;
+  if(typeof _origRenderMain === 'function'){
+    window.renderMain = function(){
+      var result = _origRenderMain.apply(this, arguments);
+      setTimeout(ensureEvTabActive, 80);
+      return result;
+    };
   }
 }
+
+// 🎯 اجرای اولیه
+setTimeout(ensureEvTabActive, 500);
+
+
+// 🔍 دیباگ تب‌ها
+window.debugEvTabs = function(){
+  console.log('═══════════════════════════════');
+  console.log('عرض صفحه:', window.innerWidth, '| موبایل؟', window.innerWidth <= 900);
+  console.log('');
+  console.log('دکمه‌های تب:');
+  document.querySelectorAll('.ev-tab').forEach(function(t){
+    console.log('  -', t.dataset.evtype, '| active:', t.classList.contains('active'), '| onclick:', t.getAttribute('onclick'));
+  });
+  console.log('');
+  console.log('محتواها:');
+  document.querySelectorAll('.ev-tab-content').forEach(function(ct){
+    var st = getComputedStyle(ct);
+    console.log('  -', ct.dataset.evtype, '| hidden:', ct.classList.contains('hidden'), '| active:', ct.classList.contains('active'), '| display:', st.display);
+  });
+  console.log('═══════════════════════════════');
+};
 
 </script>
 </body>
