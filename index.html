@@ -400,9 +400,24 @@ textarea{resize:vertical;min-height:55px}
     margin-top:3px!important;
   }
 }
+
+html[data-logged="1"] #loginScreen{display:none!important}
 </style>
 </head>
 <body>
+<script>
+// ✅ این کد بلافاصله اجرا میشه — قبل از هر چیزی
+(function(){
+  try {
+    var logged = localStorage.getItem('cme_logged_in');
+    if(logged === 'morteza' || logged === 'parvin'){
+      // کاربر قبلاً وارد شده → مخفی کردن صفحه ورود با CSS
+      document.documentElement.setAttribute('data-logged', '1');
+    }
+  } catch(e){}
+})();
+</script>
+
 <div id="loginScreen">
   <div class="login-box">
     <h1>🔐 ورود به سیستم</h1>
@@ -2208,10 +2223,7 @@ window.doLogin = function(){
   var errEl = document.getElementById('loginError');
   var screenEl = document.getElementById('loginScreen');
   
-  if(!userEl || !passEl || !screenEl){
-    alert('خطا: فیلدهای لاگین پیدا نشد');
-    return;
-  }
+  if(!userEl || !passEl || !screenEl){ alert('فیلدهای لاگین پیدا نشد'); return; }
   
   var u = userEl.value.trim().toLowerCase();
   var p = passEl.value;
@@ -2220,10 +2232,8 @@ window.doLogin = function(){
     try { localStorage.setItem('cme_logged_in', u); } catch(e){}
     if(errEl) errEl.classList.remove('show');
     screenEl.classList.add('hidden');
-    
-    if(typeof currentUser !== 'undefined'){
-      currentUser = u;
-    }
+    document.documentElement.setAttribute('data-logged', '1');
+    if(typeof currentUser !== 'undefined') window.currentUser = u;
     try { localStorage.setItem('cme_current_user', u); } catch(e){}
     
     document.querySelectorAll('.user-picker button').forEach(function(b){
@@ -2234,9 +2244,11 @@ window.doLogin = function(){
     if(typeof renderAll === 'function') renderAll();
     if(typeof updateMobileSelection === 'function') updateMobileSelection();
     if(typeof toast === 'function') toast('👋 خوش آمدید ' + USERS[u].name);
+    console.log('✅ ورود موفق:', u);
   } else {
     if(errEl) errEl.classList.add('show');
     passEl.value = '';
+    console.log('❌ ورود ناموفق');
   }
 };
 
@@ -2246,6 +2258,7 @@ window.doLogout = function(){
     localStorage.removeItem('cme_logged_in');
     localStorage.removeItem('cme_current_user');
   } catch(e){}
+  document.documentElement.removeAttribute('data-logged');
   location.reload();
 };
 
