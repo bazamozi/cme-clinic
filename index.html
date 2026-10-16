@@ -533,6 +533,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwp_yjquh9tEXmy_rPIV
 let doctors = [];
 let calls = [];
 let selectedDoctorId = null;
+var _dataLoaded = false;
 let currentUser = 'morteza';
 
 try {
@@ -673,6 +674,12 @@ function save(){
     localStorage.setItem(K+'_updatedAt', String(now));
   } catch(e){}
   
+  // ⚠️ مهم: تا داده‌ها از سرور لود نشده، push نکن!
+  if(!_dataLoaded){
+    console.log('⏳ منتظر لود شدن داده‌ها از سرور...');
+    return;
+  }
+  
   // 2) نمایش نشانگر «در حال ذخیره»
   showSaveIndicator('saving');
   
@@ -780,7 +787,7 @@ async function pullFromCloud(){
       renderAll();
     }
   } catch(e){}
-  finally { _pulling = false; }
+  finally { _pulling = false; _dataLoaded = true; }
 }
 
 // ============================================
@@ -1884,6 +1891,11 @@ window.restoreFromBackup = function(){
 
 // ===== ذخیره خودکار قبل از بستن صفحه =====
 window.addEventListener('beforeunload', function(e){
+  // ⚠️ محافظ: اگه داده‌ها از سرور لود نشده، هیچ کاری نکن!
+  if(!_dataLoaded){
+    console.log('⏭️ ذخیره نهایی رد شد (داده‌ها لود نشده)');
+    return;
+  }
   // ذخیره فوری محلی
   try {
     localStorage.setItem(K, JSON.stringify(doctors));
@@ -1914,6 +1926,11 @@ setInterval(function(){
 // ===== ذخیره وقتی کاربر از تب خارج میشه =====
 document.addEventListener('visibilitychange', function(){
   if(document.hidden){
+    // ⚠️ محافظ
+    if(!_dataLoaded){
+      console.log('⏭️ ذخیره از تب رد شد');
+      return;
+    }
     try {
       localStorage.setItem(K, JSON.stringify(doctors));
       localStorage.setItem(K+'_calls', JSON.stringify(calls));
@@ -1998,6 +2015,14 @@ window.addEventListener('resize', function(){
 
 // اجرا در شروع
 setTimeout(initMobileEventsTabs, 1000);
+
+// ===== تابع push اجباری (نادیده گرفتن محافظ) =====
+window.forcePushNow = async function(){
+  _dataLoaded = true;  // موقتاً flag رو true کن
+  await pushToCloud();
+  toast('✅ داده‌ها ارسال شد');
+  console.log('🚀 Push اجباری انجام شد');
+};
 </script>
 </body>
 </html>
