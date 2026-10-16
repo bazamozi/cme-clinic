@@ -640,6 +640,52 @@ html.is-logged-in #loginScreen{display:none!important}
 }
 </style>
 
+<style id="mobile-sticky-filters">
+/* ============================================
+   🎯 موبایل: فیلترها همیشه بالای صفحه
+   ============================================ */
+
+@media (max-width: 900px) {
+
+  /* ───── والد یوزر پیکر (مرتضی/پروین/همه) ───── */
+  .user-picker {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 9999 !important;
+    background: linear-gradient(180deg, #0f172a 0%, #0f172a 90%, rgba(15,23,42,0.85) 100%) !important;
+    padding: 8px !important;
+    margin: 0 0 4px 0 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6) !important;
+    border-radius: 0 0 10px 10px !important;
+  }
+
+  /* ───── والد دکمه‌های فیلتر ───── */
+  *:has(> button[data-filter]) {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 56px !important;
+    z-index: 9998 !important;
+    background: linear-gradient(180deg, #0f172a 0%, #0f172a 95%, rgba(15,23,42,0.85) 100%) !important;
+    padding: 8px !important;
+    margin: 0 0 8px 0 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6) !important;
+    border-radius: 0 0 10px 10px !important;
+  }
+
+  /* اگه فیلترها در همون parent یوزر پیکرن */
+  .user-picker + * button[data-filter],
+  .user-picker > button[data-filter] {
+    /* top خودکار می‌مونه زیر یوزر پیکر */
+  }
+
+  /* پدینگ بالا برای محتوا که زیر نوار چسبیده گیر نکنه */
+  #docList, .doc-list {
+    scroll-margin-top: 120px !important;
+  }
+}
+</style>
+
 </head>
 <body>
 
