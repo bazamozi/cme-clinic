@@ -2500,10 +2500,26 @@ function getDoctorStatus(d){
 
 function setDocFilter(filter){
   _docFilter = filter;
+  
+  // ✅ پاک کردن دکتر انتخاب‌شده
+  selectedDoctorId = null;
+  
+  // ✅ پاک کردن پنل وسط
+  var ma = document.getElementById('mainArea');
+  if(ma){
+    ma.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>';
+  }
+  
+  // ✅ آپدیت دکمه‌های تب
   document.querySelectorAll('.doc-filter-tabs button').forEach(function(b){
     if(b.dataset.filter === filter) b.classList.add('active');
     else b.classList.remove('active');
   });
+  
+  // ✅ آپدیت mobile selection
+  if(typeof updateMobileSelection === 'function') updateMobileSelection();
+  
+  // ✅ رندر لیست
   renderDocList();
 }
 
