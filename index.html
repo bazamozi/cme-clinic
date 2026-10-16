@@ -408,13 +408,86 @@ html.is-logged-in #loginScreen{display:none!important}
 
 <style>
 @media (max-width: 768px) {
-  #eventQuickJump {
-    display: flex !important;
   }
+</style>
+
+
+<style>
+/* 🎯 تب‌های رویداد (زیر کارنامه) */
+.event-tabs-wrapper {
+  margin-top: 14px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 217, 255, 0.15);
 }
-#eventQuickJump button:active {
-  transform: scale(0.95);
-  filter: brightness(1.3);
+.event-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+  background: linear-gradient(90deg, rgba(15,23,42,0.9), rgba(30,41,59,0.9));
+  border-bottom: 2px solid rgba(0, 217, 255, 0.25);
+}
+.ev-tab {
+  flex: 1;
+  padding: 11px 8px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ev-tab:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+.ev-tab[data-evtype="وبینار"].active {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(139, 92, 246, 0.1));
+  border-color: #a78bfa;
+  color: #a78bfa;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.35);
+}
+.ev-tab[data-evtype="غیر حضوری"].active {
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.25), rgba(255, 193, 7, 0.1));
+  border-color: #ffc107;
+  color: #ffc107;
+  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.35);
+}
+.ev-tab[data-evtype="حضوری"].active {
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.25), rgba(0, 255, 136, 0.1));
+  border-color: #00ff88;
+  color: #00ff88;
+  box-shadow: 0 4px 15px rgba(0, 255, 136, 0.35);
+}
+.ev-tab-content {
+  display: block;
+  padding: 4px;
+}
+.ev-tab-content.hidden {
+  display: none !important;
+}
+@media (max-width: 768px) {
+  .event-tabs {
+    gap: 4px;
+    padding: 6px;
+  }
+  .ev-tab {
+    padding: 9px 4px;
+    font-size: 11.5px;
+    min-height: 42px;
+    letter-spacing: -0.3px;
+  }
+  .ev-tab-content {
+    padding: 2px;
+  }
 }
 </style>
 
@@ -422,19 +495,6 @@ html.is-logged-in #loginScreen{display:none!important}
 <body>
 
 <!-- 🚀 نوار پرش سریع به تب‌های رویداد (اضافه شده) -->
-<div id="eventQuickJump" style="position:sticky;top:0;z-index:999;background:linear-gradient(90deg,#1a1a2e,#16213e);padding:8px;display:flex;gap:6px;justify-content:center;border-bottom:1px solid #00d9ff33;box-shadow:0 2px 10px rgba(0,217,255,0.15);">
-  <button type="button" onclick="quickJumpToEvent('webinar')" style="flex:1;padding:10px 8px;background:#00d9ff22;color:#00d9ff;border:1px solid #00d9ff;border-radius:8px;font-weight:bold;font-size:13px;cursor:pointer;">
-    💻 وبینار
-  </button>
-  <button type="button" onclick="quickJumpToEvent('inperson')" style="flex:1;padding:10px 8px;background:#00ff8822;color:#00ff88;border:1px solid #00ff88;border-radius:8px;font-weight:bold;font-size:13px;cursor:pointer;">
-    🏢 حضوری
-  </button>
-  <button type="button" onclick="quickJumpToEvent('noninperson')" style="flex:1;padding:10px 8px;background:#ff00ff22;color:#ff00ff;border:1px solid #ff00ff;border-radius:8px;font-weight:bold;font-size:13px;cursor:pointer;">
-    📁 غیرحضوری
-  </button>
-</div>
-
-
 <script>
 // ✅ این کد بلافاصله اجرا میشه — قبل از هر چیزی
 (function(){
@@ -470,21 +530,6 @@ html.is-logged-in #loginScreen{display:none!important}
   </div>
   
 <!-- 🚀 نوار پرش سریع به تب‌های رویداد -->
-<div id="eventQuickJump" style="position:sticky;top:0;z-index:999;background:linear-gradient(90deg,#1a1a2e,#16213e);padding:8px;display:none;gap:6px;justify-content:center;border-bottom:1px solid rgba(0,217,255,0.3);box-shadow:0 2px 10px rgba(0,217,255,0.15);margin-bottom:8px;">
-  <button type="button" onclick="quickJumpToEvent('webinar')" style="flex:1;padding:10px 8px;background:rgba(0,217,255,0.15);color:#00d9ff;border:1px solid #00d9ff;border-radius:8px;font-weight:bold;font-size:13px;cursor:pointer;font-family:inherit;">
-    💻 وبینار
-  </button>
-  <button type="button" onclick="quickJumpToEvent('inperson')" style="flex:1;padding:10px 8px;background:rgba(0,255,136,0.15);color:#00ff88;border:1px solid #00ff88;border-radius:8px;font-weight:bold;font-size:13px;cursor:pointer;font-family:inherit;">
-    🏢 حضوری
-  </button>
-  <button type="button" onclick="quickJumpToEvent('noninperson')" style="flex:1;padding:10px 8px;background:rgba(255,0,255,0.15);color:#ff00ff;border:1px solid #ff00ff;border-radius:8px;font-weight:bold;font-size:13px;cursor:pointer;font-family:inherit;">
-    📁 غیرحضوری
-  </button>
-</div>
-
-
-
-
 <div class="tabs" id="mainTabs">
     <button class="tab active" data-tab="dash">📊 داشبورد</button>
     <button class="tab" data-tab="doctors">👨‍⚕️ دفتر پزشکان</button>
@@ -1222,10 +1267,21 @@ function renderMain(){
             <span class="label">🔑 رمز دوم</span>
             <span class="value ltr">${esc(c.pass2||'—')}</span>
           </div>
-        </div></div>`:''}</div><div class="events-grid">
-      ${renderEventSection(d, 'وبینار', '💻', 'var(--purple)')}
-      ${renderEventSection(d, 'غیر حضوری', '📁', 'var(--warn)')}
-      ${renderEventSection(d, 'حضوری', '🏢', 'var(--accent)')}
+        </div></div>`:''}</div><div class="event-tabs-wrapper">
+      <div class="event-tabs">
+        <button class="ev-tab active" data-evtype="وبینار" onclick="switchEventTab('وبینار', this)">💻 وبینار</button>
+        <button class="ev-tab" data-evtype="غیر حضوری" onclick="switchEventTab('غیر حضوری', this)">📁 غیرحضوری</button>
+        <button class="ev-tab" data-evtype="حضوری" onclick="switchEventTab('حضوری', this)">🏢 حضوری</button>
+      </div>
+      <div class="ev-tab-content" data-evtype="وبینار">
+        ${renderEventSection(d, 'وبینار', '💻', 'var(--purple)')}
+      </div>
+      <div class="ev-tab-content hidden" data-evtype="غیر حضوری">
+        ${renderEventSection(d, 'غیر حضوری', '📁', 'var(--warn)')}
+      </div>
+      <div class="ev-tab-content hidden" data-evtype="حضوری">
+        ${renderEventSection(d, 'حضوری', '🏢', 'var(--accent)')}
+      </div>
     </div>
   `;
 }
@@ -2566,70 +2622,7 @@ window.checkLogin = window.checkLogin || checkLogin;
 console.log('✅ Missing Functions Loaded');
 
 
-// 🚀 پرش سریع به تب رویداد
 
-
-
-// 🚀 پرش سریع به تب رویداد (موبایل)
-window.quickJumpToEvent = function(type){
-  try {
-    var keywords = {
-      'webinar': ['وبینار', 'webinar'],
-      'inperson': ['حضوری', 'inperson'],
-      'noninperson': ['غیرحضوری', 'غیر حضوری', 'noninperson']
-    };
-    var kws = keywords[type] || [];
-    
-    // ۱. جستجو با data-attribute
-    var dataSelectors = {
-      'webinar': '[data-tab="webinar"], [data-event="webinar"]',
-      'inperson': '[data-tab="inperson"], [data-event="inperson"]',
-      'noninperson': '[data-tab="noninperson"], [data-event="noninperson"]'
-    };
-    var el = document.querySelector(dataSelectors[type]);
-    if(el){
-      el.scrollIntoView({behavior:'smooth', block:'center'});
-      setTimeout(function(){ el.click(); }, 150);
-      if(typeof el.onclick === 'function') el.onclick();
-      return true;
-    }
-    
-    // ۲. جستجو با متن دکمه‌ها
-    var all = document.querySelectorAll('button, .tab, [role="tab"], [onclick], a[href*="#"]');
-    for(var i = 0; i < all.length; i++){
-      var t = all[i];
-      var txt = (t.textContent || '').trim();
-      for(var k = 0; k < kws.length; k++){
-        if(txt.indexOf(kws[k]) !== -1 && txt.length < 40){
-          t.scrollIntoView({behavior:'smooth', block:'center'});
-          var clickFn = t.onclick;
-          setTimeout(function(){ 
-            t.click();
-            if(typeof clickFn === 'function') clickFn();
-          }, 150);
-          return true;
-        }
-      }
-    }
-    
-    // ۳. اگه فقط باید اسکرول کنیم
-    var area = document.querySelector('#eventList, #events, [id*="event"]');
-    if(area){
-      area.scrollIntoView({behavior:'smooth', block:'start'});
-      // حالا داخل تب‌ها بگرد
-      setTimeout(function(){
-        var tabs = document.querySelectorAll('[onclick*="Tab"], [onclick*="tab"]');
-        tabs.forEach(function(tb){
-          if(tb.textContent.indexOf(kws[0]) !== -1) tb.click();
-        });
-      }, 300);
-    }
-    return true;
-  } catch(e){
-    console.error('❌ پرش:', e);
-    return false;
-  }
-};
 
 
 // ============================================
@@ -2756,6 +2749,18 @@ setTimeout(function(){
 }, 500);
 
 console.log('✅ Helpers Loaded v3');
+
+
+// 🚀 تب‌های رویداد (زیر کارنامه)
+window.switchEventTab = function(type, btn){
+  try {
+    document.querySelectorAll('.ev-tab').forEach(function(b){ b.classList.remove('active'); });
+    if(btn) btn.classList.add('active');
+    document.querySelectorAll('.ev-tab-content').forEach(function(ct){ ct.classList.add('hidden'); });
+    var content = document.querySelector('.ev-tab-content[data-evtype="'+type+'"]');
+    if(content) content.classList.remove('hidden');
+  } catch(e){ console.error('switchEventTab:', e); }
+};
 
 </script>
 </body>
