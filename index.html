@@ -423,24 +423,44 @@ html.is-logged-in #loginScreen{display:none!important}
 
 
 <style>
-/* 🎯 سه بخش رویداد — افقی، ۳ ستون */
 
-/* تب‌ها مخفی */
-.event-tabs { display: none !important; }
-.ev-tab { display: none !important; }
 
-/* wrapper اصلی: grid 3 ستونه */
-.event-tabs-wrapper {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 12px;
-  margin-top: 16px;
-  border: none !important;
-  background: transparent !important;
-  align-items: start;
+
+<style>
+/* ============================================
+   🎯 سه بخش رویداد — افقی، ۳ ستون دقیق
+   ترتیب راست به چپ: وبینار | غیرحضوری | حضوری
+   ============================================ */
+
+/* تب‌های قدیمی کاملاً حذف */
+.event-tabs,
+.event-tabs-wrapper > .event-tabs,
+.ev-tab {
+  display: none !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
-/* هر ستون */
+/* wrapper اصلی — GRID اجباری ۳ ستونه */
+.event-tabs-wrapper {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr 1fr !important;
+  grid-auto-flow: row !important;
+  gap: 12px !important;
+  margin-top: 16px !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  align-items: stretch !important;
+  direction: rtl !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* همه محتواها نمایش داده بشن */
 .event-tabs-wrapper .ev-tab-content,
 .ev-tab-content,
 .ev-tab-content.hidden {
@@ -448,66 +468,85 @@ html.is-logged-in #loginScreen{display:none!important}
   padding: 0 !important;
   margin: 0 !important;
   border: none !important;
-  min-width: 0;
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  align-self: start !important;
 }
 
-/* هدر و بدنه هر ستون */
+/* ستون‌های صریح بر اساس نوع رویداد */
+.ev-tab-content[data-evtype="وبینار"] { grid-column: 1 !important; grid-row: 1 !important; }
+.ev-tab-content[data-evtype="غیر حضوری"] { grid-column: 2 !important; grid-row: 1 !important; }
+.ev-tab-content[data-evtype="حضوری"] { grid-column: 3 !important; grid-row: 1 !important; }
+
+/* بخش هر رویداد */
 .ev-section {
-  border-radius: 12px;
-  border: 1px solid rgba(0, 217, 255, 0.18);
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.4));
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+  border-radius: 12px !important;
+  border: 1px solid rgba(0, 217, 255, 0.18) !important;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.4)) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  min-height: 140px !important;
+  box-sizing: border-box !important;
 }
 
 /* هدر هر بخش */
 .ev-section .ev-head {
-  padding: 10px 12px;
-  background: linear-gradient(90deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.7));
-  border-bottom: 1px solid rgba(0, 217, 255, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
+  padding: 10px 12px !important;
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.7)) !important;
+  border-bottom: 1px solid rgba(0, 217, 255, 0.15) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
 }
 
 .ev-section .ev-head h3 {
-  margin: 0;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 800;
+  margin: 0 !important;
+  font-size: 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-weight: 800 !important;
 }
 
 .ev-section .ev-head h3 .count {
-  background: rgba(0, 217, 255, 0.15);
-  color: #38bdf8;
-  border: 1px solid rgba(0, 217, 255, 0.4);
-  border-radius: 20px;
-  padding: 1px 8px;
-  font-size: 11px;
-  font-weight: 800;
+  background: rgba(0, 217, 255, 0.15) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(0, 217, 255, 0.4) !important;
+  border-radius: 20px !important;
+  padding: 1px 8px !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
 }
 
+/* بدنه */
 .ev-section .ev-body {
-  padding: 8px;
-  flex: 1;
-  overflow-y: auto;
-  max-height: 400px;
+  padding: 8px !important;
+  flex: 1 !important;
+  overflow-y: auto !important;
+  max-height: 400px !important;
 }
 
-/* موبایل: عمودی برگردون */
+/* موبایل: عمودی */
 @media (max-width: 900px) {
   .event-tabs-wrapper {
-    grid-template-columns: 1fr;
-    gap: 10px;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
   }
+  .ev-tab-content[data-evtype="وبینار"] { grid-column: 1 !important; grid-row: 1 !important; }
+  .ev-tab-content[data-evtype="غیر حضوری"] { grid-column: 1 !important; grid-row: 2 !important; }
+  .ev-tab-content[data-evtype="حضوری"] { grid-column: 1 !important; grid-row: 3 !important; }
   .ev-section .ev-body {
-    max-height: none;
+    max-height: none !important;
+  }
+  .ev-section {
+    min-height: auto !important;
   }
 }
 </style>
