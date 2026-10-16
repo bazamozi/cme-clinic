@@ -447,11 +447,20 @@ html.is-logged-in #loginScreen{display:none!important}
 
 
 <style>
+
+
+
+<style>
+
+
+
+<style>
 /* ============================================
    🎯 رویدادها — دسکتاپ: ۳ ستون | موبایل: تب
+   روش: data-attribute روی wrapper
    ============================================ */
 
-/* دسکتاپ */
+/* ---------- دسکتاپ ---------- */
 .event-tabs { display: none !important; }
 .ev-tab { display: none !important; }
 
@@ -465,9 +474,7 @@ html.is-logged-in #loginScreen{display:none!important}
   box-sizing: border-box !important;
 }
 
-/* دسکتاپ — همه نشون داده بشن (حتی اگه hidden داشته باشن) */
-.ev-tab-content,
-.ev-tab-content.hidden {
+.ev-tab-content {
   display: block !important;
   padding: 0 !important;
   margin: 0 !important;
@@ -527,7 +534,9 @@ html.is-logged-in #loginScreen{display:none!important}
   flex: 1 !important;
 }
 
-/* ============ موبایل ============ */
+/* ============================================
+   موبایل — همه مخفی، فقط data-ev نشون داده بشه
+   ============================================ */
 @media (max-width: 900px) {
 
   .event-tabs-wrapper {
@@ -535,6 +544,7 @@ html.is-logged-in #loginScreen{display:none!important}
     margin-top: 12px !important;
   }
 
+  /* نوار تب */
   .event-tabs {
     display: flex !important;
     gap: 6px !important;
@@ -544,6 +554,8 @@ html.is-logged-in #loginScreen{display:none!important}
     border: 1px solid rgba(0, 217, 255, 0.2) !important;
     border-radius: 10px !important;
     direction: rtl !important;
+    position: relative !important;
+    z-index: 10 !important;
   }
 
   .ev-tab {
@@ -558,12 +570,17 @@ html.is-logged-in #loginScreen{display:none!important}
     font-family: inherit !important;
     cursor: pointer !important;
     pointer-events: auto !important;
+    -webkit-tap-highlight-color: transparent !important;
+    touch-action: manipulation !important;
+    position: relative !important;
+    z-index: 11 !important;
     background: rgba(255, 255, 255, 0.05) !important;
     border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
     color: #94a3b8 !important;
     min-height: 44px !important;
     gap: 4px !important;
     transition: all 0.2s ease !important;
+    user-select: none !important;
   }
 
   .ev-tab[data-evtype="وبینار"].active {
@@ -585,22 +602,31 @@ html.is-logged-in #loginScreen{display:none!important}
     box-shadow: 0 4px 15px rgba(0, 255, 136, 0.35) !important;
   }
 
-  /* موبایل: همه مخفی، JS با inline style نشون میده */
-  .ev-tab-content,
-  .ev-tab-content.hidden {
+  /* 🎯 موبایل: همه مخفی */
+  .ev-tab-content {
     display: none !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
   }
-  /* وبینار پیش‌فرض قبل از اجرای JS */
-  .ev-tab-content[data-evtype="وبینار"],
-  .ev-tab-content[data-evtype="وبینار"].hidden {
+
+  /* 🎯 فقط بر اساس data-ev روی wrapper نشون بده */
+
+  /* وبینار فعال */
+  .event-tabs-wrapper[data-ev="وبینار"] .ev-tab-content[data-evtype="وبینار"] {
+    display: block !important;
+  }
+  /* غیرحضوری فعال */
+  .event-tabs-wrapper[data-ev="غیر حضوری"] .ev-tab-content[data-evtype="غیر حضوری"] {
+    display: block !important;
+  }
+  /* حضوری فعال */
+  .event-tabs-wrapper[data-ev="حضوری"] .ev-tab-content[data-evtype="حضوری"] {
     display: block !important;
   }
 
-  .ev-tab-content[data-evtype="وبینار"],
-  .ev-tab-content[data-evtype="غیر حضوری"],
-  .ev-tab-content[data-evtype="حضوری"] {
-    grid-column: auto !important;
-    grid-row: auto !important;
+  /* fallback: اگه data-ev نبود، وبینار نشون داده بشه */
+  .event-tabs-wrapper:not([data-ev]) .ev-tab-content[data-evtype="وبینار"] {
+    display: block !important;
   }
 
   .ev-section { min-height: auto !important; }
@@ -2901,83 +2927,32 @@ if(typeof window._evTabDelegated === 'undefined'){
 }
 
 
+
 // ============================================
-// 🎯 تب رویداد — نسخه نهایی (inline style)
+// 🎯 تب رویداد — v5 (data-attribute)
 // ============================================
 
-window._currentEvTab = window._currentEvTab || 'وبینار';
-
-window.switchEventTab = function(type, btn){
+// 🎯 اطمینان از data-ev اولیه بعد از هر رندر
+function _ensureEvWrapperState(){
   try {
-    window._currentEvTab = type;
-    var isMobile = window.innerWidth <= 900;
-    console.log('🎯 switch:', type, '| mobile:', isMobile);
-    
-    // حذف hidden از همه + کلاس active دکمه‌ها
-    document.querySelectorAll('.ev-tab').forEach(function(b){
-      b.classList.remove('hidden');
-      b.classList.remove('active');
-      b.type = 'button';
-      if(b.getAttribute('data-evtype') === type) b.classList.add('active');
-    });
-    
-    // محتوا
-    document.querySelectorAll('.ev-tab-content').forEach(function(ct){
-      ct.classList.remove('hidden');
-      var isTarget = ct.getAttribute('data-evtype') === type;
-      if(isTarget) ct.classList.add('active');
-      else ct.classList.remove('active');
-      
-      if(isMobile){
-        if(isTarget){
-          ct.style.setProperty('display', 'block', 'important');
-        } else {
-          ct.style.setProperty('display', 'none', 'important');
-        }
-      } else {
-        ct.style.removeProperty('display');
-      }
-    });
-    
-    return false;
-  } catch(e){ console.error('switchEventTab:', e); }
-};
-
-// 🎯 اعمال مجدد
-function _applyEvTab(){
-  var isMobile = window.innerWidth <= 900;
-  var t = window._currentEvTab || 'وبینار';
-  
-  // پاک کردن hidden از دکمه‌ها
-  document.querySelectorAll('.ev-tab').forEach(function(b){
-    b.classList.remove('hidden');
-    b.type = 'button';
-    if(b.getAttribute('data-evtype') === t) b.classList.add('active');
-    else b.classList.remove('active');
-  });
-  
-  document.querySelectorAll('.ev-tab-content').forEach(function(ct){
-    ct.classList.remove('hidden');
-    var isTarget = ct.getAttribute('data-evtype') === t;
-    if(isTarget) ct.classList.add('active');
-    else ct.classList.remove('active');
-    
-    if(isMobile){
-      if(isTarget){
-        ct.style.setProperty('display', 'block', 'important');
-      } else {
-        ct.style.setProperty('display', 'none', 'important');
-      }
-    } else {
-      ct.style.removeProperty('display');
+    var wrapper = document.querySelector('.event-tabs-wrapper');
+    if(!wrapper) return;
+    if(!wrapper.getAttribute('data-ev')){
+      wrapper.setAttribute('data-ev', 'وبینار');
     }
-  });
+    // کلاس active روی وبینار
+    var hasActive = document.querySelector('.ev-tab.active');
+    if(!hasActive){
+      var firstBtn = document.querySelector('.ev-tab[data-evtype="وبینار"]');
+      if(firstBtn) firstBtn.classList.add('active');
+    }
+  } catch(e){}
 }
 
-// 🎯 Delegation — کلیک + لمس
-if(!window._evDelegated){
-  window._evDelegated = true;
-  var handler = function(e){
+// 🎯 Event delegation — capture + touchend
+if(!window._evDelegatedV5){
+  window._evDelegatedV5 = true;
+  var _handler = function(e){
     var tab = e.target && e.target.closest ? e.target.closest('.ev-tab') : null;
     if(!tab) return;
     var type = tab.getAttribute('data-evtype');
@@ -2986,31 +2961,105 @@ if(!window._evDelegated){
     e.stopPropagation();
     window.switchEventTab(type, tab);
   };
-  document.addEventListener('click', handler, true);
-  document.addEventListener('touchend', handler, true);
+  document.addEventListener('click', _handler, true);
+  document.addEventListener('touchend', _handler, true);
+  console.log('✅ Event Tabs v5 — delegation فعال');
 }
 
-// 🎯 Observer روی mainArea
-if(!window._evObserverSetup){
-  window._evObserverSetup = true;
-  var iv = setInterval(function(){
+// 🎯 MutationObserver
+if(!window._evObserverV5){
+  window._evObserverV5 = true;
+  var _iv = setInterval(function(){
     var ma = document.getElementById('mainArea');
     if(!ma) return;
-    if(ma._evObs){ clearInterval(iv); return; }
-    ma._evObs = true;
-    clearInterval(iv);
+    if(ma._evObsV5){ clearInterval(_iv); return; }
+    ma._evObsV5 = true;
+    clearInterval(_iv);
     new MutationObserver(function(muts){
       var has = muts.some(function(m){ return m.type === 'childList' && m.addedNodes.length; });
-      if(has) setTimeout(_applyEvTab, 100);
+      if(has) setTimeout(_ensureEvWrapperState, 100);
     }).observe(ma, {childList: true});
-    console.log('✅ ev observer');
+    console.log('✅ MutationObserver فعال');
   }, 500);
 }
 
-window.addEventListener('resize', function(){ setTimeout(_applyEvTab, 150); });
-setTimeout(_applyEvTab, 800);
+setTimeout(_ensureEvWrapperState, 500);
 
-console.log('✅ Event Tabs v4');
+
+// ============================================
+// 🎯 تب رویداد — v5 (data-attribute)
+// ============================================
+
+window.switchEventTab = function(type, btn){
+  try {
+    console.log('🎯 switch:', type);
+    
+    // ۱. data-ev روی wrapper
+    var wrapper = document.querySelector('.event-tabs-wrapper');
+    if(wrapper) wrapper.setAttribute('data-ev', type);
+    
+    // ۲. کلاس active روی دکمه‌ها
+    document.querySelectorAll('.ev-tab').forEach(function(b){
+      b.classList.remove('active');
+      if(b.getAttribute('data-evtype') === type) b.classList.add('active');
+    });
+    
+    return false;
+  } catch(e){ console.error('switchEventTab:', e); }
+};
+
+// 🎯 اطمینان از data-ev اولیه بعد از هر رندر
+function _ensureEvWrapperState(){
+  try {
+    var wrapper = document.querySelector('.event-tabs-wrapper');
+    if(!wrapper) return;
+    if(!wrapper.getAttribute('data-ev')){
+      wrapper.setAttribute('data-ev', 'وبینار');
+    }
+    // کلاس active روی وبینار
+    var hasActive = document.querySelector('.ev-tab.active');
+    if(!hasActive){
+      var firstBtn = document.querySelector('.ev-tab[data-evtype="وبینار"]');
+      if(firstBtn) firstBtn.classList.add('active');
+    }
+  } catch(e){}
+}
+
+// 🎯 Event delegation — capture + touchend
+if(!window._evDelegatedV5){
+  window._evDelegatedV5 = true;
+  var _handler = function(e){
+    var tab = e.target && e.target.closest ? e.target.closest('.ev-tab') : null;
+    if(!tab) return;
+    var type = tab.getAttribute('data-evtype');
+    if(!type) return;
+    e.preventDefault();
+    e.stopPropagation();
+    window.switchEventTab(type, tab);
+  };
+  document.addEventListener('click', _handler, true);
+  document.addEventListener('touchend', _handler, true);
+  console.log('✅ Event Tabs v5 — delegation فعال');
+}
+
+// 🎯 MutationObserver
+if(!window._evObserverV5){
+  window._evObserverV5 = true;
+  var _iv = setInterval(function(){
+    var ma = document.getElementById('mainArea');
+    if(!ma) return;
+    if(ma._evObsV5){ clearInterval(_iv); return; }
+    ma._evObsV5 = true;
+    clearInterval(_iv);
+    new MutationObserver(function(muts){
+      var has = muts.some(function(m){ return m.type === 'childList' && m.addedNodes.length; });
+      if(has) setTimeout(_ensureEvWrapperState, 100);
+    }).observe(ma, {childList: true});
+    console.log('✅ MutationObserver فعال');
+  }, 500);
+}
+
+setTimeout(_ensureEvWrapperState, 500);
 
 </script>
 </body>
