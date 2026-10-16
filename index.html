@@ -1098,6 +1098,32 @@ window.backToList = function(){
 // ============================================
 // DOCTOR DETAIL
 // ============================================
+function openIRCME(nat, pass){
+  if(!nat || !pass){
+    if(typeof toast === 'function') toast('⚠️ کد ملی یا رمز سامانه موجود نیست');
+    else alert('کد ملی یا رمز سامانه موجود نیست');
+    return;
+  }
+  
+  var url = 'https://www.ircme.ir/App_Web/%28Guest%29/Membership/Login.aspx?CenterID=25&u=' 
+            + encodeURIComponent(nat) 
+            + '&p=' 
+            + encodeURIComponent(pass);
+  
+  console.log('🔗 باز کردن:', url);
+  
+  var a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  
+  if(typeof toast === 'function') toast('🔗 در حال باز کردن...');
+}
+window.openIRCME = openIRCME;
+
 function renderMain(){
   const el = document.getElementById('mainArea');
   if(!el) return;
@@ -1701,32 +1727,7 @@ window.quickLogin = function(nat, pass, name){
 };
 
 // ===== Open IRCME Login =====
-window.openIRCME = function(nat, pass){
-  if(!nat || !pass){
-    if(typeof toast === 'function') toast('⚠️ کد ملی یا رمز سامانه موجود نیست');
-    else alert('کد ملی یا رمز سامانه موجود نیست');
-    return;
-  }
-  
-  // ساده‌ترین راه: یک <a> بساز و کلیک کن
-  var url = 'https://www.ircme.ir/App_Web/%28Guest%29/Membership/Login.aspx?CenterID=25&u=' 
-            + encodeURIComponent(nat) 
-            + '&p=' 
-            + encodeURIComponent(pass);
-  
-  console.log('🔗 باز کردن:', url);
-  
-  // ساخت یک لینک مخفی و کلیک
-  var a = document.createElement('a');
-  a.href = url;
-  a.target = '_blank';
-  a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  
-  if(typeof toast === 'function') toast('🔗 در حال باز کردن سایت...');
-};
+// openIRCME منتقل شد
 
 /* ===== Auto Attend System ===== */
 function getShamsiToday(){
