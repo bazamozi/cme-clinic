@@ -705,18 +705,13 @@ html.is-logged-in #loginScreen{display:none!important}
 
 
 
+
+
 <style id="bank-card-css">
 /* ============================================
-   🎯 کارت بانکی — نصف عرض، همیشه نمایش، بدون دکمه
+   🎯 کارت بانکی — نصف عرض، همیشه نمایش
    ============================================ */
 
-/* حذف wrapper اضافی */
-#mainArea .doc-header > div:has(.bank-card-display) {
-  margin-top: 8px !important;
-  width: 50% !important;
-}
-
-/* کانتینر اصلی — ۵۰٪ عرض */
 .bank-card-display {
   display: grid !important;
   grid-template-columns: 2fr 1fr 1fr 1fr 1.25fr !important;
@@ -730,8 +725,8 @@ html.is-logged-in #loginScreen{display:none!important}
   direction: rtl !important;
   font-size: 13px !important;
   line-height: 1.5 !important;
-  width: 50% !important;
-  max-width: 50% !important;
+  width: 100% !important;
+  max-width: 100% !important;
   box-sizing: border-box !important;
 }
 
@@ -822,25 +817,12 @@ html.is-logged-in #loginScreen{display:none!important}
   color: #38bdf8 !important;
   border: 1px solid rgba(0, 217, 255, 0.4) !important;
   font-weight: 700 !important;
-  transition: all 0.15s !important;
   margin: 0 !important;
   flex-shrink: 0 !important;
 }
 
-.bank-card-display .copy-inline:hover {
-  background: rgba(0, 217, 255, 0.3) !important;
-}
-
-.bank-card-display .copy-inline:active {
-  transform: scale(0.94) !important;
-}
-
-/* موبایل — ۱۰۰٪ عرض */
+/* موبایل — ۱۰۰٪ */
 @media (max-width: 768px) {
-  #mainArea .doc-header > div:has(.bank-card-display) {
-    width: 100% !important;
-  }
-  
   .bank-card-display {
     grid-template-columns: 1fr 1fr 1fr 1fr !important;
     gap: 5px !important;
@@ -852,18 +834,6 @@ html.is-logged-in #loginScreen{display:none!important}
   .bank-card-display .bank-cell-compact.card-number {
     grid-column: 1 / -1 !important;
     margin-bottom: 4px !important;
-  }
-  
-  .bank-card-display .bank-cell-compact .label {
-    font-size: 11px !important;
-  }
-  
-  .bank-card-display .bank-cell-compact .value {
-    font-size: 12px !important;
-  }
-  
-  .bank-card-display .bank-cell-compact.card-number .value {
-    font-size: 13px !important;
   }
 }
 </style>
@@ -4423,6 +4393,77 @@ window.isDone = isDone;
   console.log('✅ Auto-Save Hook v2 فعال — localStorage + push');
 })();
 
+</script>
+
+<script id="bank-card-js">
+// 🎯 کارت بانکی: نصف عرض + همیشه نمایش
+(function(){
+  if(window._bankCardFix) return;
+  window._bankCardFix = true;
+  
+  function fixBankCardWidth(){
+    try {
+      var isMobile = window.innerWidth <= 768;
+      var cards = document.querySelectorAll('.bank-card-display');
+      
+      cards.forEach(function(card){
+        // کارت همیشه نمایش
+        card.classList.remove('hidden');
+        card.style.setProperty('display', 'grid', 'important');
+        card.style.setProperty('width', '100%', 'important');
+        card.style.setProperty('max-width', '100%', 'important');
+        card.style.setProperty('box-sizing', 'border-box', 'important');
+        
+        // والد — نصف عرض (در مک)
+        var wrapper = card.parentElement;
+        if(wrapper && !wrapper.classList.contains('bank-card-display')){
+          if(isMobile){
+            wrapper.style.setProperty('width', '100%', 'important');
+            wrapper.style.setProperty('max-width', '100%', 'important');
+          } else {
+            wrapper.style.setProperty('width', '50%', 'important');
+            wrapper.style.setProperty('max-width', '50%', 'important');
+          }
+          wrapper.style.setProperty('box-sizing', 'border-box', 'important');
+        }
+      });
+      
+      // حذف دکمه‌های نمایش کارت
+      document.querySelectorAll('[onclick*="toggleCard"]').forEach(function(btn){
+        btn.style.display = 'none';
+      });
+    } catch(e){}
+  }
+  
+  // اجرا اولیه
+  setTimeout(fixBankCardWidth, 300);
+  setTimeout(fixBankCardWidth, 1000);
+  setTimeout(fixBankCardWidth, 2500);
+  
+  // MutationObserver روی mainArea
+  setTimeout(function(){
+    var ma = document.getElementById('mainArea');
+    if(ma){
+      var debounceTimer;
+      new MutationObserver(function(){
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(fixBankCardWidth, 150);
+      }).observe(ma, {childList: true, subtree: false});
+    }
+  }, 1500);
+  
+  // هر ۲ ثانیه چک (سبک)
+  setInterval(fixBankCardWidth, 2000);
+  
+  // resize
+  var resTimer;
+  window.addEventListener('resize', function(){
+    clearTimeout(resTimer);
+    resTimer = setTimeout(fixBankCardWidth, 200);
+  });
+  
+  console.log('✅ Bank Card Fix فعال — نصف عرض، همیشه نمایش');
+})();
 </script>
 
 </body>
