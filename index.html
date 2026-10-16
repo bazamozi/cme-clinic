@@ -707,26 +707,28 @@ html.is-logged-in #loginScreen{display:none!important}
 
 
 
+
+
 <style id="bank-card-css">
 /* ============================================
-   🎯 کارت بانکی — نصف عرض، همیشه نمایش
+   🎯 کارت بانکی — نصف عرض خود کارت
    ============================================ */
 
+/* کارت بانکی — ۵۰٪ عرض */
 .bank-card-display {
   display: grid !important;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1.25fr !important;
-  gap: 6px !important;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr) !important;
+  gap: 8px !important;
   align-items: center !important;
-  margin-top: 8px !important;
-  padding: 10px 12px !important;
+  margin-top: 10px !important;
+  padding: 10px 14px !important;
   background: rgba(15, 23, 42, 0.5) !important;
   border: 1px solid rgba(0, 217, 255, 0.18) !important;
   border-radius: 8px !important;
   direction: rtl !important;
-  font-size: 13px !important;
-  line-height: 1.5 !important;
-  width: 100% !important;
-  max-width: 100% !important;
+  width: 50% !important;
+  max-width: 50% !important;
+  min-width: 450px !important;
   box-sizing: border-box !important;
 }
 
@@ -738,21 +740,18 @@ html.is-logged-in #loginScreen{display:none!important}
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
-  justify-content: flex-start !important;
   gap: 4px !important;
   padding: 0 !important;
   margin: 0 !important;
   background: transparent !important;
   border: none !important;
   min-width: 0 !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-  white-space: nowrap !important;
   overflow: hidden !important;
+  white-space: nowrap !important;
 }
 
 .bank-card-display .bank-cell-compact .label {
-  font-size: 11.5px !important;
+  font-size: 12px !important;
   color: #94a3b8 !important;
   font-weight: 700 !important;
   white-space: nowrap !important;
@@ -768,11 +767,11 @@ html.is-logged-in #loginScreen{display:none!important}
 }
 
 .bank-card-display .bank-cell-compact .value {
-  font-size: 12.5px !important;
+  font-size: 13px !important;
   color: #e2e8f0 !important;
   font-weight: 800 !important;
   font-family: 'SF Mono', Menlo, Consolas, monospace !important;
-  letter-spacing: 0.2px !important;
+  letter-spacing: 0.3px !important;
   white-space: nowrap !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -781,18 +780,19 @@ html.is-logged-in #loginScreen{display:none!important}
   min-width: 0 !important;
 }
 
+/* شماره کارت */
 .bank-card-display .bank-cell-compact.card-number {
   justify-content: space-between !important;
-  gap: 4px !important;
-  padding: 4px 8px !important;
+  gap: 6px !important;
+  padding: 5px 10px !important;
   background: rgba(0, 217, 255, 0.08) !important;
   border: 1px solid rgba(0, 217, 255, 0.25) !important;
-  border-radius: 5px !important;
+  border-radius: 6px !important;
 }
 
 .bank-card-display .bank-cell-compact.card-number .label {
   color: #38bdf8 !important;
-  font-size: 11px !important;
+  font-size: 11.5px !important;
   flex-shrink: 0 !important;
 }
 
@@ -801,16 +801,16 @@ html.is-logged-in #loginScreen{display:none!important}
 }
 
 .bank-card-display .bank-cell-compact.card-number .value {
-  font-size: 13px !important;
+  font-size: 14px !important;
   color: #38bdf8 !important;
-  letter-spacing: 0.8px !important;
+  letter-spacing: 1px !important;
   flex: 1 1 auto !important;
   text-align: center !important;
 }
 
 .bank-card-display .copy-inline {
-  font-size: 10px !important;
-  padding: 2px 6px !important;
+  font-size: 10.5px !important;
+  padding: 2px 7px !important;
   border-radius: 4px !important;
   cursor: pointer !important;
   background: rgba(0, 217, 255, 0.15) !important;
@@ -821,19 +821,25 @@ html.is-logged-in #loginScreen{display:none!important}
   flex-shrink: 0 !important;
 }
 
+/* 🎯 مخفی کردن دکمه "نمایش کارت بانکی" */
+button[onclick*="toggleCard"] {
+  display: none !important;
+}
+
 /* موبایل — ۱۰۰٪ */
 @media (max-width: 768px) {
   .bank-card-display {
     grid-template-columns: 1fr 1fr 1fr 1fr !important;
-    gap: 5px !important;
-    padding: 8px 10px !important;
+    gap: 6px !important;
+    padding: 10px 12px !important;
     width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
   }
   
   .bank-card-display .bank-cell-compact.card-number {
     grid-column: 1 / -1 !important;
-    margin-bottom: 4px !important;
+    margin-bottom: 6px !important;
   }
 }
 </style>
@@ -4395,74 +4401,40 @@ window.isDone = isDone;
 
 </script>
 
-<script id="bank-card-js">
-// 🎯 کارت بانکی: نصف عرض + همیشه نمایش
+
+
+<script>
 (function(){
-  if(window._bankCardFix) return;
-  window._bankCardFix = true;
+  if(window._bankCardShow) return;
+  window._bankCardShow = true;
   
-  function fixBankCardWidth(){
-    try {
-      var isMobile = window.innerWidth <= 768;
-      var cards = document.querySelectorAll('.bank-card-display');
-      
-      cards.forEach(function(card){
-        // کارت همیشه نمایش
-        card.classList.remove('hidden');
-        card.style.setProperty('display', 'grid', 'important');
-        card.style.setProperty('width', '100%', 'important');
-        card.style.setProperty('max-width', '100%', 'important');
-        card.style.setProperty('box-sizing', 'border-box', 'important');
-        
-        // والد — نصف عرض (در مک)
-        var wrapper = card.parentElement;
-        if(wrapper && !wrapper.classList.contains('bank-card-display')){
-          if(isMobile){
-            wrapper.style.setProperty('width', '100%', 'important');
-            wrapper.style.setProperty('max-width', '100%', 'important');
-          } else {
-            wrapper.style.setProperty('width', '50%', 'important');
-            wrapper.style.setProperty('max-width', '50%', 'important');
-          }
-          wrapper.style.setProperty('box-sizing', 'border-box', 'important');
-        }
-      });
-      
-      // حذف دکمه‌های نمایش کارت
-      document.querySelectorAll('[onclick*="toggleCard"]').forEach(function(btn){
-        btn.style.display = 'none';
-      });
-    } catch(e){}
+  function showCards(){
+    document.querySelectorAll('.bank-card-display').forEach(function(el){
+      el.classList.remove('hidden');
+    });
+    // پنهان کردن دکمه نمایش کارت
+    document.querySelectorAll('button[onclick*="toggleCard"]').forEach(function(btn){
+      btn.style.setProperty('display', 'none', 'important');
+    });
   }
   
-  // اجرا اولیه
-  setTimeout(fixBankCardWidth, 300);
-  setTimeout(fixBankCardWidth, 1000);
-  setTimeout(fixBankCardWidth, 2500);
+  setTimeout(showCards, 500);
+  setTimeout(showCards, 1500);
+  setInterval(showCards, 2500);
   
-  // MutationObserver روی mainArea
+  // Observer روی mainArea
   setTimeout(function(){
     var ma = document.getElementById('mainArea');
     if(ma){
-      var debounceTimer;
+      var t;
       new MutationObserver(function(){
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(fixBankCardWidth, 150);
+        clearTimeout(t);
+        t = setTimeout(showCards, 150);
       }).observe(ma, {childList: true, subtree: false});
     }
   }, 1500);
   
-  // هر ۲ ثانیه چک (سبک)
-  setInterval(fixBankCardWidth, 2000);
-  
-  // resize
-  var resTimer;
-  window.addEventListener('resize', function(){
-    clearTimeout(resTimer);
-    resTimer = setTimeout(fixBankCardWidth, 200);
-  });
-  
-  console.log('✅ Bank Card Fix فعال — نصف عرض، همیشه نمایش');
+  console.log('✅ Bank Card Show فعال');
 })();
 </script>
 
