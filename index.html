@@ -2486,15 +2486,23 @@ setTimeout(checkLogin, 100);
 var _docFilter = 'active';  // پیش‌فرض: در حال اجرا
 
 function getDoctorStatus(d){
-  // 1) تکمیل‌شده
-  if(typeof isComplete === 'function' && isComplete(d)) return 'done';
-  
-  // 2) در حال اجرا: حداقل یک رویداد یا پرداخت داره
-  var hasEvents = (d.events || []).length > 0;
+  var events = (d.events || []);
   var hasPaid = (d.finance && Number(d.finance.paid || 0) > 0);
-  if(hasEvents || hasPaid) return 'active';
   
-  // 3) بلاتکلیف: تازه اضافه شده، نه رویداد نه پرداخت
+  // اگه رویداد داره
+  if(events.length > 0){
+    // چک کن همه رویدادها کامل هستن
+    var allComplete = events.every(function(e){
+      return (typeof eventComplete === 'function') ? eventComplete(e) : false;
+    });
+    if(allComplete) return 'done';
+    return 'active';
+  }
+  
+  // اگه رویداد نداره ولی پرداخت داره
+  if(hasPaid) return 'active';
+  
+  // بلاتکلیف
   return 'pending';
 }
 
