@@ -655,41 +655,9 @@ document.addEventListener('input', e => {
 // ============================================
 
 
-function updateFilterCounts(){
-  try {
-    if(typeof myDoctors !== 'function') return;
-    var all = myDoctors();
-    var counts = { active: 0, done: 0, pending: 0 };
-    all.forEach(function(d){
-      var st = (typeof getDoctorStatus === 'function') ? getDoctorStatus(d) : 'active';
-      if(counts[st] !== undefined) counts[st]++;
-    });
-    var ce = document.getElementById('cntActive');
-    var cd = document.getElementById('cntDone');
-    var cp = document.getElementById('cntPending');
-    if(ce) ce.textContent = counts.active;
-    if(cd) cd.textContent = counts.done;
-    if(cp) cp.textContent = counts.pending;
-  } catch(e){}
-}
+// transferred
 
-function checkLogin(){
-  try {
-    var logged = localStorage.getItem('cme_logged_in');
-    var screenEl = document.getElementById('loginScreen');
-    if(!screenEl) return;
-    if(logged === 'morteza' || logged === 'parvin'){
-      screenEl.classList.add('hidden');
-      screenEl.style.display = 'none';
-      document.documentElement.classList.add('is-logged-in');
-      if(typeof currentUser !== 'undefined') window.currentUser = logged;
-    } else {
-      screenEl.classList.remove('hidden');
-      screenEl.style.display = 'flex';
-      document.documentElement.classList.remove('is-logged-in');
-    }
-  } catch(e){}
-}
+// transferred
 
 
 // 🚀 تابع پرش سریع به تب رویداد (اضافه شده)
@@ -753,6 +721,42 @@ function quickJumpToEvent(type){
   }
 }
 
+
+function updateFilterCounts(){
+  try {
+    if(typeof myDoctors !== 'function') return;
+    var all = myDoctors();
+    var counts = { active: 0, done: 0, pending: 0 };
+    all.forEach(function(d){
+      var st = (typeof getDoctorStatus === 'function') ? getDoctorStatus(d) : 'active';
+      if(counts[st] !== undefined) counts[st]++;
+    });
+    var ce = document.getElementById('cntActive');
+    var cd = document.getElementById('cntDone');
+    var cp = document.getElementById('cntPending');
+    if(ce) ce.textContent = counts.active;
+    if(cd) cd.textContent = counts.done;
+    if(cp) cp.textContent = counts.pending;
+  } catch(e){}
+}
+
+function checkLogin(){
+  try {
+    var logged = localStorage.getItem('cme_logged_in');
+    var screenEl = document.getElementById('loginScreen');
+    if(!screenEl) return;
+    if(logged === 'morteza' || logged === 'parvin'){
+      screenEl.classList.add('hidden');
+      screenEl.style.display = 'none';
+      document.documentElement.classList.add('is-logged-in');
+      if(typeof currentUser !== 'undefined') window.currentUser = logged;
+    } else {
+      screenEl.classList.remove('hidden');
+      screenEl.style.display = 'flex';
+      document.documentElement.classList.remove('is-logged-in');
+    }
+  } catch(e){}
+}
 
 function myDoctors(){
   if(currentUser === 'all') return doctors;
