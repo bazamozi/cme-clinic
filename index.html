@@ -3828,7 +3828,8 @@ setTimeout(function(){
 
 
 
-<!-- 🎯 Mobile Sticky Filter Bar v3 (فقط در پروفایل، نه در مودال) -->
+
+<!-- 🎯 Mobile Filter Bar v4 — JS مستقیم -->
 <style id="mobile-filterbar-css">
 @media (max-width: 900px) {
   body.has-mobile-filterbar #mainArea {
@@ -3846,21 +3847,6 @@ setTimeout(function(){
     border-bottom: 2px solid rgba(0, 217, 255, 0.35);
     box-shadow: 0 6px 20px rgba(0,0,0,0.75);
     direction: rtl;
-  }
-  body.has-mobile-filterbar #mobileFilterBar {
-    display: block !important;
-  }
-  /* 🎯 کلید اصلی: اگه body کلاس modal-open داره، نوار مخفی بشه */
-  body.modal-open #mobileFilterBar {
-    display: none !important;
-  }
-  body.modal-open #mainArea {
-    padding-top: 0 !important;
-  }
-  /* همچنین اگه modalHost محتوا داره، نوار مخفی */
-  body.modal-open #modalHost ~ #mobileFilterBar,
-  body:has(#modalHost:not(:empty)) #mobileFilterBar {
-    display: none !important;
   }
   #mobileFilterBar .mfb-user {
     display: flex;
@@ -3946,55 +3932,71 @@ setTimeout(function(){
 
 <script>
 (function(){
-  if(window._mfbInitV3) return;
-  window._mfbInitV3 = true;
-
-  function isMobile(){ return window.innerWidth <= 900; }
-
-  // 🎯 فقط این‌ها رو چک کن — کلاس body رو دست نزن!
-  function isModalOpen(){
-    // ۱. body.modal-open — اپ خودش می‌ذاره
-    if(document.body.classList.contains('modal-open')) return true;
-    
-    // ۲. #modalHost محتوا داره
-    var host = document.getElementById('modalHost');
-    if(host && host.children.length > 0){
-      var st = getComputedStyle(host);
-      if(st.display !== 'none') return true;
-    }
-    
-    // ۳. .modal-bg visible
-    var bg = document.querySelector('.modal-bg');
-    if(bg){
-      var st2 = getComputedStyle(bg);
-      if(st2.display !== 'none' && st2.visibility !== 'hidden' && parseFloat(st2.opacity) > 0.1){
-        return true;
-      }
-    }
-    
-    return false;
-  }
-
-  function hasProfile(){
-    var ma = document.getElementById('mainArea');
-    if(!ma) return false;
-    return !!ma.querySelector('.back-btn');
-  }
+  if(window._mfbInitV4) return;
+  window._mfbInitV4 = true;
 
   function refresh(){
     var bar = document.getElementById('mobileFilterBar');
     if(!bar) return;
 
-    var modalOpen = isModalOpen();
-    var profile = hasProfile();
+    var isMobile = window.innerWidth <= 900;
     
-    // 🎯 فقط اضافه/حذف has-mobile-filterbar — کلاس modal-open رو دست نزن!
-    if(isMobile() && profile && !modalOpen){
+    // 🎯 چک قوی مودال
+    var modalOpen = false;
+    
+    // ۱. body class
+    if(document.body.classList.contains('modal-open')) modalOpen = true;
+    
+    // ۲. modalHost
+    var mh = document.getElementById('modalHost');
+    if(mh && mh.children.length > 0) modalOpen = true;
+    
+    // ۳. modal-bg visible
+    var bg = document.querySelector('.modal-bg');
+    if(bg){
+      var st = getComputedStyle(bg);
+      if(st.display !== 'none' && parseFloat(st.opacity) > 0.1) modalOpen = true;
+    }
+    
+    // ۴. وجود متن "ثبت پزشک" روی صفحه
+    var mTitle = document.querySelector('.modal h1, .modal h2, .modal .title, .modal-bg h1, .modal-bg h2');
+    if(mTitle && mTitle.getBoundingClientRect().width > 0) modalOpen = true;
+    
+    // ۵. چک اگه h1/h2 توی mainArea «ثبت پزشک» یا «ویرایش پزشک» هست
+    var mainH = document.querySelector('#mainArea h1, #mainArea h2, #mainArea h3');
+    if(mainH){
+      var t = (mainH.textContent || '').trim();
+      if(t.indexOf('ثبت پزشک') !== -1 || t.indexOf('ویرایش پزشک') !== -1) {
+        var rect = mainH.getBoundingClientRect();
+        if(rect.width > 0 && rect.top < 300) modalOpen = true;
+      }
+    }
+    
+    // ۶. چک اگه دکمه‌های modal (مانند "ذخیره" بزرگ) روی صفحه‌ان
+    var saveBtns = document.querySelectorAll('.modal button, .modal-bg button');
+    // فقط اگه یه دکمه بزرگ داخل مودال دیده میشه
+    for(var i=0;i<saveBtns.length;i++){
+      var sb = saveBtns[i];
+      if(sb.offsetParent && sb.textContent.indexOf('ذخیره') !== -1 && sb.getBoundingClientRect().width > 100){
+        modalOpen = true;
+        break;
+      }
+    }
+    
+    // پروفایل بازه؟
+    var profile = !!document.querySelector('#mainArea .back-btn');
+    
+    // 🎯 تصمیم نهایی
+    var shouldShow = isMobile && profile && !modalOpen;
+    
+    // مستقیم style رو ست کن — هیچ CSS‌ای نمی‌تونه override کنه
+    if(shouldShow){
+      bar.style.setProperty('display', 'block', 'important');
       document.body.classList.add('has-mobile-filterbar');
     } else {
+      bar.style.setProperty('display', 'none', 'important');
       document.body.classList.remove('has-mobile-filterbar');
     }
-    // ⛔ هیچ‌وقت document.body.classList.remove('modal-open') نکن!
 
     // رنگ کاربر فعال
     var u = window.currentUser || 'all';
@@ -4027,23 +4029,19 @@ setTimeout(function(){
 
   window.updateMobileFilterBar = refresh;
 
-  // کلیک روی کاربر
+  // کلیک
   document.addEventListener('click', function(e){
     var b = e.target.closest && e.target.closest('#mobileFilterBar .mfb-user button');
     if(b && b.dataset.u){
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault(); e.stopPropagation();
       if(typeof switchUser === 'function') switchUser(b.dataset.u);
       if(typeof backToList === 'function') backToList();
       setTimeout(refresh, 150);
       return;
     }
-
-    // کلیک روی فیلتر
     var fb = e.target.closest && e.target.closest('#mobileFilterBar .mfb-filters button');
     if(fb && fb.dataset.f){
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault(); e.stopPropagation();
       if(typeof setDocFilter === 'function') setDocFilter(fb.dataset.f);
       if(typeof backToList === 'function') backToList();
       setTimeout(refresh, 150);
@@ -4051,36 +4049,30 @@ setTimeout(function(){
     }
   }, true);
 
-  // 🎯 پایش تغییرات
+  // 🎯 پایش قوی — چند observer
   setTimeout(function(){
-    // mainArea
     var ma = document.getElementById('mainArea');
-    if(ma){
-      new MutationObserver(function(){ setTimeout(refresh, 60); }).observe(ma, {childList:true, subtree:true});
-    }
-    
-    // body class — تغییر modal-open رو ببین
-    new MutationObserver(function(muts){
-      muts.forEach(function(m){
-        if(m.attributeName === 'class'){
-          setTimeout(refresh, 30);
-        }
-      });
-    }).observe(document.body, {attributes:true, attributeFilter:['class']});
-    
-    // modalHost — تغییرات محتوا
     var mh = document.getElementById('modalHost');
-    if(mh){
-      new MutationObserver(function(){ setTimeout(refresh, 30); }).observe(mh, {childList:true, subtree:false});
+    
+    if(ma){
+      new MutationObserver(function(){ refresh(); setTimeout(refresh, 30); setTimeout(refresh, 150); })
+        .observe(ma, {childList:true, subtree:true});
     }
+    
+    if(mh){
+      new MutationObserver(function(){ refresh(); setTimeout(refresh, 30); setTimeout(refresh, 100); })
+        .observe(mh, {childList:true, subtree:true, attributes:true});
+    }
+    
+    new MutationObserver(function(){ refresh(); setTimeout(refresh, 30); })
+      .observe(document.body, {attributes:true, attributeFilter:['class']});
     
     refresh();
-    setInterval(refresh, 600);
-  }, 1500);
+    setInterval(refresh, 500); // هر ۰.۵ ثانیه
+  }, 1000);
 
   window.addEventListener('resize', function(){ setTimeout(refresh, 100); });
-  
-  console.log('✅ Mobile Filter Bar v3 فعال');
+  console.log('✅ Mobile Filter Bar v4 فعال');
 })();
 </script>
 
