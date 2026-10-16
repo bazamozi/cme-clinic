@@ -534,6 +534,14 @@ let doctors = [];
 let calls = [];
 let selectedDoctorId = null;
 var _dataLoaded = false;
+var _lastKnownDoctorCount = 0;
+var _lastKnownCallCount = 0;
+
+// بارگذاری تعداد قبلی
+try {
+  _lastKnownDoctorCount = Number(localStorage.getItem(K + '_lastCount') || 0);
+  _lastKnownCallCount = Number(localStorage.getItem(K + '_lastCallCount') || 0);
+} catch(e){}
 let currentUser = 'morteza';
 
 try {
@@ -688,6 +696,7 @@ function save(){
   _saveTimer = setTimeout(function(){
     pushToCloud().then(function(){
       showSaveIndicator('saved');
+      updateKnownCounts();
       console.log('✅ ذخیره خودکار انجام شد');
     }).catch(function(){
       showSaveIndicator('error');
@@ -730,8 +739,26 @@ function getLocalTimestamp(){
 }
 
 var _pushing = false;
-async function pushToCloud(){
+async function pushToCloud(force){
   if(_pushing) return Promise.resolve();
+  
+  // 🛡️ بررسی امنیت — مگر اینکه force = true باشه
+  if(!force && !isSafeToPush()){
+    console.error('🛑 push متوقف شد — داده‌های مشکوک');
+    showSaveIndicator('error');
+    toast('⚠️ هشدار: داده‌ها مشکوک به دستکاری — push متوقف شد');
+    
+    // پیام هشدار در Console
+    if(confirm('⚠️ هشدار امنیتی!\n\nتعداد داده‌ها یهو کم شده:\n' +
+              'پزشکان فعلی: ' + (doctors || []).length + '\n' +
+              'پزشکان قبلی: ' + _lastKnownDoctorCount + '\n\n' +
+              'می‌خوای از سرور بازگردانی کنم؟')){
+      // بازگردانی از سرور
+      pullFromCloud(true);
+    }
+    return Promise.reject(new Error('Unsafe push blocked'));
+  }
+  
   _pushing = true;
   try {
     var ts = Date.now();
@@ -742,6 +769,7 @@ async function pushToCloud(){
       body: JSON.stringify({ doctors, calls, updatedAt: ts })
     });
     localStorage.setItem(K+'_updatedAt', String(ts));
+    updateKnownCounts();
     console.log('☁️ داده‌ها به سرور فرستاده شد - ' + new Date().toLocaleString('fa-IR'));
     return Promise.resolve();
   } catch(e){
@@ -785,6 +813,10 @@ async function pullFromCloud(){
         localStorage.setItem(K+'_updatedAt', String(remoteTs));
       } catch(e){}
       renderAll();
+      
+      // 🛡️ بعد از pull، count ها رو به‌روز کن
+      updateKnownCounts();
+      console.log('✅ pull انجام شد و count ها به‌روز شدند');
     }
   } catch(e){}
   finally { _pulling = false; _dataLoaded = true; }
@@ -2023,6 +2055,151 @@ window.forcePushNow = async function(){
   toast('✅ داده‌ها ارسال شد');
   console.log('🚀 Push اجباری انجام شد');
 };
+
+// ===== 🛡️ تابع بررسی امنیت قبل از push =====
+function isSafeToPush(){
+  var currentDocs = (doctors || []).length;
+  var currentCalls = (calls || []).length;
+  var lastDocs = _lastKnownDoctorCount;
+  var lastCalls = _lastKnownCallCount;
+  
+  console.log('🛡️ بررسی امنیت push:');
+  console.log('  - پزشکان فعلی:', currentDocs, '| قبلی:', lastDocs);
+  console.log('  - تماس‌ها فعلی:', currentCalls, '| قبلی:', lastCalls);
+  
+  // ⚠️ قانون ۱: اگه قبلاً پزشک داشتیم ولی الان صفر شد، مشکوکه
+  if(lastDocs > 0 && currentDocs === 0){
+    console.error('🚨 هشدار: همه پزشکان ناپدید شده‌اند!');
+    return false;
+  }
+  
+  // ⚠️ قانون ۲: اگه بیشتر از ۵۰٪ کاهش داشتیم، مشکوکه
+  if(lastDocs >= 5 && currentDocs < (lastDocs * 0.5)){
+    console.error('🚨 هشدار: کاهش شدید تعداد پزشکان!');
+    return false;
+  }
+  
+  // ⚠️ قانون ۳: اگه قبلاً تماس داشتیم ولی الان صفر شد
+  if(lastCalls >= 3 && currentCalls === 0 && currentDocs === lastDocs){
+    console.warn('⚠️ همه تماس‌ها ناپدید شده‌اند');
+    return false;
+  }
+  
+  console.log('✅ push امن است');
+  return true;
+}
+
+// ===== به‌روزرسانی count ها =====
+function updateKnownCounts(){
+  _lastKnownDoctorCount = (doctors || []).length;
+  _lastKnownCallCount = (calls || []).length;
+  try {
+    localStorage.setItem(K + '_lastCount', String(_lastKnownDoctorCount));
+    localStorage.setItem(K + '_lastCallCount', String(_lastKnownCallCount));
+  } catch(e){}
+}
+
+// ===== 🛡️ سیستم پشتیبان چرخشی (۱۰ نسخه آخر) =====
+function rotateBackup(){
+  try {
+    var timestamp = Date.now();
+    var snapshot = {
+      doctors: doctors,
+      calls: calls,
+      savedAt: new Date().toISOString(),
+      count: (doctors || []).length
+    };
+    
+    var key = K + '_snapshot_' + timestamp;
+    localStorage.setItem(key, JSON.stringify(snapshot));
+    console.log('📸 Snapshot گرفته شد: ' + (doctors || []).length + ' پزشک');
+    
+    // پاک کردن قدیمی‌ها (بیشتر از ۱۰ تا)
+    var allKeys = Object.keys(localStorage).filter(function(k){
+      return k.indexOf(K + '_snapshot_') === 0;
+    });
+    
+    if(allKeys.length > 10){
+      allKeys.sort(); // ترتیب زمانی
+      var toRemove = allKeys.slice(0, allKeys.length - 10);
+      toRemove.forEach(function(k){
+        localStorage.removeItem(k);
+        console.log('🗑 Snapshot قدیمی حذف شد:', k);
+      });
+    }
+  } catch(e){
+    console.error('خطا در snapshot:', e);
+  }
+}
+
+// ===== نمایش snapshot ها =====
+window.showSnapshots = function(){
+  var snapshots = Object.keys(localStorage)
+    .filter(function(k){ return k.indexOf(K + '_snapshot_') === 0; })
+    .sort()
+    .reverse();
+  
+  console.log('📸 ' + snapshots.length + ' snapshot موجود:');
+  snapshots.forEach(function(k, i){
+    try {
+      var data = JSON.parse(localStorage.getItem(k));
+      var ts = k.replace(K + '_snapshot_', '');
+      var date = new Date(Number(ts));
+      console.log('  ' + (i+1) + '. ' + date.toLocaleString('fa-IR') + ' — ' + data.count + ' پزشک');
+    } catch(e){}
+  });
+  return snapshots;
+};
+
+// ===== بازگردانی از snapshot =====
+window.restoreSnapshot = function(timestamp){
+  try {
+    var key = K + '_snapshot_' + timestamp;
+    var data = localStorage.getItem(key);
+    if(!data){ console.error('Snapshot پیدا نشد'); return false; }
+    
+    var snapshot = JSON.parse(data);
+    if(!confirm('📸 بازگردانی از snapshot:\n\n' +
+                'تاریخ: ' + new Date(Number(timestamp)).toLocaleString('fa-IR') + '\n' +
+                'تعداد پزشکان: ' + snapshot.count + '\n\n' +
+                'مطمئنی؟')){
+      return false;
+    }
+    
+    doctors = snapshot.doctors || [];
+    calls = snapshot.calls || [];
+    save();
+    renderAll();
+    toast('✅ بازگردانی از snapshot انجام شد');
+    console.log('✅ ' + doctors.length + ' پزشک بازیابی شد');
+    return true;
+  } catch(e){
+    console.error('خطا:', e);
+    return false;
+  }
+};
+
+// ===== snapshot خودکار هر ۵ دقیقه =====
+setInterval(function(){
+  if(_dataLoaded && (doctors || []).length > 0){
+    rotateBackup();
+  }
+}, 5 * 60 * 1000); // 5 دقیقه
+
+// ===== snapshot اولیه بعد از ۳۰ ثانیه =====
+setTimeout(function(){
+  if(_dataLoaded && (doctors || []).length > 0){
+    rotateBackup();
+  }
+}, 30000);
+
+// ===== مقداردهی اولیه count ها =====
+setTimeout(function(){
+  if(_dataLoaded && (doctors || []).length > 0){
+    updateKnownCounts();
+    console.log('📊 Initial counts: ' + (doctors||[]).length + ' doctors, ' + (calls||[]).length + ' calls');
+  }
+}, 3000);
 </script>
 </body>
 </html>
