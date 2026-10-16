@@ -2963,5 +2963,117 @@ window.checkTabs = function(){
 console.log('✅ Event Tabs v7 (CSS-only) loaded');
 
 </script>
+<script>
+// ═══════════════════════════════════════════════
+// 🚀 FINAL FIX — تعریف کامل توابع (نسخه نهایی)
+// ═══════════════════════════════════════════════
+
+// ✅ getDoctorStatus — global
+function getDoctorStatus(d){
+  try {
+    if(!d) return 'pending';
+    var events = (d.events || []).filter(function(e){ return e && e.type; });
+    if(events.length === 0) return 'pending';
+    var allComplete = events.every(function(ev){
+      if(ev.type === 'حضوری'){
+        return ev.buy === true && ev.attend === true;
+      }
+      return ev.buy === true && ev.attend === true && ev.exam === true;
+    });
+    return allComplete ? 'done' : 'active';
+  } catch(e){
+    console.warn('getDoctorStatus error:', e);
+    return 'pending';
+  }
+}
+window.getDoctorStatus = getDoctorStatus;
+
+// ✅ updateFilterCounts — همه پزشکان (نه فیلتر بر اساس کاربر)
+function updateFilterCounts(){
+  try {
+    var all = window.doctors || [];
+    var counts = { active: 0, done: 0, pending: 0 };
+    for(var i=0; i<all.length; i++){
+      var st = getDoctorStatus(all[i]);
+      if(counts[st] !== undefined) counts[st]++;
+    }
+    var elA = document.getElementById('cntActive');
+    var elD = document.getElementById('cntDone');
+    var elP = document.getElementById('cntPending');
+    if(elA) elA.textContent = counts.active;
+    if(elD) elD.textContent = counts.done;
+    if(elP) elP.textContent = counts.pending;
+    console.log('✅ counts:', counts);
+    return counts;
+  } catch(e){
+    console.warn('updateFilterCounts error:', e);
+  }
+}
+window.updateFilterCounts = updateFilterCounts;
+
+// ✅ showDataSize
+function showDataSize(){
+  try {
+    var docs = window.doctors || [];
+    var counts = { active: 0, done: 0, pending: 0 };
+    docs.forEach(function(d){
+      var st = getDoctorStatus(d);
+      if(counts[st] !== undefined) counts[st]++;
+    });
+    console.log('═══════════════════════════════');
+    console.log('👥 کل پزشکان:', docs.length);
+    console.log('⚡ در حال اجرا:', counts.active);
+    console.log('✅ اتمام:', counts.done);
+    console.log('⏳ بلاتکلیف:', counts.pending);
+    console.log('═══════════════════════════════');
+    return { count: docs.length, counts: counts };
+  } catch(e){ console.error('❌', e); }
+}
+window.showDataSize = showDataSize;
+
+// ✅ debugUsers
+function debugUsers(){
+  var docs = window.doctors || [];
+  console.log('currentUser:', window.currentUser);
+  console.log('کل پزشکان:', docs.length);
+  var byOwner = {}, byStatus = {active:0, done:0, pending:0};
+  docs.forEach(function(d){
+    byOwner[d.owner||'?'] = (byOwner[d.owner||'?']||0)+1;
+    var s = getDoctorStatus(d);
+    if(byStatus[s]!==undefined) byStatus[s]++;
+  });
+  console.log('به تفکیک مالک:', byOwner);
+  console.log('به تفکیک وضعیت:', byStatus);
+}
+window.debugUsers = debugUsers;
+
+// ✅ checkLogin
+function checkLogin(){
+  try {
+    var logged = localStorage.getItem('cme_logged_in');
+    var screenEl = document.getElementById('loginScreen');
+    if(!screenEl) return;
+    if(logged === 'morteza' || logged === 'parvin'){
+      screenEl.classList.add('hidden');
+      screenEl.style.display = 'none';
+      document.documentElement.classList.add('is-logged-in');
+    } else {
+      screenEl.classList.remove('hidden');
+      screenEl.style.display = 'flex';
+      document.documentElement.classList.remove('is-logged-in');
+    }
+  } catch(e){}
+}
+window.checkLogin = checkLogin;
+
+// اجرای خودکار
+setTimeout(function(){
+  try { updateFilterCounts(); } catch(e){}
+  try { if(typeof renderAll === 'function') renderAll(); } catch(e){}
+}, 1500);
+
+console.log('✅ FINAL FIX loaded');
+</script>
+
 </body>
 </html>
