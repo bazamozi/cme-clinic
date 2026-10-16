@@ -675,34 +675,27 @@ var _saveTimer = null;
 var _lastSaveStatus = 'idle'; // idle | saving | saved
 
 function save(){
-  // 1) ذخیره فوری در localStorage (سریع)
+  // ✅ فقط در localStorage ذخیره کن (سریع، امن، بدون سرور)
   try {
     var now = Date.now();
     localStorage.setItem(K, JSON.stringify(doctors));
     localStorage.setItem(K+'_calls', JSON.stringify(calls));
     localStorage.setItem(K+'_updatedAt', String(now));
+    updateKnownCounts();
   } catch(e){}
   
-  // ⚠️ مهم: تا داده‌ها از سرور لود نشده، push نکن!
-  if(!_dataLoaded){
-    console.log('⏳ منتظر لود شدن داده‌ها از سرور...');
-    return;
+  // ✅ نشانگر «ذخیره شد»
+  showSaveIndicator('saved');
+  
+  // ✅ یک snapshot هم بگیر (فقط در localStorage)
+  if((doctors || []).length > 0){
+    rotateBackup();
   }
   
-  // 2) نمایش نشانگر «در حال ذخیره»
-  showSaveIndicator('saving');
+  console.log('💾 ذخیره محلی انجام شد — ' + doctors.length + ' پزشک');
   
-  // 3) ارسال به سرور با تاخیر (debounce) — تا اگه چند تغییر سریع داشتی، یک بار بفرسته
-  if(_saveTimer) clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(function(){
-    pushToCloud().then(function(){
-      showSaveIndicator('saved');
-      updateKnownCounts();
-      console.log('✅ ذخیره خودکار انجام شد');
-    }).catch(function(){
-      showSaveIndicator('error');
-    });
-  }, 800); // 0.8 ثانیه صبر می‌کنه
+  // ⚠️ push به سرور از اینجا حذف شد!
+  // فقط از طریق دکمه «💾 ذخیره» یا auto-push هر ۳۰ دقیقه انجام میشه
 }
 
 // ===== نشانگر وضعیت ذخیره =====
@@ -1486,80 +1479,14 @@ renderAll();
 // Google Sheets Sync
 setTimeout(pullFromCloud, 500);
 setInterval(pullFromCloud, 5000);
-document.addEventListener('visibilitychange', () => { if(!document.hidden) pullFromCloud(); });
-
-// ===== Login System =====
-var USERS = {
-  'morteza': { pass: 'MN13601353', name: 'مرتضی' },
-  'parvin': { pass: 'parvin123', name: 'پروین' }
-};
-
-window.doLogin = function(){
-  var u = document.getElementById('loginUser').value.trim().toLowerCase();
-  var p = document.getElementById('loginPass').value;
-  var errEl = document.getElementById('loginError');
-  
-  if(USERS[u] && USERS[u].pass === p){
-    // ورود موفق
-    try {
-      localStorage.setItem('cme_logged_in', u);
-    } catch(e){}
-    errEl.classList.remove('show');
-    document.getElementById('loginScreen').classList.add('hidden');
-    // تنظیم کاربر فعال
-    currentUser = u;
-    try { localStorage.setItem('cme_current_user', u); } catch(e){}
-    document.querySelectorAll('.user-picker button').forEach(function(b){
-      if(b.dataset.user === u) b.classList.add('active');
-      else b.classList.remove('active');
-    });
-    renderAll();
-    updateMobileSelection();
-    toast('👋 خوش آمدید ' + USERS[u].name);
-  } else {
-    errEl.classList.add('show');
-    document.getElementById('loginPass').value = '';
+document.addEventListener('visibilitychange', function(){
+  if(!document.hidden){
+    // برگشت به تب → pull از سرور (فقط اگه لود شده)
+    if(_dataLoaded && typeof pullFromCloud === 'function'){
+      pullFromCloud();
+    }
   }
-};
-
-window.doLogout = function(){
-  if(!confirm('از سیستم خارج می‌شوید؟')) return;
-  try {
-    localStorage.removeItem('cme_logged_in');
-    localStorage.removeItem('cme_current_user');
-  } catch(e){}
-  location.reload();
-};
-
-// چک کردن وضعیت ورود در بارگذاری
-function checkLogin(){
-  var logged = null;
-  try { logged = localStorage.getItem('cme_logged_in'); } catch(e){}
-  
-  if(logged && USERS[logged]){
-    // قبلاً وارد شده
-    document.getElementById('loginScreen').classList.add('hidden');
-    currentUser = logged;
-    try { localStorage.setItem('cme_current_user', logged); } catch(e){}
-    document.querySelectorAll('.user-picker button').forEach(function(b){
-      if(b.dataset.user === logged) b.classList.add('active');
-      else b.classList.remove('active');
-    });
-  } else {
-    // نیاز به ورود
-    document.getElementById('loginScreen').classList.remove('hidden');
-    setTimeout(function(){
-      var u = document.getElementById('loginUser');
-      if(u) u.focus();
-    }, 100);
-  }
-}
-
-// Enter برای ورود
-document.addEventListener('keydown', function(e){
-  if(e.key === 'Enter' && !document.getElementById('loginScreen').classList.contains('hidden')){
-    doLogin();
-  }
+  // ⛔ در حالت hidden، هیچ کاری نمی‌کنیم
 });
 
 // چک ورود
@@ -1798,21 +1725,27 @@ window.forcePull = async function(){
 
 // ===== ذخیره دستی =====
 window.manualSave = async function(){
+  if(!confirm('💾 ذخیره دستی\n\n' +
+              'پزشکان: ' + (doctors || []).length + '\n' +
+              'تماس‌ها: ' + (calls || []).length + '\n\n' +
+              'ارسال به Google Sheet؟')){
+    return;
+  }
+  
   try {
     // 1) ذخیره محلی
     localStorage.setItem(K, JSON.stringify(doctors));
     localStorage.setItem(K+'_calls', JSON.stringify(calls));
     localStorage.setItem(K+'_updatedAt', String(Date.now()));
-    console.log('💾 ذخیره محلی انجام شد');
+    updateKnownCounts();
     
-    // 2) Push به سرور
+    // 2) Push به سرور (force، چون کاربر خودش تأیید کرد)
     toast('⏳ در حال ارسال به سرور...');
-    await pushToCloud();
+    await pushToCloud(true);
     
-    // 3) نمایش موفقیت
-    toast('✅ ذخیره کامل شد — داده‌ها محفوظ هستند');
+    toast('✅ ذخیره کامل شد — ' + doctors.length + ' پزشک');
     
-    // 4) چشمک سبز روی دکمه
+    // چشمک سبز
     var btns = document.querySelectorAll('.save-btn-header');
     btns.forEach(function(b){
       if(b.textContent.includes('ذخیره')){
@@ -1826,10 +1759,10 @@ window.manualSave = async function(){
       }
     });
     
-    console.log('✅ ذخیره کامل — تعداد پزشکان:', doctors.length, '| تماس‌ها:', calls.length);
+    console.log('✅ ذخیره دستی: ' + doctors.length + ' پزشک');
   } catch(e){
-    console.error('خطا در ذخیره:', e);
-    toast('❌ خطا در ذخیره — دوباره تلاش کن');
+    console.error('خطا:', e);
+    toast('❌ خطا در ذخیره');
   }
 };
 
@@ -1939,38 +1872,22 @@ window.restoreFromBackup = function(){
 };
 
 // ===== ذخیره خودکار قبل از بستن صفحه =====
-window.addEventListener('beforeunload', function(e){
-  // ⚠️ محافظ: اگه داده‌ها از سرور لود نشده، هیچ کاری نکن!
-  if(!_dataLoaded){
-    console.log('⏭️ ذخیره نهایی رد شد (داده‌ها لود نشده)');
-    return;
-  }
-  // ذخیره فوری محلی
-  try {
-    localStorage.setItem(K, JSON.stringify(doctors));
-    localStorage.setItem(K+'_calls', JSON.stringify(calls));
-    localStorage.setItem(K+'_updatedAt', String(Date.now()));
-  } catch(err){}
-  
-  // ارسال به سرور (sync — چون فرصت کمه)
-  try {
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', SCRIPT_URL, false); // sync
-    xhr.setRequestHeader('Content-Type', 'text/plain;charset=utf-8');
-    xhr.send(JSON.stringify({ doctors: doctors, calls: calls, updatedAt: Date.now() }));
-    console.log('✅ ذخیره نهایی قبل از بستن انجام شد');
-  } catch(err){
-    console.log('خطا در ذخیره نهایی:', err);
-  }
-});
+// ⛔ beforeunload حذف شد (خطرناک بود)
 
 // ===== ذخیره خودکار هر ۵ دقیقه (در پس‌زمینه) =====
+// ✅ auto-push هر ۳۰ دقیقه (با تأیید کاربر)
 setInterval(function(){
-  if(doctors.length > 0){
-    console.log('🔄 ذخیره خودکار دوره‌ای');
-    pushToCloud();
-  }
-}, 5 * 60 * 1000); // 5 minutes
+  if(!_dataLoaded) return;
+  if((doctors || []).length === 0) return;
+  if(_lastKnownDoctorCount === 0) return;
+  
+  console.log('⏰ auto-push دوره‌ای...');
+  pushToCloud(true).then(function(){
+    console.log('✅ auto-push انجام شد');
+  }).catch(function(){
+    console.log('⚠️ auto-push ناموفق');
+  });
+}, 30 * 60 * 1000); // 30 دقیقه // 5 minutes
 
 // ===== ذخیره وقتی کاربر از تب خارج میشه =====
 document.addEventListener('visibilitychange', function(){
