@@ -1490,7 +1490,7 @@ document.addEventListener('visibilitychange', function(){
 });
 
 // چک ورود
-checkLogin();
+
 
 // ===== Quick Login to IRCME =====
 window.quickLogin = function(nat, pass, name){
@@ -2192,7 +2192,7 @@ document.addEventListener('keydown', function(e){
 });
 
 // چک ورود
-checkLogin();
+
 
 /* ======================================================= */
 /* ===== Login System (قطعی) ===== */
@@ -2249,30 +2249,6 @@ window.doLogout = function(){
   location.reload();
 };
 
-function checkLogin(){
-  var logged = null;
-  try { logged = localStorage.getItem('cme_logged_in'); } catch(e){}
-  
-  var screenEl = document.getElementById('loginScreen');
-  if(!screenEl) return;
-  
-  if(logged && USERS[logged]){
-    screenEl.classList.add('hidden');
-    if(typeof currentUser !== 'undefined') currentUser = logged;
-    try { localStorage.setItem('cme_current_user', logged); } catch(e){}
-    document.querySelectorAll('.user-picker button').forEach(function(b){
-      if(b.dataset.user === logged) b.classList.add('active');
-      else b.classList.remove('active');
-    });
-  } else {
-    screenEl.classList.remove('hidden');
-    setTimeout(function(){
-      var u = document.getElementById('loginUser');
-      if(u) u.focus();
-    }, 100);
-  }
-}
-
 // Enter برای ورود
 document.addEventListener('keydown', function(e){
   if(e.key === 'Enter'){
@@ -2284,7 +2260,7 @@ document.addEventListener('keydown', function(e){
 });
 
 // اجرا
-checkLogin();
+
 console.log('✅ Login System بارگذاری شد');
 </script>
 <script>
@@ -2341,32 +2317,6 @@ window.doLogout = function(){
   location.reload();
 };
 
-function checkLogin(){
-  var logged = null;
-  try { logged = localStorage.getItem('cme_logged_in'); } catch(e){}
-  
-  var screenEl = document.getElementById('loginScreen');
-  if(!screenEl){ console.log('loginScreen نیست'); return; }
-  
-  if(logged && USERS[logged]){
-    screenEl.classList.add('hidden');
-    if(typeof currentUser !== 'undefined') window.currentUser = logged;
-    try { localStorage.setItem('cme_current_user', logged); } catch(e){}
-    document.querySelectorAll('.user-picker button').forEach(function(b){
-      if(b.dataset.user === logged) b.classList.add('active');
-      else b.classList.remove('active');
-    });
-    console.log('✅ کاربر وارد شده:', logged);
-  } else {
-    screenEl.classList.remove('hidden');
-    setTimeout(function(){
-      var u = document.getElementById('loginUser');
-      if(u) u.focus();
-    }, 100);
-    console.log('🔐 نیاز به ورود');
-  }
-}
-
 document.addEventListener('keydown', function(e){
   if(e.key === 'Enter'){
     var screen = document.getElementById('loginScreen');
@@ -2380,9 +2330,10 @@ document.addEventListener('keydown', function(e){
 if(document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', checkLogin);
 } else {
-  checkLogin();
+  
 }
 console.log('✅ Login System v2 بارگذاری شد');
+setTimeout(checkLogin, 100);
 </script>
 </body>
 </html>
