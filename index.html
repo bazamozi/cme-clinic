@@ -918,21 +918,82 @@ function quickJumpToEvent(type){
 
 function updateFilterCounts(){
   try {
-    if(typeof myDoctors !== 'function') return;
-    var all = myDoctors();
-    var counts = { active: 0, done: 0, pending: 0 };
-    all.forEach(function(d){
-      var st = (typeof getDoctorStatus === 'function') ? getDoctorStatus(d) : 'active';
+    var all = window.doctors || [];
+    if(!all.length){
+      // اگه doctors خالی بود، از localStorage بخون
+      try {
+        var cached = JSON.parse(localStorage.getItem('cme_doctors') || '[]');
+        if(cached.length) all = cached;
+      } catch(e){}
+    }
+    
+    var counts = {active: 0, done: 0, pending: 0};
+    for(var i = 0; i < all.length; i++){
+      var st = getDoctorStatus(all[i]);
       if(counts[st] !== undefined) counts[st]++;
-    });
-    var ce = document.getElementById('cntActive');
-    var cd = document.getElementById('cntDone');
-    var cp = document.getElementById('cntPending');
-    if(ce) ce.textContent = counts.active;
-    if(cd) cd.textContent = counts.done;
-    if(cp) cp.textContent = counts.pending;
-  } catch(e){}
+    }
+    
+    // نوشتن مستقیم در DOM
+    var elA = document.getElementById('cntActive');
+    var elD = document.getElementById('cntDone');
+    var elP = document.getElementById('cntPending');
+    if(elA) elA.textContent = counts.active;
+    if(elD) elD.textContent = counts.done;
+    if(elP) elP.textContent = counts.pending;
+    
+    // چک کن اگه ID کار نکرد، با data-filter امتحان کن
+    if(!elA || !elD || !elP){
+      document.querySelectorAll('[data-filter]').forEach(function(btn){
+        var f = btn.getAttribute('data-filter');
+        var cnt = btn.querySelector('.cnt');
+        if(cnt && counts[f] !== undefined){
+          cnt.textContent = counts[f];
+        }
+      });
+    }
+    
+    return counts;
+  } catch(e){
+    console.warn('updateFilterCounts error:', e);
+  }
 }
+window.updateFilterCounts = updateFilterCounts;
+
+// 🎯 اجرای مداوم — هر ۱ ثانیه (قوی در برابر خطا)
+if(!window._cntInterval){
+  window._cntInterval = setInterval(function(){
+    try { updateFilterCounts(); } catch(e){}
+  }, 1000);
+}
+
+// 🎯 پچ renderAll
+if(typeof window.renderAll === 'function' && !window._renderAllPatched){
+  window._renderAllPatched = true;
+  var _orig = window.renderAll;
+  window.renderAll = function(){
+    var r = _orig.apply(this, arguments);
+    setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 50);
+    setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 300);
+    return r;
+  };
+}
+
+// 🎯 پچ renderDocList
+if(typeof window.renderDocList === 'function' && !window._renderDocListPatched){
+  window._renderDocListPatched = true;
+  var _orig2 = window.renderDocList;
+  window.renderDocList = function(){
+    var r = _orig2.apply(this, arguments);
+    setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 50);
+    return r;
+  };
+}
+
+// 🎯 اجرای اولیه
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 500);
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 1500);
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 3000);
+
 
 function checkLogin(){
   try {
@@ -2709,33 +2770,7 @@ window.showDataSize = function(){
   }
 };
 
-window.updateFilterCounts = function(){
-  try {
-    if(typeof myDoctors !== 'function') return;
-    var all = myDoctors();
-    var counts = { active: 0, done: 0, pending: 0 };
-    all.forEach(function(d){
-      var st = window.getDoctorStatus(d);
-      if(counts[st] !== undefined) counts[st]++;
-    });
-    
-    // به‌روزرسانی شمارنده‌های فیلتر
-    var ids = { 
-      'cntActive': counts.active, 
-      'cntDone': counts.done, 
-      'cntPending': counts.pending 
-    };
-    Object.keys(ids).forEach(function(id){
-      var el = document.getElementById(id);
-      if(el) el.textContent = ids[id];
-    });
-    
-    console.log('✅ شمارنده‌ها:', counts);
-    return counts;
-  } catch(e){ 
-    console.warn('updateFilterCounts error:', e); 
-  }
-};
+window.updateFilterCounts = updateFilterCounts;
 
 window.checkLogin = function(){
   try {
@@ -2992,23 +3027,81 @@ window.getDoctorStatus = getDoctorStatus;
 function updateFilterCounts(){
   try {
     var all = window.doctors || [];
-    var counts = { active: 0, done: 0, pending: 0 };
-    for(var i=0; i<all.length; i++){
+    if(!all.length){
+      // اگه doctors خالی بود، از localStorage بخون
+      try {
+        var cached = JSON.parse(localStorage.getItem('cme_doctors') || '[]');
+        if(cached.length) all = cached;
+      } catch(e){}
+    }
+    
+    var counts = {active: 0, done: 0, pending: 0};
+    for(var i = 0; i < all.length; i++){
       var st = getDoctorStatus(all[i]);
       if(counts[st] !== undefined) counts[st]++;
     }
+    
+    // نوشتن مستقیم در DOM
     var elA = document.getElementById('cntActive');
     var elD = document.getElementById('cntDone');
     var elP = document.getElementById('cntPending');
     if(elA) elA.textContent = counts.active;
     if(elD) elD.textContent = counts.done;
     if(elP) elP.textContent = counts.pending;
-    console.log('✅ counts:', counts);
+    
+    // چک کن اگه ID کار نکرد، با data-filter امتحان کن
+    if(!elA || !elD || !elP){
+      document.querySelectorAll('[data-filter]').forEach(function(btn){
+        var f = btn.getAttribute('data-filter');
+        var cnt = btn.querySelector('.cnt');
+        if(cnt && counts[f] !== undefined){
+          cnt.textContent = counts[f];
+        }
+      });
+    }
+    
     return counts;
   } catch(e){
     console.warn('updateFilterCounts error:', e);
   }
 }
+window.updateFilterCounts = updateFilterCounts;
+
+// 🎯 اجرای مداوم — هر ۱ ثانیه (قوی در برابر خطا)
+if(!window._cntInterval){
+  window._cntInterval = setInterval(function(){
+    try { updateFilterCounts(); } catch(e){}
+  }, 1000);
+}
+
+// 🎯 پچ renderAll
+if(typeof window.renderAll === 'function' && !window._renderAllPatched){
+  window._renderAllPatched = true;
+  var _orig = window.renderAll;
+  window.renderAll = function(){
+    var r = _orig.apply(this, arguments);
+    setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 50);
+    setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 300);
+    return r;
+  };
+}
+
+// 🎯 پچ renderDocList
+if(typeof window.renderDocList === 'function' && !window._renderDocListPatched){
+  window._renderDocListPatched = true;
+  var _orig2 = window.renderDocList;
+  window.renderDocList = function(){
+    var r = _orig2.apply(this, arguments);
+    setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 50);
+    return r;
+  };
+}
+
+// 🎯 اجرای اولیه
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 500);
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 1500);
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 3000);
+
 window.updateFilterCounts = updateFilterCounts;
 
 // ✅ showDataSize
@@ -3073,6 +3166,25 @@ setTimeout(function(){
 }, 1500);
 
 console.log('✅ FINAL FIX loaded');
+
+// 🎯 اگه doctors از سرور کمتر بود، pull کن
+setTimeout(function(){
+  try {
+    var localCount = (window.doctors || []).length;
+    var cached = JSON.parse(localStorage.getItem('cme_doctors') || '[]');
+    var cachedCount = cached.length;
+    console.log('📊 local:', localCount, '| cache:', cachedCount);
+    
+    // اگه cache بیشتره، از cache استفاده کن
+    if(cachedCount > localCount){
+      console.log('⚠️ cache بیشتر از حافظه — reload از cache');
+      window.doctors = cached;
+      if(typeof renderAll === 'function') renderAll();
+      if(typeof updateFilterCounts === 'function') updateFilterCounts();
+    }
+  } catch(e){ console.warn(e); }
+}, 2000);
+
 </script>
 
 </body>
