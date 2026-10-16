@@ -1260,7 +1260,7 @@ function quickJumpToEvent(type){
 
 // 🎯 اجرای مداوم — هر ۱ ثانیه (قوی در برابر خطا)
 if(!window._cntInterval){
-  window._cntInterval = setInterval(function(){
+  {
     try { updateFilterCounts(); } catch(e){}
   }, 1000);
 }
@@ -3463,6 +3463,114 @@ window.vipDebug = function(){
 };
 
 console.log('✅ VIP System v2 فعال');
+})();
+</script>
+<script>
+// ═══════════════════════════════════════════════════
+// 🎯 FINAL FIX v5 — getDoctorStatus + updateFilterCounts
+// بدون تداخل، بدون حلقه بی‌نهایت
+// ═══════════════════════════════════════════════════
+(function(){
+  if(window._finalFixV5) return;
+  window._finalFixV5 = true;
+
+  // ─── isDone ───
+  function isDone(val){
+    if(val === true) return true;
+    if(val === false || val === null || val === undefined) return false;
+    if(typeof val === 'number') return val > 0;
+    var s = String(val).trim();
+    if(!s) return false;
+    if(s.indexOf('نشده') !== -1) return false;
+    if(s.indexOf('نشد') !== -1) return false;
+    if(s.indexOf('نداده') !== -1) return false;
+    if(s.indexOf('نکرده') !== -1) return false;
+    if(s.indexOf('نکرد') !== -1) return false;
+    if(s === 'خیر' || s === 'نه' || s === 'false') return false;
+    if(s.indexOf('انجام شد') !== -1) return true;
+    if(s.indexOf('قبول') !== -1) return true;
+    if(s.indexOf('خرید شده') !== -1) return true;
+    if(s.indexOf('ثبت شده') !== -1) return true;
+    return false;
+  }
+  window.isDone = isDone;
+
+  // ─── getDoctorStatus ───
+  function getDoctorStatus(d){
+    try {
+      if(!d) return 'pending';
+      var events = (d.events || []).filter(function(e){ return e && e.type; });
+      if(events.length === 0) return 'pending';
+      var allComplete = events.every(function(ev){
+        var t = (ev.type || '').trim();
+        var isInPerson = (t === 'حضوری' || t === 'inperson');
+        var purchaseDone = isDone(ev.purchase) || ev.buy === true;
+        var attendDone = isDone(ev.attend);
+        var examDone = isDone(ev.exam);
+        if(isInPerson) return purchaseDone && attendDone;
+        return purchaseDone && attendDone && examDone;
+      });
+      return allComplete ? 'done' : 'active';
+    } catch(e){ return 'pending'; }
+  }
+  window.getDoctorStatus = getDoctorStatus;
+
+  // ─── updateFilterCounts ───
+  function updateFilterCounts(){
+    try {
+      var all = (typeof myDoctors === 'function') ? myDoctors() : (window.doctors || []);
+      var counts = {active: 0, done: 0, pending: 0, vip: 0};
+      for(var i = 0; i < all.length; i++){
+        var d = all[i];
+        var st = getDoctorStatus(d);
+        if(counts[st] !== undefined) counts[st]++;
+        if(d.vip) counts.vip++;
+      }
+      
+      var ids = {
+        cntActive: counts.active,
+        cntDone: counts.done,
+        cntPending: counts.pending,
+        cntVip: counts.vip
+      };
+      for(var id in ids){
+        var el = document.getElementById(id);
+        if(el && el.textContent !== String(ids[id])) el.textContent = ids[id];
+      }
+      
+      document.querySelectorAll('[data-filter]').forEach(function(btn){
+        var f = btn.getAttribute('data-filter');
+        var cnt = btn.querySelector('.cnt');
+        if(cnt && counts[f] !== undefined && cnt.textContent !== String(counts[f])){
+          cnt.textContent = counts[f];
+        }
+      });
+      
+      return counts;
+    } catch(e){ 
+      console.warn('updateFilterCounts:', e); 
+      return {active:0, done:0, pending:0, vip:0};
+    }
+  }
+  window.updateFilterCounts = updateFilterCounts;
+
+  // ─── اجرای خودکار با throttle ───
+  var _lastRun = 0;
+  window._finalInterval = setInterval(function(){
+    var now = Date.now();
+    if(now - _lastRun < 2500) return;
+    _lastRun = now;
+    if(document.hidden) return;
+    try { updateFilterCounts(); } catch(e){}
+  }, 2500);
+
+  // اجرای اولیه
+  setTimeout(function(){
+    try { updateFilterCounts(); } catch(e){}
+    if(typeof renderDocList === 'function') renderDocList();
+  }, 1000);
+
+  console.log('✅ FINAL FIX v5 — getDoctorStatus + updateFilterCounts');
 })();
 </script>
 </body>
