@@ -456,285 +456,153 @@ html.is-logged-in #loginScreen{display:none!important}
 
 
 
-<style>
-/* =============================================
-   🎯 Event Tabs v6 — نهایی
-   دسکتاپ: ۳ ستون کنار هم
-   موبایل: تب‌ها + فقط یکی نشون داده میشه
-   ============================================= */
+
+
+
+
+<style id="evtabs-final-css">
+/* ================================================
+   🎯 Event Tabs v8 — CSS Only نهایی
+   ================================================ */
 
 /* ---------- دسکتاپ ---------- */
-.event-tabs { display: none !important; }
-
-.event-tabs-wrapper {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 12px;
-  margin-top: 16px;
-  direction: rtl;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.ev-tab-content {
-  display: block;
-  min-width: 0;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.ev-tab-content[data-evtype="وبینار"] { grid-column: 1; grid-row: 1; }
-.ev-tab-content[data-evtype="غیر حضوری"] { grid-column: 2; grid-row: 1; }
-.ev-tab-content[data-evtype="حضوری"] { grid-column: 3; grid-row: 1; }
-
-.ev-section {
-  border-radius: 12px;
-  border: 1px solid rgba(0, 217, 255, 0.18);
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.4));
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.ev-section .ev-head {
-  padding: 10px 12px;
-  background: linear-gradient(90deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.7));
-  border-bottom: 1px solid rgba(0, 217, 255, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.ev-section .ev-head h3 {
-  margin: 0;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 800;
-}
-
-.ev-section .ev-head h3 .count {
-  background: rgba(0, 217, 255, 0.15);
-  color: #38bdf8;
-  border: 1px solid rgba(0, 217, 255, 0.4);
-  border-radius: 20px;
-  padding: 1px 8px;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.ev-section .ev-body {
-  padding: 8px;
-  flex: 1;
-}
-
-/* ---------- موبایل ---------- */
-@media (max-width: 900px) {
-
-  .event-tabs-wrapper {
-    display: block;
-    margin-top: 12px;
-  }
-
-  /* نوار تب‌ها */
-  .event-tabs {
-    display: flex;
-    gap: 6px;
-    padding: 6px;
-    margin-bottom: 10px;
-    background: rgba(15, 23, 42, 0.9);
-    border: 1px solid rgba(0, 217, 255, 0.2);
-    border-radius: 10px;
-    direction: rtl;
-    position: relative;
-    z-index: 100;
-  }
-
-  .ev-tab {
-    display: block;
-    flex: 1;
-    padding: 12px 6px;
-    border-radius: 8px;
-    font-weight: 800;
-    font-size: 12px;
-    font-family: inherit;
-    cursor: pointer;
-    -webkit-tap-highlight-color: rgba(0, 217, 255, 0.3);
-    touch-action: manipulation;
-    position: relative;
-    z-index: 101;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1.5px solid rgba(255, 255, 255, 0.15);
-    color: #94a3b8;
-    min-height: 46px;
-    user-select: none;
-    -webkit-user-select: none;
-    text-align: center;
-  }
-
-  .ev-tab.active[data-evtype="وبینار"] {
-    background: rgba(139, 92, 246, 0.3);
-    border-color: #a78bfa;
-    color: #e9d5ff;
-    box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
-  }
-  .ev-tab.active[data-evtype="غیر حضوری"] {
-    background: rgba(255, 193, 7, 0.3);
-    border-color: #ffc107;
-    color: #fef3c7;
-    box-shadow: 0 0 12px rgba(255, 193, 7, 0.4);
-  }
-  .ev-tab.active[data-evtype="حضوری"] {
-    background: rgba(0, 255, 136, 0.3);
-    border-color: #00ff88;
-    color: #d1fae5;
-    box-shadow: 0 0 12px rgba(0, 255, 136, 0.4);
-  }
-
-  /* 🎯 موبایل: هیچ‌کدوم از طریق CSS نشون داده نشن — JS کنترل می‌کنه */
-  .ev-tab-content {
-    display: none;
-    grid-column: auto !important;
-    grid-row: auto !important;
-  }
-
-  .ev-section {
-    min-height: auto;
-  }
-}
-</style>
-
-<style>
-/* ==========================================
-   🎯 Event Tabs v7 — CSS Only (Radio)
-   ========================================== */
-
-/* رادیو‌ها همیشه مخفی */
 .evtab-radio {
-  display: none !important;
   position: absolute !important;
-  left: -9999px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
-/* ---------- دسکتاپ ---------- */
-.event-tabs { display: none !important; }
-
 .event-tabs-wrapper {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 12px;
-  margin-top: 16px;
-  direction: rtl;
-  width: 100%;
-  box-sizing: border-box;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr 1fr !important;
+  gap: 12px !important;
+  margin-top: 16px !important;
+  direction: rtl !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.event-tabs {
+  display: none !important;
 }
 
 .ev-tab-content {
-  display: block;
-  min-width: 0;
-  width: 100%;
-  box-sizing: border-box;
+  display: block !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
-.ev-tab-content[data-evtype="وبینار"] { grid-column: 1; grid-row: 1; }
-.ev-tab-content[data-evtype="غیر حضوری"] { grid-column: 2; grid-row: 1; }
-.ev-tab-content[data-evtype="حضوری"] { grid-column: 3; grid-row: 1; }
+.ev-tab-content[data-evtype="وبینار"] { grid-column: 1 !important; grid-row: 1 !important; }
+.ev-tab-content[data-evtype="غیر حضوری"] { grid-column: 2 !important; grid-row: 1 !important; }
+.ev-tab-content[data-evtype="حضوری"] { grid-column: 3 !important; grid-row: 1 !important; }
 
 .ev-section {
-  border-radius: 12px;
-  border: 1px solid rgba(0, 217, 255, 0.18);
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.4));
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+  border-radius: 12px !important;
+  border: 1px solid rgba(0, 217, 255, 0.18) !important;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.4)) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
 }
 
 .ev-section .ev-head {
-  padding: 10px 12px;
-  background: linear-gradient(90deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.7));
-  border-bottom: 1px solid rgba(0, 217, 255, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
+  padding: 10px 12px !important;
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.7)) !important;
+  border-bottom: 1px solid rgba(0, 217, 255, 0.15) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
 }
 
 .ev-section .ev-head h3 {
-  margin: 0;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 800;
+  margin: 0 !important;
+  font-size: 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-weight: 800 !important;
 }
 
 .ev-section .ev-head h3 .count {
-  background: rgba(0, 217, 255, 0.15);
-  color: #38bdf8;
-  border: 1px solid rgba(0, 217, 255, 0.4);
-  border-radius: 20px;
-  padding: 1px 8px;
-  font-size: 11px;
-  font-weight: 800;
+  background: rgba(0, 217, 255, 0.15) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(0, 217, 255, 0.4) !important;
+  border-radius: 20px !important;
+  padding: 1px 8px !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
 }
 
 .ev-section .ev-body {
-  padding: 8px;
-  flex: 1;
+  padding: 8px !important;
+  flex: 1 !important;
 }
 
-/* ---------- موبایل ---------- */
+/* ================================================
+   موبایل — تب‌ها با :checked
+   ================================================ */
 @media (max-width: 900px) {
 
   .event-tabs-wrapper {
-    display: block;
-    margin-top: 12px;
-    position: relative;
+    display: block !important;
+    margin-top: 12px !important;
+    position: relative !important;
   }
 
-  /* نوار تب */
+  /* نوار تب — نمایش اجباری */
   .event-tabs {
-    display: flex;
-    gap: 6px;
-    padding: 6px;
-    margin-bottom: 10px;
-    background: rgba(15, 23, 42, 0.95);
-    border: 1px solid rgba(0, 217, 255, 0.25);
-    border-radius: 10px;
-    direction: rtl;
-    position: relative;
-    z-index: 100;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    gap: 6px !important;
+    padding: 6px !important;
+    margin-bottom: 10px !important;
+    background: rgba(15, 23, 42, 0.95) !important;
+    border: 1px solid rgba(0, 217, 255, 0.25) !important;
+    border-radius: 10px !important;
+    direction: rtl !important;
+    position: relative !important;
+    z-index: 100 !important;
+    width: auto !important;
+    height: auto !important;
   }
 
+  /* دکمه‌ها — نمایش اجباری */
   .ev-tab {
-    flex: 1;
-    padding: 12px 6px;
-    border-radius: 8px;
-    font-weight: 800;
-    font-size: 12px;
-    font-family: inherit;
-    cursor: pointer;
-    -webkit-tap-highlight-color: rgba(0, 217, 255, 0.3);
-    touch-action: manipulation;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1.5px solid rgba(255, 255, 255, 0.15);
-    color: #94a3b8;
-    min-height: 46px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-    -webkit-user-select: none;
-    transition: all 0.2s ease;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    flex: 1 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 12px 6px !important;
+    border-radius: 8px !important;
+    font-weight: 800 !important;
+    font-size: 12px !important;
+    font-family: inherit !important;
+    cursor: pointer !important;
+    -webkit-tap-highlight-color: rgba(0, 217, 255, 0.3) !important;
+    touch-action: manipulation !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
+    color: #94a3b8 !important;
+    min-height: 46px !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    transition: all 0.2s ease !important;
+    position: relative !important;
+    z-index: 101 !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
   }
 
-  /* استایل تب فعال بر اساس :checked */
+  /* تب فعال - وبینار */
   #evtab_w:checked ~ .event-tabs label[for="evtab_w"] {
     background: rgba(139, 92, 246, 0.35) !important;
     border-color: #a78bfa !important;
@@ -755,18 +623,20 @@ html.is-logged-in #loginScreen{display:none!important}
   }
 
   /* همه محتواها مخفی */
-  .ev-tab-content {
+  .event-tabs-wrapper .ev-tab-content {
     display: none !important;
     grid-column: auto !important;
     grid-row: auto !important;
   }
 
   /* فقط محتوای انتخاب‌شده نشون داده بشه */
-  #evtab_w:checked ~ .ev-tab-content[data-evtype="وبینار"] { display: block !important; }
-  #evtab_o:checked ~ .ev-tab-content[data-evtype="غیر حضوری"] { display: block !important; }
-  #evtab_p:checked ~ .ev-tab-content[data-evtype="حضوری"] { display: block !important; }
+  #evtab_w:checked ~ .ev-tab-content[data-evtype="وبینار"],
+  #evtab_o:checked ~ .ev-tab-content[data-evtype="غیر حضوری"],
+  #evtab_p:checked ~ .ev-tab-content[data-evtype="حضوری"] {
+    display: block !important;
+  }
 
-  .ev-section { min-height: auto; }
+  .ev-section { min-height: auto !important; }
 }
 </style>
 
