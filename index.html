@@ -427,12 +427,15 @@ html.is-logged-in #loginScreen{display:none!important}
 
 
 <style>
+
+
+
+<style>
 /* ============================================
-   🎯 سه بخش رویداد — افقی، ۳ ستون دقیق
-   ترتیب راست به چپ: وبینار | غیرحضوری | حضوری
+   🎯 سه بخش رویداد — افقی، ۳ ستون، بدون اسکرول داخلی
    ============================================ */
 
-/* تب‌های قدیمی کاملاً حذف */
+/* تب‌های قدیمی حذف */
 .event-tabs,
 .event-tabs-wrapper > .event-tabs,
 .ev-tab {
@@ -444,7 +447,7 @@ html.is-logged-in #loginScreen{display:none!important}
   height: 0 !important;
 }
 
-/* wrapper اصلی — GRID اجباری ۳ ستونه */
+/* wrapper — GRID ۳ ستونه */
 .event-tabs-wrapper {
   display: grid !important;
   grid-template-columns: 1fr 1fr 1fr !important;
@@ -454,13 +457,13 @@ html.is-logged-in #loginScreen{display:none!important}
   border: none !important;
   background: transparent !important;
   padding: 0 !important;
-  align-items: stretch !important;
+  align-items: start !important;
   direction: rtl !important;
   width: 100% !important;
   box-sizing: border-box !important;
 }
 
-/* همه محتواها نمایش داده بشن */
+/* محتواها */
 .event-tabs-wrapper .ev-tab-content,
 .ev-tab-content,
 .ev-tab-content.hidden {
@@ -471,30 +474,30 @@ html.is-logged-in #loginScreen{display:none!important}
   min-width: 0 !important;
   width: 100% !important;
   max-width: 100% !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   box-sizing: border-box !important;
   align-self: start !important;
 }
 
-/* ستون‌های صریح بر اساس نوع رویداد */
+/* قفل موقعیت */
 .ev-tab-content[data-evtype="وبینار"] { grid-column: 1 !important; grid-row: 1 !important; }
 .ev-tab-content[data-evtype="غیر حضوری"] { grid-column: 2 !important; grid-row: 1 !important; }
 .ev-tab-content[data-evtype="حضوری"] { grid-column: 3 !important; grid-row: 1 !important; }
 
-/* بخش هر رویداد */
+/* بخش رویداد */
 .ev-section {
   border-radius: 12px !important;
   border: 1px solid rgba(0, 217, 255, 0.18) !important;
   background: linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.4)) !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   display: flex !important;
   flex-direction: column !important;
-  height: 100% !important;
-  min-height: 140px !important;
+  height: auto !important;
+  min-height: 120px !important;
   box-sizing: border-box !important;
 }
 
-/* هدر هر بخش */
+/* هدر — چسبنده به بالای ستون (اختیاری) */
 .ev-section .ev-head {
   padding: 10px 12px !important;
   background: linear-gradient(90deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.7)) !important;
@@ -504,6 +507,7 @@ html.is-logged-in #loginScreen{display:none!important}
   justify-content: space-between !important;
   gap: 8px !important;
   flex-wrap: wrap !important;
+  border-radius: 12px 12px 0 0 !important;
 }
 
 .ev-section .ev-head h3 {
@@ -525,12 +529,13 @@ html.is-logged-in #loginScreen{display:none!important}
   font-weight: 800 !important;
 }
 
-/* بدنه */
+/* 🚀 بدنه — بدون محدودیت ارتفاع و بدون اسکرول داخلی */
 .ev-section .ev-body {
   padding: 8px !important;
   flex: 1 !important;
-  overflow-y: auto !important;
-  max-height: 400px !important;
+  overflow: visible !important;
+  max-height: none !important;
+  height: auto !important;
 }
 
 /* موبایل: عمودی */
@@ -542,9 +547,6 @@ html.is-logged-in #loginScreen{display:none!important}
   .ev-tab-content[data-evtype="وبینار"] { grid-column: 1 !important; grid-row: 1 !important; }
   .ev-tab-content[data-evtype="غیر حضوری"] { grid-column: 1 !important; grid-row: 2 !important; }
   .ev-tab-content[data-evtype="حضوری"] { grid-column: 1 !important; grid-row: 3 !important; }
-  .ev-section .ev-body {
-    max-height: none !important;
-  }
   .ev-section {
     min-height: auto !important;
   }
