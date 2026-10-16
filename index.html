@@ -4821,50 +4821,7 @@ window.isDone = isDone;
   // ═══════════════════════════════════════════
   // ۳. ذخیره VIP موقع saveDoctor
   // ═══════════════════════════════════════════
-  var _saveHook = setInterval(function(){
-    if(typeof window.saveDoctor === 'function' && !window._vip_hooked_save){
-      window._vip_hooked_save = true;
-      clearInterval(_saveHook);
-      var _origSave = window.saveDoctor;
-      window.saveDoctor = function(){
-        // قبل از ذخیره، مقادیر رو بگیر
-        var cb = document.getElementById('mVip');
-        var dt = document.getElementById('mVipDate');
-        var vipVal = cb ? cb.checked : false;
-        var dateVal = dt ? dt.value.trim() : '';
-        
-        // بعد از ذخیره، آخرین پزشک رو آپدیت کن
-        var r = _origSave.apply(this, arguments);
-        
-        setTimeout(function(){
-          try {
-            var id = window._editingDoctorId;
-            var doctor = null;
-            if(id){
-              doctor = (window.doctors||[]).find(function(x){ return x.id === id; });
-            }
-            // اگه id نبود، آخرین پزشک رو بگیر (اضافه جدید)
-            if(!doctor && window.doctors && window.doctors.length){
-              doctor = window.doctors[window.doctors.length - 1];
-            }
-            if(doctor){
-              doctor.vip = vipVal;
-              doctor.vipDate = dateVal;
-              console.log('⭐ VIP set:', doctor.fname || doctor.firstName, '→', vipVal, dateVal);
-            }
-            // رندر و ذخیره
-            if(typeof renderDocList === 'function') renderDocList();
-            if(typeof updateFilterCounts === 'function') updateFilterCounts();
-            if(typeof window.triggerAutoSave === 'function') window.triggerAutoSave('vip-save');
-            else if(typeof window.pushToCloud === 'function') window.pushToCloud(true);
-          } catch(e){ console.warn('vip save:', e); }
-        }, 400);
-        
-        return r;
-      };
-      console.log('✅ saveDoctor hook شد');
-    }
-  }, 500);
+  // save hook قدیمی حذف شد
   
   // ═══════════════════════════════════════════
   // ۴. محاسبه روزهای مانده (پشتیبانی شمسی و میلادی)
@@ -5111,7 +5068,85 @@ window.isDone = isDone;
     addVipBadges();
   }, 2000);
   
-  console.log('✅ VIP System v2 فعال');
+  
+// ═══════════════════════════════════════════
+// 🎯 VIP Save Hook v2 — قوی‌تر
+// ═══════════════════════════════════════════
+var _saveHookV2 = setInterval(function(){
+  if(typeof window.saveDoctor === 'function' && !window._vip_hooked_save_v2){
+    window._vip_hooked_save_v2 = true;
+    clearInterval(_saveHookV2);
+    var _origSaveV2 = window.saveDoctor;
+    
+    window.saveDoctor = function(){
+      // ۱. مقادیر VIP رو قبل از ذخیره بگیر
+      var cb = document.getElementById('mVip');
+      var dt = document.getElementById('mVipDate');
+      var vipVal = cb ? cb.checked : false;
+      var dateVal = dt ? dt.value.trim() : '';
+      
+      console.log('💾 قبل از ذخیره — vip:', vipVal, '| date:', dateVal);
+      
+      // ۲. اسنپ‌شات از idهای فعلی
+      var beforeIds = (window.doctors || []).map(function(d){ return d.id; });
+      var editingId = window._editingDoctorId;
+      console.log('💾 editingId:', editingId, '| before count:', beforeIds.length);
+      
+      // ۳. ذخیره اصلی
+      var r = _origSaveV2.apply(this, arguments);
+      
+      // ۴. بعد از ذخیره، doctor رو پیدا کن و vip ست کن
+      setTimeout(function(){
+        try {
+          var target = null;
+          
+          // الف) اگه ویرایش بود
+          if(editingId){
+            target = (window.doctors || []).find(function(d){ return d.id === editingId; });
+            console.log('🔍 پیدا شد (edit):', target ? target.id : 'null');
+          }
+          
+          // ب) اگه اضافه جدید بود — با diff پیدا کن
+          if(!target){
+            target = (window.doctors || []).find(function(d){
+              return beforeIds.indexOf(d.id) === -1;
+            });
+            console.log('🔍 پیدا شد (diff):', target ? target.id : 'null');
+          }
+          
+          // ج) آخرین تلاش — آخرین doctor
+          if(!target && window.doctors && window.doctors.length){
+            target = window.doctors[window.doctors.length - 1];
+            console.log('🔍 پیدا شد (last):', target ? target.id : 'null');
+          }
+          
+          if(target){
+            target.vip = vipVal;
+            target.vipDate = dateVal;
+            console.log('✅ VIP set on:', target.fname || target.firstName, '| vip:', target.vip);
+            
+            // رندر مجدد
+            if(typeof renderDocList === 'function') renderDocList();
+            if(typeof updateFilterCounts === 'function') updateFilterCounts();
+            
+            // push به سرور
+            setTimeout(function(){
+              if(typeof window.triggerAutoSave === 'function') window.triggerAutoSave('vip-save-v2');
+              else if(typeof window.pushToCloud === 'function') window.pushToCloud(true);
+            }, 300);
+          } else {
+            console.warn('❌ target پیدا نشد!');
+          }
+        } catch(e){ console.warn('vip save v2:', e); }
+      }, 300);
+      
+      return r;
+    };
+    console.log('✅ saveDoctor v2 hook شد');
+  }
+}, 500);
+
+console.log('✅ VIP System v2 فعال');
 })();
 </script>
 </body>
