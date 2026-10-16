@@ -3826,7 +3826,8 @@ setTimeout(function(){
 
 </script>
 
-<!-- 🎯 Mobile Sticky Filter Bar (فقط موبایل) -->
+
+<!-- 🎯 Mobile Sticky Filter Bar (فقط در پروفایل پزشک) -->
 <style id="mobile-filterbar-css">
 @media (max-width: 900px) {
   body.has-mobile-filterbar #mainArea {
@@ -3848,6 +3849,15 @@ setTimeout(function(){
   }
   body.has-mobile-filterbar #mobileFilterBar {
     display: block !important;
+  }
+  /* اگه مودال بازه، نوار مخفی بشه */
+  body.modal-open #mobileFilterBar,
+  body.has-modal #mobileFilterBar {
+    display: none !important;
+  }
+  body.modal-open.has-mobile-filterbar #mainArea,
+  body.has-modal.has-mobile-filterbar #mainArea {
+    padding-top: 0 !important;
   }
   #mobileFilterBar .mfb-user {
     display: flex;
@@ -3938,20 +3948,81 @@ setTimeout(function(){
 
   function isMobile(){ return window.innerWidth <= 900; }
 
+  // 🎯 تشخیص پروفایل پزشک (نه مودال)
   function hasProfile(){
     var ma = document.getElementById('mainArea');
     if(!ma) return false;
+    // اگه back-btn هست و مودالی باز نیست
     return !!ma.querySelector('.back-btn');
+  }
+
+  // 🎯 تشخیص مودال باز
+  function isModalOpen(){
+    // چک body class
+    if(document.body.classList.contains('modal-open')) return true;
+    if(document.body.classList.contains('has-modal')) return true;
+    
+    // چک وجود مودال‌های رایج
+    var modalSelectors = [
+      '.modal:not(.hidden)',
+      '.modal.show',
+      '.modal.active',
+      '.modal.open',
+      '[role="dialog"]:not(.hidden)',
+      '.doctor-modal:not(.hidden)',
+      '.doctor-modal.show',
+      '.overlay:not(.hidden)',
+      '.overlay.show',
+      '.form-modal:not(.hidden)',
+      '.form-modal.show'
+    ];
+    
+    for(var i=0;i<modalSelectors.length;i++){
+      try {
+        var el = document.querySelector(modalSelectors[i]);
+        if(el){
+          var st = getComputedStyle(el);
+          if(st.display !== 'none' && st.visibility !== 'hidden' && parseFloat(st.opacity) > 0.1){
+            // چک کن واقعاً روی صفحه هست
+            var rect = el.getBoundingClientRect();
+            if(rect.width > 50 && rect.height > 50) return true;
+          }
+        }
+      } catch(e){}
+    }
+    
+    // چک وجود h1/h2 "ثبت پزشک" یا دکمه‌های خاص مودال
+    var headings = document.querySelectorAll('h1, h2, h3, .title, .header-title');
+    for(var j=0;j<headings.length;j++){
+      var t = (headings[j].textContent || '').trim();
+      if(t.indexOf('ثبت پزشک') !== -1 || t.indexOf('ویرایش پزشک') !== -1){
+        // چک کن visible هست
+        var rect2 = headings[j].getBoundingClientRect();
+        var st2 = getComputedStyle(headings[j]);
+        if(st2.display !== 'none' && rect2.width > 0 && rect2.top < window.innerHeight && rect2.bottom > 0){
+          return true;
+        }
+      }
+    }
+    
+    return false;
   }
 
   function refresh(){
     var bar = document.getElementById('mobileFilterBar');
     if(!bar) return;
 
-    if(isMobile() && hasProfile()){
+    var modalOpen = isModalOpen();
+    var profile = hasProfile();
+    
+    // اگه مودال بازه، نوار کاملاً مخفی
+    if(isMobile() && profile && !modalOpen){
       document.body.classList.add('has-mobile-filterbar');
+      document.body.classList.remove('modal-open');
     } else {
       document.body.classList.remove('has-mobile-filterbar');
+      if(modalOpen) document.body.classList.add('modal-open');
+      else document.body.classList.remove('modal-open');
     }
 
     // رنگ کاربر فعال
@@ -4015,14 +4086,26 @@ setTimeout(function(){
     if(ma){
       new MutationObserver(function(){
         setTimeout(refresh, 60);
-      }).observe(ma, {childList:true, subtree:false});
+      }).observe(ma, {childList:true, subtree:true});
     }
+    
+    // پایش کل body برای مودال‌ها
+    new MutationObserver(function(){
+      setTimeout(refresh, 80);
+    }).observe(document.body, {childList:true, subtree:false, attributes:true, attributeFilter:['class']});
+    
     refresh();
-    setInterval(refresh, 1200);
+    setInterval(refresh, 800);
   }, 1500);
 
   window.addEventListener('resize', function(){ setTimeout(refresh, 100); });
-  console.log('✅ Mobile Filter Bar فعال');
+  
+  // 🎯 Esc برای بستن مودال (اختیاری)
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') setTimeout(refresh, 100);
+  });
+  
+  console.log('✅ Mobile Filter Bar v2 فعال');
 })();
 </script>
 
