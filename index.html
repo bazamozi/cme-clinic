@@ -608,6 +608,168 @@ html.is-logged-in #loginScreen{display:none!important}
 }
 </style>
 
+<style>
+/* ==========================================
+   🎯 Event Tabs v7 — CSS Only (Radio)
+   ========================================== */
+
+/* رادیو‌ها همیشه مخفی */
+.evtab-radio {
+  display: none !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
+
+/* ---------- دسکتاپ ---------- */
+.event-tabs { display: none !important; }
+
+.event-tabs-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+  direction: rtl;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ev-tab-content {
+  display: block;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ev-tab-content[data-evtype="وبینار"] { grid-column: 1; grid-row: 1; }
+.ev-tab-content[data-evtype="غیر حضوری"] { grid-column: 2; grid-row: 1; }
+.ev-tab-content[data-evtype="حضوری"] { grid-column: 3; grid-row: 1; }
+
+.ev-section {
+  border-radius: 12px;
+  border: 1px solid rgba(0, 217, 255, 0.18);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.4));
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ev-section .ev-head {
+  padding: 10px 12px;
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.7));
+  border-bottom: 1px solid rgba(0, 217, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ev-section .ev-head h3 {
+  margin: 0;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+}
+
+.ev-section .ev-head h3 .count {
+  background: rgba(0, 217, 255, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(0, 217, 255, 0.4);
+  border-radius: 20px;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.ev-section .ev-body {
+  padding: 8px;
+  flex: 1;
+}
+
+/* ---------- موبایل ---------- */
+@media (max-width: 900px) {
+
+  .event-tabs-wrapper {
+    display: block;
+    margin-top: 12px;
+    position: relative;
+  }
+
+  /* نوار تب */
+  .event-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 6px;
+    margin-bottom: 10px;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(0, 217, 255, 0.25);
+    border-radius: 10px;
+    direction: rtl;
+    position: relative;
+    z-index: 100;
+  }
+
+  .ev-tab {
+    flex: 1;
+    padding: 12px 6px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(0, 217, 255, 0.3);
+    touch-action: manipulation;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    color: #94a3b8;
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: all 0.2s ease;
+  }
+
+  /* استایل تب فعال بر اساس :checked */
+  #evtab_w:checked ~ .event-tabs label[for="evtab_w"] {
+    background: rgba(139, 92, 246, 0.35) !important;
+    border-color: #a78bfa !important;
+    color: #e9d5ff !important;
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.5) !important;
+  }
+  #evtab_o:checked ~ .event-tabs label[for="evtab_o"] {
+    background: rgba(255, 193, 7, 0.35) !important;
+    border-color: #ffc107 !important;
+    color: #fef3c7 !important;
+    box-shadow: 0 0 12px rgba(255, 193, 7, 0.5) !important;
+  }
+  #evtab_p:checked ~ .event-tabs label[for="evtab_p"] {
+    background: rgba(0, 255, 136, 0.35) !important;
+    border-color: #00ff88 !important;
+    color: #d1fae5 !important;
+    box-shadow: 0 0 12px rgba(0, 255, 136, 0.5) !important;
+  }
+
+  /* همه محتواها مخفی */
+  .ev-tab-content {
+    display: none !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+
+  /* فقط محتوای انتخاب‌شده نشون داده بشه */
+  #evtab_w:checked ~ .ev-tab-content[data-evtype="وبینار"] { display: block !important; }
+  #evtab_o:checked ~ .ev-tab-content[data-evtype="غیر حضوری"] { display: block !important; }
+  #evtab_p:checked ~ .ev-tab-content[data-evtype="حضوری"] { display: block !important; }
+
+  .ev-section { min-height: auto; }
+}
+</style>
+
 </head>
 <body>
 
@@ -1386,19 +1548,13 @@ function renderMain(){
             <span class="value ltr">${esc(c.pass2||'—')}</span>
           </div>
         </div></div>`:''}</div><div class="event-tabs-wrapper">
+      <input type="radio" name="evtab_radio" id="evtab_w" class="evtab-radio" checked>
+      <input type="radio" name="evtab_radio" id="evtab_o" class="evtab-radio">
+      <input type="radio" name="evtab_radio" id="evtab_p" class="evtab-radio">
       <div class="event-tabs">
-        <button class="ev-tab active" data-evtype="وبینار" onclick="switchEventTab('وبینار', this)">
-          💻 وبینار
-          ${(()=>{const evs=(d.events||[]).filter(e=>e.type==='وبینار');return `<span style="opacity:0.7;font-size:11px">(${evs.length})</span>`;})()}
-        </button>
-        <button class="ev-tab" data-evtype="غیر حضوری" onclick="switchEventTab('غیر حضوری', this)">
-          📁 غیرحضوری
-          ${(()=>{const evs=(d.events||[]).filter(e=>e.type==='غیر حضوری');return `<span style="opacity:0.7;font-size:11px">(${evs.length})</span>`;})()}
-        </button>
-        <button class="ev-tab" data-evtype="حضوری" onclick="switchEventTab('حضوری', this)">
-          🏢 حضوری
-          ${(()=>{const evs=(d.events||[]).filter(e=>e.type==='حضوری');return `<span style="opacity:0.7;font-size:11px">(${evs.length})</span>`;})()}
-        </button>
+        <label for="evtab_w" class="ev-tab active" data-evtype="وبینار">💻 وبینار</label>
+        <label for="evtab_o" class="ev-tab" data-evtype="غیر حضوری">📁 غیرحضوری</label>
+        <label for="evtab_p" class="ev-tab" data-evtype="حضوری">🏢 حضوری</label>
       </div>
       <div class="ev-tab-content active" data-evtype="وبینار">
         ${renderEventSection(d, 'وبینار', '💻', 'var(--purple)')}
@@ -2904,165 +3060,37 @@ if(typeof window._evTabDelegated === 'undefined'){
 
 
 
-// ==========================================
-// 🎯 Event Tabs v6 — نهایی
-// ==========================================
 
+
+
+// ==========================================
+// 🎯 Event Tabs v7 — فقط CSS کار می‌کنه
+// ==========================================
+// switchEventTab به عنوان no-op نگه داشته میشه
 window.switchEventTab = function(type, btn){
-  try {
-    console.log('🎯 switchEventTab CALLED:', type);
-    
-    var isMobile = window.innerWidth <= 900;
-    
-    // ۱. کلاس active روی دکمه‌ها
-    var allBtns = document.querySelectorAll('.ev-tab');
-    for(var i=0; i<allBtns.length; i++){
-      allBtns[i].classList.remove('active');
-      if(allBtns[i].getAttribute('data-evtype') === type){
-        allBtns[i].classList.add('active');
-      }
-    }
-    
-    // ۲. نمایش/مخفی محتوا
-    var allContent = document.querySelectorAll('.ev-tab-content');
-    for(var j=0; j<allContent.length; j++){
-      var ct = allContent[j];
-      var match = (ct.getAttribute('data-evtype') === type);
-      
-      if(isMobile){
-        // موبایل: فقط یکی نمایش
-        if(match){
-          ct.style.setProperty('display', 'block', 'important');
-        } else {
-          ct.style.setProperty('display', 'none', 'important');
-        }
-      } else {
-        // دسکتاپ: همه نمایش
-        ct.style.removeProperty('display');
-      }
-    }
-    
-    console.log('✅ switchEventTab DONE:', type, '| mobile:', isMobile);
-    return false;
-  } catch(e){
-    console.error('❌ switchEventTab error:', e);
-    return false;
-  }
+  console.log('ℹ️ switchEventTab فراخوانی شد (CSS خودش مدیریت می‌کنه)');
+  return false;
 };
 
-// 🎯 بعد از هر رندر: تنظیم حالت موبایل
-window._ensureTabsState = function(){
-  try {
-    var isMobile = window.innerWidth <= 900;
-    
-    // دکمه‌ها رو ریست کن
-    var allBtns = document.querySelectorAll('.ev-tab');
-    allBtns.forEach(function(b){
-      b.classList.remove('hidden');
-      b.setAttribute('type', 'button');
-    });
-    
-    if(!isMobile){
-      // دسکتاپ: همه نمایش
-      document.querySelectorAll('.ev-tab-content').forEach(function(ct){
-        ct.style.removeProperty('display');
-      });
-      return;
-    }
-    
-    // موبایل: اگه تب فعال هست، همون رو نگه دار
-    var activeBtn = document.querySelector('.ev-tab.active');
-    var activeType = activeBtn ? activeBtn.getAttribute('data-evtype') : 'وبینار';
-    
-    window.switchEventTab(activeType, activeBtn);
-  } catch(e){ console.error('_ensureTabsState:', e); }
-};
-
-// 🎯 Event Delegation — با استفاده از pointerdown (هم کلیک هم لمس)
-if(!window._evDelegatedV6){
-  window._evDelegatedV6 = true;
-  
-  var _handleTab = function(e){
-    var tab = null;
-    var el = e.target;
-    while(el && el !== document){
-      if(el.classList && el.classList.contains('ev-tab')){
-        tab = el;
-        break;
-      }
-      el = el.parentNode;
-    }
-    if(!tab) return;
-    var type = tab.getAttribute('data-evtype');
-    if(!type) return;
-    
-    e.preventDefault();
-    e.stopPropagation();
-    window.switchEventTab(type, tab);
-  };
-  
-  document.addEventListener('click', _handleTab, true);
-  document.addEventListener('touchend', _handleTab, true);
-  document.addEventListener('pointerup', _handleTab, true);
-  
-  console.log('✅ Event delegation v6 فعال');
-}
-
-// 🎯 MutationObserver برای mainArea
-if(!window._evObserverV6){
-  window._evObserverV6 = true;
-  
-  var setupObs = setInterval(function(){
-    var ma = document.getElementById('mainArea');
-    if(!ma) return;
-    if(ma._evObsV6){ clearInterval(setupObs); return; }
-    ma._evObsV6 = true;
-    clearInterval(setupObs);
-    
-    new MutationObserver(function(){
-      setTimeout(window._ensureTabsState, 150);
-    }).observe(ma, {childList: true, subtree: true});
-    
-    console.log('✅ MutationObserver v6 فعال');
-  }, 500);
-}
-
-// 🎯 تست دستی
-window.testTabs = function(){
-  console.log('═══ تست تب‌ها ═══');
-  console.log('عرض:', window.innerWidth, '| mobile:', window.innerWidth <= 900);
-  
+// دیباگ
+window.checkTabs = function(){
   var wrapper = document.querySelector('.event-tabs-wrapper');
-  console.log('wrapper:', wrapper ? 'پیدا شد' : '❌ نبود');
-  
-  console.log('\nدکمه‌ها:');
-  document.querySelectorAll('.ev-tab').forEach(function(b){
-    var st = getComputedStyle(b);
-    console.log('  -', b.getAttribute('data-evtype'), '| active:', b.classList.contains('active'), '| display:', st.display, '| pointer:', st.pointerEvents);
+  if(!wrapper){ console.log('❌ wrapper نیست'); return; }
+  console.log('✅ wrapper پیدا شد');
+  ['evtab_w','evtab_o','evtab_p'].forEach(function(id){
+    var r = document.getElementById(id);
+    console.log('  radio', id, ':', r ? (r.checked ? '✅ checked' : '⬜ not checked') : '❌ نیست');
   });
-  
-  console.log('\nمحتواها:');
-  document.querySelectorAll('.ev-tab-content').forEach(function(ct){
-    var st = getComputedStyle(ct);
-    console.log('  -', ct.getAttribute('data-evtype'), '| display:', st.display);
+  var tabs = wrapper.querySelectorAll('.event-tabs label');
+  console.log('  labels:', tabs.length);
+  var contents = wrapper.querySelectorAll('.ev-tab-content');
+  console.log('  contents:', contents.length);
+  contents.forEach(function(ct){
+    console.log('    -', ct.getAttribute('data-evtype'), '| display:', getComputedStyle(ct).display);
   });
-  
-  console.log('\nحالا تست کن: testSwitch("غیر حضوری")');
 };
 
-window.testSwitch = function(type){
-  console.log('🔬 تست switch:', type);
-  window.switchEventTab(type, document.querySelector('.ev-tab[data-evtype="'+type+'"]'));
-  setTimeout(function(){
-    document.querySelectorAll('.ev-tab-content').forEach(function(ct){
-      console.log(ct.getAttribute('data-evtype'), '→', getComputedStyle(ct).display);
-    });
-  }, 100);
-};
-
-// اجرای اولیه
-setTimeout(window._ensureTabsState, 800);
-console.log('✅ Event Tabs v6 loaded');
+console.log('✅ Event Tabs v7 (CSS-only) loaded');
 
 </script>
 </body>
