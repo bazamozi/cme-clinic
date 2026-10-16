@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
+<script id="earlyLoginCheck">
+(function(){
+  try {
+    var logged = localStorage.getItem('cme_logged_in');
+    if(logged === 'morteza' || logged === 'parvin'){
+      document.documentElement.classList.add('is-logged-in');
+    }
+  } catch(e){}
+})();
+</script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>دفتر بازآموزی پزشکان</title>
@@ -409,6 +420,25 @@ textarea{resize:vertical;min-height:55px}
   .bank-cell-compact .value{font-size:12px;letter-spacing:0}
   .bank-cell-compact.card-number .value{font-size:13px}
   .bank-cell-compact .copy-inline{font-size:10px;padding:2px 5px}
+}
+
+html.is-logged-in #loginScreen{display:none!important}
+
+/* ===== Bank Card Font Sizes (Bigger) ===== */
+.bank-cell-compact .label{font-size:13px!important;color:#cbd5e1!important;font-weight:700!important}
+.bank-cell-compact .value{font-size:20px!important;color:#fff!important;font-weight:800!important}
+.bank-cell-compact.card-number .value{font-size:22px!important;letter-spacing:2px!important}
+.bank-cell-compact .copy-inline{font-size:12px!important;padding:4px 10px!important;margin-top:4px!important}
+.bank-cell-compact{min-height:75px!important;padding:10px 12px!important}
+.bank-cell-compact.card-number{min-height:85px!important}
+
+@media(max-width:768px){
+  .bank-cell-compact .label{font-size:12px!important}
+  .bank-cell-compact .value{font-size:18px!important}
+  .bank-cell-compact.card-number .value{font-size:16px!important;letter-spacing:1px!important}
+  .bank-cell-compact .copy-inline{font-size:11px!important}
+  .bank-cell-compact{min-height:65px!important;padding:8px 8px!important}
+  .bank-cell-compact.card-number{min-height:75px!important}
 }
 </style>
 </head>
