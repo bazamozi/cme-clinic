@@ -2404,6 +2404,11 @@ document.addEventListener('keydown', function(e){
 // اجرا
 
 console.log('✅ Login System بارگذاری شد');
+
+// اتصال به window
+window.getDoctorStatus = getDoctorStatus;
+window.setDocFilter = setDocFilter;
+window.updateFilterCounts = updateFilterCounts;
 </script>
 <script>
 /* ===== Login System (قطعی v2) ===== */
@@ -2480,7 +2485,7 @@ setTimeout(checkLogin, 100);
 /* ===== Doctors Filter System ===== */
 var _docFilter = 'active';  // پیش‌فرض: در حال اجرا
 
-window.getDoctorStatus = function(d){
+function getDoctorStatus(d){
   // 1) تکمیل‌شده
   if(typeof isComplete === 'function' && isComplete(d)) return 'done';
   
@@ -2491,18 +2496,18 @@ window.getDoctorStatus = function(d){
   
   // 3) بلاتکلیف: تازه اضافه شده، نه رویداد نه پرداخت
   return 'pending';
-};
+}
 
-window.setDocFilter = function(filter){
+function setDocFilter(filter){
   _docFilter = filter;
   document.querySelectorAll('.doc-filter-tabs button').forEach(function(b){
     if(b.dataset.filter === filter) b.classList.add('active');
     else b.classList.remove('active');
   });
   renderDocList();
-};
+}
 
-window.updateFilterCounts = function(){
+function updateFilterCounts(){
   var all = myDoctors();
   var counts = { active: 0, done: 0, pending: 0 };
   all.forEach(function(d){
@@ -2514,7 +2519,7 @@ window.updateFilterCounts = function(){
   if(ce) ce.textContent = counts.active;
   if(cd) cd.textContent = counts.done;
   if(cp) cp.textContent = counts.pending;
-};
+}
 </script>
 </body>
 </html>
