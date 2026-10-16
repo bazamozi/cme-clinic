@@ -3119,57 +3119,8 @@ setTimeout(function(){
 // ============================================
 // 🎯 updateFilterCounts — نسخه نهایی
 // ============================================
-function updateFilterCounts(){
-  try {
-    var all = [];
-    // از getter استفاده کن
-    if(typeof window._getAllDoctors === 'function'){
-      all = window._getAllDoctors() || [];
-    }
-    // fallback
-    if(!all.length){
-      try {
-        if(typeof doctors !== 'undefined' && Array.isArray(doctors)) all = doctors;
-      } catch(e){}
-    }
-    if(!all.length){
-      try {
-        var cached = JSON.parse(localStorage.getItem('cme_doctors') || '[]');
-        if(cached.length) all = cached;
-      } catch(e){}
-    }
-    
-    var counts = {active: 0, done: 0, pending: 0};
-    for(var i = 0; i < all.length; i++){
-      var st = (typeof getDoctorStatus === 'function') 
-               ? getDoctorStatus(all[i]) 
-               : 'pending';
-      if(counts[st] !== undefined) counts[st]++;
-    }
-    
-    // نوشتن در DOM
-    var elA = document.getElementById('cntActive');
-    var elD = document.getElementById('cntDone');
-    var elP = document.getElementById('cntPending');
-    if(elA) elA.textContent = counts.active;
-    if(elD) elD.textContent = counts.done;
-    if(elP) elP.textContent = counts.pending;
-    
-    // fallback با data-filter
-    document.querySelectorAll('[data-filter]').forEach(function(btn){
-      var f = btn.getAttribute('data-filter');
-      var cnt = btn.querySelector('.cnt');
-      if(cnt && counts[f] !== undefined){
-        cnt.textContent = counts[f];
-      }
-    });
-    
-    return counts;
-  } catch(e){
-    console.warn('updateFilterCounts error:', e);
-  }
-}
-window.updateFilterCounts = updateFilterCounts;
+
+
 
 // 🎯 اجرای مداوم
 if(!window._cntIntervalV2){
@@ -3483,6 +3434,90 @@ if(!window._syncInterval){
 
   console.log('✅ Auto-Sync v3 فعال — push ایمن، pull هر ۵ ثانیه');
 })();
+
+</script>
+<script>
+// ═══════════════════════════════════════════════
+// 🎯 updateFilterCounts — هماهنگ با لیست
+// ═══════════════════════════════════════════════
+function updateFilterCounts(){
+  try {
+    var all = [];
+    
+    // 🎯 از myDoctors استفاده کن — دقیقاً مثل renderDocList
+    if(typeof myDoctors === 'function'){
+      try { all = myDoctors() || []; } catch(e){}
+    }
+    
+    // Fallback: اگه myDoctors نبود، همه
+    if(!all.length && typeof window._getAllDoctors === 'function'){
+      all = window._getAllDoctors() || [];
+    }
+    if(!all.length){
+      try {
+        if(typeof doctors !== 'undefined' && Array.isArray(doctors)) all = doctors;
+      } catch(e){}
+    }
+    
+    var counts = {active: 0, done: 0, pending: 0};
+    for(var i = 0; i < all.length; i++){
+      var st = (typeof getDoctorStatus === 'function')
+               ? getDoctorStatus(all[i])
+               : 'pending';
+      if(counts[st] !== undefined) counts[st]++;
+    }
+    
+    // نوشتن در DOM
+    var elA = document.getElementById('cntActive');
+    var elD = document.getElementById('cntDone');
+    var elP = document.getElementById('cntPending');
+    if(elA) elA.textContent = counts.active;
+    if(elD) elD.textContent = counts.done;
+    if(elP) elP.textContent = counts.pending;
+    
+    // fallback با data-filter
+    document.querySelectorAll('[data-filter]').forEach(function(btn){
+      var f = btn.getAttribute('data-filter');
+      var cnt = btn.querySelector('.cnt');
+      if(cnt && counts[f] !== undefined){
+        cnt.textContent = counts[f];
+      }
+    });
+    
+    return counts;
+  } catch(e){
+    console.warn('updateFilterCounts error:', e);
+  }
+}
+window.updateFilterCounts = updateFilterCounts;
+
+// اجرای مداوم
+if(!window._cntIntervalV3){
+  window._cntIntervalV3 = setInterval(function(){
+    try { updateFilterCounts(); } catch(e){}
+  }, 1000);
+}
+
+// اجرای اولیه
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 500);
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 1500);
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 3000);
+
+console.log('✅ updateFilterCounts v3 — هماهنگ با لیست');
+
+// 🎯 Hook روی switchUser — بعد از تغییر کاربر، شمارش رو آپدیت کن
+setTimeout(function(){
+  if(typeof window.switchUser === 'function' && !window._switchUserHooked){
+    window._switchUserHooked = true;
+    var _orig = window.switchUser;
+    window.switchUser = function(){
+      var r = _orig.apply(this, arguments);
+      setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 100);
+      setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 500);
+      return r;
+    };
+  }
+}, 2000);
 
 </script>
 </body>
