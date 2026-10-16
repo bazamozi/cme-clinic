@@ -3260,219 +3260,228 @@ if(!window._syncInterval){
 }
 
 
+
+
+
 // ═══════════════════════════════════════════════
-// 🔄 Auto-Sync v2 — همگام‌سازی خودکار بین دستگاه‌ها
+// 🔄 Auto-Sync v3 — push ایمن + pull مداوم
 // ═══════════════════════════════════════════════
 
 (function(){
 
-  // ──────────────────────────────────────
-  // ۱. Auto-push بعد از تغییرات
-  // ──────────────────────────────────────
-  var _pushTimer = null;
-  var _lastPushTime = 0;
-  var _lastDataHash = '';
+  var _lastServerJSON = '';    // آخرین داده سرور که دیدیم
+  var _lastLocalJSON = '';     // آخرین داده محلی که push کردیم
+  var _isPushing = false;
+  var _isPulling = false;
 
-  function _dataHash(){
-    try {
-      var d = (typeof doctors !== 'undefined' && doctors) ? doctors : [];
-      return String(d.length) + '_' + JSON.stringify(d).length;
-    } catch(e){ return ''; }
+  function _dataToString(arr){
+    try { return JSON.stringify(arr || []); } catch(e){ return ''; }
   }
 
-  window.scheduleAutoPush = function(reason){
-    var now = Date.now();
-    if(now - _lastPushTime < 3000) return; // ضد spam
-    if(_pushTimer) clearTimeout(_pushTimer);
-    _pushTimer = setTimeout(function(){
-      try {
-        var hash = _dataHash();
-        if(hash === _lastDataHash) return;
-        _lastDataHash = hash;
-        _lastPushTime = Date.now();
-        console.log('📤 auto-push (' + (reason||'change') + ')');
-        if(typeof pushToCloud === 'function'){
-          pushToCloud(true).then(function(){
-            console.log('✅ auto-push موفق');
-          }).catch(function(e){
-            console.warn('⚠️ auto-push خطا:', e);
-          });
-        }
-      } catch(e){ console.warn('scheduleAutoPush:', e); }
-    }, 2500); // ۲.۵ ثانیه debounce
-  };
+  function _getDoctors(){
+    try { return (typeof doctors !== 'undefined' && doctors) ? doctors : []; }
+    catch(e){ return []; }
+  }
 
-  // ──────────────────────────────────────
-  // ۲. Auto-pull دوره‌ای
-  // ──────────────────────────────────────
-  var _lastPullHash = '';
-  var _lastCheck = 0;
-
-  window.syncPull = async function(){
+  // ─────────────────────────────────────
+  // PUSH ایمن — قبل push، سرور رو چک می‌کنه
+  // ─────────────────────────────────────
+  window.safePush = async function(reason){
+    if(_isPushing) return { busy: true };
+    _isPushing = true;
+    
     try {
-      if(typeof SCRIPT_URL === 'undefined') return;
-      // چک hash سرور با یک درخواست سبک (اگه ممکن)
+      var localJSON = _dataToString(_getDoctors());
+      
+      // اگه از آخرین push تغییری نکرده، بی‌خیال
+      if(localJSON === _lastLocalJSON){
+        console.log('⏭ push لازم نیست (' + (reason||'') + ')');
+        _isPushing = false;
+        return { skipped: true };
+      }
+      
+      // سرور رو چک کن
       var resp = await fetch(SCRIPT_URL + '?action=data&t=' + Date.now());
-      var data = await resp.json();
-      var serverDocs = data.doctors || [];
-      var serverHash = serverDocs.length + '_' + JSON.stringify(serverDocs).length;
+      var serverData = await resp.json();
+      var serverDocs = serverData.doctors || [];
+      var serverJSON = _dataToString(serverDocs);
       
-      if(serverHash === _lastPullHash) {
-        // هیچ تغییری نیست
-        return { nochange: true };
-      }
-      
-      // hash سرور با hash محلی فرق داره؟
-      var localHash = _dataHash();
-      if(serverHash === localHash){
-        _lastPullHash = serverHash;
-        return { synced: true };
-      }
-      
-      // کدوم جدیده؟
-      var localLen = (typeof doctors !== 'undefined' && doctors) ? doctors.length : 0;
-      if(serverDocs.length > localLen){
-        // سرور بیشتره → pull
-        console.log('📥 auto-pull: سرور', serverDocs.length, '> محلی', localLen);
-        if(typeof doctors !== 'undefined'){
-          try {
-            doctors.length = 0;
-            serverDocs.forEach(function(d){ doctors.push(d); });
-          } catch(e){
-            window.doctors = serverDocs;
-          }
+      // اگه سرور جدیدتر از آخرین sync ماست → اول pull کن
+      if(serverJSON !== _lastServerJSON && _lastServerJSON !== ''){
+        console.log('⚠️ سرور توسط دستگاه دیگه تغییر کرده — اول pull');
+        _lastServerJSON = serverJSON;
+        
+        // اگه محتوا فرق داره، به نفع سرور (چون ما تغییر جدید نداشتیم در این لحظه)
+        if(serverJSON !== localJSON){
+          _applyServerData(serverDocs);
+          _isPushing = false;
+          return { pulledFirst: true };
         }
-        try { localStorage.setItem('cme_doctors', JSON.stringify(serverDocs)); } catch(e){}
-        _lastPullHash = serverHash;
-        if(typeof renderAll === 'function') renderAll();
-        if(typeof renderDocList === 'function') renderDocList();
-        if(typeof updateFilterCounts === 'function') updateFilterCounts();
-        return { pulled: true, count: serverDocs.length };
       }
-      else if(localLen > serverDocs.length){
-        // محلی بیشتره → push
-        console.log('📤 auto-push: محلی', localLen, '> سرور', serverDocs.length);
-        window.scheduleAutoPush('pull-trigger');
-        return { pushed: true };
+      
+      // حالا push
+      console.log('📤 push (' + (reason||'') + ') — ' + _getDoctors().length + ' پزشک');
+      
+      if(typeof pushToCloud === 'function'){
+        await pushToCloud(true);
+        _lastLocalJSON = localJSON;
+        _lastServerJSON = localJSON;
+        console.log('✅ push موفق');
+        _isPushing = false;
+        return { pushed: true, count: _getDoctors().length };
       }
-      else {
-        // تعداد برابر، ولی محتوا فرق داره — به نفع سرور
-        console.log('⚠️ تعداد برابر ولی محتوا فرق — pull سرور');
-        if(typeof doctors !== 'undefined'){
-          try {
-            doctors.length = 0;
-            serverDocs.forEach(function(d){ doctors.push(d); });
-          } catch(e){
-            window.doctors = serverDocs;
-          }
-        }
-        try { localStorage.setItem('cme_doctors', JSON.stringify(serverDocs)); } catch(e){}
-        _lastPullHash = serverHash;
-        if(typeof renderAll === 'function') renderAll();
-        if(typeof updateFilterCounts === 'function') updateFilterCounts();
-        return { pulled: true, count: serverDocs.length };
-      }
+      
+      _isPushing = false;
+      return { error: 'pushToCloud نیست' };
     } catch(e){
-      console.warn('syncPull:', e);
+      console.warn('safePush error:', e);
+      _isPushing = false;
       return { error: e.message };
     }
   };
 
-  // ──────────────────────────────────────
-  // ۳. Hook کردن توابع تغییر داده
-  // ──────────────────────────────────────
-  function _hookSave(){
-    // اضافه کردن auto-push به توابع اصلی
-    var saveFns = ['saveDoctor', 'addDoctor', 'delDoctor', 'editDoctor', 'delEvent', 'openEventModal'];
-    saveFns.forEach(function(fn){
-      if(typeof window[fn] === 'function' && !window['_' + fn + '_patched']){
-        window['_' + fn + '_patched'] = true;
+  function _applyServerData(serverDocs){
+    try {
+      var d = _getDoctors();
+      d.length = 0;
+      serverDocs.forEach(function(x){ d.push(x); });
+      try { localStorage.setItem('cme_doctors', JSON.stringify(serverDocs)); } catch(e){}
+      if(typeof renderAll === 'function') renderAll();
+      if(typeof renderDocList === 'function') renderDocList();
+      if(typeof updateFilterCounts === 'function') updateFilterCounts();
+      console.log('📥 سرور اعمال شد — ' + serverDocs.length + ' پزشک');
+    } catch(e){ console.warn('applyServerData:', e); }
+  }
+
+  // ─────────────────────────────────────
+  // PULL دوره‌ای — فقط اگه تغییری هست
+  // ─────────────────────────────────────
+  window.safePull = async function(){
+    if(_isPulling) return { busy: true };
+    if(_isPushing) return { pushing: true };
+    _isPulling = true;
+    
+    try {
+      var resp = await fetch(SCRIPT_URL + '?action=data&t=' + Date.now());
+      var data = await resp.json();
+      var serverDocs = data.doctors || [];
+      var serverJSON = _dataToString(serverDocs);
+      var localJSON = _dataToString(_getDoctors());
+      
+      // سرور تغییری نکرده؟
+      if(serverJSON === _lastServerJSON){
+        _isPulling = false;
+        return { nochange: true };
+      }
+      
+      // سرور با محلی فرق داره
+      if(serverJSON !== localJSON){
+        console.log('📥 pull: سرور ' + serverDocs.length + ' vs محلی ' + _getDoctors().length);
+        _lastServerJSON = serverJSON;
+        _applyServerData(serverDocs);
+        _lastLocalJSON = serverJSON;
+      } else {
+        _lastServerJSON = serverJSON;
+        _lastLocalJSON = serverJSON;
+      }
+      
+      _isPulling = false;
+      return { pulled: true, count: serverDocs.length };
+    } catch(e){
+      console.warn('safePull:', e);
+      _isPulling = false;
+      return { error: e.message };
+    }
+  };
+
+  // ─────────────────────────────────────
+  // Hook توابع تغییر — بلافاصله push
+  // ─────────────────────────────────────
+  function _hookMutationFns(){
+    var fns = ['saveDoctor', 'addDoctor', 'delDoctor', 'editDoctor', 
+               'delEvent', 'addEvent', 'saveEvent', 'openEventModal', 
+               'toggleCard', 'setDocFilter'];
+    
+    fns.forEach(function(fn){
+      if(typeof window[fn] === 'function' && !window['_hook_' + fn]){
+        window['_hook_' + fn] = true;
         var orig = window[fn];
         window[fn] = function(){
           var r = orig.apply(this, arguments);
+          // بلافاصله (بدون debounce) — 200ms برای اطمینان از آپدیت data
           setTimeout(function(){
-            window.scheduleAutoPush(fn);
-          }, 500);
+            try { window.safePush('change:' + fn); } catch(e){}
+          }, 200);
           return r;
         };
       }
     });
   }
 
-  // ──────────────────────────────────────
-  // ۴. اجرای دوره‌ای
-  // ──────────────────────────────────────
+  // ─────────────────────────────────────
+  // اجرای دوره‌ای
+  // ─────────────────────────────────────
   
-  // auto-pull هر ۱۰ ثانیه
+  // pull هر ۵ ثانیه
   setInterval(function(){
-    try {
-      if(document.hidden) return; // اگه tab مخفیه، رد شو
-      window.syncPull();
-    } catch(e){}
-  }, 10000);
+    if(document.hidden) return;
+    try { window.safePull(); } catch(e){}
+  }, 5000);
 
-  // hook توابع بعد از لود
-  setTimeout(_hookSave, 2000);
-  setTimeout(_hookSave, 5000);
+  // hook توابع
+  setTimeout(_hookMutationFns, 2000);
+  setTimeout(_hookMutationFns, 6000);
 
-  // auto-pull اولیه
+  // pull اولیه
   setTimeout(function(){
-    try { window.syncPull(); } catch(e){}
-  }, 3000);
+    try { window.safePull(); } catch(e){}
+  }, 2500);
 
-  // auto-pull وقتی tab فعال میشه
+  // tab فعال شد → pull
   document.addEventListener('visibilitychange', function(){
     if(!document.hidden){
       setTimeout(function(){
-        try { window.syncPull(); } catch(e){}
-      }, 500);
+        try { window.safePull(); } catch(e){}
+      }, 300);
+    } else {
+      // tab بسته شد → push فوری اگه تغییری هست
+      try { window.safePush('tab-hide'); } catch(e){}
     }
   });
 
-  // auto-push وقتی tab غیرفعال میشه (خروج از صفحه)
-  document.addEventListener('visibilitychange', function(){
-    if(document.hidden){
-      try {
-        if(typeof pushToCloud === 'function'){
-          pushToCloud(true);
-          console.log('📤 push هنگام بستن صفحه');
-        }
-      } catch(e){}
-    }
-  });
-
-  // auto-push قبل از بسته شدن
+  // قبل بستن
   window.addEventListener('beforeunload', function(){
-    try {
-      if(typeof pushToCloud === 'function') pushToCloud(true);
-    } catch(e){}
+    try { window.safePush('beforeunload'); } catch(e){}
   });
 
-  // ──────────────────────────────────────
-  // ۵. دکمه دستی
-  // ──────────────────────────────────────
+  // ─────────────────────────────────────
+  // توابع کمکی
+  // ─────────────────────────────────────
   window.syncNow = async function(){
-    console.log('🔄 Sync دستی...');
-    var r = await window.syncPull();
-    console.log('نتیجه:', r);
-    return r;
+    console.log('🔄 sync دستی...');
+    await window.safePull();
+    console.log('✅ sync تمام');
   };
-
+  
   window.forceSync = async function(){
-    console.log('🔄 Force sync — push + pull');
-    try {
-      if(typeof pushToCloud === 'function'){
-        await pushToCloud(true);
-        console.log('✅ Push انجام شد');
-      }
-      await new Promise(function(r){ setTimeout(r, 1000); });
-      var r = await window.syncPull();
-      console.log('✅ Pull:', r);
-      return r;
-    } catch(e){ console.error(e); }
+    console.log('🔄 force sync');
+    await window.safePush('force');
+    await new Promise(function(r){ setTimeout(r, 1000); });
+    await window.safePull();
+    console.log('✅ force sync تمام');
   };
 
-  console.log('✅ Auto-Sync v2 فعال — هر ۱۰ ثانیه pull، بعد از هر تغییر push');
+  window.debugSync = function(){
+    console.log('═══════════════════════════');
+    console.log('📊 وضعیت sync');
+    console.log('doctors محلی:', _getDoctors().length);
+    console.log('آخرین server JSON length:', _lastServerJSON.length);
+    console.log('آخرین local JSON length:', _lastLocalJSON.length);
+    console.log('isPushing:', _isPushing, '| isPulling:', _isPulling);
+    console.log('═══════════════════════════');
+  };
+
+  console.log('✅ Auto-Sync v3 فعال — push ایمن، pull هر ۵ ثانیه');
 })();
 
 </script>
