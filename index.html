@@ -703,23 +703,24 @@ html.is-logged-in #loginScreen{display:none!important}
 
 
 
+
+
 <style id="bank-card-css">
 /* ============================================
-   🎯 کارت بانکی — دقیقاً هم‌عرض کادر مبلغ
-   تقسیم: ۱/۳ شماره کارت + ۲/۳ بقیه
+   🎯 کارت بانکی — نصف عرض، همیشه نمایش، بدون دکمه
    ============================================ */
 
-/* کانتینر والد (دکمه + محتوا) */
+/* حذف wrapper اضافی */
 #mainArea .doc-header > div:has(.bank-card-display) {
   margin-top: 8px !important;
+  width: 50% !important;
 }
 
-/* کانتینر اصلی — به عرض کادر مبلغ (کل عرض doc-header) */
-#mainArea .bank-card-display,
+/* کانتینر اصلی — ۵۰٪ عرض */
 .bank-card-display {
   display: grid !important;
   grid-template-columns: 2fr 1fr 1fr 1fr 1.25fr !important;
-  gap: 8px !important;
+  gap: 6px !important;
   align-items: center !important;
   margin-top: 8px !important;
   padding: 10px 12px !important;
@@ -729,15 +730,15 @@ html.is-logged-in #loginScreen{display:none!important}
   direction: rtl !important;
   font-size: 13px !important;
   line-height: 1.5 !important;
-  width: 100% !important;
+  width: 50% !important;
+  max-width: 50% !important;
   box-sizing: border-box !important;
 }
 
 .bank-card-display.hidden {
-  display: none !important;
+  display: grid !important;
 }
 
-/* هر فیلد — داخل ستون خودش */
 .bank-card-display .bank-cell-compact {
   display: flex !important;
   flex-direction: row !important;
@@ -755,9 +756,8 @@ html.is-logged-in #loginScreen{display:none!important}
   overflow: hidden !important;
 }
 
-/* برچسب (label) */
 .bank-card-display .bank-cell-compact .label {
-  font-size: 12px !important;
+  font-size: 11.5px !important;
   color: #94a3b8 !important;
   font-weight: 700 !important;
   white-space: nowrap !important;
@@ -772,13 +772,12 @@ html.is-logged-in #loginScreen{display:none!important}
   color: #64748b !important;
 }
 
-/* مقدار (value) */
 .bank-card-display .bank-cell-compact .value {
-  font-size: 13px !important;
+  font-size: 12.5px !important;
   color: #e2e8f0 !important;
   font-weight: 800 !important;
   font-family: 'SF Mono', Menlo, Consolas, monospace !important;
-  letter-spacing: 0.3px !important;
+  letter-spacing: 0.2px !important;
   white-space: nowrap !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -787,19 +786,18 @@ html.is-logged-in #loginScreen{display:none!important}
   min-width: 0 !important;
 }
 
-/* 🎯 شماره کارت — ستون اول (۱/۳) */
 .bank-card-display .bank-cell-compact.card-number {
   justify-content: space-between !important;
-  gap: 6px !important;
-  padding: 4px 10px !important;
+  gap: 4px !important;
+  padding: 4px 8px !important;
   background: rgba(0, 217, 255, 0.08) !important;
   border: 1px solid rgba(0, 217, 255, 0.25) !important;
-  border-radius: 6px !important;
+  border-radius: 5px !important;
 }
 
 .bank-card-display .bank-cell-compact.card-number .label {
   color: #38bdf8 !important;
-  font-size: 11.5px !important;
+  font-size: 11px !important;
   flex-shrink: 0 !important;
 }
 
@@ -808,17 +806,16 @@ html.is-logged-in #loginScreen{display:none!important}
 }
 
 .bank-card-display .bank-cell-compact.card-number .value {
-  font-size: 14px !important;
+  font-size: 13px !important;
   color: #38bdf8 !important;
-  letter-spacing: 1px !important;
+  letter-spacing: 0.8px !important;
   flex: 1 1 auto !important;
   text-align: center !important;
 }
 
-/* دکمه کپی */
 .bank-card-display .copy-inline {
-  font-size: 10.5px !important;
-  padding: 2px 8px !important;
+  font-size: 10px !important;
+  padding: 2px 6px !important;
   border-radius: 4px !important;
   cursor: pointer !important;
   background: rgba(0, 217, 255, 0.15) !important;
@@ -838,24 +835,23 @@ html.is-logged-in #loginScreen{display:none!important}
   transform: scale(0.94) !important;
 }
 
-/* 🎯 رمز دوم — کمی بزرگ‌تر */
-.bank-card-display .bank-cell-compact:last-child {
-  justify-content: flex-start !important;
-}
-
-/* موبایل */
+/* موبایل — ۱۰۰٪ عرض */
 @media (max-width: 768px) {
-  #mainArea .bank-card-display,
-  .bank-card-display {
-    grid-template-columns: 1fr 1fr 1fr 1fr !important;
-    gap: 6px !important;
-    padding: 10px !important;
+  #mainArea .doc-header > div:has(.bank-card-display) {
+    width: 100% !important;
   }
   
-  /* شماره کارت — ردیف اول، کامل */
+  .bank-card-display {
+    grid-template-columns: 1fr 1fr 1fr 1fr !important;
+    gap: 5px !important;
+    padding: 8px 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
   .bank-card-display .bank-cell-compact.card-number {
     grid-column: 1 / -1 !important;
-    margin-bottom: 6px !important;
+    margin-bottom: 4px !important;
   }
   
   .bank-card-display .bank-cell-compact .label {
@@ -863,11 +859,11 @@ html.is-logged-in #loginScreen{display:none!important}
   }
   
   .bank-card-display .bank-cell-compact .value {
-    font-size: 12.5px !important;
+    font-size: 12px !important;
   }
   
   .bank-card-display .bank-cell-compact.card-number .value {
-    font-size: 13.5px !important;
+    font-size: 13px !important;
   }
 }
 </style>
