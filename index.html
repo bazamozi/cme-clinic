@@ -405,8 +405,36 @@ html.is-logged-in #loginScreen{display:none!important}
   .doc-filter-tabs button .cnt{font-size:9px}
 }
 </style>
+
+<style>
+@media (max-width: 768px) {
+  #eventQuickJump {
+    display: flex !important;
+  }
+}
+#eventQuickJump button:active {
+  transform: scale(0.95);
+  filter: brightness(1.3);
+}
+</style>
+
 </head>
 <body>
+
+<!-- 🚀 نوار پرش سریع به تب‌های رویداد (اضافه شده) -->
+<div id="eventQuickJump" style="position:sticky;top:0;z-index:999;background:linear-gradient(90deg,#1a1a2e,#16213e);padding:8px;display:flex;gap:6px;justify-content:center;border-bottom:1px solid #00d9ff33;box-shadow:0 2px 10px rgba(0,217,255,0.15);">
+  <button type="button" onclick="quickJumpToEvent('webinar')" style="flex:1;padding:10px 8px;background:#00d9ff22;color:#00d9ff;border:1px solid #00d9ff;border-radius:8px;font-weight:bold;font-size:13px;cursor:pointer;">
+    💻 وبینار
+  </button>
+  <button type="button" onclick="quickJumpToEvent('inperson')" style="flex:1;padding:10px 8px;background:#00ff8822;color:#00ff88;border:1px solid #00ff88;border-radius:8px;font-weight:bold;font-size:13px;cursor:pointer;">
+    🏢 حضوری
+  </button>
+  <button type="button" onclick="quickJumpToEvent('noninperson')" style="flex:1;padding:10px 8px;background:#ff00ff22;color:#ff00ff;border:1px solid #ff00ff;border-radius:8px;font-weight:bold;font-size:13px;cursor:pointer;">
+    📁 غیرحضوری
+  </button>
+</div>
+
+
 <script>
 // ✅ این کد بلافاصله اجرا میشه — قبل از هر چیزی
 (function(){
@@ -440,7 +468,21 @@ html.is-logged-in #loginScreen{display:none!important}
     <h1>📚 دفتر بازآموزی پزشکان</h1>
     <div class="sub">حضوری 🏢 | وبینار 💻 | غیر حضوری 📁</div>
   </div>
-  <div class="tabs" id="mainTabs">
+  
+<!-- 🚀 نوار پرش سریع به تب‌های رویداد -->
+<div id="eventQuickJump" style="position:sticky;top:0;z-index:999;background:linear-gradient(90deg,#1a1a2e,#16213e);padding:8px;display:none;gap:6px;justify-content:center;border-bottom:1px solid rgba(0,217,255,0.3);box-shadow:0 2px 10px rgba(0,217,255,0.15);margin-bottom:8px;">
+  <button type="button" onclick="quickJumpToEvent('webinar')" style="flex:1;padding:10px 8px;background:rgba(0,217,255,0.15);color:#00d9ff;border:1px solid #00d9ff;border-radius:8px;font-weight:bold;font-size:13px;cursor:pointer;font-family:inherit;">
+    💻 وبینار
+  </button>
+  <button type="button" onclick="quickJumpToEvent('inperson')" style="flex:1;padding:10px 8px;background:rgba(0,255,136,0.15);color:#00ff88;border:1px solid #00ff88;border-radius:8px;font-weight:bold;font-size:13px;cursor:pointer;font-family:inherit;">
+    🏢 حضوری
+  </button>
+  <button type="button" onclick="quickJumpToEvent('noninperson')" style="flex:1;padding:10px 8px;background:rgba(255,0,255,0.15);color:#ff00ff;border:1px solid #ff00ff;border-radius:8px;font-weight:bold;font-size:13px;cursor:pointer;font-family:inherit;">
+    📁 غیرحضوری
+  </button>
+</div>
+
+<div class="tabs" id="mainTabs">
     <button class="tab active" data-tab="dash">📊 داشبورد</button>
     <button class="tab" data-tab="doctors">👨‍⚕️ دفتر پزشکان</button>
     <button class="tab" data-tab="calls">📞 تماس‌ها</button>
@@ -645,6 +687,69 @@ function checkLogin(){
     }
   } catch(e){}
 }
+
+
+// 🚀 تابع پرش سریع به تب رویداد (اضافه شده)
+function quickJumpToEvent(type){
+  try {
+    // ۱. تب مربوطه رو پیدا و کلیک کن
+    var tabSelectors = {
+      'webinar': ['[data-tab="webinar"]', '.tab-webinar', 'button[onclick*="webinar"]', 'button[onclick*="وبینار"]'],
+      'inperson': ['[data-tab="inperson"]', '.tab-inperson', 'button[onclick*="inperson"]', 'button[onclick*="حضوری"]'],
+      'noninperson': ['[data-tab="noninperson"]', '.tab-noninperson', 'button[onclick*="noninperson"]', 'button[onclick*="غیرحضوری"]', 'button[onclick*="غیر حضوری"]']
+    };
+    
+    var selectors = tabSelectors[type] || [];
+    var clicked = false;
+    
+    for(var i = 0; i < selectors.length; i++){
+      var btn = document.querySelector(selectors[i]);
+      if(btn){
+        // اگه دکمه مخفی هست، اول نمایشش بده
+        btn.scrollIntoView({behavior:'smooth', block:'center'});
+        setTimeout(function(){ btn.click(); }, 200);
+        clicked = true;
+        break;
+      }
+    }
+    
+    // ۲. اگه دکمه پیدا نشد، سعی کن با متن پیدا کنی
+    if(!clicked){
+      var allBtns = document.querySelectorAll('button, .tab, [role="tab"]');
+      var keywords = {
+        'webinar': ['وبینار', 'webinar'],
+        'inperson': ['حضوری', 'inperson', 'in-person'],
+        'noninperson': ['غیرحضوری', 'غیر حضوری', 'noninperson']
+      };
+      var kws = keywords[type] || [];
+      
+      allBtns.forEach(function(b){
+        var txt = (b.textContent || '').trim();
+        for(var k = 0; k < kws.length; k++){
+          if(txt.indexOf(kws[k]) !== -1 && !clicked){
+            b.scrollIntoView({behavior:'smooth', block:'center'});
+            setTimeout(function(){ b.click(); }, 200);
+            clicked = true;
+            break;
+          }
+        }
+      });
+    }
+    
+    // ۳. اگه بازم نشد، به تب‌ها اسکرول کن
+    if(!clicked){
+      var tabsContainer = document.querySelector('.event-tabs, .tabs, [role="tablist"]');
+      if(tabsContainer){
+        tabsContainer.scrollIntoView({behavior:'smooth', block:'start'});
+      }
+    }
+    
+    console.log('🎯 پرش به:', type, '— موفق:', clicked);
+  } catch(e){
+    console.log('❌ خطای پرش:', e);
+  }
+}
+
 
 function myDoctors(){
   if(currentUser === 'all') return doctors;
@@ -2336,6 +2441,180 @@ function doLogout(){
 window.doLogin = doLogin;
 window.doLogout = doLogout;
 console.log('✅ Login System Loaded');
+
+// 🚀 پرش سریع به تب رویداد
+window.quickJumpToEvent = function(type){
+  try {
+    var keywords = {
+      'webinar': ['وبینار', 'webinar'],
+      'inperson': ['حضوری', 'inperson', 'in-person', 'حضوری'],
+      'noninperson': ['غیرحضوری', 'غیر حضوری', 'noninperson', 'non-inperson']
+    };
+    
+    var kws = keywords[type] || [];
+    var allClickable = document.querySelectorAll('button, .tab, [role="tab"], [onclick]');
+    var found = false;
+    
+    // اول با data-attribute بگرد
+    var dataSelectors = {
+      'webinar': '[data-tab="webinar"], [data-event="webinar"], [data-type="webinar"]',
+      'inperson': '[data-tab="inperson"], [data-event="inperson"], [data-type="inperson"]',
+      'noninperson': '[data-tab="noninperson"], [data-event="noninperson"], [data-type="noninperson"]'
+    };
+    
+    var dataEl = document.querySelector(dataSelectors[type]);
+    if(dataEl){
+      dataEl.scrollIntoView({behavior:'smooth', block:'center'});
+      setTimeout(function(){ dataEl.click(); }, 150);
+      found = true;
+      console.log('🎯 پرش موفق (data-attr) به:', type);
+      return true;
+    }
+    
+    // بعد با متن بگرد
+    for(var i = 0; i < allClickable.length; i++){
+      var el = allClickable[i];
+      var txt = (el.textContent || '').trim();
+      for(var k = 0; k < kws.length; k++){
+        if(txt.indexOf(kws[k]) !== -1 && txt.length < 40){
+          el.scrollIntoView({behavior:'smooth', block:'center'});
+          setTimeout(function(){ el.click(); }, 150);
+          found = true;
+          console.log('🎯 پرش موفق (متن) به:', type, '- دکمه:', txt.slice(0, 30));
+          return true;
+        }
+      }
+    }
+    
+    if(!found){
+      console.log('⚠️ تب پیدا نشد:', type);
+      // اسکرول به بخش رویدادها
+      var evtArea = document.querySelector('#eventList, #events, .event-tabs, [id*="event"]');
+      if(evtArea) evtArea.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+    return found;
+  } catch(e){
+    console.error('❌ خطای پرش:', e);
+    return false;
+  }
+};
+
+
+// ============================================
+// 🚀 توابع کمکی اضافه شده (Fix Missing Functions)
+// ============================================
+
+if (typeof window.getDoctorStatus === 'undefined') {
+  window.getDoctorStatus = function(d){
+    try {
+      if(!d) return 'pending';
+      var events = d.events || d.courses || [];
+      if(!events.length){
+        return (d.paid && d.paid > 0) ? 'active' : 'pending';
+      }
+      var hasPaid = (d.paid && d.paid > 0) || (d.totalCost && d.paid && d.paid >= d.totalCost);
+      var allComplete = events.every(function(ev){
+        return ev && (ev.buy === true || ev.status === 'buy') && 
+               (ev.attend === true || ev.status === 'attend') && 
+               (ev.exam === true || ev.status === 'exam' || ev.type === 'inperson');
+      });
+      if(hasPaid || events.some(function(ev){ 
+        return ev.buy === true || ev.attend === true || ev.exam === true; 
+      })){
+        return allComplete ? 'done' : 'active';
+      }
+      return 'pending';
+    } catch(e){ 
+      console.warn('getDoctorStatus error:', e);
+      return 'pending'; 
+    }
+  };
+}
+
+if (typeof window.showDataSize === 'undefined') {
+  window.showDataSize = function(){
+    try {
+      var docs = (typeof myDoctors === 'function') ? myDoctors() : (window.doctors || []);
+      var sizeKB = (JSON.stringify(docs).length / 1024).toFixed(2);
+      var counts = { active: 0, done: 0, pending: 0 };
+      docs.forEach(function(d){
+        var st = window.getDoctorStatus(d);
+        if(counts[st] !== undefined) counts[st]++;
+      });
+      console.log('═══════════════════════════════');
+      console.log('📊 وضعیت داده‌ها');
+      console.log('═══════════════════════════════');
+      console.log('👥 کل پزشکان:', docs.length);
+      console.log('📦 حجم داده:', sizeKB, 'KB');
+      console.log('⚡ در حال اجرا:', counts.active);
+      console.log('✅ اتمام:', counts.done);
+      console.log('⏳ بلاتکلیف:', counts.pending);
+      console.log('═══════════════════════════════');
+      return { count: docs.length, sizeKB: sizeKB, counts: counts };
+    } catch(e){
+      console.error('❌ خطا:', e);
+    }
+  };
+}
+
+if (typeof window.updateFilterCounts === 'undefined') {
+  window.updateFilterCounts = function(){
+    try {
+      if(typeof myDoctors !== 'function') return;
+      var all = myDoctors();
+      var counts = { active: 0, done: 0, pending: 0 };
+      all.forEach(function(d){
+        var st = window.getDoctorStatus(d);
+        if(counts[st] !== undefined) counts[st]++;
+      });
+      var map = { cntActive: counts.active, cntDone: counts.done, cntPending: counts.pending };
+      Object.keys(map).forEach(function(id){
+        var el = document.getElementById(id);
+        if(el) el.textContent = map[id];
+      });
+      // به‌روزرسانی شمارنده‌های کلاس‌محور
+      var el2 = document.querySelector('[data-count="active"]');
+      if(el2) el2.textContent = counts.active;
+      var el3 = document.querySelector('[data-count="done"]');
+      if(el3) el3.textContent = counts.done;
+      var el4 = document.querySelector('[data-count="pending"]');
+      if(el4) el4.textContent = counts.pending;
+      console.log('✅ شمارنده‌ها به‌روز شد:', counts);
+      return counts;
+    } catch(e){
+      console.warn('updateFilterCounts error:', e);
+    }
+  };
+}
+
+if (typeof window.checkLogin === 'undefined') {
+  window.checkLogin = function(){
+    try {
+      var logged = localStorage.getItem('cme_logged_in');
+      var screenEl = document.getElementById('loginScreen');
+      if(!screenEl) return;
+      if(logged === 'morteza' || logged === 'parvin'){
+        screenEl.classList.add('hidden');
+        screenEl.style.display = 'none';
+        document.documentElement.classList.add('is-logged-in');
+        if(typeof currentUser !== 'undefined') window.currentUser = logged;
+      } else {
+        screenEl.classList.remove('hidden');
+        screenEl.style.display = 'flex';
+        document.documentElement.classList.remove('is-logged-in');
+      }
+    } catch(e){ console.warn('checkLogin error:', e); }
+  };
+}
+
+// اتصال قوی به window
+window.getDoctorStatus = window.getDoctorStatus || getDoctorStatus;
+window.showDataSize = window.showDataSize || showDataSize;
+window.updateFilterCounts = window.updateFilterCounts || updateFilterCounts;
+window.checkLogin = window.checkLogin || checkLogin;
+
+console.log('✅ Missing Functions Loaded');
+
 </script>
 </body>
 </html>
