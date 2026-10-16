@@ -4030,5 +4030,58 @@ setTimeout(function(){
   console.log('✅ Mobile Filter Bar v7 — بهینه');
 })();
 </script>
+
+<!-- 🚀 Instant Pull — pull سریع در لود اولیه (بدون تداخل با کد موجود) -->
+<script>
+(function(){
+  if(window._instantPull) return;
+  window._instantPull = true;
+
+  // 🎯 pull سریع ۲۰۰ms بعد از لود — قبل از اینکه کاربر متوجه تأخیر بشه
+  function doInstantPull(){
+    try {
+      if(typeof window.safePull === 'function'){
+        window.safePull();
+      }
+    } catch(e){}
+  }
+
+  // اولین pull — سریع
+  if(document.readyState === 'complete'){
+    setTimeout(doInstantPull, 200);
+  } else {
+    window.addEventListener('load', function(){
+      setTimeout(doInstantPull, 200);
+    });
+  }
+  
+  // pull دوم — برای اطمینان
+  setTimeout(doInstantPull, 800);
+  setTimeout(doInstantPull, 1500);
+
+  // 🎯 push خودکار بعد از delete (فوری‌تر از triggerAutoSave)
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest && e.target.closest('[onclick*="delDoctor"], [onclick*="deleteDoctor"], button[title*="حذف"]');
+    if(btn){
+      // ۳۰۰ms بعد، push فوری
+      setTimeout(function(){
+        try {
+          if(typeof window.safePush === 'function') window.safePush('after-delete');
+          if(typeof window.triggerAutoSave === 'function') window.triggerAutoSave('after-delete');
+        } catch(e){}
+      }, 300);
+      // ۱ ثانیه بعد هم دوباره — برای اطمینان
+      setTimeout(function(){
+        try {
+          if(typeof window.safePush === 'function') window.safePush('after-delete-2');
+        } catch(e){}
+      }, 1000);
+    }
+  }, true);
+
+  console.log('✅ Instant Pull فعال');
+})();
+</script>
+
 </body>
 </html>
