@@ -919,7 +919,6 @@ button[onclick*="toggleCard"] {
 }
 </style>
 
-
 <style id="vip-customer-css">
 /* ⭐ فیلتر مشتری ثابت */
 button[data-filter="vip"] {
@@ -1260,7 +1259,7 @@ function quickJumpToEvent(type){
 
 // 🎯 اجرای مداوم — هر ۱ ثانیه (قوی در برابر خطا)
 if(!window._cntInterval){
-  {
+  window._cntInterval = setInterval(function(){
     try { updateFilterCounts(); } catch(e){}
   }, 1000);
 }
@@ -3034,8 +3033,26 @@ console.log('✅ Login System Loaded');
 // 🚀 توابع کمکی اضافه شده (Fix Missing Functions)
 // ============================================
 
+// 🎯 تعریف getDoctorStatus (قبل از showDataSize)
 if (typeof window.getDoctorStatus === 'undefined') {
-  
+  window.getDoctorStatus = function(d){
+    try {
+      if(!d) return 'pending';
+      var events = (d.events || []).filter(function(e){ return e && e.type; });
+      if(events.length === 0) return 'pending';
+      var allComplete = events.every(function(ev){
+        var t = (ev.type || '').trim();
+        var isInPerson = (t === 'حضوری' || t === 'inperson');
+        var purchaseDone = window.isDone ? window.isDone(ev.purchase) : (ev.buy === true || ev.purchase === 'انجام شد');
+        var attendDone = window.isDone ? window.isDone(ev.attend) : (ev.attend === 'انجام شد');
+        var examDone = window.isDone ? window.isDone(ev.exam) : (ev.exam === 'قبول');
+        if(isInPerson) return purchaseDone && attendDone;
+        return purchaseDone && attendDone && examDone;
+      });
+      return allComplete ? 'done' : 'active';
+    } catch(e){ return 'pending'; }
+  };
+}
 
 window.showDataSize = function(){
   try {
@@ -3290,287 +3307,1827 @@ console.log('✅ Event Tabs v7 (CSS-only) loaded');
 
 </script>
 <script>
-// حذف شد v2
+// ═══════════════════════════════════════════════
+// 🚀 FINAL FIX — تعریف کامل توابع (نسخه نهایی)
+// ═══════════════════════════════════════════════
+
+// ✅ getDoctorStatus — global
+
+window.getDoctorStatus = getDoctorStatus;
+
+// ✅ updateFilterCounts — همه پزشکان (نه فیلتر بر اساس کاربر)
 
 
-// ═══════════════════════════════════════════════════
-// 🎯 VIP Save System v3 — قطعی
-// استراتژی: قبل save، pending رو ست کن
-// بعد save، در چند بازه چک و اعمال کن
-// ═══════════════════════════════════════════════════
 
-window._pendingVip = null;
-
-// ─────────────────────────────────────────
-// ۱. خواندن مقادیر VIP از فرم
-// ─────────────────────────────────────────
-function _readVipForm(){
-  try {
-    var cb = document.getElementById('mVip');
-    var dt = document.getElementById('mVipDate');
-    return {
-      vip: cb ? cb.checked : false,
-      vipDate: dt ? dt.value.trim() : ''
-    };
-  } catch(e){ return {vip: false, vipDate: ''}; }
+// 🎯 اجرای مداوم — هر ۱ ثانیه (قوی در برابر خطا)
+if(!window._cntInterval){
+  window._cntInterval = setInterval(function(){
+    try { updateFilterCounts(); } catch(e){}
+  }, 1000);
 }
 
-// ─────────────────────────────────────────
-// ۲. اعمال VIP روی پزشک مورد نظر
-// ─────────────────────────────────────────
-function _applyVipToDoctor(doctor, data){
-  if(!doctor || !data) return false;
-  try {
-    doctor.vip = data.vip;
-    doctor.vipDate = data.vipDate;
-    doctor._vipUpdatedAt = Date.now();
-    console.log('⭐ VIP applied to:', (doctor.fname||doctor.firstName||'?'), '| vip:', doctor.vip, '| date:', doctor.vipDate);
-    return true;
-  } catch(e){ return false; }
-}
-
-// ─────────────────────────────────────────
-// ۳. پیدا کردن پزشک target
-// ─────────────────────────────────────────
-function _findTargetDoctor(savedIds){
-  var all = window.doctors || [];
-  
-  // الف) id جدید که توی savedIds قبلی نبود
-  for(var i = all.length - 1; i >= 0; i--){
-    if(savedIds.indexOf(all[i].id) === -1){
-      console.log('🎯 target با diff:', all[i].id);
-      return all[i];
-    }
-  }
-  
-  // ب) آخرین پزشک
-  if(all.length > 0){
-    console.log('🎯 target با last:', all[all.length - 1].id);
-    return all[all.length - 1];
-  }
-  
-  return null;
-}
-
-// ─────────────────────────────────────────
-// ۴. hook قوی روی saveDoctor
-// ─────────────────────────────────────────
-var _hookSaveV3 = setInterval(function(){
-  if(typeof window.saveDoctor !== 'function') return;
-  if(window._vipV3_save_hooked) return;
-  
-  window._vipV3_save_hooked = true;
-  clearInterval(_hookSaveV3);
-  
-  var _origSave = window.saveDoctor;
-  window.saveDoctor = function(){
-    // ۱. خواندن مقادیر VIP قبل از ذخیره
-    var vipData = _readVipForm();
-    console.log('💾 [pre-save] vip:', vipData.vip, '| date:', vipData.vipDate);
-    
-    // ۲. ذخیره IDهای قبل
-    var beforeIds = (window.doctors||[]).map(function(d){ return d.id; });
-    
-    // ۳. ذخیره pending
-    window._pendingVip = {
-      data: vipData,
-      timestamp: Date.now(),
-      beforeIds: beforeIds
-    };
-    
-    // ۴. اجرای ذخیره اصلی
-    var result = _origSave.apply(this, arguments);
-    
-    // ۵. اعمال در چند بازه
-    [100, 300, 600, 1000, 2000].forEach(function(delay){
-      setTimeout(function(){
-        try {
-          if(!window._pendingVip) return;
-          if(Date.now() - window._pendingVip.timestamp > 5000){
-            window._pendingVip = null;
-            return;
-          }
-          
-          var target = _findTargetDoctor(window._pendingVip.beforeIds);
-          if(target && !target.vip){
-            _applyVipToDoctor(target, window._pendingVip.data);
-            
-            // رندر
-            if(typeof renderDocList === 'function') renderDocList();
-            if(typeof updateFilterCounts === 'function') updateFilterCounts();
-            
-            // push به سرور
-            setTimeout(function(){
-              if(typeof window.triggerAutoSave === 'function') window.triggerAutoSave('vip-v3');
-              else if(typeof window.pushToCloud === 'function') window.pushToCloud(true);
-            }, 200);
-          }
-        } catch(e){ console.warn('vip apply:', e); }
-      }, delay);
-    });
-    
-    return result;
+// 🎯 پچ renderAll
+if(typeof window.renderAll === 'function' && !window._renderAllPatched){
+  window._renderAllPatched = true;
+  var _orig = window.renderAll;
+  window.renderAll = function(){
+    var r = _orig.apply(this, arguments);
+    setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 50);
+    setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 300);
+    return r;
   };
-  
-  console.log('✅ VIP Save v3 فعال');
-}, 300);
+}
 
-// ─────────────────────────────────────────
-// ۵. پاک‌سازی pending بعد از موفقیت
-// ─────────────────────────────────────────
-setInterval(function(){
-  if(window._pendingVip && Date.now() - window._pendingVip.timestamp > 6000){
-    window._pendingVip = null;
-  }
-}, 3000);
+// 🎯 پچ renderDocList
+if(typeof window.renderDocList === 'function' && !window._renderDocListPatched){
+  window._renderDocListPatched = true;
+  var _orig2 = window.renderDocList;
+  window.renderDocList = function(){
+    var r = _orig2.apply(this, arguments);
+    setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 50);
+    return r;
+  };
+}
 
-// ─────────────────────────────────────────
-// ۶. fallback — اگه pending داریم و پزشک جدید اومد
-// ─────────────────────────────────────────
-setInterval(function(){
-  if(!window._pendingVip) return;
-  var all = window.doctors || [];
-  var beforeIds = window._pendingVip.beforeIds || [];
-  
-  // پزشک‌های جدید
-  var newDocs = all.filter(function(d){ return beforeIds.indexOf(d.id) === -1; });
-  
-  if(newDocs.length > 0){
-    var target = newDocs[newDocs.length - 1];
-    if(target && !target.vip){
-      _applyVipToDoctor(target, window._pendingVip.data);
+// 🎯 اجرای اولیه
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 500);
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 1500);
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 3000);
+
+
+
+// ✅ showDataSize
+function showDataSize(){
+  try {
+    var docs = window.doctors || [];
+    var counts = { active: 0, done: 0, pending: 0 };
+    docs.forEach(function(d){
+      var st = getDoctorStatus(d);
+      if(counts[st] !== undefined) counts[st]++;
+    });
+    console.log('═══════════════════════════════');
+    console.log('👥 کل پزشکان:', docs.length);
+    console.log('⚡ در حال اجرا:', counts.active);
+    console.log('✅ اتمام:', counts.done);
+    console.log('⏳ بلاتکلیف:', counts.pending);
+    console.log('═══════════════════════════════');
+    return { count: docs.length, counts: counts };
+  } catch(e){ console.error('❌', e); }
+}
+window.showDataSize = showDataSize;
+
+// ✅ debugUsers
+function debugUsers(){
+  var docs = window.doctors || [];
+  console.log('currentUser:', window.currentUser);
+  console.log('کل پزشکان:', docs.length);
+  var byOwner = {}, byStatus = {active:0, done:0, pending:0};
+  docs.forEach(function(d){
+    byOwner[d.owner||'?'] = (byOwner[d.owner||'?']||0)+1;
+    var s = getDoctorStatus(d);
+    if(byStatus[s]!==undefined) byStatus[s]++;
+  });
+  console.log('به تفکیک مالک:', byOwner);
+  console.log('به تفکیک وضعیت:', byStatus);
+}
+window.debugUsers = debugUsers;
+
+// ✅ checkLogin
+function checkLogin(){
+  try {
+    var logged = localStorage.getItem('cme_logged_in');
+    var screenEl = document.getElementById('loginScreen');
+    if(!screenEl) return;
+    if(logged === 'morteza' || logged === 'parvin'){
+      screenEl.classList.add('hidden');
+      screenEl.style.display = 'none';
+      document.documentElement.classList.add('is-logged-in');
+    } else {
+      screenEl.classList.remove('hidden');
+      screenEl.style.display = 'flex';
+      document.documentElement.classList.remove('is-logged-in');
+    }
+  } catch(e){}
+}
+window.checkLogin = checkLogin;
+
+// اجرای خودکار
+setTimeout(function(){
+  try { updateFilterCounts(); } catch(e){}
+  try { if(typeof renderAll === 'function') renderAll(); } catch(e){}
+}, 1500);
+
+console.log('✅ FINAL FIX loaded');
+
+// 🎯 اگه doctors از سرور کمتر بود، pull کن
+setTimeout(function(){
+  try {
+    var localCount = (window.doctors || []).length;
+    var cached = JSON.parse(localStorage.getItem('cme_doctors') || '[]');
+    var cachedCount = cached.length;
+    console.log('📊 local:', localCount, '| cache:', cachedCount);
+    
+    // اگه cache بیشتره، از cache استفاده کن
+    if(cachedCount > localCount){
+      console.log('⚠️ cache بیشتر از حافظه — reload از cache');
+      window.doctors = cached;
+      if(typeof renderAll === 'function') renderAll();
+      if(typeof updateFilterCounts === 'function') updateFilterCounts();
+    }
+  } catch(e){ console.warn(e); }
+}, 2000);
+
+</script>
+
+<script>
+// ============================================
+// 🎯 updateFilterCounts — نسخه نهایی
+// ============================================
+
+
+
+// 🎯 اجرای مداوم
+if(!window._cntIntervalV2){
+  window._cntIntervalV2 = setInterval(function(){
+    try { updateFilterCounts(); } catch(e){}
+  }, 1000);
+}
+
+// اجرای اولیه با تأخیر
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 500);
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 1500);
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 3000);
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 5000);
+
+console.log('✅ updateFilterCounts v2 loaded');
+
+// ═══════════════════════════════════════════════
+// 🔄 Auto-sync — pull خودکار از سرور در لود
+// ═══════════════════════════════════════════════
+
+window.syncNow = async function(){
+  try {
+    if(typeof SCRIPT_URL === 'undefined'){
+      console.warn('❌ SCRIPT_URL تعریف نشده');
+      return;
+    }
+    console.log('🔄 Sync now...');
+    var localCount = 0;
+    try { localCount = (typeof doctors !== 'undefined' && doctors) ? doctors.length : 0; } catch(e){}
+    console.log('   محلی:', localCount);
+    
+    var resp = await fetch(SCRIPT_URL + '?action=data&t=' + Date.now());
+    var data = await resp.json();
+    var serverDocs = data.doctors || [];
+    console.log('   سرور:', serverDocs.length);
+    
+    if(serverDocs.length > localCount){
+      console.log('📥 سرور بیشتر — pull...');
+      if(typeof doctors !== 'undefined'){
+        try {
+          // جایگزینی کامل
+          doctors.length = 0;
+          serverDocs.forEach(function(d){ doctors.push(d); });
+        } catch(e){
+          window.doctors = serverDocs;
+        }
+      }
+      try { localStorage.setItem('cme_doctors', JSON.stringify(serverDocs)); } catch(e){}
+      if(typeof renderAll === 'function') renderAll();
       if(typeof renderDocList === 'function') renderDocList();
       if(typeof updateFilterCounts === 'function') updateFilterCounts();
-      console.log('🎯 VIP applied (fallback interval)');
+      console.log('✅ Pulled:', serverDocs.length, 'پزشک');
+      return { pulled: true, count: serverDocs.length };
+    } 
+    else if(localCount > serverDocs.length){
+      console.log('⚠️ محلی بیشتر — نیاز به push');
+      console.log('   دستور: pushToCloud(true)');
+      return { needsPush: true, local: localCount, server: serverDocs.length };
+    } 
+    else {
+      console.log('✅ همگام هستن:', localCount);
+      return { synced: true, count: localCount };
     }
-    window._pendingVip = null;
+  } catch(e){
+    console.error('syncNow error:', e);
+    return { error: e.message };
   }
-}, 500);
-
-// ─────────────────────────────────────────
-// ۷. لاگ دیباگ
-// ─────────────────────────────────────────
-window.vipDebug = function(){
-  console.log('═══════════════════════════════');
-  console.log('🎯 VIP Debug');
-  console.log('pendingVip:', window._pendingVip);
-  console.log('editingId:', window._editingDoctorId);
-  console.log('vip doctors:');
-  (window.doctors||[]).forEach(function(d){
-    if(d.vip) console.log('  ⭐', d.fname||d.firstName, '| date:', d.vipDate);
-  });
-  console.log('═══════════════════════════════');
 };
 
-console.log('✅ VIP System v2 فعال');
+// 🎯 اجرای خودکار بعد از لود
+(function(){
+  setTimeout(async function(){
+    try {
+      await window.syncNow();
+    } catch(e){}
+  }, 3000);
 })();
+
+// 🎯 دکمه کوچیک "همگام‌سازی" در هدر (اگه خواستی)
+window.syncNow();
+
+
+// 🎯 هر ۵ دقیقه sync
+if(!window._syncInterval){
+  window._syncInterval = setInterval(function(){
+    try { if(typeof syncNow === 'function') syncNow(); } catch(e){}
+  }, 5 * 60 * 1000);
+}
+
+
+
+
+
+
+
 </script>
 <script>
-// ═══════════════════════════════════════════════════
-// 🎯 FINAL FIX v5 — getDoctorStatus + updateFilterCounts
-// بدون تداخل، بدون حلقه بی‌نهایت
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// 🎯 updateFilterCounts — هماهنگ با لیست
+// ═══════════════════════════════════════════════
+function updateFilterCounts(){
+  try {
+    var all = [];
+    
+    // 🎯 از myDoctors استفاده کن — دقیقاً مثل renderDocList
+    if(typeof myDoctors === 'function'){
+      try { all = myDoctors() || []; } catch(e){}
+    }
+    
+    // Fallback: اگه myDoctors نبود، همه
+    if(!all.length && typeof window._getAllDoctors === 'function'){
+      all = window._getAllDoctors() || [];
+    }
+    if(!all.length){
+      try {
+        if(typeof doctors !== 'undefined' && Array.isArray(doctors)) all = doctors;
+      } catch(e){}
+    }
+    
+    var counts = {active: 0, done: 0, pending: 0};
+    for(var i = 0; i < all.length; i++){
+      var st = (typeof getDoctorStatus === 'function')
+               ? getDoctorStatus(all[i])
+               : 'pending';
+      if(counts[st] !== undefined) counts[st]++;
+    }
+    
+    // نوشتن در DOM
+    var elA = document.getElementById('cntActive');
+    var elD = document.getElementById('cntDone');
+    var elP = document.getElementById('cntPending');
+    if(elA) elA.textContent = counts.active;
+    if(elD) elD.textContent = counts.done;
+    if(elP) elP.textContent = counts.pending;
+    
+    // fallback با data-filter
+    document.querySelectorAll('[data-filter]').forEach(function(btn){
+      var f = btn.getAttribute('data-filter');
+      var cnt = btn.querySelector('.cnt');
+      if(cnt && counts[f] !== undefined){
+        cnt.textContent = counts[f];
+      }
+    });
+    
+    return counts;
+  } catch(e){
+    console.warn('updateFilterCounts error:', e);
+  }
+}
+window.updateFilterCounts = updateFilterCounts;
+
+// اجرای مداوم
+if(!window._cntIntervalV3){
+  window._cntIntervalV3 = setInterval(function(){
+    try { updateFilterCounts(); } catch(e){}
+  }, 1000);
+}
+
+// اجرای اولیه
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 500);
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 1500);
+setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 3000);
+
+console.log('✅ updateFilterCounts v3 — هماهنگ با لیست');
+
+// 🎯 Hook روی switchUser — بعد از تغییر کاربر، شمارش رو آپدیت کن
+setTimeout(function(){
+  if(typeof window.switchUser === 'function' && !window._switchUserHooked){
+    window._switchUserHooked = true;
+    var _orig = window.switchUser;
+    window.switchUser = function(){
+      var r = _orig.apply(this, arguments);
+      setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 100);
+      setTimeout(function(){ try { updateFilterCounts(); } catch(e){} }, 500);
+      return r;
+    };
+  }
+}, 2000);
+
+
+// ═══════════════════════════════════════════════
+// 🔄 Auto-Save + Auto-Push v4
+// هر تغییر → ذخیره فوری در localStorage + push
+// ═══════════════════════════════════════════════
+
 (function(){
-  if(window._finalFixV5) return;
-  window._finalFixV5 = true;
 
-  // ─── isDone ───
-  function isDone(val){
-    if(val === true) return true;
-    if(val === false || val === null || val === undefined) return false;
-    if(typeof val === 'number') return val > 0;
-    var s = String(val).trim();
-    if(!s) return false;
-    if(s.indexOf('نشده') !== -1) return false;
-    if(s.indexOf('نشد') !== -1) return false;
-    if(s.indexOf('نداده') !== -1) return false;
-    if(s.indexOf('نکرده') !== -1) return false;
-    if(s.indexOf('نکرد') !== -1) return false;
-    if(s === 'خیر' || s === 'نه' || s === 'false') return false;
-    if(s.indexOf('انجام شد') !== -1) return true;
-    if(s.indexOf('قبول') !== -1) return true;
-    if(s.indexOf('خرید شده') !== -1) return true;
-    if(s.indexOf('ثبت شده') !== -1) return true;
-    return false;
-  }
-  window.isDone = isDone;
-
-  // ─── getDoctorStatus ───
-  function getDoctorStatus(d){
+  // ─────────────────────────────────────
+  // ذخیره فوری در localStorage
+  // ─────────────────────────────────────
+  function _saveLocal(){
     try {
-      if(!d) return 'pending';
-      var events = (d.events || []).filter(function(e){ return e && e.type; });
-      if(events.length === 0) return 'pending';
-      var allComplete = events.every(function(ev){
-        var t = (ev.type || '').trim();
-        var isInPerson = (t === 'حضوری' || t === 'inperson');
-        var purchaseDone = isDone(ev.purchase) || ev.buy === true;
-        var attendDone = isDone(ev.attend);
-        var examDone = isDone(ev.exam);
-        if(isInPerson) return purchaseDone && attendDone;
-        return purchaseDone && attendDone && examDone;
+      var d = (typeof doctors !== 'undefined' && doctors) ? doctors : [];
+      localStorage.setItem('cme_doctors', JSON.stringify(d));
+      localStorage.setItem('cme_last_save', String(Date.now()));
+      return true;
+    } catch(e){
+      console.warn('_saveLocal:', e);
+      return false;
+    }
+  }
+
+  // ─────────────────────────────────────
+  // Push به سرور
+  // ─────────────────────────────────────
+  var _pushTimer = null;
+  var _isPushing = false;
+
+  async function _pushNow(reason){
+    if(_isPushing) return;
+    _isPushing = true;
+    try {
+      if(typeof pushToCloud === 'function'){
+        console.log('📤 push (' + reason + ')');
+        await pushToCloud(true);
+        console.log('✅ push موفق');
+      }
+    } catch(e){
+      console.warn('push:', e);
+    }
+    _isPushing = false;
+  }
+
+  window.triggerAutoSave = function(reason){
+    console.log('💾 auto-save (' + (reason||'') + ')');
+    
+    // ۱. ذخیره فوری در localStorage
+    _saveLocal();
+    
+    // ۲. push (با debounce 1.5s)
+    if(_pushTimer) clearTimeout(_pushTimer);
+    _pushTimer = setTimeout(function(){
+      _pushNow(reason);
+    }, 1500);
+    
+    // ۳. آپدیت شمارنده‌ها
+    if(typeof updateFilterCounts === 'function') {
+      try { updateFilterCounts(); } catch(e){}
+    }
+  };
+
+  // ─────────────────────────────────────
+  // Hook توابع تغییر — auto-save بعد از هر تغییر
+  // ─────────────────────────────────────
+  var _hookedFns = [
+    'saveDoctor', 'addDoctor', 'delDoctor', 'editDoctor',
+    'delEvent', 'addEvent', 'saveEvent', 'openEventModal',
+    'toggleCard', 'saveAll', 'manualSave'
+  ];
+
+  function _hookAll(){
+    _hookedFns.forEach(function(fn){
+      if(typeof window[fn] === 'function' && !window['_autoSaveHook_' + fn]){
+        window['_autoSaveHook_' + fn] = true;
+        var orig = window[fn];
+        window[fn] = function(){
+          var r = orig.apply(this, arguments);
+          // بلافاصله ذخیره
+          setTimeout(function(){
+            try { window.triggerAutoSave('change:' + fn); } catch(e){}
+          }, 100);
+          return r;
+        };
+      }
+    });
+  }
+
+  // ─────────────────────────────────────
+  // Proxy روی آرایه doctors — هر mutation خودکار trigger بشه
+  // ─────────────────────────────────────
+  function _setupDoctorsProxy(){
+    try {
+      if(typeof doctors === 'undefined') return;
+      if(doctors._autoSaveProxy) return;
+      
+      var _origPush = doctors.push;
+      var _origSplice = doctors.splice;
+      var _origPop = doctors.pop;
+      var _origShift = doctors.shift;
+      var _origUnshift = doctors.unshift;
+      
+      function trigger(){
+        setTimeout(function(){
+          try { window.triggerAutoSave('array-change'); } catch(e){}
+        }, 100);
+      }
+      
+      doctors.push = function(){ var r = _origPush.apply(this, arguments); trigger(); return r; };
+      doctors.splice = function(){ var r = _origSplice.apply(this, arguments); trigger(); return r; };
+      doctors.pop = function(){ var r = _origPop.apply(this, arguments); trigger(); return r; };
+      doctors.shift = function(){ var r = _origShift.apply(this, arguments); trigger(); return r; };
+      doctors.unshift = function(){ var r = _origUnshift.apply(this, arguments); trigger(); return r; };
+      
+      doctors._autoSaveProxy = true;
+      console.log('✅ doctors proxy فعال');
+    } catch(e){ console.warn('proxy:', e); }
+  }
+
+  // ─────────────────────────────────────
+  // Pull ایمن — فقط اگه سرور جدیدتره
+  // ─────────────────────────────────────
+  var _lastServerJSON = '';
+  var _isPulling = false;
+
+  function _dataJSON(arr){
+    try { return JSON.stringify(arr || []); } catch(e){ return ''; }
+  }
+
+  window.safePull = async function(){
+    if(_isPulling || _isPushing) return { busy: true };
+    _isPulling = true;
+    
+    try {
+      var resp = await fetch(SCRIPT_URL + '?action=data&t=' + Date.now());
+      var data = await resp.json();
+      var serverDocs = data.doctors || [];
+      var serverJSON = _dataJSON(serverDocs);
+      
+      if(serverJSON === _lastServerJSON){
+        _isPulling = false;
+        return { nochange: true };
+      }
+      
+      var localJSON = _dataJSON(typeof doctors !== 'undefined' ? doctors : []);
+      
+      if(serverJSON !== localJSON){
+        // تعداد برابر ولی محتوا فرق؟
+        // اگه محلی تازه push شده، اولویت به محلیه
+        var lastSave = Number(localStorage.getItem('cme_last_save') || 0);
+        if(Date.now() - lastSave < 5000){
+          console.log('⏭ محلی تازه‌ست، pull نمی‌کنم');
+          _isPulling = false;
+          return { skipped: true };
+        }
+        
+        console.log('📥 pull: سرور', serverDocs.length, 'vs محلی', (typeof doctors !== 'undefined' ? doctors.length : 0));
+        if(typeof doctors !== 'undefined'){
+          doctors.length = 0;
+          serverDocs.forEach(function(d){ doctors.push(d); });
+        }
+        try { localStorage.setItem('cme_doctors', JSON.stringify(serverDocs)); } catch(e){}
+        if(typeof renderAll === 'function') renderAll();
+        if(typeof renderDocList === 'function') renderDocList();
+        if(typeof updateFilterCounts === 'function') updateFilterCounts();
+      }
+      
+      _lastServerJSON = serverJSON;
+      _isPulling = false;
+      return { pulled: true, count: serverDocs.length };
+    } catch(e){
+      _isPulling = false;
+      return { error: e.message };
+    }
+  };
+
+  // ─────────────────────────────────────
+  // اجرای دوره‌ای
+  // ─────────────────────────────────────
+  
+  // pull هر ۵ ثانیه
+  setInterval(function(){
+    if(document.hidden) return;
+    try { window.safePull(); } catch(e){}
+  }, 5000);
+
+  // hook توابع
+  setTimeout(_hookAll, 1000);
+  setTimeout(_hookAll, 3000);
+  setTimeout(_setupDoctorsProxy, 2000);
+  setTimeout(_setupDoctorsProxy, 5000);
+
+  // pull اولیه
+  setTimeout(function(){
+    try { window.safePull(); } catch(e){}
+  }, 3000);
+
+  // tab فعال شد → pull
+  document.addEventListener('visibilitychange', function(){
+    if(!document.hidden){
+      setTimeout(function(){ try { window.safePull(); } catch(e){} }, 300);
+    } else {
+      // tab غیرفعال → ذخیره فوری
+      try { window.triggerAutoSave('tab-hide'); } catch(e){}
+    }
+  });
+
+  // قبل بستن
+  window.addEventListener('beforeunload', function(){
+    try { _saveLocal(); } catch(e){}
+  });
+
+  // ─────────────────────────────────────
+  // توابع کمکی
+  // ─────────────────────────────────────
+  window.syncNow = async function(){
+    await window.safePull();
+  };
+  
+  window.forceSync = async function(){
+    await _pushNow('force');
+    await new Promise(function(r){ setTimeout(r, 1000); });
+    await window.safePull();
+  };
+
+  window.debugSync = function(){
+    console.log('═══════════════════════════');
+    console.log('📊 وضعیت');
+    console.log('doctors محلی:', (typeof doctors !== 'undefined' ? doctors.length : '?'));
+    console.log('last save:', new Date(Number(localStorage.getItem('cme_last_save') || 0)).toLocaleString());
+    console.log('آخرین server JSON length:', _lastServerJSON.length);
+    console.log('isPushing:', _isPushing, '| isPulling:', _isPulling);
+    console.log('proxy فعال:', (typeof doctors !== 'undefined' && doctors._autoSaveProxy) ? '✅' : '❌');
+    console.log('═══════════════════════════');
+  };
+
+  console.log('✅ Auto-Save v4 فعال');
+})();
+
+
+// ═══════════════════════════════════════════════
+// 🔄 Auto-Save + Auto-Push v4
+// هر تغییر → ذخیره فوری در localStorage + push
+// ═══════════════════════════════════════════════
+
+(function(){
+
+  // ─────────────────────────────────────
+  // ذخیره فوری در localStorage
+  // ─────────────────────────────────────
+  function _saveLocal(){
+    try {
+      var d = (typeof doctors !== 'undefined' && doctors) ? doctors : [];
+      localStorage.setItem('cme_doctors', JSON.stringify(d));
+      localStorage.setItem('cme_last_save', String(Date.now()));
+      return true;
+    } catch(e){
+      console.warn('_saveLocal:', e);
+      return false;
+    }
+  }
+
+  // ─────────────────────────────────────
+  // Push به سرور
+  // ─────────────────────────────────────
+  var _pushTimer = null;
+  var _isPushing = false;
+
+  async function _pushNow(reason){
+    if(_isPushing) return;
+    _isPushing = true;
+    try {
+      if(typeof pushToCloud === 'function'){
+        console.log('📤 push (' + reason + ')');
+        await pushToCloud(true);
+        console.log('✅ push موفق');
+      }
+    } catch(e){
+      console.warn('push:', e);
+    }
+    _isPushing = false;
+  }
+
+  window.triggerAutoSave = function(reason){
+    console.log('💾 auto-save (' + (reason||'') + ')');
+    
+    // ۱. ذخیره فوری در localStorage
+    _saveLocal();
+    
+    // ۲. push (با debounce 1.5s)
+    if(_pushTimer) clearTimeout(_pushTimer);
+    _pushTimer = setTimeout(function(){
+      _pushNow(reason);
+    }, 1500);
+    
+    // ۳. آپدیت شمارنده‌ها
+    if(typeof updateFilterCounts === 'function') {
+      try { updateFilterCounts(); } catch(e){}
+    }
+  };
+
+  // ─────────────────────────────────────
+  // Hook توابع تغییر — auto-save بعد از هر تغییر
+  // ─────────────────────────────────────
+  var _hookedFns = [
+    'saveDoctor', 'addDoctor', 'delDoctor', 'editDoctor',
+    'delEvent', 'addEvent', 'saveEvent', 'openEventModal',
+    'toggleCard', 'saveAll', 'manualSave'
+  ];
+
+  function _hookAll(){
+    _hookedFns.forEach(function(fn){
+      if(typeof window[fn] === 'function' && !window['_autoSaveHook_' + fn]){
+        window['_autoSaveHook_' + fn] = true;
+        var orig = window[fn];
+        window[fn] = function(){
+          var r = orig.apply(this, arguments);
+          // بلافاصله ذخیره
+          setTimeout(function(){
+            try { window.triggerAutoSave('change:' + fn); } catch(e){}
+          }, 100);
+          return r;
+        };
+      }
+    });
+  }
+
+  // ─────────────────────────────────────
+  // Proxy روی آرایه doctors — هر mutation خودکار trigger بشه
+  // ─────────────────────────────────────
+  function _setupDoctorsProxy(){
+    try {
+      if(typeof doctors === 'undefined') return;
+      if(doctors._autoSaveProxy) return;
+      
+      var _origPush = doctors.push;
+      var _origSplice = doctors.splice;
+      var _origPop = doctors.pop;
+      var _origShift = doctors.shift;
+      var _origUnshift = doctors.unshift;
+      
+      function trigger(){
+        setTimeout(function(){
+          try { window.triggerAutoSave('array-change'); } catch(e){}
+        }, 100);
+      }
+      
+      doctors.push = function(){ var r = _origPush.apply(this, arguments); trigger(); return r; };
+      doctors.splice = function(){ var r = _origSplice.apply(this, arguments); trigger(); return r; };
+      doctors.pop = function(){ var r = _origPop.apply(this, arguments); trigger(); return r; };
+      doctors.shift = function(){ var r = _origShift.apply(this, arguments); trigger(); return r; };
+      doctors.unshift = function(){ var r = _origUnshift.apply(this, arguments); trigger(); return r; };
+      
+      doctors._autoSaveProxy = true;
+      console.log('✅ doctors proxy فعال');
+    } catch(e){ console.warn('proxy:', e); }
+  }
+
+  // ─────────────────────────────────────
+  // Pull ایمن — فقط اگه سرور جدیدتره
+  // ─────────────────────────────────────
+  var _lastServerJSON = '';
+  var _isPulling = false;
+
+  function _dataJSON(arr){
+    try { return JSON.stringify(arr || []); } catch(e){ return ''; }
+  }
+
+  window.safePull = async function(){
+    if(_isPulling || _isPushing) return { busy: true };
+    _isPulling = true;
+    
+    try {
+      var resp = await fetch(SCRIPT_URL + '?action=data&t=' + Date.now());
+      var data = await resp.json();
+      var serverDocs = data.doctors || [];
+      var serverJSON = _dataJSON(serverDocs);
+      
+      if(serverJSON === _lastServerJSON){
+        _isPulling = false;
+        return { nochange: true };
+      }
+      
+      var localJSON = _dataJSON(typeof doctors !== 'undefined' ? doctors : []);
+      
+      if(serverJSON !== localJSON){
+        // تعداد برابر ولی محتوا فرق؟
+        // اگه محلی تازه push شده، اولویت به محلیه
+        var lastSave = Number(localStorage.getItem('cme_last_save') || 0);
+        if(Date.now() - lastSave < 5000){
+          console.log('⏭ محلی تازه‌ست، pull نمی‌کنم');
+          _isPulling = false;
+          return { skipped: true };
+        }
+        
+        console.log('📥 pull: سرور', serverDocs.length, 'vs محلی', (typeof doctors !== 'undefined' ? doctors.length : 0));
+        if(typeof doctors !== 'undefined'){
+          doctors.length = 0;
+          serverDocs.forEach(function(d){ doctors.push(d); });
+        }
+        try { localStorage.setItem('cme_doctors', JSON.stringify(serverDocs)); } catch(e){}
+        if(typeof renderAll === 'function') renderAll();
+        if(typeof renderDocList === 'function') renderDocList();
+        if(typeof updateFilterCounts === 'function') updateFilterCounts();
+      }
+      
+      _lastServerJSON = serverJSON;
+      _isPulling = false;
+      return { pulled: true, count: serverDocs.length };
+    } catch(e){
+      _isPulling = false;
+      return { error: e.message };
+    }
+  };
+
+  // ─────────────────────────────────────
+  // اجرای دوره‌ای
+  // ─────────────────────────────────────
+  
+  // pull هر ۵ ثانیه
+  setInterval(function(){
+    if(document.hidden) return;
+    try { window.safePull(); } catch(e){}
+  }, 5000);
+
+  // hook توابع
+  setTimeout(_hookAll, 1000);
+  setTimeout(_hookAll, 3000);
+  setTimeout(_setupDoctorsProxy, 2000);
+  setTimeout(_setupDoctorsProxy, 5000);
+
+  // pull اولیه
+  setTimeout(function(){
+    try { window.safePull(); } catch(e){}
+  }, 3000);
+
+  // tab فعال شد → pull
+  document.addEventListener('visibilitychange', function(){
+    if(!document.hidden){
+      setTimeout(function(){ try { window.safePull(); } catch(e){} }, 300);
+    } else {
+      // tab غیرفعال → ذخیره فوری
+      try { window.triggerAutoSave('tab-hide'); } catch(e){}
+    }
+  });
+
+  // قبل بستن
+  window.addEventListener('beforeunload', function(){
+    try { _saveLocal(); } catch(e){}
+  });
+
+  // ─────────────────────────────────────
+  // توابع کمکی
+  // ─────────────────────────────────────
+  window.syncNow = async function(){
+    await window.safePull();
+  };
+  
+  window.forceSync = async function(){
+    await _pushNow('force');
+    await new Promise(function(r){ setTimeout(r, 1000); });
+    await window.safePull();
+  };
+
+  window.debugSync = function(){
+    console.log('═══════════════════════════');
+    console.log('📊 وضعیت');
+    console.log('doctors محلی:', (typeof doctors !== 'undefined' ? doctors.length : '?'));
+    console.log('last save:', new Date(Number(localStorage.getItem('cme_last_save') || 0)).toLocaleString());
+    console.log('آخرین server JSON length:', _lastServerJSON.length);
+    console.log('isPushing:', _isPushing, '| isPulling:', _isPulling);
+    console.log('proxy فعال:', (typeof doctors !== 'undefined' && doctors._autoSaveProxy) ? '✅' : '❌');
+    console.log('═══════════════════════════');
+  };
+
+  console.log('✅ Auto-Save v4 فعال');
+})();
+
+</script>
+
+
+
+
+
+<script id="mfb-js">
+(function(){
+  if(window._mfbV7) return;
+  window._mfbV7 = true;
+
+  var BAR_HTML = '<div class="mfb-user">' +
+    '<button type="button" data-u="morteza">مرتضی</button>' +
+    '<button type="button" data-u="parvin">پروین</button>' +
+    '<button type="button" data-u="all">همه</button>' +
+    '</div>' +
+    '<div class="mfb-filters">' +
+    '<button type="button" data-f="active">⚡ در حال اجرا<span class="cnt" id="mfb_cnt_active">0</span></button>' +
+    '<button type="button" data-f="done">✅ اتمام<span class="cnt" id="mfb_cnt_done">0</span></button>' +
+    '<button type="button" data-f="pending">⏳ بلاتکلیف<span class="cnt" id="mfb_cnt_pending">0</span></button>' +
+    '</div>';
+
+  var _rafPending = false;
+  var _lastShow = null;
+
+  function removeBar(){
+    var b = document.getElementById('mobileFilterBar');
+    if(b && b.parentNode) b.parentNode.removeChild(b);
+    if(document.body.classList.contains('has-mfb')) document.body.classList.remove('has-mfb');
+  }
+
+  function addBar(){
+    var b = document.getElementById('mobileFilterBar');
+    if(!b){
+      b = document.createElement('div');
+      b.id = 'mobileFilterBar';
+      b.innerHTML = BAR_HTML;
+      document.body.appendChild(b);
+      document.body.classList.add('has-mfb');
+    }
+    return b;
+  }
+
+  // 🎯 سریع و سبک
+  function shouldShow(){
+    if(window.innerWidth > 900) return false;
+    if(document.body.classList.contains('modal-open')) return false;
+    
+    var mh = document.getElementById('modalHost');
+    if(mh && mh.children.length > 0) return false;
+    
+    var ma = document.getElementById('mainArea');
+    if(!ma) return false;
+    if(!ma.querySelector('.back-btn')) return false;
+    
+    // چک سریع: اگه فرم هست (با data-attr یا کلاس خاص) → نشون نده
+    if(ma.querySelector('form, .form-grid, input[name="lname"], input[name="family"]')) {
+      // فقط اگه بیش از ۵ input داره
+      var cnt = ma.querySelectorAll('input, select, textarea').length;
+      if(cnt > 5) return false;
+    }
+    
+    return true;
+  }
+
+  function refresh(){
+    if(_rafPending) return;
+    _rafPending = true;
+    requestAnimationFrame(function(){
+      _rafPending = false;
+      var show = shouldShow();
+      
+      // 🎯 اگه حالت عوض نشده، فقط محتوا آپدیت کن (نه حذف/اضافه)
+      var has = !!document.getElementById('mobileFilterBar');
+      
+      if(show && !has){
+        addBar();
+        _lastShow = true;
+      } else if(!show && has){
+        removeBar();
+        _lastShow = false;
+        return;
+      } else if(!show && !has){
+        return; // هیچی
+      }
+      
+      // آپدیت وضعیت (فقط اگه bar هست)
+      var bar = document.getElementById('mobileFilterBar');
+      if(!bar) return;
+      
+      // 🎯 فقط کلاس فعال رو عوض کن اگه عوض شده
+      var u = window.currentUser || 'all';
+      bar.querySelectorAll('.mfb-user button').forEach(function(b){
+        var on = (b.dataset.u === u);
+        if(b.classList.contains('on') !== on){
+          if(on) b.classList.add('on'); else b.classList.remove('on');
+        }
       });
-      return allComplete ? 'done' : 'active';
-    } catch(e){ return 'pending'; }
-  }
-  window.getDoctorStatus = getDoctorStatus;
-
-  // ─── updateFilterCounts ───
-  function updateFilterCounts(){
-    try {
-      var all = (typeof myDoctors === 'function') ? myDoctors() : (window.doctors || []);
-      var counts = {active: 0, done: 0, pending: 0, vip: 0};
-      for(var i = 0; i < all.length; i++){
-        var d = all[i];
-        var st = getDoctorStatus(d);
-        if(counts[st] !== undefined) counts[st]++;
-        if(d.vip) counts.vip++;
-      }
-      
-      var ids = {
-        cntActive: counts.active,
-        cntDone: counts.done,
-        cntPending: counts.pending,
-        cntVip: counts.vip
-      };
-      for(var id in ids){
-        var el = document.getElementById(id);
-        if(el && el.textContent !== String(ids[id])) el.textContent = ids[id];
-      }
-      
-      document.querySelectorAll('[data-filter]').forEach(function(btn){
-        var f = btn.getAttribute('data-filter');
-        var cnt = btn.querySelector('.cnt');
-        if(cnt && counts[f] !== undefined && cnt.textContent !== String(counts[f])){
-          cnt.textContent = counts[f];
+      var f = window._docFilter || 'active';
+      bar.querySelectorAll('.mfb-filters button').forEach(function(b){
+        var on = (b.dataset.f === f);
+        if(b.classList.contains('on') !== on){
+          if(on) b.classList.add('on'); else b.classList.remove('on');
         }
       });
       
-      return counts;
-    } catch(e){ 
-      console.warn('updateFilterCounts:', e); 
-      return {active:0, done:0, pending:0, vip:0};
-    }
+      // شمارنده‌ها
+      try {
+        var docs = (typeof myDoctors === 'function') ? myDoctors() : [];
+        var counts = {active:0, done:0, pending:0};
+        for(var i=0; i<docs.length; i++){
+          var s = (typeof getDoctorStatus === 'function') ? getDoctorStatus(docs[i]) : 'pending';
+          if(counts[s] !== undefined) counts[s]++;
+        }
+        var el;
+        el = document.getElementById('mfb_cnt_active');
+        if(el && el.textContent !== String(counts.active)) el.textContent = counts.active;
+        el = document.getElementById('mfb_cnt_done');
+        if(el && el.textContent !== String(counts.done)) el.textContent = counts.done;
+        el = document.getElementById('mfb_cnt_pending');
+        if(el && el.textContent !== String(counts.pending)) el.textContent = counts.pending;
+      } catch(e){}
+    });
   }
-  window.updateFilterCounts = updateFilterCounts;
 
-  // ─── اجرای خودکار با throttle ───
-  var _lastRun = 0;
-  window._finalInterval = setInterval(function(){
-    var now = Date.now();
-    if(now - _lastRun < 2500) return;
-    _lastRun = now;
-    if(document.hidden) return;
-    try { updateFilterCounts(); } catch(e){}
-  }, 2500);
+  window.updateMobileFilterBar = refresh;
 
-  // اجرای اولیه
+  // کلیک با delegation
+  document.addEventListener('click', function(e){
+    var b = e.target.closest && e.target.closest('#mobileFilterBar .mfb-user button');
+    if(b && b.dataset.u){
+      e.preventDefault(); e.stopPropagation();
+      if(typeof switchUser === 'function') switchUser(b.dataset.u);
+      if(typeof backToList === 'function') backToList();
+      setTimeout(refresh, 250);
+      return;
+    }
+    var fb = e.target.closest && e.target.closest('#mobileFilterBar .mfb-filters button');
+    if(fb && fb.dataset.f){
+      e.preventDefault(); e.stopPropagation();
+      if(typeof setDocFilter === 'function') setDocFilter(fb.dataset.f);
+      if(typeof backToList === 'function') backToList();
+      setTimeout(refresh, 250);
+      return;
+    }
+  }, true);
+
+  // 🎯 Debounced trigger
+  var _debTimer = null;
+  function debouncedRefresh(){
+    if(_debTimer) clearTimeout(_debTimer);
+    _debTimer = setTimeout(refresh, 200);
+  }
+
   setTimeout(function(){
-    try { updateFilterCounts(); } catch(e){}
-    if(typeof renderDocList === 'function') renderDocList();
+    var ma = document.getElementById('mainArea');
+    var mh = document.getElementById('modalHost');
+    
+    // 🎯 MutationObserver سبک — فقط childList، بدون subtree و characterData
+    if(ma){
+      new MutationObserver(debouncedRefresh)
+        .observe(ma, {childList:true, subtree:false});
+    }
+    if(mh){
+      new MutationObserver(debouncedRefresh)
+        .observe(mh, {childList:true, subtree:false});
+    }
+    // body class تغییر (فقط modal-open)
+    new MutationObserver(function(muts){
+      for(var i=0; i<muts.length; i++){
+        if(muts[i].attributeName === 'class'){
+          debouncedRefresh();
+          return;
+        }
+      }
+    }).observe(document.body, {attributes:true, attributeFilter:['class']});
+    
+    refresh();
+    
+    // 🎯 setInterval خیلی کند — هر ۳ ثانیه، فقط اگه tab فعاله
+    setInterval(function(){
+      if(document.hidden) return;
+      refresh();
+    }, 3000);
+    
   }, 1000);
 
-  console.log('✅ FINAL FIX v5 — getDoctorStatus + updateFilterCounts');
+  // فقط resize (نه scroll)
+  var _resTimer = null;
+  window.addEventListener('resize', function(){
+    if(_resTimer) clearTimeout(_resTimer);
+    _resTimer = setTimeout(refresh, 200);
+  });
+
+  console.log('✅ Mobile Filter Bar v7 — بهینه');
+})();
+</script>
+
+
+
+
+<!-- 🛡 Pull Race Guard — جلوگیری از برگشت داده قدیمی بعد از تغییر -->
+<script>
+(function(){
+  if(window._raceGuard) return;
+  window._raceGuard = true;
+
+  // 🎯 زمان آخرین تغییر کاربر
+  window._lastUserMutation = window._lastUserMutation || 0;
+  // 🎯 آیا سرور داره اعمال میشه؟
+  window._applyingServerData = false;
+
+  // 🛡 ۱. hook روی triggerAutoSave — علامت‌گذاری تغییر کاربر
+  var _origTrigger = window.triggerAutoSave;
+  if(typeof _origTrigger === 'function' && !window._triggerHooked){
+    window._triggerHooked = true;
+    window.triggerAutoSave = function(reason){
+      // 🎯 اگه این تغییر از pull خودمون اومده، نادیده بگیر
+      if(window._applyingServerData){
+        console.log('⏭ auto-save از pull — نادیده گرفته شد');
+        return;
+      }
+      window._lastUserMutation = Date.now();
+      console.log('🛡 user mutation ثبت شد:', reason);
+      return _origTrigger.apply(this, arguments);
+    };
+  }
+
+  // 🛡 ۲. hook روی safePull — قبل از اعمال، چک کن تغییر کاربر نبوده
+  var _pullInterval = setInterval(function(){
+    var _origPull = window.safePull;
+    if(typeof _origPull !== 'function') return;
+    if(window._pullHooked) { clearInterval(_pullInterval); return; }
+    window._pullHooked = true;
+    clearInterval(_pullInterval);
+
+    window.safePull = async function(){
+      // اگه ۵ ثانیه اخیر تغییر کاربر داشتیم، pull نکن
+      var sinceMutation = Date.now() - (window._lastUserMutation || 0);
+      if(sinceMutation < 5000){
+        console.log('⏭ pull skip — کاربر ' + Math.round(sinceMutation/1000) + ' ثانیه پیش تغییر داد');
+        return { skipped: 'recent-mutation' };
+      }
+
+      // علامت‌گذاری که داریم داده سرور رو اعمال می‌کنیم
+      var result = await _origPull.apply(this, arguments);
+      
+      // اگه pull چیزی اعمال کرد، flag بذار
+      if(result && result.pulled){
+        window._applyingServerData = true;
+        setTimeout(function(){
+          window._applyingServerData = false;
+        }, 800);
+      }
+      
+      return result;
+    };
+    console.log('✅ safePull hooked با race guard');
+  }, 500);
+
+  // 🛡 ۳. hook روی pushToCloud — وقتی push شد، همه pull‌های قدیمی بی‌اعتبار میشن
+  var _pushInterval = setInterval(function(){
+    var _origPush = window.pushToCloud;
+    if(typeof _origPush !== 'function') return;
+    if(window._pushHooked) { clearInterval(_pushInterval); return; }
+    window._pushHooked = true;
+    clearInterval(_pushInterval);
+
+    window.pushToCloud = async function(){
+      var result = await _origPush.apply(this, arguments);
+      // بعد از push موفق، ۱۰ ثانیه pull نکن
+      window._lastUserMutation = Date.now();
+      console.log('🛡 push موفق → pull موقتاً غیرفعال');
+      return result;
+    };
+    console.log('✅ pushToCloud hooked');
+  }, 500);
+
+  // 🛡 ۴. hook مستقیم روی delDoctor/saveDoctor
+  ['delDoctor', 'saveDoctor', 'editDoctor', 'addDoctor'].forEach(function(fn){
+    var _iv = setInterval(function(){
+      if(typeof window[fn] !== 'function') return;
+      if(window['_race_' + fn]) { clearInterval(_iv); return; }
+      window['_race_' + fn] = true;
+      clearInterval(_iv);
+      var orig = window[fn];
+      window[fn] = function(){
+        window._lastUserMutation = Date.now();
+        console.log('🛡 ' + fn + ' → mutation ثبت شد');
+        return orig.apply(this, arguments);
+      };
+    }, 500);
+  });
+
+  // 🛡 ۵. Instant Pull — ولی با احترام به mutation
+  function doInstantPull(){
+    try {
+      if(typeof window.safePull === 'function'){
+        window.safePull();
+      }
+    } catch(e){}
+  }
+
+  if(document.readyState === 'complete'){
+    setTimeout(doInstantPull, 200);
+  } else {
+    window.addEventListener('load', function(){
+      setTimeout(doInstantPull, 200);
+    });
+  }
+  setTimeout(doInstantPull, 1000);
+
+  console.log('✅ Race Guard فعال');
+})();
+
+
+// ============================================
+// 🎯 getDoctorStatus — نسخه نهایی
+// مقادیر واقعی:
+//   purchase: "انجام شد" / "انجام نشد"
+//   attend:   "انجام شد" / "انجام نشد"
+//   exam:     "قبول" / "ثبت نشده"
+// ============================================
+
+function isDone(val){
+  if(val === true) return true;
+  if(val === false || val === null || val === undefined) return false;
+  if(typeof val === 'number') return val > 0;
+  
+  var s = String(val).trim();
+  if(!s) return false;
+  
+  // 🎯 چک منفی (اول اینا چک بشن چون "نشد" شامل "شد" هست)
+  if(s.indexOf('نشده') !== -1) return false;
+  if(s.indexOf('نشد') !== -1) return false;
+  if(s.indexOf('نداده') !== -1) return false;
+  if(s.indexOf('نکرده') !== -1) return false;
+  if(s.indexOf('نکرد') !== -1) return false;
+  if(s.indexOf('خرید نشده') !== -1) return false;
+  if(s.indexOf('ثبت نشده') !== -1) return false;
+  if(s === 'خیر' || s === 'نه' || s === 'false' || s === '0') return false;
+  
+  // 🎯 چک مثبت
+  if(s.indexOf('انجام شد') !== -1) return true;
+  if(s.indexOf('قبول') !== -1) return true;
+  if(s.indexOf('خرید شده') !== -1) return true;
+  if(s.indexOf('ثبت شده') !== -1) return true;
+  if(s === 'بله' || s === 'آری' || s === 'true' || s === '1') return true;
+  if(s === '✓' || s === '✅' || s === '✔') return true;
+  
+  return false;
+}
+
+function getDoctorStatus(d){
+  try {
+    if(!d) return 'pending';
+    var events = (d.events || []).filter(function(e){ return e && e.type; });
+    if(events.length === 0) return 'pending';
+    
+    var allComplete = events.every(function(ev){
+      // تشخیص حضوری
+      var t = (ev.type || '').trim();
+      var isInPerson = (t === 'حضوری' || t === 'inperson' || t === 'in-person');
+      
+      var purchaseDone = isDone(ev.purchase) || ev.buy === true;
+      var attendDone = isDone(ev.attend);
+      var examDone = isDone(ev.exam);
+      
+      // حضوری: خرید + شرکت
+      if(isInPerson){
+        return purchaseDone && attendDone;
+      }
+      // وبینار و غیرحضوری: خرید + شرکت + آزمون
+      return purchaseDone && attendDone && examDone;
+    });
+    
+    return allComplete ? 'done' : 'active';
+  } catch(e){
+    console.warn('getDoctorStatus error:', e);
+    return 'pending';
+  }
+}
+
+window.getDoctorStatus = getDoctorStatus;
+window.isDone = isDone;
+
+
+
+// ============================================
+// 🎯 Auto-Save Hook v2 — ذخیره خودکار در localStorage
+// مشکل: تابع تیک، doctors رو آپدیت می‌کنه ولی localStorage نه
+// راه‌حل: هر تغییر doctors → فوری localStorage
+// ============================================
+
+(function(){
+  if(window._autoSaveHookV2) return;
+  window._autoSaveHookV2 = true;
+  
+  var lastHash = '';
+  var lastSave = 0;
+  
+  // 🎯 hash سریع فقط از فیلدهای مهم
+  function calcHash(){
+    try {
+      var d = (typeof doctors !== 'undefined' && Array.isArray(doctors)) ? doctors : [];
+      var s = d.length + '|';
+      for(var i = 0; i < d.length; i++){
+        var doc = d[i];
+        var evs = doc.events || [];
+        s += (doc.id || '') + ':' + evs.length + ';';
+        for(var j = 0; j < evs.length; j++){
+          var e = evs[j];
+          s += (e.purchase||'') + ',' + (e.attend||'') + ',' + (e.exam||'') + '/';
+        }
+      }
+      return s;
+    } catch(err){ return ''; }
+  }
+  
+  lastHash = calcHash();
+  
+  // 🎯 هر ۸۰۰ms چک کن
+  setInterval(function(){
+    try {
+      var h = calcHash();
+      if(h !== lastHash){
+        var now = Date.now();
+        if(now - lastSave < 400) return; // throttle
+        lastSave = now;
+        lastHash = h;
+        
+        // ۱. ذخیره فوری در localStorage
+        try {
+          localStorage.setItem('cme_doctors', JSON.stringify(doctors));
+          console.log('💾 auto-save localStorage — ' + doctors.length + ' پزشک');
+        } catch(e){
+          console.warn('localStorage save failed:', e);
+        }
+        
+        // ۲. push به سرور (با تأخیر کوتاه)
+        setTimeout(function(){
+          if(typeof window.triggerAutoSave === 'function'){
+            window.triggerAutoSave('tick-changed');
+          } else if(typeof window.pushToCloud === 'function'){
+            window.pushToCloud(true);
+          }
+        }, 300);
+        
+        // ۳. snapshot
+        try {
+          if(typeof window.takeSnapshot === 'function'){
+            window.takeSnapshot();
+          }
+        } catch(e){}
+      }
+    } catch(e){}
+  }, 800);
+  
+  console.log('✅ Auto-Save Hook v2 فعال — localStorage + push');
+})();
+
+</script>
+
+
+
+<script>
+(function(){
+  if(window._bankCardShow) return;
+  window._bankCardShow = true;
+  
+  function showCards(){
+    document.querySelectorAll('.bank-card-display').forEach(function(el){
+      el.classList.remove('hidden');
+    });
+    // پنهان کردن دکمه نمایش کارت
+    document.querySelectorAll('button[onclick*="toggleCard"]').forEach(function(btn){
+      btn.style.setProperty('display', 'none', 'important');
+    });
+  }
+  
+  setTimeout(showCards, 500);
+  setTimeout(showCards, 1500);
+  setInterval(showCards, 2500);
+  
+  // Observer روی mainArea
+  setTimeout(function(){
+    var ma = document.getElementById('mainArea');
+    if(ma){
+      var t;
+      new MutationObserver(function(){
+        clearTimeout(t);
+        t = setTimeout(showCards, 150);
+      }).observe(ma, {childList: true, subtree: false});
+    }
+  }, 1500);
+  
+  console.log('✅ Bank Card Show فعال');
+})();
+</script>
+
+
+
+
+
+<script id="bank-card-show">
+(function(){
+  if(window._bankCardShowV2) return;
+  window._bankCardShowV2 = true;
+  
+  function show(){
+    try {
+      // کارت‌ها رو نشون بده
+      document.querySelectorAll('.bank-card-display').forEach(function(el){
+        el.classList.remove('hidden');
+        el.removeAttribute('hidden');
+      });
+      // دکمه نمایش کارت رو مخفی کن
+      document.querySelectorAll('button').forEach(function(b){
+        var t = (b.textContent || '').trim();
+        if((t.indexOf('نمایش کارت') !== -1 || t.indexOf('کارت بانکی') !== -1) && t.length < 30){
+          b.style.setProperty('display', 'none', 'important');
+        }
+      });
+    } catch(e){}
+  }
+  
+  setTimeout(show, 300);
+  setTimeout(show, 1000);
+  setTimeout(show, 2500);
+  setInterval(show, 2500);
+  
+  setTimeout(function(){
+    var ma = document.getElementById('mainArea');
+    if(ma){
+      var t;
+      new MutationObserver(function(){
+        clearTimeout(t);
+        t = setTimeout(show, 150);
+      }).observe(ma, {childList: true, subtree: false});
+    }
+  }, 1500);
+  
+  console.log('✅ Bank Card Show v2 فعال');
+})();
+</script>
+
+<script id="bank-card-final-v2">
+(function(){
+  if(window._bankCardV2) return;
+  window._bankCardV2 = true;
+  
+  function apply(){
+    try {
+      // کارت‌ها رو نشون بده
+      document.querySelectorAll('.bank-card-display').forEach(function(card){
+        card.classList.remove('hidden');
+        card.removeAttribute('hidden');
+        
+        // 🎯 حذف دکمه‌های کپی داخل کارت
+        card.querySelectorAll('.copy-inline, button.copy-btn, .copy-btn').forEach(function(btn){
+          btn.remove();
+        });
+        
+        // 🎯 درست کردن ترتیب فیلدها برای نمایش افقی
+        card.querySelectorAll('.bank-cell-compact').forEach(function(cell){
+          cell.style.setProperty('display', 'flex', 'important');
+          cell.style.setProperty('flex-direction', 'row', 'important');
+          cell.style.setProperty('align-items', 'center', 'important');
+          cell.style.setProperty('justify-content', 'center', 'important');
+          cell.style.setProperty('gap', '6px', 'important');
+          
+          // label بزرگ
+          var lbl = cell.querySelector('.label');
+          if(lbl){
+            lbl.style.setProperty('font-size', '22px', 'important');
+            lbl.style.setProperty('display', 'inline-block', 'important');
+          }
+          
+          // value بزرگ
+          var val = cell.querySelector('.value');
+          if(val){
+            val.style.setProperty('font-size', '24px', 'important');
+            val.style.setProperty('display', 'inline-block', 'important');
+          }
+        });
+      });
+      
+      // دکمه نمایش کارت رو حذف کن
+      document.querySelectorAll('button').forEach(function(b){
+        var t = (b.textContent || '').trim();
+        if((t.indexOf('نمایش کارت') !== -1 || t.indexOf('کارت بانکی') !== -1) && t.length < 30){
+          b.style.setProperty('display', 'none', 'important');
+        }
+      });
+    } catch(e){}
+  }
+  
+  [200, 500, 1000, 2000, 3000].forEach(function(t){ setTimeout(apply, t); });
+  setInterval(apply, 2500);
+  
+  setTimeout(function(){
+    var ma = document.getElementById('mainArea');
+    if(ma){
+      var deb;
+      new MutationObserver(function(){
+        clearTimeout(deb);
+        deb = setTimeout(apply, 150);
+      }).observe(ma, {childList: true, subtree: false});
+    }
+  }, 1500);
+  
+  console.log('✅ Bank Card v2 — فونت بزرگ، بدون کپی');
+})();
+</script>
+
+<script id="bank-card-final-v3">
+(function(){
+  if(window._bankCardV3) return;
+  window._bankCardV3 = true;
+  
+  function fix(){
+    try {
+      // ۱. کارت‌ها رو نشون بده
+      document.querySelectorAll('.bank-card-display').forEach(function(card){
+        card.classList.remove('hidden');
+        card.removeAttribute('hidden');
+        
+        // ۲. اصلاح ساختار شماره کارت
+        var numCell = card.querySelector('.bank-cell-compact.card-number');
+        if(numCell){
+          // چک کن دکمه کپی هست یا نه
+          var hasCopy = numCell.querySelector('.copy-inline, button');
+          if(!hasCopy){
+            // اضافه کردن دکمه کپی
+            var val = numCell.querySelector('.value');
+            var num = val ? val.textContent.trim() : '';
+            if(num && num !== '—'){
+              var copyBtn = document.createElement('button');
+              copyBtn.type = 'button';
+              copyBtn.className = 'copy-inline';
+              copyBtn.textContent = '📋 کپی';
+              copyBtn.onclick = function(e){
+                e.preventDefault();
+                e.stopPropagation();
+                try {
+                  navigator.clipboard.writeText(num);
+                  copyBtn.textContent = '✅';
+                  setTimeout(function(){ copyBtn.textContent = '📋 کپی'; }, 1500);
+                } catch(err){
+                  console.warn(err);
+                }
+              };
+              numCell.appendChild(copyBtn);
+            }
+          }
+          
+          // استایل grid
+          numCell.style.setProperty('display', 'grid', 'important');
+          numCell.style.setProperty('grid-template-columns', 'auto auto 1fr auto', 'important');
+          numCell.style.setProperty('align-items', 'center', 'important');
+          numCell.style.setProperty('gap', '6px', 'important');
+          numCell.style.setProperty('padding', '8px 10px', 'important');
+        }
+      });
+      
+      // ۳. دکمه نمایش کارت رو مخفی کن
+      document.querySelectorAll('button').forEach(function(b){
+        var t = (b.textContent || '').trim();
+        if((t.indexOf('نمایش کارت') !== -1 || t.indexOf('کارت بانکی') !== -1) && t.length < 30){
+          b.style.setProperty('display', 'none', 'important');
+        }
+      });
+    } catch(e){ console.warn('bankFix:', e); }
+  }
+  
+  [200, 500, 1000, 2000].forEach(function(t){ setTimeout(fix, t); });
+  setInterval(fix, 2500);
+  
+  setTimeout(function(){
+    var ma = document.getElementById('mainArea');
+    if(ma){
+      var deb;
+      new MutationObserver(function(){
+        clearTimeout(deb);
+        deb = setTimeout(fix, 150);
+      }).observe(ma, {childList: true, subtree: false});
+    }
+  }, 1500);
+  
+  console.log('✅ Bank Card v3 — فونت یکسان + کپی برگشت');
+})();
+</script>
+
+<script id="vip-customer-js">
+(function(){
+  if(window._vipV2) return;
+  window._vipV2 = true;
+  
+  // ═══════════════════════════════════════════
+  // ۱. ذخیره کردن doctor id فعلی موقع باز کردن فرم
+  // ═══════════════════════════════════════════
+  window._editingDoctorId = window._editingDoctorId || null;
+  
+  var _hookInterval = setInterval(function(){
+    if(typeof window.openDoctorModal === 'function' && !window._vip_hooked_open){
+      window._vip_hooked_open = true;
+      clearInterval(_hookInterval);
+      var _orig = window.openDoctorModal;
+      window.openDoctorModal = function(id){
+        window._editingDoctorId = id || null;
+        var r = _orig.apply(this, arguments);
+        setTimeout(fillVipFields, 200);
+        return r;
+      };
+      console.log('✅ openDoctorModal hook شد');
+    }
+  }, 500);
+  
+  // ═══════════════════════════════════════════
+  // ۲. پر کردن فیلدهای VIP
+  // ═══════════════════════════════════════════
+  function fillVipFields(){
+    try {
+      var id = window._editingDoctorId;
+      var d = id ? (window.doctors||[]).find(function(x){ return x.id === id; }) : null;
+      var cb = document.getElementById('mVip');
+      var dt = document.getElementById('mVipDate');
+      if(cb) cb.checked = !!(d && d.vip);
+      if(dt) dt.value = (d && d.vipDate) || '';
+    } catch(e){}
+  }
+  
+  // ═══════════════════════════════════════════
+  // ۳. ذخیره VIP موقع saveDoctor
+  // ═══════════════════════════════════════════
+  var _saveHook = setInterval(function(){
+    if(typeof window.saveDoctor === 'function' && !window._vip_hooked_save){
+      window._vip_hooked_save = true;
+      clearInterval(_saveHook);
+      var _origSave = window.saveDoctor;
+      window.saveDoctor = function(){
+        // قبل از ذخیره، مقادیر رو بگیر
+        var cb = document.getElementById('mVip');
+        var dt = document.getElementById('mVipDate');
+        var vipVal = cb ? cb.checked : false;
+        var dateVal = dt ? dt.value.trim() : '';
+        
+        // بعد از ذخیره، آخرین پزشک رو آپدیت کن
+        var r = _origSave.apply(this, arguments);
+        
+        setTimeout(function(){
+          try {
+            var id = window._editingDoctorId;
+            var doctor = null;
+            if(id){
+              doctor = (window.doctors||[]).find(function(x){ return x.id === id; });
+            }
+            // اگه id نبود، آخرین پزشک رو بگیر (اضافه جدید)
+            if(!doctor && window.doctors && window.doctors.length){
+              doctor = window.doctors[window.doctors.length - 1];
+            }
+            if(doctor){
+              doctor.vip = vipVal;
+              doctor.vipDate = dateVal;
+              console.log('⭐ VIP set:', doctor.fname || doctor.firstName, '→', vipVal, dateVal);
+            }
+            // رندر و ذخیره
+            if(typeof renderDocList === 'function') renderDocList();
+            if(typeof updateFilterCounts === 'function') updateFilterCounts();
+            if(typeof window.triggerAutoSave === 'function') window.triggerAutoSave('vip-save');
+            else if(typeof window.pushToCloud === 'function') window.pushToCloud(true);
+          } catch(e){ console.warn('vip save:', e); }
+        }, 400);
+        
+        return r;
+      };
+      console.log('✅ saveDoctor hook شد');
+    }
+  }, 500);
+  
+  // ═══════════════════════════════════════════
+  // ۴. محاسبه روزهای مانده (پشتیبانی شمسی و میلادی)
+  // ═══════════════════════════════════════════
+  function daysUntil(dateStr){
+    if(!dateStr) return null;
+    try {
+      var s = String(dateStr).trim().replace(/[\-]/g, '/');
+      var parts = s.split('/');
+      if(parts.length !== 3) return null;
+      var a = parseInt(parts[0]), b = parseInt(parts[1]), cc = parseInt(parts[2]);
+      if(isNaN(a) || isNaN(b) || isNaN(cc)) return null;
+      
+      var target, today = new Date();
+      today.setHours(0,0,0,0);
+      
+      // تشخیص شمسی یا میلادی: شمسی سالش بین 1390-1420، میلادی 2020-2050
+      if(a >= 1380 && a <= 1450){
+        // شمسی → تبدیل به میلادی
+        target = jalaliToGregorian(a, b, cc);
+      } else {
+        // میلادی
+        target = new Date(a, b - 1, cc);
+      }
+      if(!target || isNaN(target.getTime())) return null;
+      target.setHours(0,0,0,0);
+      return Math.floor((target - today) / 86400000);
+    } catch(e){ return null; }
+  }
+  
+  // تبدیل شمسی به میلادی
+  function jalaliToGregorian(jy, jm, jd){
+    try {
+      jy += 1595;
+      var days = -355668 + (365 * jy) + (Math.floor(jy / 33) * 8) + Math.floor(((jy % 33) + 3) / 4) + jd;
+      days += (jm < 7) ? (jm - 1) * 31 : ((jm - 7) * 30 + 186);
+      var gy = 400 * Math.floor(days / 146097);
+      days = days % 146097;
+      if(days > 36524){
+        gy += 100 * Math.floor(--days / 36524);
+        days = days % 36524;
+        if(days >= 365) days++;
+      }
+      gy += 4 * Math.floor(days / 1461);
+      days = days % 1461;
+      if(days > 365){
+        gy += Math.floor((days - 1) / 365);
+        days = (days - 1) % 365;
+      }
+      var gd = days + 1;
+      var sal_a = [0, 31, ((gy % 4 === 0 && gy % 100 !== 0) || (gy % 400 === 0)) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      var gm = 0;
+      for(gm = 0; gm < 13 && gd > sal_a[gm]; gm++) gd -= sal_a[gm];
+      return new Date(gy, gm - 1, gd);
+    } catch(e){ return null; }
+  }
+  
+  // ═══════════════════════════════════════════
+  // ۵. بازنویسی setDocFilter برای فیلتر VIP
+  // ═══════════════════════════════════════════
+  var _filterHook = setInterval(function(){
+    if(typeof window.setDocFilter === 'function' && !window._vip_hooked_filter){
+      window._vip_hooked_filter = true;
+      clearInterval(_filterHook);
+      var _origFilter = window.setDocFilter;
+      window.setDocFilter = function(filter){
+        if(filter === 'vip'){
+          window._docFilter = 'vip';
+          document.querySelectorAll('[data-filter]').forEach(function(b){
+            if(b.getAttribute('data-filter') === 'vip') b.classList.add('active');
+            else b.classList.remove('active');
+          });
+          if(typeof renderDocList === 'function') renderDocList();
+          if(typeof updateFilterCounts === 'function') updateFilterCounts();
+          return;
+        }
+        return _origFilter.apply(this, arguments);
+      };
+      console.log('✅ setDocFilter hook شد');
+    }
+  }, 500);
+  
+  // ═══════════════════════════════════════════
+  // ۶. بازنویسی renderDocList برای VIP
+  // ═══════════════════════════════════════════
+  var _renderHook = setInterval(function(){
+    if(typeof window.renderDocList === 'function' && !window._vip_hooked_render){
+      window._vip_hooked_render = true;
+      clearInterval(_renderHook);
+      var _origRender = window.renderDocList;
+      
+      window.renderDocList = function(){
+        if(window._docFilter === 'vip'){
+          try {
+            var q = (document.getElementById('searchDoctor') || {}).value;
+            q = (q || '').trim().toLowerCase();
+            var all = (typeof myDoctors === 'function') ? myDoctors() : (window.doctors || []);
+            var arr = all.filter(function(d){
+              if(!d.vip) return false;
+              if(!q) return true;
+              var name = ((d.fname||d.firstName||'') + ' ' + (d.lname||d.lastName||'')).toLowerCase();
+              return name.indexOf(q) !== -1;
+            });
+            var el = document.getElementById('docList');
+            if(!el) return;
+            if(!arr.length){ el.innerHTML = '<div class="empty">⭐ مشتری ثابتی پیدا نشد</div>'; return; }
+            el.innerHTML = arr.map(function(d){ return _renderVipRow(d); }).join('');
+            return;
+          } catch(e){ console.warn('vip render:', e); }
+        }
+        return _origRender.apply(this, arguments);
+      };
+      console.log('✅ renderDocList hook شد');
+    }
+  }, 500);
+  
+  // ساخت کارت VIP
+  function _renderVipRow(d){
+    try {
+      var req = Number(d.creditReq||0), total = (typeof totalEarned === 'function') ? totalEarned(d) : 0;
+      var pct = req ? Math.min(100, Math.round(total/req*100)) : 0;
+      var complete = (typeof isComplete === 'function') ? isComplete(d) : false;
+      var f = d.finance || {};
+      var rem$ = Math.max(0, Number(f.total||0) - Number(f.paid||0));
+      var status = (typeof getDoctorStatus === 'function') ? getDoctorStatus(d) : 'active';
+      var name = (d.fname||d.firstName||'') + ' ' + (d.lname||d.lastName||'');
+      
+      // یادآوری
+      var reminder = '';
+      var days = daysUntil(d.vipDate);
+      if(days !== null){
+        if(days < 0){
+          reminder = '<div class="vip-reminder">⏰ ' + Math.abs(days) + ' روز گذشته!</div>';
+        } else if(days === 0){
+          reminder = '<div class="vip-reminder">🔥 امروز سر رسید!</div>';
+        } else if(days <= 7){
+          reminder = '<div class="vip-reminder">⏰ ' + days + ' روز تا سر رسید</div>';
+        } else if(days <= 30){
+          reminder = '<div class="vip-reminder warning">📅 ' + days + ' روز مانده</div>';
+        } else {
+          reminder = '<div class="vip-reminder info">📅 ' + days + ' روز مانده</div>';
+        }
+      }
+      
+      return '<div class="doc-row status-' + status + ' ' + (window.selectedDoctorId === d.id ? 'active' : '') + '" onclick="selectDoctor(\'' + d.id + '\')">' +
+        '<div class="doc-name">' +
+          '<span>' + name + '</span>' +
+          '<span class="vip-badge">⭐ مشتری ثابت</span>' +
+          (d.owner ? '<span class="owner-badge ' + d.owner + '">' + (d.owner === 'morteza' ? 'مرتضی' : 'پروین') + '</span>' : '') +
+        '</div>' +
+        reminder +
+        '<div class="doc-spec">' + (d.spec || '—') + '</div>' +
+        '<div class="doc-bar"><div class="fill ' + (complete ? 'done' : '') + '" style="width:' + pct + '%"></div></div>' +
+        '<div class="doc-meta"><span>🎯 <b>' + total + '</b> از ' + req + '</span><span>' + pct + '%</span></div>' +
+      '</div>';
+    } catch(e){ return ''; }
+  }
+  
+  // ═══════════════════════════════════════════
+  // ۷. شمارش VIP در updateFilterCounts
+  // ═══════════════════════════════════════════
+  var _countHook = setInterval(function(){
+    if(typeof window.updateFilterCounts === 'function' && !window._vip_hooked_count){
+      window._vip_hooked_count = true;
+      clearInterval(_countHook);
+      var _origCount = window.updateFilterCounts;
+      window.updateFilterCounts = function(){
+        try {
+          _origCount.apply(this, arguments);
+          var all = (typeof myDoctors === 'function') ? myDoctors() : [];
+          var vipCount = all.filter(function(d){ return d.vip; }).length;
+          var el = document.getElementById('cntVip');
+          if(el) el.textContent = vipCount;
+        } catch(e){}
+      };
+      console.log('✅ updateFilterCounts hook شد');
+    }
+  }, 500);
+  
+  // ═══════════════════════════════════════════
+  // ۸. رندر badge VIP روی کارت‌های عادی
+  // ═══════════════════════════════════════════
+  // این کار با MutationObserver انجام میشه
+  function addVipBadges(){
+    try {
+      document.querySelectorAll('.doc-row').forEach(function(row){
+        // پیدا کردن id پزشک از onclick
+        var oc = row.getAttribute('onclick') || '';
+        var m = oc.match(/selectDoctor\('([^']+)'\)/);
+        if(!m) return;
+        var doc = (window.doctors||[]).find(function(x){ return x.id === m[1]; });
+        if(!doc || !doc.vip) return;
+        
+        // اگه badge قبلاً هست، skip
+        if(row.querySelector('.vip-badge')) return;
+        
+        // اضافه کردن badge به doc-name
+        var nameEl = row.querySelector('.doc-name');
+        if(nameEl){
+          var badge = document.createElement('span');
+          badge.className = 'vip-badge';
+          badge.textContent = '⭐ مشتری ثابت';
+          nameEl.appendChild(badge);
+        }
+        
+        // اضافه کردن reminder
+        if(!row.querySelector('.vip-reminder')){
+          var days = daysUntil(doc.vipDate);
+          if(days !== null){
+            var rem = document.createElement('div');
+            if(days < 0){
+              rem.className = 'vip-reminder';
+              rem.textContent = '⏰ ' + Math.abs(days) + ' روز گذشته!';
+            } else if(days === 0){
+              rem.className = 'vip-reminder';
+              rem.textContent = '🔥 امروز سر رسید!';
+            } else if(days <= 7){
+              rem.className = 'vip-reminder';
+              rem.textContent = '⏰ ' + days + ' روز تا سر رسید';
+            } else if(days <= 30){
+              rem.className = 'vip-reminder warning';
+              rem.textContent = '📅 ' + days + ' روز مانده';
+            } else {
+              rem.className = 'vip-reminder info';
+              rem.textContent = '📅 ' + days + ' روز مانده';
+            }
+            // اضافه کردن بعد از name
+            var nameBlock = row.querySelector('.doc-name');
+            if(nameBlock && nameBlock.parentNode){
+              nameBlock.parentNode.insertBefore(rem, nameBlock.nextSibling);
+            }
+          }
+        }
+      });
+    } catch(e){}
+  }
+  
+  // هر ۲ ثانیه چک کن
+  setInterval(addVipBadges, 2000);
+  
+  // اجرای اولیه
+  setTimeout(function(){
+    if(typeof updateFilterCounts === 'function') updateFilterCounts();
+    addVipBadges();
+  }, 2000);
+  
+  console.log('✅ VIP System v2 فعال');
 })();
 </script>
 </body>
