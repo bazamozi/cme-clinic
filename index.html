@@ -640,52 +640,56 @@ html.is-logged-in #loginScreen{display:none!important}
 }
 </style>
 
-<style id="mobile-sticky-filters">
-/* ============================================
-   🎯 موبایل: فیلترها همیشه بالای صفحه
-   ============================================ */
-
+<style id="mfb-css">
 @media (max-width: 900px) {
-
-  /* ───── والد یوزر پیکر (مرتضی/پروین/همه) ───── */
-  .user-picker {
-    position: -webkit-sticky !important;
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 9999 !important;
-    background: linear-gradient(180deg, #0f172a 0%, #0f172a 90%, rgba(15,23,42,0.85) 100%) !important;
-    padding: 8px !important;
-    margin: 0 0 4px 0 !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.6) !important;
-    border-radius: 0 0 10px 10px !important;
+  #mobileFilterBar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 999999;
+    background: linear-gradient(180deg, #0f172a, #0a101f);
+    padding: 6px 8px 8px 8px;
+    border-bottom: 2px solid rgba(0, 217, 255, 0.35);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.75);
+    direction: rtl;
   }
-
-  /* ───── والد دکمه‌های فیلتر ───── */
-  *:has(> button[data-filter]) {
-    position: -webkit-sticky !important;
-    position: sticky !important;
-    top: 56px !important;
-    z-index: 9998 !important;
-    background: linear-gradient(180deg, #0f172a 0%, #0f172a 95%, rgba(15,23,42,0.85) 100%) !important;
-    padding: 8px !important;
-    margin: 0 0 8px 0 !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.6) !important;
-    border-radius: 0 0 10px 10px !important;
+  #mobileFilterBar .mfb-user {
+    display: flex; gap: 4px; margin-bottom: 6px;
   }
-
-  /* اگه فیلترها در همون parent یوزر پیکرن */
-  .user-picker + * button[data-filter],
-  .user-picker > button[data-filter] {
-    /* top خودکار می‌مونه زیر یوزر پیکر */
+  #mobileFilterBar .mfb-user button {
+    flex: 1; padding: 6px 4px;
+    background: rgba(255,255,255,0.05); color: #94a3b8;
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 6px;
+    font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
   }
-
-  /* پدینگ بالا برای محتوا که زیر نوار چسبیده گیر نکنه */
-  #docList, .doc-list {
-    scroll-margin-top: 120px !important;
+  #mobileFilterBar .mfb-user button.on {
+    background: rgba(56,189,248,0.25); color: #38bdf8; border-color: #38bdf8;
+  }
+  #mobileFilterBar .mfb-filters { display: flex; gap: 5px; }
+  #mobileFilterBar .mfb-filters button {
+    flex: 1; padding: 9px 4px;
+    background: rgba(255,255,255,0.05); color: #94a3b8;
+    border: 1.5px solid rgba(255,255,255,0.15); border-radius: 8px;
+    font-size: 11px; font-weight: 800; cursor: pointer; font-family: inherit;
+    min-height: 42px; display: flex; align-items: center; justify-content: center; gap: 4px;
+  }
+  #mobileFilterBar .mfb-filters button .cnt {
+    background: rgba(255,255,255,0.15); border-radius: 10px;
+    padding: 1px 7px; font-size: 11px; min-width: 18px; text-align: center;
+  }
+  #mobileFilterBar .mfb-filters button[data-f="active"].on {
+    background: rgba(0,217,255,0.28); color: #00d9ff; border-color: #00d9ff;
+  }
+  #mobileFilterBar .mfb-filters button[data-f="done"].on {
+    background: rgba(0,255,136,0.28); color: #00ff88; border-color: #00ff88;
+  }
+  #mobileFilterBar .mfb-filters button[data-f="pending"].on {
+    background: rgba(255,193,7,0.28); color: #ffc107; border-color: #ffc107;
+  }
+  body.has-mfb #mainArea {
+    padding-top: 118px !important;
   }
 }
 </style>
-
 </head>
 <body>
 
@@ -3829,202 +3833,111 @@ setTimeout(function(){
 
 
 
-<!-- 🎯 Mobile Filter Bar v4 — JS مستقیم -->
-<style id="mobile-filterbar-css">
-@media (max-width: 900px) {
-  body.has-mobile-filterbar #mainArea {
-    padding-top: 118px !important;
-  }
-  #mobileFilterBar {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 99999;
-    background: linear-gradient(180deg, #0f172a 0%, #0a101f 100%);
-    padding: 6px 8px 8px 8px;
-    border-bottom: 2px solid rgba(0, 217, 255, 0.35);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.75);
-    direction: rtl;
-  }
-  #mobileFilterBar .mfb-user {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 6px;
-  }
-  #mobileFilterBar .mfb-user button {
-    flex: 1;
-    padding: 6px 4px;
-    background: rgba(255,255,255,0.05);
-    color: #94a3b8;
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-  }
-  #mobileFilterBar .mfb-user button.on {
-    background: rgba(56,189,248,0.25);
-    color: #38bdf8;
-    border-color: #38bdf8;
-  }
-  #mobileFilterBar .mfb-filters {
-    display: flex;
-    gap: 5px;
-  }
-  #mobileFilterBar .mfb-filters button {
-    flex: 1;
-    padding: 9px 4px;
-    background: rgba(255,255,255,0.05);
-    color: #94a3b8;
-    border: 1.5px solid rgba(255,255,255,0.15);
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: 800;
-    cursor: pointer;
-    font-family: inherit;
-    min-height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-  }
-  #mobileFilterBar .mfb-filters button .cnt {
-    background: rgba(255,255,255,0.15);
-    border-radius: 10px;
-    padding: 1px 7px;
-    font-size: 11px;
-    min-width: 18px;
-    text-align: center;
-  }
-  #mobileFilterBar .mfb-filters button[data-f="active"].on {
-    background: rgba(0,217,255,0.28);
-    color: #00d9ff;
-    border-color: #00d9ff;
-  }
-  #mobileFilterBar .mfb-filters button[data-f="done"].on {
-    background: rgba(0,255,136,0.28);
-    color: #00ff88;
-    border-color: #00ff88;
-  }
-  #mobileFilterBar .mfb-filters button[data-f="pending"].on {
-    background: rgba(255,193,7,0.28);
-    color: #ffc107;
-    border-color: #ffc107;
-  }
-}
-</style>
-
-<div id="mobileFilterBar">
-  <div class="mfb-user">
-    <button type="button" data-u="morteza">مرتضی</button>
-    <button type="button" data-u="parvin">پروین</button>
-    <button type="button" data-u="all">همه</button>
-  </div>
-  <div class="mfb-filters">
-    <button type="button" data-f="active">⚡ در حال اجرا<span class="cnt" id="mfb_cnt_active">0</span></button>
-    <button type="button" data-f="done">✅ اتمام<span class="cnt" id="mfb_cnt_done">0</span></button>
-    <button type="button" data-f="pending">⏳ بلاتکلیف<span class="cnt" id="mfb_cnt_pending">0</span></button>
-  </div>
-</div>
-
-<script>
+<script id="mfb-js">
 (function(){
-  if(window._mfbInitV4) return;
-  window._mfbInitV4 = true;
+  if(window._mfbV6) return;
+  window._mfbV6 = true;
 
-  function refresh(){
-    var bar = document.getElementById('mobileFilterBar');
-    if(!bar) return;
+  var BAR_HTML = '<div class="mfb-user">' +
+    '<button type="button" data-u="morteza">مرتضی</button>' +
+    '<button type="button" data-u="parvin">پروین</button>' +
+    '<button type="button" data-u="all">همه</button>' +
+    '</div>' +
+    '<div class="mfb-filters">' +
+    '<button type="button" data-f="active">⚡ در حال اجرا<span class="cnt" id="mfb_cnt_active">0</span></button>' +
+    '<button type="button" data-f="done">✅ اتمام<span class="cnt" id="mfb_cnt_done">0</span></button>' +
+    '<button type="button" data-f="pending">⏳ بلاتکلیف<span class="cnt" id="mfb_cnt_pending">0</span></button>' +
+    '</div>';
 
-    var isMobile = window.innerWidth <= 900;
-    
-    // 🎯 چک قوی مودال
-    var modalOpen = false;
-    
-    // ۱. body class
-    if(document.body.classList.contains('modal-open')) modalOpen = true;
-    
-    // ۲. modalHost
+  function removeBar(){
+    var b = document.getElementById('mobileFilterBar');
+    if(b && b.parentNode) b.parentNode.removeChild(b);
+    document.body.classList.remove('has-mfb');
+  }
+
+  function addBar(){
+    var b = document.getElementById('mobileFilterBar');
+    if(!b){
+      b = document.createElement('div');
+      b.id = 'mobileFilterBar';
+      b.innerHTML = BAR_HTML;
+      document.body.appendChild(b);
+    }
+    document.body.classList.add('has-mfb');
+    return b;
+  }
+
+  // 🎯 تشخیص قطعی
+  function shouldShow(){
+    // موبایل؟
+    if(window.innerWidth > 900) return false;
+
+    // مودال باز؟
+    if(document.body.classList.contains('modal-open')) return false;
     var mh = document.getElementById('modalHost');
-    if(mh && mh.children.length > 0) modalOpen = true;
-    
-    // ۳. modal-bg visible
+    if(mh && mh.children.length > 0) return false;
     var bg = document.querySelector('.modal-bg');
     if(bg){
       var st = getComputedStyle(bg);
-      if(st.display !== 'none' && parseFloat(st.opacity) > 0.1) modalOpen = true;
+      if(st.display !== 'none' && st.visibility !== 'hidden' && parseFloat(st.opacity) > 0.1) return false;
     }
-    
-    // ۴. وجود متن "ثبت پزشک" روی صفحه
-    var mTitle = document.querySelector('.modal h1, .modal h2, .modal .title, .modal-bg h1, .modal-bg h2');
-    if(mTitle && mTitle.getBoundingClientRect().width > 0) modalOpen = true;
-    
-    // ۵. چک اگه h1/h2 توی mainArea «ثبت پزشک» یا «ویرایش پزشک» هست
-    var mainH = document.querySelector('#mainArea h1, #mainArea h2, #mainArea h3');
-    if(mainH){
-      var t = (mainH.textContent || '').trim();
-      if(t.indexOf('ثبت پزشک') !== -1 || t.indexOf('ویرایش پزشک') !== -1) {
-        var rect = mainH.getBoundingClientRect();
-        if(rect.width > 0 && rect.top < 300) modalOpen = true;
-      }
+
+    var ma = document.getElementById('mainArea');
+    if(!ma) return false;
+
+    // 🎯 اگه فرم ثبت/ویرایش پزشک هست → نشون نده
+    var txt = (ma.textContent || '');
+    if(txt.indexOf('ثبت پزشک') !== -1) return false;
+    if(txt.indexOf('ویرایش پزشک') !== -1) return false;
+    if(txt.indexOf('اطلاعات فردی') !== -1 && txt.indexOf('هزینه‌ها') !== -1) return false;
+
+    // 🎯 اگه inputهای خالی زیاد داره (فرم) → نشون نده
+    var inputs = ma.querySelectorAll('input[type="text"], input[type="tel"], input[type="password"], input[type="number"], input:not([type])');
+    var emptyInputs = 0;
+    for(var i = 0; i < inputs.length; i++){
+      var v = (inputs[i].value || '').trim();
+      if(v === '') emptyInputs++;
     }
-    
-    // ۶. چک اگه دکمه‌های modal (مانند "ذخیره" بزرگ) روی صفحه‌ان
-    var saveBtns = document.querySelectorAll('.modal button, .modal-bg button');
-    // فقط اگه یه دکمه بزرگ داخل مودال دیده میشه
-    for(var i=0;i<saveBtns.length;i++){
-      var sb = saveBtns[i];
-      if(sb.offsetParent && sb.textContent.indexOf('ذخیره') !== -1 && sb.getBoundingClientRect().width > 100){
-        modalOpen = true;
-        break;
-      }
-    }
-    
-    // پروفایل بازه؟
-    var profile = !!document.querySelector('#mainArea .back-btn');
-    
-    // 🎯 تصمیم نهایی
-    var shouldShow = isMobile && profile && !modalOpen;
-    
-    // مستقیم style رو ست کن — هیچ CSS‌ای نمی‌تونه override کنه
-    if(shouldShow){
-      bar.style.setProperty('display', 'block', 'important');
-      document.body.classList.add('has-mobile-filterbar');
+    if(emptyInputs > 3) return false;
+
+    // 🎯 باید دکمه بازگشت داشته باشه (پروفایل)
+    if(!ma.querySelector('.back-btn')) return false;
+
+    return true;
+  }
+
+  function refresh(){
+    var show = shouldShow();
+    var bar = document.getElementById('mobileFilterBar');
+
+    if(show){
+      if(!bar) bar = addBar();
+      // آپدیت
+      var u = window.currentUser || 'all';
+      bar.querySelectorAll('.mfb-user button').forEach(function(b){
+        if(b.dataset.u === u) b.classList.add('on');
+        else b.classList.remove('on');
+      });
+      var f = window._docFilter || 'active';
+      bar.querySelectorAll('.mfb-filters button').forEach(function(b){
+        if(b.dataset.f === f) b.classList.add('on');
+        else b.classList.remove('on');
+      });
+      try {
+        var docs = (typeof myDoctors === 'function') ? myDoctors() : [];
+        var counts = {active:0, done:0, pending:0};
+        docs.forEach(function(d){
+          var s = (typeof getDoctorStatus === 'function') ? getDoctorStatus(d) : 'pending';
+          if(counts[s] !== undefined) counts[s]++;
+        });
+        ['active','done','pending'].forEach(function(k){
+          var el = document.getElementById('mfb_cnt_' + k);
+          if(el) el.textContent = counts[k];
+        });
+      } catch(e){}
     } else {
-      bar.style.setProperty('display', 'none', 'important');
-      document.body.classList.remove('has-mobile-filterbar');
+      removeBar();
     }
-
-    // رنگ کاربر فعال
-    var u = window.currentUser || 'all';
-    bar.querySelectorAll('.mfb-user button').forEach(function(b){
-      if(b.dataset.u === u) b.classList.add('on');
-      else b.classList.remove('on');
-    });
-
-    // رنگ فیلتر فعال
-    var f = window._docFilter || 'active';
-    bar.querySelectorAll('.mfb-filters button').forEach(function(b){
-      if(b.dataset.f === f) b.classList.add('on');
-      else b.classList.remove('on');
-    });
-
-    // شمارنده‌ها
-    try {
-      var docs = (typeof myDoctors === 'function') ? myDoctors() : [];
-      var counts = {active:0, done:0, pending:0};
-      docs.forEach(function(d){
-        var s = (typeof getDoctorStatus === 'function') ? getDoctorStatus(d) : 'pending';
-        if(counts[s] !== undefined) counts[s]++;
-      });
-      ['active','done','pending'].forEach(function(k){
-        var el = document.getElementById('mfb_cnt_' + k);
-        if(el) el.textContent = counts[k];
-      });
-    } catch(e){}
   }
 
   window.updateMobileFilterBar = refresh;
@@ -4036,7 +3949,7 @@ setTimeout(function(){
       e.preventDefault(); e.stopPropagation();
       if(typeof switchUser === 'function') switchUser(b.dataset.u);
       if(typeof backToList === 'function') backToList();
-      setTimeout(refresh, 150);
+      setTimeout(refresh, 200);
       return;
     }
     var fb = e.target.closest && e.target.closest('#mobileFilterBar .mfb-filters button');
@@ -4044,37 +3957,34 @@ setTimeout(function(){
       e.preventDefault(); e.stopPropagation();
       if(typeof setDocFilter === 'function') setDocFilter(fb.dataset.f);
       if(typeof backToList === 'function') backToList();
-      setTimeout(refresh, 150);
+      setTimeout(refresh, 200);
       return;
     }
   }, true);
 
-  // 🎯 پایش قوی — چند observer
+  // 🎯 پایش چند لایه
   setTimeout(function(){
     var ma = document.getElementById('mainArea');
     var mh = document.getElementById('modalHost');
     
     if(ma){
-      new MutationObserver(function(){ refresh(); setTimeout(refresh, 30); setTimeout(refresh, 150); })
-        .observe(ma, {childList:true, subtree:true});
+      new MutationObserver(function(){ refresh(); })
+        .observe(ma, {childList:true, subtree:true, characterData:true});
     }
-    
     if(mh){
-      new MutationObserver(function(){ refresh(); setTimeout(refresh, 30); setTimeout(refresh, 100); })
-        .observe(mh, {childList:true, subtree:true, attributes:true});
+      new MutationObserver(function(){ refresh(); setTimeout(refresh, 50); setTimeout(refresh, 200); })
+        .observe(mh, {childList:true, subtree:false, attributes:true});
     }
-    
-    new MutationObserver(function(){ refresh(); setTimeout(refresh, 30); })
+    new MutationObserver(function(){ refresh(); setTimeout(refresh, 50); })
       .observe(document.body, {attributes:true, attributeFilter:['class']});
     
     refresh();
-    setInterval(refresh, 500); // هر ۰.۵ ثانیه
+    setInterval(refresh, 300);
   }, 1000);
 
   window.addEventListener('resize', function(){ setTimeout(refresh, 100); });
-  console.log('✅ Mobile Filter Bar v4 فعال');
+  console.log('✅ Mobile Filter Bar v6 — حذف کامل از DOM');
 })();
 </script>
-
 </body>
 </html>
