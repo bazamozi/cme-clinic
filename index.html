@@ -5468,5 +5468,155 @@ window.isDone = isDone;
   console.log('✅ VIP List Keep فعال');
 })();
 </script>
+<script id="vip-sync">
+// ═══════════════════════════════════════════════════════════
+// 🎯 VIP SYNC — بین دستگاه‌ها
+// قبل push: vip fields رو روی doctors ست کن (تا sync بشن)
+// بعد pull: از doctors هرچی vip هست رو به vip_list اضافه کن
+// ═══════════════════════════════════════════════════════════
+(function(){
+  if(window._vipSync) return;
+  window._vipSync = true;
+
+  // ═══════════════════════════════════════════════
+  // ۱. Hook pushToCloud — قبل از push، vip fields رو ست کن
+  // ═══════════════════════════════════════════════
+  var _h1 = setInterval(function(){
+    if(typeof window.pushToCloud !== 'function') return;
+    if(window._vipSync_push) return;
+    window._vipSync_push = true;
+    clearInterval(_h1);
+    
+    var _orig = window.pushToCloud;
+    window.pushToCloud = function(force){
+      try {
+        // قبل از push، vip fields رو روی doctors ست کن
+        if(typeof window.applyVips === 'function'){
+          window.applyVips();
+        }
+        
+        // اطمینان نهایی: هر doctor که vip داره، vip_list هم داشته باشه
+        var all = window.doctors || [];
+        var vips = (typeof window.getVips === 'function') ? window.getVips() : {};
+        var changed = false;
+        
+        all.forEach(function(d){
+          if(d.vip && d.id && !vips[d.id]){
+            vips[d.id] = { date: d.vipDate || '' };
+            changed = true;
+          }
+        });
+        
+        if(changed){
+          try { localStorage.setItem('vip_list', JSON.stringify(vips)); } catch(e){}
+        }
+        
+        // لاگ
+        var vipCount = all.filter(function(d){ return d.vip; }).length;
+        console.log('📤 pre-push: ' + all.length + ' پزشک | ' + vipCount + ' VIP');
+      } catch(e){ console.warn('pre-push vip:', e); }
+      
+      return _orig.apply(this, arguments);
+    };
+    console.log('✅ pushToCloud hooked (vip sync)');
+  }, 300);
+
+  // ═══════════════════════════════════════════════
+  // ۲. هر ۱.۵ ثانیه: از doctors به vip_list sync کن
+  // (این کار بعد از هر pull اتفاق میفته)
+  // ═══════════════════════════════════════════════
+  setInterval(function(){
+    if(document.hidden) return;
+    try {
+      var all = window.doctors || [];
+      var vips = (typeof window.getVips === 'function') ? window.getVips() : {};
+      var changed = false;
+      var newVips = [];
+      
+      all.forEach(function(d){
+        if(d.vip && d.id && !vips[d.id]){
+          vips[d.id] = { date: d.vipDate || '' };
+          changed = true;
+          newVips.push((d.fname||d.firstName||'') + ' ' + (d.lname||d.lastName||''));
+        }
+      });
+      
+      if(changed){
+        try { localStorage.setItem('vip_list', JSON.stringify(vips)); } catch(e){}
+        console.log('📥 VIP sync از سرور:', newVips.length, 'پزشک');
+        newVips.forEach(function(n){ console.log('   ⭐', n); });
+        
+        // اعمال مجدد روی doctors
+        if(typeof window.applyVips === 'function'){
+          window.applyVips();
+        }
+        
+        // آپدیت UI
+        if(typeof renderVipList === 'function' && window._docFilter === 'vip'){
+          renderVipList();
+        }
+        if(typeof renderDocList === 'function' && window._docFilter !== 'vip'){
+          renderDocList();
+        }
+        
+        // آپدیت شمارنده
+        var u = window.currentUser || 'all';
+        var count = all.filter(function(d){
+          if(!d.vip) return false;
+          if(u !== 'all' && d.owner !== u) return false;
+          return true;
+        }).length;
+        var el = document.getElementById('cntVip');
+        if(el && el.textContent !== String(count)) el.textContent = count;
+      }
+    } catch(e){ console.warn('vip sync interval:', e); }
+  }, 1500);
+
+  // ═══════════════════════════════════════════════
+  // ۳. اجرای اولیه — شاید doctors از سرور با vip اومده باشن
+  // ═══════════════════════════════════════════════
+  setTimeout(function(){
+    try {
+      var all = window.doctors || [];
+      var vips = (typeof window.getVips === 'function') ? window.getVips() : {};
+      var added = 0;
+      
+      all.forEach(function(d){
+        if(d.vip && d.id && !vips[d.id]){
+          vips[d.id] = { date: d.vipDate || '' };
+          added++;
+        }
+      });
+      
+      if(added > 0){
+        try { localStorage.setItem('vip_list', JSON.stringify(vips)); } catch(e){}
+        console.log('📥 initial VIP sync:', added, 'پزشک');
+        if(typeof window.applyVips === 'function') window.applyVips();
+        if(typeof renderVipList === 'function' && window._docFilter === 'vip'){
+          renderVipList();
+        }
+      }
+    } catch(e){}
+  }, 3000);
+
+  // ═══════════════════════════════════════════════
+  // 🎯 Debug
+  // ═══════════════════════════════════════════════
+  window.vipSyncDebug = function(){
+    console.log('═══ VIP Sync Debug ═══');
+    console.log('vip_list:', localStorage.getItem('vip_list'));
+    var all = window.doctors || [];
+    console.log('doctors:', all.length);
+    all.forEach(function(d){
+      if(d.vip){
+        console.log('  ⭐ doctors:', (d.fname||d.firstName) + ' ' + (d.lname||d.lastName), '| date:', d.vipDate);
+      }
+    });
+    console.log('═══════════════════════════════');
+  };
+
+  console.log('✅ VIP Sync فعال');
+})();
+</script>
 </body>
 </html>
