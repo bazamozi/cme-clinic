@@ -50,7 +50,6 @@ textarea{resize:vertical;min-height:55px}
 .badge.red{background:rgba(248,113,113,0.18);color:var(--danger)}
 .badge.yellow{background:rgba(251,191,36,0.18);color:var(--warn)}
 .badge.gray{background:rgba(148,163,184,0.18);color:var(--muted)}
-.badge.purple{background:rgba(167,139,250,0.18);color:var(--purple)}
 .actions{margin-top:7px;display:flex;gap:5px;flex-wrap:wrap}
 .mini{border:1px solid var(--border);background:transparent;color:var(--muted);padding:6px 11px;border-radius:7px;font-size:13px;cursor:pointer;font-family:inherit;transition:.2s}
 .mini:hover{color:var(--accent);border-color:var(--accent)}
@@ -243,10 +242,7 @@ textarea{resize:vertical;min-height:55px}
     <button data-user="all" onclick="switchUser('all')">همه</button>
   </div>
   <button class="logout-btn" onclick="doLogout()">🚪 خروج</button>
-  <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
-    <div class="sub" id="clock"></div>
-    <div class="sub" id="syncStatus" style="color:var(--muted); font-size:10px;">☁️ متصل</div>
-  </div>
+  <div class="sub" id="clock"></div>
 </header>
 
 <div class="tab-content" id="tab-dash">
@@ -338,18 +334,14 @@ textarea{resize:vertical;min-height:55px}
 // CONSTANTS & STATE
 // ============================================
 const K = 'cme4_data';
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwp_yjquh9tEXmy_rPIVCbjchFi6427qr2G73pOVVagD4PcPt2jSePBBtP-PG24jSot/exec';
+// لینک جدید جایگزین شد:
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxgaQoioSTin2ipJxZ78d8yb5l6HVIR1KvggjJZ2f9H88xKQs3qsQ3KFpzfdHFKsVek/exec';
 
 let doctors = [];
 let calls = [];
 let selectedDoctorId = null;
 let currentUser = 'morteza';
 let currentDocCategory = 'all';
-
-// متغیرهای همگام‌سازی
-let isPushing = false;
-let isPulling = false;
-let pendingPush = false;
 
 try {
   doctors = JSON.parse(localStorage.getItem(K)||'[]');
@@ -410,29 +402,6 @@ document.addEventListener('input', e => {
 });
 
 // ============================================
-// SYNC STATUS INDICATOR
-// ============================================
-function setSyncStatus(status) {
-  const el = document.getElementById('syncStatus');
-  if (!el) return;
-  
-  if (status === 'syncing') {
-    el.innerHTML = '🔄 در حال همگام‌سازی...';
-    el.style.color = 'var(--warn)';
-  } else if (status === 'success') {
-    el.innerHTML = '✅ همگام شد';
-    el.style.color = 'var(--success)';
-    setTimeout(() => { if(el.innerHTML === '✅ همگام شد') { el.innerHTML = '☁️ متصل'; el.style.color = 'var(--muted)'; } }, 2000);
-  } else if (status === 'error') {
-    el.innerHTML = '⚠️ خطای شبکه';
-    el.style.color = 'var(--danger)';
-  } else {
-    el.innerHTML = '☁️ متصل';
-    el.style.color = 'var(--muted)';
-  }
-}
-
-// ============================================
 // USER SYSTEM
 // ============================================
 window.switchUser = function(user){
@@ -456,12 +425,14 @@ window.switchUser = function(user){
 };
 
 function myDoctors(){
-  if(currentUser === 'all') return doctors;
-  return doctors.filter(d => d.owner === currentUser);
+  const arr = doctors.filter(d => !d.deleted);
+  if(currentUser === 'all') return arr;
+  return arr.filter(d => d.owner === currentUser);
 }
 function myCalls(){
-  if(currentUser === 'all') return calls;
-  return calls.filter(c => c.owner === currentUser);
+  const arr = calls.filter(c => !c.deleted);
+  if(currentUser === 'all') return arr;
+  return arr.filter(c => c.owner === currentUser);
 }
 
 // ============================================
@@ -510,70 +481,95 @@ function offlinePurchasedToday(d){
 }
 
 // ============================================
-// SAVE & SYNC (IMPROVED)
+// SAVE & SYNC (اصلاح‌شده)
 // ============================================
+let _dirty = false;
+let _syncing = false;
+let _syncQueued = false;
+let _syncTimer = null;
+
 function save(){
   try {
     localStorage.setItem(K, JSON.stringify(doctors));
     localStorage.setItem(K+'_calls', JSON.stringify(calls));
   } catch(e){}
-  pushToCloud();
+  _dirty = true;
+  scheduleSync();
+}
+
+function scheduleSync(){
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(syncNow, 400);
+}
+
+async function syncNow(){
+  if(_syncing){ _syncQueued = true; return; }
+  _syncing = true;
+  try {
+    if(_dirty){
+      const ok = await pushToCloud();
+      if(ok) _dirty = false;
+    }
+    await pullFromCloud();
+  } finally {
+    _syncing = false;
+    if(_syncQueued){ _syncQueued = false; scheduleSync(); }
+  }
 }
 
 async function pushToCloud(){
-  if(isPushing) { pendingPush = true; return; }
-  isPushing = true;
-  setSyncStatus('syncing');
-  
   try {
-    const payload = { doctors, calls, updatedAt: Date.now() };
     await fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ doctors, calls, savedAt: Date.now() })
     });
-    setSyncStatus('success');
+    return true;
   } catch(e){
-    console.error("Push Error:", e);
-    setSyncStatus('error');
-  } finally {
-    isPushing = false;
-    if(pendingPush) { pendingPush = false; pushToCloud(); }
+    console.warn('push failed:', e);
+    return false;
   }
 }
 
+function mergeById(localArr, remoteArr, tsField){
+  const map = new Map();
+  (localArr || []).forEach(r => map.set(r.id, r));
+  (remoteArr || []).forEach(r => {
+    if(!r || !r.id) return;
+    const ex = map.get(r.id);
+    const rTs = Number(r[tsField] || r.createdAt || 0);
+    const eTs = ex ? Number(ex[tsField] || ex.createdAt || 0) : -1;
+    if(!ex || rTs > eTs) map.set(r.id, r);
+  });
+  return Array.from(map.values());
+}
+
 async function pullFromCloud(){
-  // اگر در حال ارسال داده هستیم یا قبلاً در حال دریافت بودیم، متوقف شو
-  if(isPushing || isPulling) return;
-  isPulling = true;
-  
   try {
-    const r = await fetch(SCRIPT_URL + '?t=' + Date.now());
-    if (!r.ok) throw new Error("Network response was not ok");
+    const r = await fetch(SCRIPT_URL + '?t=' + Date.now(), { cache: 'no-store' });
+    if(!r.ok) return;
     const data = await r.json();
     if(!data) return;
-    
-    const remote = { doctors: data.doctors || [], calls: data.calls || [] };
-    const local = { doctors, calls };
-    
-    // فقط در صورتی که داده‌ها تغییر کرده باشند آپدیت کن
-    if(JSON.stringify(remote) !== JSON.stringify(local)){
-      console.log("🔄 دریافت داده‌های جدید از سرور...");
-      doctors = remote.doctors;
-      calls = remote.calls;
+
+    const newDocs  = mergeById(doctors, data.doctors || [], 'updatedAt');
+    const newCalls = mergeById(calls,   data.calls   || [], 'updatedAt');
+
+    const changed = JSON.stringify(newDocs)  !== JSON.stringify(doctors)
+                 || JSON.stringify(newCalls) !== JSON.stringify(calls);
+
+    doctors = newDocs;
+    calls   = newCalls;
+
+    if(changed){
       try {
         localStorage.setItem(K, JSON.stringify(doctors));
         localStorage.setItem(K+'_calls', JSON.stringify(calls));
       } catch(e){}
       renderAll();
-      setSyncStatus('success');
     }
   } catch(e){
-    console.error("Pull Error:", e);
-    setSyncStatus('error');
-  } finally {
-    isPulling = false;
+    console.warn('pull failed:', e);
   }
 }
 
@@ -759,7 +755,7 @@ function renderMain(){
     return;
   }
   const d = doctors.find(x=>x.id===selectedDoctorId);
-  if(!d){ selectedDoctorId=null; renderMain(); return; }
+  if(!d || d.deleted){ selectedDoctorId=null; renderMain(); return; }
   
   const cr = doctorCredits(d), total = totalEarned(d), req = Number(d.creditReq||0), rem = remainingCredits(d);
   const c = d.card||{}, f = d.finance||{};
@@ -918,6 +914,7 @@ window.cycleStatus = function(eventId, field){
   const e = (d.events||[]).find(x=>x.id===eventId); if(!e) return;
   if(field==='exam'){ const o=['ثبت نشده','قبول','رد']; e.exam = o[(o.indexOf(e.exam)+1)%3]; }
   else { e[field] = e[field]==='انجام شد' ? 'انجام نشد' : 'انجام شد'; }
+  d.updatedAt = Date.now();
   save(); renderMain(); renderDocList();
 };
 
@@ -925,12 +922,16 @@ window.delEvent = function(eventId){
   if(!confirm('حذف شود؟')) return;
   const d = doctors.find(x=>x.id===selectedDoctorId); if(!d) return;
   d.events = (d.events||[]).filter(x=>x.id!==eventId);
+  d.updatedAt = Date.now();
   save(); renderMain(); renderDocList();
 };
 
 window.delDoctor = function(id){
   if(!confirm('این پزشک حذف شود؟')) return;
-  doctors = doctors.filter(x=>x.id!==id);
+  const d = doctors.find(x=>x.id===id);
+  if(!d) return;
+  d.deleted = true;
+  d.updatedAt = Date.now();
   if(selectedDoctorId===id) selectedDoctorId = null;
   save(); renderAll();
 };
@@ -1116,8 +1117,11 @@ window.openDoctorModal = function(editId){
       owner: document.getElementById('mOwner').value
     };
     const id = document.getElementById('mEditId').value;
-    if(id){ Object.assign(doctors.find(x=>x.id===id), data); toast('✅ ویرایش شد'); }
-    else { const n = { id:uid(), ...data, events:[], createdAt:Date.now() }; doctors.unshift(n); selectedDoctorId = n.id; toast('✅ ثبت شد'); }
+    if(id){ 
+      const doctor = doctors.find(x=>x.id===id);
+      if(doctor){ Object.assign(doctor, data); doctor.updatedAt = Date.now(); toast('✅ ویرایش شد'); }
+    }
+    else { const n = { id:uid(), ...data, events:[], createdAt:Date.now(), updatedAt: Date.now() }; doctors.unshift(n); selectedDoctorId = n.id; toast('✅ ثبت شد'); }
     save(); closeModal(); renderAll();
   };
 };
@@ -1194,6 +1198,7 @@ window.openEventModal = function(editId, presetType){
       d.events.unshift({ id:uid(), ...data, purchase:'انجام نشد', attend:'انجام نشد', exam:'ثبت نشده', createdAt:Date.now() });
       toast('✅ اضافه شد');
     }
+    d.updatedAt = Date.now();
     save(); closeModal(); renderMain(); renderDocList();
   };
 };
@@ -1208,7 +1213,7 @@ function updateCallInfo(){
   const p = normPhone(document.getElementById('callPhone').value);
   const el = document.getElementById('callCreditInfo');
   if(!p){ el.innerHTML=''; document.getElementById('callName').value=''; return; }
-  const d = doctors.find(x=>normPhone(x.phone)===p);
+  const d = doctors.find(x=> !x.deleted && normPhone(x.phone)===p);
   if(!d){ el.innerHTML='<div style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.35);border-radius:12px;padding:14px"><h3 style="color:var(--danger);font-size:14px">❌ این شماره در لیست پزشکان نیست</h3></div>'; return; }
   document.getElementById('callName').value = fullName(d);
   const cr = doctorCredits(d), req = Number(d.creditReq||0), total = totalEarned(d), rem = remainingCredits(d);
@@ -1223,7 +1228,7 @@ function updateCallInfo(){
 
 document.getElementById('fCall').onsubmit = e => {
   e.preventDefault();
-  calls.unshift({ id:uid(), owner:currentUser, phone:toEnDigits(document.getElementById('callPhone').value.trim()), name:document.getElementById('callName').value.trim(), subject:document.getElementById('callSubject').value, follow:document.getElementById('callFollow').value, note:document.getElementById('callNote').value.trim(), createdAt:Date.now() });
+  calls.unshift({ id:uid(), owner:currentUser, phone:toEnDigits(document.getElementById('callPhone').value.trim()), name:document.getElementById('callName').value.trim(), subject:document.getElementById('callSubject').value, follow:document.getElementById('callFollow').value, note:document.getElementById('callNote').value.trim(), createdAt:Date.now(), updatedAt: Date.now() });
   save(); e.target.reset(); document.getElementById('callCreditInfo').innerHTML=''; renderCalls(); toast('📞 ثبت شد');
 };
 
@@ -1260,11 +1265,15 @@ window.cycleFollow = function(id){
   const c=calls.find(x=>x.id===id); if(!c) return;
   const o=['پیگیری‌نشده','در حال پیگیری','پیگیری‌شده'];
   c.follow=o[(o.indexOf(c.follow)+1)%3];
+  c.updatedAt = Date.now();
   save(); renderCalls();
 };
 window.delCall = function(id){
   if(!confirm('حذف شود؟')) return;
-  calls=calls.filter(x=>x.id!==id);
+  const c = calls.find(x=>x.id===id);
+  if(!c) return;
+  c.deleted = true;
+  c.updatedAt = Date.now();
   save(); renderCalls();
 };
 
@@ -1303,17 +1312,11 @@ tick();
 setInterval(tick, 30000);
 renderAll();
 
-// ===== SYNC SYSTEM =====
-// همگام‌سازی فوری در بارگذاری
-setTimeout(pullFromCloud, 500);
-
-// بروزرسانی خودکار هر ۳ ثانیه (برای اعمال آنی تغییرات)
-setInterval(pullFromCloud, 3000);
-
-// بررسی مجدد وقتی که کاربر به تب برمی‌گردد
-document.addEventListener('visibilitychange', () => { 
-  if(!document.hidden) pullFromCloud(); 
-});
+// Sync intervals
+setTimeout(syncNow, 500);
+setInterval(syncNow, 4000); // هر 4 ثانیه چک میکند
+document.addEventListener('visibilitychange', () => { if(!document.hidden) syncNow(); });
+window.addEventListener('online', () => syncNow());
 
 // ===== Login System =====
 var USERS = {
@@ -1403,6 +1406,7 @@ function autoAttendEvents(){
   
   var changed = 0;
   doctors.forEach(function(doc){
+    if(doc.deleted) return;
     (doc.events||[]).forEach(function(e){
       if(e.purchase === 'انجام شد' && e.attend === 'انجام نشد' && e.date && e.date.length >= 8){
         if(today > e.date){
@@ -1411,6 +1415,7 @@ function autoAttendEvents(){
         }
       }
     });
+    if(changed > 0) doc.updatedAt = Date.now();
   });
   
   if(changed > 0){
@@ -1419,11 +1424,6 @@ function autoAttendEvents(){
     toast('✅ ' + changed + ' رویداد خودکار به «شرکت شده» تغییر یافت');
   }
 }
-
-window.testAutoAttend = function(){
-  console.log('امروز (شمسی):', getShamsiToday());
-  autoAttendEvents();
-};
 
 setTimeout(autoAttendEvents, 2000);
 setInterval(autoAttendEvents, 60000);
