@@ -125,23 +125,18 @@ textarea{resize:vertical;min-height:55px}
 .bank-logo{font-size:20px; font-weight:800; color:rgba(255,255,255,0.5); letter-spacing:1px}
 .bank-number{direction:ltr; text-align:center; font-size:22px; font-weight:800; letter-spacing:2px; color:#fff; margin-bottom:20px; text-shadow:0 2px 4px rgba(0,0,0,0.5); white-space:nowrap}
 .bank-details{display:flex; justify-content:space-between; align-items:flex-end}
-.bank-info-group{display:flex; gap:20px}
-.bank-info-item{display:flex; flex-direction:column; gap:4px}
+.bank-info-group{display:flex; gap:15px}
+.bank-info-item{display:flex; flex-direction:column; align-items:center; gap:4px}
 .bank-info-label{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px}
-.bank-info-value{font-size:15px; font-weight:700; color:#fff; direction:ltr; white-space:nowrap}
+/* کادر مجزا برای ماه، سال، CVV2 و رمز دوم */
+.bank-info-box{background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:6px 10px; font-size:14px; font-weight:800; color:#fff; direction:ltr; min-width:45px; text-align:center; white-space:nowrap; box-shadow:inset 0 2px 4px rgba(0,0,0,0.2)}
 .bank-copy-btn{background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer; transition:.2s; font-family:inherit; font-size:12px; display:flex; align-items:center; gap:6px}
 .bank-copy-btn:hover{background:rgba(255,255,255,0.2)}
 
-/* ===== Events Layout with Tabs ===== */
+/* ===== Events Layout ===== */
 .events-layout{display:flex;flex-direction:column;gap:12px}
-.events-nav{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch; scrollbar-width: none;}
-.events-nav::-webkit-scrollbar { display: none; }
-.ev-nav-btn{flex:1;padding:10px;border-radius:12px;background:rgba(15,23,42,0.6);border:1px solid var(--border);color:var(--muted);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.3s;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
-.ev-nav-btn.active{background:linear-gradient(135deg,rgba(56,189,248,0.2),rgba(34,211,238,0.1));color:var(--accent);border-color:rgba(56,189,248,0.5);box-shadow:0 4px 15px rgba(56,189,248,0.15)}
-.ev-nav-btn .count{background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:10px;font-size:11px}
-.ev-nav-btn.active .count{background:var(--accent);color:#0f172a}
-
-.ev-section{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:rgba(15,23,42,0.3);animation:fadeIn 0.3s ease-out}
+.events-nav{display:none;} /* در دسکتاپ مخفی است */
+.ev-section{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:rgba(15,23,42,0.3);animation:fadeIn 0.3s ease-out; margin-bottom: 12px;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 .ev-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(15,23,42,0.7);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px}
 .ev-head h3{font-size:13.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
@@ -214,15 +209,24 @@ textarea{resize:vertical;min-height:55px}
   
   /* Bank Card Mobile Tweaks */
   .bank-number{font-size:18px; letter-spacing:1px; margin-bottom:15px}
-  .bank-info-group{gap:12px}
-  .bank-info-value{font-size:13.5px}
+  .bank-info-group{gap:8px}
+  .bank-info-box{font-size:12px; padding:4px 6px; min-width:35px}
   
-  /* Events mobile layout tweaks */
-  .ev-nav-btn{padding:8px 10px;font-size:12px}
+  /* Events Mobile Layout - Tabs ON */
+  .events-nav{display:flex; position:sticky; top:-12px; z-index:10; background:rgba(15,23,42,0.95); padding:10px 0; margin-top:-10px; backdrop-filter:blur(10px); border-bottom:1px solid rgba(255,255,255,0.05); gap:8px; overflow-x:auto; scrollbar-width: none;}
+  .events-nav::-webkit-scrollbar { display: none; }
+  .ev-nav-btn{flex:1; padding:8px 10px; border-radius:10px; background:rgba(15,23,42,0.6); border:1px solid var(--border); color:var(--muted); font-family:inherit; font-size:12.5px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; white-space:nowrap;}
+  .ev-nav-btn.active{background:linear-gradient(135deg,rgba(56,189,248,0.2),rgba(34,211,238,0.1)); color:var(--accent); border-color:rgba(56,189,248,0.5); box-shadow:0 4px 15px rgba(56,189,248,0.15);}
+  .ev-nav-btn .count{background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:10px; font-size:11px;}
+  .ev-nav-btn.active .count{background:var(--accent); color:#0f172a;}
+  
+  /* در موبایل فقط بخش فعال نمایش داده می‌شود */
+  .ev-section{display:none;}
+  .ev-section.active-section{display:block;}
+  
   .event-row{padding:12px}
   .status-group{grid-template-columns:1fr 1fr!important}
   .status-group .stat-pill:last-child{grid-column:span 2}
-  .events-nav{position:sticky; top:-12px; z-index:10; background:rgba(15,23,42,0.95); padding:10px 0; margin-top:-10px; backdrop-filter:blur(10px); border-bottom:1px solid rgba(255,255,255,0.05);}
 }
 .back-btn{display:none}
 
@@ -382,7 +386,7 @@ let calls = [];
 let selectedDoctorId = null;
 let currentUser = 'morteza';
 let currentDocCategory = 'all';
-let currentEventTab = 'وبینار'; // برای مدیریت تب‌های رویدادها
+let currentEventTab = 'وبینار'; // فقط برای موبایل استفاده می‌شود
 
 try {
   doctors = JSON.parse(localStorage.getItem(K)||'[]');
@@ -665,7 +669,6 @@ function renderDocList(){
   const searchEl = document.getElementById('searchDoctor'); if(!searchEl) return;
   const q = searchEl.value.trim().toLowerCase();
   
-  // فیلتر و مرتب‌سازی: در حال اجرا همیشه بالا
   const statusPriority = { 'in_progress': 1, 'undecided': 2, 'regular': 3, 'completed': 4 };
   
   let allMyDocs = myDoctors().filter(d => !q || fullName(d).toLowerCase().includes(q) || (d.spec||'').toLowerCase().includes(q) || (d.phone||'').includes(q) || (d.nat||'').includes(q));
@@ -723,7 +726,6 @@ function renderMain(){
   const statusMap = { 'in_progress': {txt: '⚡ در حال اجرا', cls: 'blue'}, 'completed': {txt: '🏆 تمام شده', cls: 'green'}, 'undecided': {txt: '⏳ بلاتکلیف', cls: 'yellow'}, 'regular': {txt: '⭐ مشتری ثابت', cls: 'purple'} };
   const st = statusMap[d.status || 'in_progress'], isDue = d.status === 'regular' && d.reminderDate && d.reminderDate <= getShamsiToday();
   
-  // تب‌های رویداد
   const evCounts = { 'وبینار': 0, 'غیر حضوری': 0, 'حضوری': 0 };
   (d.events||[]).forEach(e => { if(evCounts[e.type] !== undefined) evCounts[e.type]++; });
 
@@ -776,15 +778,15 @@ function renderMain(){
               <div class="bank-info-group">
                 <div class="bank-info-item">
                   <div class="bank-info-label">EXPIRES</div>
-                  <div class="bank-info-value">${esc(c.m||'--')}/${esc(c.y||'--')}</div>
+                  <div class="bank-info-box">${esc(c.m||'--')}/${esc(c.y||'--')}</div>
                 </div>
                 <div class="bank-info-item">
                   <div class="bank-info-label">CVV2</div>
-                  <div class="bank-info-value">${esc(c.cvv2||'—')}</div>
+                  <div class="bank-info-box">${esc(c.cvv2||'—')}</div>
                 </div>
                 <div class="bank-info-item">
                   <div class="bank-info-label">رمز دوم</div>
-                  <div class="bank-info-value">${esc(c.pass2||'—')}</div>
+                  <div class="bank-info-box">${esc(c.pass2||'—')}</div>
                 </div>
               </div>
               <button class="bank-copy-btn" onclick="copyText('${esc(c.num||'')}',this)">📋 کپی کارت</button>
@@ -794,16 +796,26 @@ function renderMain(){
       </div>`:''}
     </div>
     
-    <!-- بخش رویدادها با تب‌های مجزا -->
+    <!-- بخش رویدادها -->
     <div class="events-layout">
+      <!-- دکمه‌های تب فقط در موبایل نمایش داده می‌شوند -->
       <div class="events-nav">
         <button class="ev-nav-btn ${currentEventTab==='وبینار'?'active':''}" onclick="setEventTab('وبینار')">💻 وبینار <span class="count">${num(evCounts['وبینار'])}</span></button>
         <button class="ev-nav-btn ${currentEventTab==='غیر حضوری'?'active':''}" onclick="setEventTab('غیر حضوری')">📁 غیر حضوری <span class="count">${num(evCounts['غیر حضوری'])}</span></button>
         <button class="ev-nav-btn ${currentEventTab==='حضوری'?'active':''}" onclick="setEventTab('حضوری')">🏢 حضوری <span class="count">${num(evCounts['حضوری'])}</span></button>
       </div>
       
-      <div id="activeEventSection">
-        ${renderEventSection(d, currentEventTab)}
+      <!-- در دسکتاپ همه نمایش داده می‌شوند، در موبایل فقط اکتیو -->
+      <div id="eventSectionsContainer">
+        <div class="ev-section ${currentEventTab==='وبینار'?'active-section':''}" id="section-وبینار">
+          ${renderEventSection(d, 'وبینار')}
+        </div>
+        <div class="ev-section ${currentEventTab==='غیر حضوری'?'active-section':''}" id="section-غیر حضوری">
+          ${renderEventSection(d, 'غیر حضوری')}
+        </div>
+        <div class="ev-section ${currentEventTab==='حضوری'?'active-section':''}" id="section-حضوری">
+          ${renderEventSection(d, 'حضوری')}
+        </div>
       </div>
     </div>
   `;
@@ -830,17 +842,15 @@ function renderEventSection(d, type){
   const totalCredit = evs.reduce((s,e)=>s+eventCredit(e),0), sumAllCredit = evs.reduce((s,e)=>s+Number(e.credit||0),0);
   
   return `
-    <div class="ev-section">
-      <div class="ev-head" style="border-right:4px solid ${color}">
-        <h3>${icon} ${type} <span class="count" style="background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:10px;font-size:11px">${num(evs.length)}</span></h3>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <div style="background:linear-gradient(135deg,rgba(56,189,248,0.15),rgba(34,211,238,0.05));border:1px solid rgba(56,189,248,0.3);border-radius:8px;padding:4px 12px;font-size:13px;font-weight:800;color:var(--accent)">جمع: ${num(sumAllCredit)}</div>
-          ${totalCredit>0?`<div style="background:linear-gradient(135deg,rgba(52,211,153,0.15),rgba(34,211,238,0.05));border:1px solid rgba(52,211,153,0.4);border-radius:8px;padding:4px 10px;font-size:12.5px;font-weight:800;color:var(--success)">✔ ${num(totalCredit)}</div>`:''}
-          <button class="add-btn" onclick="openEventModal(null, '${type}')">➕ افزودن</button>
-        </div>
+    <div class="ev-head" style="border-right:4px solid ${color}">
+      <h3>${icon} ${type} <span class="count" style="background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:10px;font-size:11px">${num(evs.length)}</span></h3>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div style="background:linear-gradient(135deg,rgba(56,189,248,0.15),rgba(34,211,238,0.05));border:1px solid rgba(56,189,248,0.3);border-radius:8px;padding:4px 12px;font-size:13px;font-weight:800;color:var(--accent)">جمع: ${num(sumAllCredit)}</div>
+        ${totalCredit>0?`<div style="background:linear-gradient(135deg,rgba(52,211,153,0.15),rgba(34,211,238,0.05));border:1px solid rgba(52,211,153,0.4);border-radius:8px;padding:4px 10px;font-size:12.5px;font-weight:800;color:var(--success)">✔ ${num(totalCredit)}</div>`:''}
+        <button class="add-btn" onclick="openEventModal(null, '${type}')">➕ افزودن</button>
       </div>
-      <div class="ev-body">${evs.length ? evs.map(e=>renderEventRow(e)).join('') : `<div class="empty">هنوز ${type}ی ثبت نشده است</div>`}</div>
     </div>
+    <div class="ev-body">${evs.length ? evs.map(e=>renderEventRow(e)).join('') : `<div class="empty">هنوز ${type}ی ثبت نشده است</div>`}</div>
   `;
 }
 
