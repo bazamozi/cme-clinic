@@ -50,6 +50,7 @@ textarea{resize:vertical;min-height:55px}
 .badge.red{background:rgba(248,113,113,0.18);color:var(--danger)}
 .badge.yellow{background:rgba(251,191,36,0.18);color:var(--warn)}
 .badge.gray{background:rgba(148,163,184,0.18);color:var(--muted)}
+.badge.purple{background:rgba(167,139,250,0.18);color:var(--purple)}
 .actions{margin-top:7px;display:flex;gap:5px;flex-wrap:wrap}
 .mini{border:1px solid var(--border);background:transparent;color:var(--muted);padding:6px 11px;border-radius:7px;font-size:13px;cursor:pointer;font-family:inherit;transition:.2s}
 .mini:hover{color:var(--accent);border-color:var(--accent)}
@@ -242,7 +243,10 @@ textarea{resize:vertical;min-height:55px}
     <button data-user="all" onclick="switchUser('all')">همه</button>
   </div>
   <button class="logout-btn" onclick="doLogout()">🚪 خروج</button>
-  <div class="sub" id="clock"></div>
+  <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
+    <div class="sub" id="clock"></div>
+    <div class="sub" id="syncStatus" style="color:var(--muted); font-size:10px;">☁️ متصل</div>
+  </div>
 </header>
 
 <div class="tab-content" id="tab-dash">
@@ -342,6 +346,11 @@ let selectedDoctorId = null;
 let currentUser = 'morteza';
 let currentDocCategory = 'all';
 
+// متغیرهای همگام‌سازی
+let isPushing = false;
+let isPulling = false;
+let pendingPush = false;
+
 try {
   doctors = JSON.parse(localStorage.getItem(K)||'[]');
   calls = JSON.parse(localStorage.getItem(K+'_calls')||'[]');
@@ -399,6 +408,29 @@ document.addEventListener('input', e => {
   const en = toEnDigits(t.value);
   if(en !== t.value){ const pos = t.selectionStart; t.value = en; try{ t.setSelectionRange(pos,pos); }catch(_){} }
 });
+
+// ============================================
+// SYNC STATUS INDICATOR
+// ============================================
+function setSyncStatus(status) {
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  
+  if (status === 'syncing') {
+    el.innerHTML = '🔄 در حال همگام‌سازی...';
+    el.style.color = 'var(--warn)';
+  } else if (status === 'success') {
+    el.innerHTML = '✅ همگام شد';
+    el.style.color = 'var(--success)';
+    setTimeout(() => { if(el.innerHTML === '✅ همگام شد') { el.innerHTML = '☁️ متصل'; el.style.color = 'var(--muted)'; } }, 2000);
+  } else if (status === 'error') {
+    el.innerHTML = '⚠️ خطای شبکه';
+    el.style.color = 'var(--danger)';
+  } else {
+    el.innerHTML = '☁️ متصل';
+    el.style.color = 'var(--muted)';
+  }
+}
 
 // ============================================
 // USER SYSTEM
@@ -478,7 +510,7 @@ function offlinePurchasedToday(d){
 }
 
 // ============================================
-// SAVE & SYNC
+// SAVE & SYNC (IMPROVED)
 // ============================================
 function save(){
   try {
@@ -488,31 +520,42 @@ function save(){
   pushToCloud();
 }
 
-let _pushing = false;
 async function pushToCloud(){
-  if(_pushing) return;
-  _pushing = true;
+  if(isPushing) { pendingPush = true; return; }
+  isPushing = true;
+  setSyncStatus('syncing');
+  
   try {
+    const payload = { doctors, calls, updatedAt: Date.now() };
     await fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ doctors, calls })
+      body: JSON.stringify(payload)
     });
-  } catch(e){}
-  finally { _pushing = false; }
+    setSyncStatus('success');
+  } catch(e){
+    setSyncStatus('error');
+  } finally {
+    isPushing = false;
+    if(pendingPush) { pendingPush = false; pushToCloud(); }
+  }
 }
 
-let _pulling = false;
 async function pullFromCloud(){
-  if(_pulling) return;
-  _pulling = true;
+  // اگر در حال ارسال داده هستیم یا قبلاً در حال دریافت بودیم، متوقف شو
+  if(isPushing || isPulling) return;
+  isPulling = true;
+  
   try {
     const r = await fetch(SCRIPT_URL + '?t=' + Date.now());
     const data = await r.json();
     if(!data) return;
+    
     const remote = { doctors: data.doctors || [], calls: data.calls || [] };
     const local = { doctors, calls };
+    
+    // فقط در صورتی که داده‌ها تغییر کرده باشند آپدیت کن
     if(JSON.stringify(remote) !== JSON.stringify(local)){
       doctors = remote.doctors;
       calls = remote.calls;
@@ -521,9 +564,13 @@ async function pullFromCloud(){
         localStorage.setItem(K+'_calls', JSON.stringify(calls));
       } catch(e){}
       renderAll();
+      setSyncStatus('success');
     }
-  } catch(e){}
-  finally { _pulling = false; }
+  } catch(e){
+    setSyncStatus('error');
+  } finally {
+    isPulling = false;
+  }
 }
 
 // ============================================
@@ -1252,10 +1299,17 @@ tick();
 setInterval(tick, 30000);
 renderAll();
 
-// Google Sheets Sync
+// ===== SYNC SYSTEM =====
+// همگام‌سازی فوری در بارگذاری
 setTimeout(pullFromCloud, 500);
-setInterval(pullFromCloud, 5000);
-document.addEventListener('visibilitychange', () => { if(!document.hidden) pullFromCloud(); });
+
+// بروزرسانی خودکار هر ۳ ثانیه (برای اعمال آنی تغییرات)
+setInterval(pullFromCloud, 3000);
+
+// بررسی مجدد وقتی که کاربر به تب برمی‌گردد
+document.addEventListener('visibilitychange', () => { 
+  if(!document.hidden) pullFromCloud(); 
+});
 
 // ===== Login System =====
 var USERS = {
