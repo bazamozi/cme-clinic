@@ -5613,5 +5613,105 @@ window.isDone = isDone;
   console.log('✅ VIP Sync v2 فعال — merge-only');
 })();
 </script>
+<script id="vip-push-fix">
+// ═══════════════════════════════════════════════════════════
+// 🎯 VIP PUSH FIX — جایگزینی pushToCloud با نسخه کامل
+// سرور باید تمام فیلدها رو دریافت کنه (vip, vipDate, card, events, finance)
+// ═══════════════════════════════════════════════════════════
+(function(){
+  if(window._vipPushFix) return;
+  window._vipPushFix = true;
+
+  var _isPushing = false;
+
+  // ═══════════════════════════════════════════════
+  // 🎯 pushToCloud جدید — کل doctors با همه فیلدها
+  // ═══════════════════════════════════════════════
+  window.pushToCloud = async function(force){
+    if(_isPushing){
+      console.log('⏸ push در جریان...');
+      return { skipped: true };
+    }
+    _isPushing = true;
+    
+    try {
+      // آخرین اعمال vip
+      if(typeof window.applyVips === 'function'){
+        try { window.applyVips(); } catch(e){}
+      }
+      
+      var all = window.doctors || [];
+      var calls = window.calls || [];
+      var vips = all.filter(function(d){ return d.vip; });
+      
+      console.log('📤 pushToCloud: ' + all.length + ' پزشک | ' + vips.length + ' VIP');
+      
+      var payload = {
+        doctors: all,           // 🎯 کل آبجکت با همه فیلدها
+        calls: calls,
+        updatedAt: Date.now()
+      };
+      
+      var resp = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify(payload)
+      });
+      
+      var result = await resp.json();
+      
+      // reset pull timer
+      window._lastUserMutation = Date.now();
+      
+      // ذخیره محلی
+      try { localStorage.setItem('cme_doctors', JSON.stringify(all)); } catch(e){}
+      try { localStorage.setItem('cme_last_save', String(Date.now())); } catch(e){}
+      
+      // علامت
+      if(typeof window.setLastSync === 'function'){
+        try { window.setLastSync(); } catch(e){}
+      }
+      
+      console.log('✅ push موفق — سرور: ' + (result.size||0) + ' بایت | VIP: ' + vips.length);
+      _isPushing = false;
+      
+      // شبیه‌سازی موفقیت
+      if(typeof showSaveIndicator === 'function'){ 
+        try { showSaveIndicator(); } catch(e){}
+      }
+      
+      return result;
+    } catch(e){
+      console.error('❌ push خطا:', e);
+      _isPushing = false;
+      throw e;
+    }
+  };
+
+  // ═══════════════════════════════════════════════
+  // 🎯 pullFromCloud — همون رفتار قبلی
+  // ═══════════════════════════════════════════════
+  var _origPull = window.pullFromCloud;
+  if(typeof _origPull === 'function' && !window._vipPushFix_pull){
+    window._vipPullHooked = true;
+    window.pullFromCloud = async function(){
+      var r = await _origPull.apply(this, arguments);
+      // بعد از pull، applyVips
+      setTimeout(function(){
+        try { window.applyVips(); } catch(e){}
+        try { if(typeof updateFilterCounts === 'function') updateFilterCounts(); } catch(e){}
+      }, 200);
+      return r;
+    };
+  }
+
+  // ═══════════════════════════════════════════════
+  // 🎯 auto-save trigger — از pushToCloud جدید استفاده کنه
+  // ═══════════════════════════════════════════════
+  // (فقط لاگ — بقیه سیستم auto-save خودش صدا می‌زنه)
+
+  console.log('✅ VIP Push Fix فعال — pushToCloud جایگزین شد');
+})();
+</script>
 </body>
 </html>
