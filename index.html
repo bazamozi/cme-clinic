@@ -4361,5 +4361,66 @@ setTimeout(function(){
   setInterval(show, 2500);
 })();
 </script>
+<script id="auto-save-guard">
+// ═══════════════════════════════════════════════════════════
+// 🛡 AUTO-SAVE GUARD — جلوگیری از پریدن داده‌ها موقع رفرش
+// ═══════════════════════════════════════════════════════════
+(function(){
+  if(window._autoSaveGuard) return;
+  window._autoSaveGuard = true;
+
+  var lastHash = '';
+  var isPushing = false;
+
+  // 🎯 تابع محاسبه هش داده‌ها (برای تشخیص تغییر)
+  function getHash() {
+    if(!window.doctors || !Array.isArray(window.doctors)) return '';
+    return window.doctors.length + '_' + JSON.stringify(window.doctors).length;
+  }
+
+  // 🎯 حلقه بررسی مداوم (هر ۱ ثانیه)
+  setInterval(function(){
+    try {
+      var currentHash = getHash();
+      
+      // اگه تغییری کرده (و قبلاً هم مقدار داشتیم)
+      if(currentHash !== lastHash && lastHash !== '') {
+        console.log('💾 [Auto-Save] تغییر در لیست پزشکان شناسایی شد — ذخیره فوری');
+        
+        // ۱. ذخیره فوری در localStorage
+        try { 
+          localStorage.setItem('cme_doctors', JSON.stringify(window.doctors));
+          localStorage.setItem('cme_last_save', String(Date.now()));
+        } catch(e){}
+        
+        // ۲. Push به سرور (اگه در حال push قبلی نباشیم)
+        if(!isPushing && typeof window.pushToCloud === 'function') {
+          isPushing = true;
+          window.pushToCloud(true).then(function(){
+            isPushing = false;
+            console.log('☁️ [Auto-Save] در سرور ذخیره شد');
+          }).catch(function(){
+            isPushing = false;
+          });
+        }
+        
+        // ۳. رندر شمارنده‌ها
+        if(typeof updateFilterCounts === 'function') updateFilterCounts();
+      }
+      
+      lastHash = currentHash;
+    } catch(e){}
+  }, 1000);
+
+  // 🎯 ذخیره فوری قبل از بستن یا رفرش صفحه
+  window.addEventListener('beforeunload', function(){
+    try {
+      localStorage.setItem('cme_doctors', JSON.stringify(window.doctors || []));
+    } catch(e){}
+  });
+
+  console.log('✅ Auto-Save Guard فعال — داده‌ها فوری ذخیره می‌شن');
+})();
+</script>
 </body>
 </html>
