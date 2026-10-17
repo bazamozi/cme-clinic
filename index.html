@@ -143,6 +143,9 @@ textarea{resize:vertical;min-height:55px}
 .events-layout{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-top:14px; align-items:start;}
 .ev-section{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:rgba(15,23,42,0.3); box-shadow:0 4px 15px rgba(0,0,0,0.1); display:flex; flex-direction:column;}
 
+/* دکمه‌های تب موبایل (در دسکتاپ مخفی هستند) */
+.mobile-event-tabs { display: none; }
+
 /* هدر رویدادها با Grid برای نظم کامل */
 .ev-head {
   display: grid;
@@ -225,11 +228,13 @@ textarea{resize:vertical;min-height:55px}
   .bank-box.card-number {flex: 1 1 100%;}
   .bank-box.other {flex: 1 1 calc(50% - 5px);}
   
-  .events-layout{grid-template-columns:1fr;}
-  
-  /* Event header on mobile */
-  .ev-head { grid-template-columns: auto 1fr; gap: 8px; }
-  .ev-stats-wrap { grid-column: 1 / -1; justify-content: flex-start; order: 3; margin-top: 4px; }
+  /* Events mobile layout tweaks (TABS) */
+  .events-layout { display: flex; flex-direction: column; }
+  .mobile-event-tabs { display: flex; gap: 8px; width: 100%; margin-bottom: 12px; }
+  .mobile-ev-tab { flex: 1; padding: 10px 4px; border-radius: 10px; background: rgba(15,23,42,0.6); border: 1px solid var(--border); color: var(--muted); font-weight: 700; font-size: 12.5px; text-align: center; cursor: pointer; transition: 0.2s; font-family: inherit;}
+  .mobile-ev-tab.active { background: rgba(56,189,248,0.15); color: var(--accent); border-color: var(--accent); box-shadow: 0 2px 10px rgba(56,189,248,0.15);}
+  .ev-section { display: none; }
+  .ev-section.active-mobile { display: flex; }
   
   .event-row{padding:12px}
   .status-group{grid-template-columns:1fr 1fr!important}
@@ -392,6 +397,7 @@ let calls = [];
 let selectedDoctorId = null;
 let currentUser = 'morteza';
 let currentDocCategory = 'all';
+let currentMobileEventTab = 'وبینار'; // تب پیش‌فرض موبایل
 
 try {
   doctors = JSON.parse(localStorage.getItem(K)||'[]');
@@ -417,7 +423,7 @@ function parseDate(s){ const m = String(s||'').match(/(\d+)\/(\d+)\/(\d+)/); if(
 function formatDate(y,m,d){ return `${y}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}`; }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2500); }
 
-// تابع استاندارد و دقیق محاسبه اختلاف تاریخ شمسی تا امروز (الهام گرفته از jalaali-js)
+// تابع استاندارد محاسبه اختلاف تاریخ شمسی تا امروز
 function getDaysDifference(shamsiDateStr) {
     if (!shamsiDateStr || !shamsiDateStr.includes('/')) return null;
     const parts = shamsiDateStr.split('/').map(Number);
@@ -426,7 +432,6 @@ function getDaysDifference(shamsiDateStr) {
     const jy = parts[0], jm = parts[1], jd = parts[2];
     
     // Jalali to Gregorian conversion
-    const g_y = jy + 621;
     const g_days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     const j_days_in_month = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
     
@@ -830,9 +835,20 @@ function renderDocList(){
   el.innerHTML = html;
 }
 
-function selectDoctor(id){ selectedDoctorId = id; renderDocList(); renderMain(); updateMobileSelection(); }
+function selectDoctor(id){ selectedDoctorId = id; currentMobileEventTab = 'وبینار'; renderDocList(); renderMain(); updateMobileSelection(); }
 function updateMobileSelection(){ const app = document.getElementById('appContainer'); if(!app) return; if(selectedDoctorId){ app.classList.add('has-selection'); app.classList.remove('no-selection'); } else { app.classList.remove('has-selection'); app.classList.add('no-selection'); } }
 window.backToList = function(){ selectedDoctorId = null; renderDocList(); renderMain(); updateMobileSelection(); };
+
+window.switchMobileEventTab = function(tab) {
+  currentMobileEventTab = tab;
+  document.querySelectorAll('.mobile-ev-tab').forEach(btn => {
+    if(btn.textContent.includes(tab)) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
+  document.querySelectorAll('.ev-section').forEach(sec => {
+    sec.classList.toggle('active-mobile', sec.id === 'sec-' + tab);
+  });
+};
 
 function renderMain(){
   const el = document.getElementById('mainArea'); if(!el) return;
@@ -946,15 +962,23 @@ function renderMain(){
       </div>`:''}
     </div>
     
-    <!-- بخش رویدادها: به صورت سه ستون عمودی -->
+    <!-- بخش رویدادها (با تب‌های موبایل) -->
     <div class="events-layout">
-      <div class="ev-section">
+      <!-- تب‌های مخصوص موبایل -->
+      <div class="mobile-event-tabs">
+        <button class="mobile-ev-tab ${currentMobileEventTab==='وبینار'?'active':''}" onclick="switchMobileEventTab('وبینار')">💻 وبینار</button>
+        <button class="mobile-ev-tab ${currentMobileEventTab==='غیر حضوری'?'active':''}" onclick="switchMobileEventTab('غیر حضوری')">📁 غیر حضوری</button>
+        <button class="mobile-ev-tab ${currentMobileEventTab==='حضوری'?'active':''}" onclick="switchMobileEventTab('حضوری')">🏢 حضوری</button>
+      </div>
+
+      <!-- سکشن‌ها (در دسکتاپ هر ۳ نمایش، در موبایل فقط اکتیو) -->
+      <div class="ev-section ${currentMobileEventTab==='وبینار'?'active-mobile':''}" id="sec-وبینار">
         ${renderEventSection(d, 'وبینار')}
       </div>
-      <div class="ev-section">
+      <div class="ev-section ${currentMobileEventTab==='غیر حضوری'?'active-mobile':''}" id="sec-غیر حضوری">
         ${renderEventSection(d, 'غیر حضوری')}
       </div>
-      <div class="ev-section">
+      <div class="ev-section ${currentMobileEventTab==='حضوری'?'active-mobile':''}" id="sec-حضوری">
         ${renderEventSection(d, 'حضوری')}
       </div>
     </div>
