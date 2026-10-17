@@ -383,14 +383,11 @@ function getShamsiToday(){
     var m = parts.find(p => p.type === 'month').value;
     var d = parts.find(p => p.type === 'day').value;
     return `${y}/${m}/${d}`;
-  } catch(e){
-    return null;
-  }
+  } catch(e){ return null; }
 }
 
 function tick(){ 
-  const d=new Date(); 
-  const p=x=>String(x).padStart(2,'0'); 
+  const d=new Date(); const p=x=>String(x).padStart(2,'0'); 
   const el=document.getElementById('clock'); 
   if(el) {
     let shamsiDate = getShamsiToday() || `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())}`;
@@ -406,62 +403,102 @@ document.addEventListener('input', e => {
 });
 
 // ============================================
-// USER SYSTEM
+// USER SYSTEM & LOGIN
 // ============================================
+var USERS = {
+  'morteza': { pass: 'MN13601353', name: 'مرتضی' },
+  'parvin': { pass: 'parvin123', name: 'پروین' }
+};
+
+window.doLogin = function(){
+  var u = document.getElementById('loginUser').value.trim().toLowerCase();
+  var p = document.getElementById('loginPass').value;
+  var errEl = document.getElementById('loginError');
+  
+  if(USERS[u] && USERS[u].pass === p){
+    try { localStorage.setItem('cme_logged_in', u); } catch(e){}
+    errEl.classList.remove('show');
+    document.getElementById('loginScreen').classList.add('hidden');
+    currentUser = u;
+    try { localStorage.setItem('cme_current_user', u); } catch(e){}
+    document.querySelectorAll('.user-picker button').forEach(function(b){
+      if(b.dataset.user === u) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+    renderAll();
+    updateMobileSelection();
+    toast('👋 خوش آمدید ' + USERS[u].name);
+  } else {
+    errEl.classList.add('show');
+    document.getElementById('loginPass').value = '';
+  }
+};
+
+window.doLogout = function(){
+  if(!confirm('از سیستم خارج می‌شوید؟')) return;
+  try {
+    localStorage.removeItem('cme_logged_in');
+    localStorage.removeItem('cme_current_user');
+  } catch(e){}
+  location.reload();
+};
+
+function checkLogin(){
+  var logged = null;
+  try { logged = localStorage.getItem('cme_logged_in'); } catch(e){}
+  
+  if(logged && USERS[logged]){
+    document.getElementById('loginScreen').classList.add('hidden');
+    currentUser = logged;
+    try { localStorage.setItem('cme_current_user', logged); } catch(e){}
+    document.querySelectorAll('.user-picker button').forEach(function(b){
+      if(b.dataset.user === logged) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+  } else {
+    document.getElementById('loginScreen').classList.remove('hidden');
+    setTimeout(function(){
+      var u = document.getElementById('loginUser');
+      if(u) u.focus();
+    }, 100);
+  }
+}
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Enter' && !document.getElementById('loginScreen').classList.contains('hidden')){
+    doLogin();
+  }
+});
+
 window.switchUser = function(user){
   currentUser = user;
   try { localStorage.setItem('cme_current_user', user); } catch(e){}
   selectedDoctorId = null;
-  
   const ma = document.getElementById('mainArea');
   if(ma) ma.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>';
-  
   document.querySelectorAll('.user-picker button').forEach(b=>{
     if(b.dataset.user === user) b.classList.add('active');
     else b.classList.remove('active');
   });
-  
-  renderDash();
-  renderDocList();
-  renderCalls();
-  updateMobileSelection();
-  updateMobileNav();
+  renderDash(); renderDocList(); renderCalls(); updateMobileSelection(); updateMobileNav();
 };
 
-function myDoctors(){
-  const arr = doctors.filter(d => !d.deleted);
-  if(currentUser === 'all') return arr;
-  return arr.filter(d => d.owner === currentUser);
-}
-function myCalls(){
-  const arr = calls.filter(c => !c.deleted);
-  if(currentUser === 'all') return arr;
-  return arr.filter(c => c.owner === currentUser);
-}
+function myDoctors(){ const arr = doctors.filter(d => !d.deleted); return currentUser === 'all' ? arr : arr.filter(d => d.owner === currentUser); }
+function myCalls(){ const arr = calls.filter(c => !c.deleted); return currentUser === 'all' ? arr : arr.filter(c => c.owner === currentUser); }
 
 // ============================================
 // BUSINESS LOGIC
 // ============================================
 function eventCredit(e){
   if(e.purchase!=='انجام شد') return 0;
-  if(e.type==='وبینار'){
-    if(e.attend!=='انجام شد') return 0;
-    if(e.exam==='رد') return 0;
-  }
-  if(e.type==='حضوری'){
-    if(e.attend!=='انجام شد') return 0;
-  }
+  if(e.type==='وبینار'){ if(e.attend!=='انجام شد') return 0; if(e.exam==='رد') return 0; }
+  if(e.type==='حضوری'){ if(e.attend!=='انجام شد') return 0; }
   return Number(e.credit||0);
 }
 function eventState(e){
   if(e.purchase!=='انجام شد') return 'partial';
-  if(e.type==='وبینار'){
-    if(e.attend!=='انجام شد') return 'partial';
-    if(e.exam==='رد') return 'failed';
-  }
-  if(e.type==='حضوری'){
-    if(e.attend!=='انجام شد') return 'partial';
-  }
+  if(e.type==='وبینار'){ if(e.attend!=='انجام شد') return 'partial'; if(e.exam==='رد') return 'failed'; }
+  if(e.type==='حضوری'){ if(e.attend!=='انجام شد') return 'partial'; }
   return 'earned';
 }
 function doctorCredits(d){
@@ -472,75 +509,42 @@ function doctorCredits(d){
 function totalEarned(d){ const c=doctorCredits(d); return c['حضوری']+c['وبینار']+c['غیر حضوری']; }
 function remainingCredits(d){ return Math.max(0, Number(d.creditReq||0) - totalEarned(d)); }
 function isComplete(d){ return remainingCredits(d)===0 && Number(d.creditReq||0)>0; }
-function pendingExamWebinars(d){
-  return (d.events||[]).filter(e=> e.type==='وبینار' && e.purchase==='انجام شد' && e.attend==='انجام شد' && e.exam==='ثبت نشده').length;
-}
+function pendingExamWebinars(d){ return (d.events||[]).filter(e=> e.type==='وبینار' && e.purchase==='انجام شد' && e.attend==='انجام شد' && e.exam==='ثبت نشده').length; }
 function offlinePurchasedToday(d){
   const t=new Date(); const y=t.getFullYear(), m=t.getMonth(), day=t.getDate();
-  return (d.events||[]).some(e=>{
-    if(e.type!=='غیر حضوری' || e.purchase!=='انجام شد') return false;
-    const d2=new Date(e.createdAt);
-    return d2.getFullYear()===y && d2.getMonth()===m && d2.getDate()===day;
-  });
+  return (d.events||[]).some(e=>{ if(e.type!=='غیر حضوری' || e.purchase!=='انجام شد') return false; const d2=new Date(e.createdAt); return d2.getFullYear()===y && d2.getMonth()===m && d2.getDate()===day; });
 }
 
 // ============================================
-// SAVE & SYNC (سیستم کاملاً جدید و مقاوم)
+// SAVE & SYNC
 // ============================================
-let _dirty = false;
-let _syncing = false;
-let _syncQueued = false;
-let _syncTimer = null;
+let _dirty = false, _syncing = false, _syncQueued = false, _syncTimer = null;
 
 function updateSyncUI(status) {
   const el = document.getElementById('syncStatus');
   if (!el) return;
-  if (status === 'syncing') {
-    el.innerHTML = '⏳ در حال سینک...';
-    el.style.color = 'var(--warn)';
-  } else if (status === 'synced') {
-    el.innerHTML = '✅ سینک شد';
-    el.style.color = 'var(--success)';
-    setTimeout(() => { if(el.innerHTML === '✅ سینک شد') el.innerHTML = '☁️ آماده'; el.style.color = 'var(--muted)'; }, 3000);
-  } else if (status === 'error') {
-    el.innerHTML = '❌ خطای سینک';
-    el.style.color = 'var(--danger)';
-  } else {
-    el.innerHTML = '☁️ آماده';
-    el.style.color = 'var(--muted)';
-  }
+  if (status === 'syncing') { el.innerHTML = '⏳ در حال سینک...'; el.style.color = 'var(--warn)'; }
+  else if (status === 'synced') { el.innerHTML = '✅ سینک شد'; el.style.color = 'var(--success)'; setTimeout(() => { if(el.innerHTML === '✅ سینک شد') el.innerHTML = '☁️ آماده'; el.style.color = 'var(--muted)'; }, 3000); }
+  else if (status === 'error') { el.innerHTML = '❌ خطای سینک'; el.style.color = 'var(--danger)'; }
+  else { el.innerHTML = '☁️ آماده'; el.style.color = 'var(--muted)'; }
 }
 
 function save(){
-  try {
-    localStorage.setItem(K, JSON.stringify(doctors));
-    localStorage.setItem(K+'_calls', JSON.stringify(calls));
-  } catch(e){}
-  _dirty = true;
-  scheduleSync();
+  try { localStorage.setItem(K, JSON.stringify(doctors)); localStorage.setItem(K+'_calls', JSON.stringify(calls)); } catch(e){}
+  _dirty = true; scheduleSync();
 }
 
-function scheduleSync(){
-  clearTimeout(_syncTimer);
-  _syncTimer = setTimeout(syncNow, 400);
-}
+function scheduleSync(){ clearTimeout(_syncTimer); _syncTimer = setTimeout(syncNow, 400); }
 
 async function syncNow(){
   if(_syncing){ _syncQueued = true; return; }
-  _syncing = true;
-  updateSyncUI('syncing');
+  _syncing = true; updateSyncUI('syncing');
   try {
-    if(_dirty){
-      await pushToCloud();
-      _dirty = false; // فرض میکنیم ارسال شد، اگر نشد pull داده‌های سرور را برمی‌گرداند
-    }
+    if(_dirty){ await pushToCloud(); _dirty = false; }
     await pullFromCloud();
     updateSyncUI('synced');
-  } catch(e) {
-    updateSyncUI('error');
-  } finally {
-    _syncing = false;
-    if(_syncQueued){ _syncQueued = false; scheduleSync(); }
+  } catch(e) { updateSyncUI('error'); } finally {
+    _syncing = false; if(_syncQueued){ _syncQueued = false; scheduleSync(); }
   }
 }
 
@@ -549,28 +553,12 @@ async function pushToCloud(){
     try {
       const payload = JSON.stringify({ doctors, calls, savedAt: Date.now() });
       const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = SCRIPT_URL;
-      form.target = 'hidden_iframe_push';
-      form.style.display = 'none';
-
+      form.method = 'POST'; form.action = SCRIPT_URL; form.target = 'hidden_iframe_push'; form.style.display = 'none';
       const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'data';
-      input.value = payload;
-      form.appendChild(input);
-
-      document.body.appendChild(form);
-      form.submit();
-      
-      setTimeout(() => {
-        if (document.body.contains(form)) document.body.removeChild(form);
-        resolve(true);
-      }, 1200); // زمان برای ارسال فرم
-    } catch (e) {
-      console.warn('push failed', e);
-      resolve(false);
-    }
+      input.type = 'hidden'; input.name = 'data'; input.value = payload; form.appendChild(input);
+      document.body.appendChild(form); form.submit();
+      setTimeout(() => { if (document.body.contains(form)) document.body.removeChild(form); resolve(true); }, 1200);
+    } catch (e) { console.warn('push failed', e); resolve(false); }
   });
 }
 
@@ -580,8 +568,7 @@ function mergeById(localArr, remoteArr, tsField){
   (remoteArr || []).forEach(r => {
     if(!r || !r.id) return;
     const ex = map.get(r.id);
-    const rTs = Number(r[tsField] || r.createdAt || 0);
-    const eTs = ex ? Number(ex[tsField] || ex.createdAt || 0) : -1;
+    const rTs = Number(r[tsField] || r.createdAt || 0), eTs = ex ? Number(ex[tsField] || ex.createdAt || 0) : -1;
     if(!ex || rTs > eTs) map.set(r.id, r);
   });
   return Array.from(map.values());
@@ -591,80 +578,46 @@ async function pullFromCloud(){
   try {
     const r = await fetch(SCRIPT_URL + '?t=' + Date.now(), { cache: 'no-store' });
     if(!r.ok) return;
-    const data = await r.json();
-    if(!data) return;
-
+    const data = await r.json(); if(!data) return;
     const newDocs  = mergeById(doctors, data.doctors || [], 'updatedAt');
     const newCalls = mergeById(calls,   data.calls   || [], 'updatedAt');
-
-    const changed = JSON.stringify(newDocs)  !== JSON.stringify(doctors)
-                 || JSON.stringify(newCalls) !== JSON.stringify(calls);
-
-    doctors = newDocs;
-    calls   = newCalls;
-
+    const changed = JSON.stringify(newDocs) !== JSON.stringify(doctors) || JSON.stringify(newCalls) !== JSON.stringify(calls);
+    doctors = newDocs; calls = newCalls;
     if(changed){
-      try {
-        localStorage.setItem(K, JSON.stringify(doctors));
-        localStorage.setItem(K+'_calls', JSON.stringify(calls));
-      } catch(e){}
+      try { localStorage.setItem(K, JSON.stringify(doctors)); localStorage.setItem(K+'_calls', JSON.stringify(calls)); } catch(e){}
       renderAll();
     }
-  } catch(e){
-    console.warn('pull failed:', e);
-  }
+  } catch(e){ console.warn('pull failed:', e); }
 }
 
 // ============================================
-// NAVIGATION
+// NAVIGATION & RENDER DASHBOARD
 // ============================================
 window.switchTab = function(tabName){
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden'));
-  
-  const tb = document.querySelector('.tab[data-tab="'+tabName+'"]');
-  if(tb) tb.classList.add('active');
-  const content = document.getElementById('tab-'+tabName);
-  if(content) content.classList.remove('hidden');
-  
-  document.querySelectorAll('.mobile-nav button').forEach(x=>{
-    if(x.dataset.tab === tabName) x.classList.add('active');
-    else x.classList.remove('active');
-  });
-  
+  const tb = document.querySelector('.tab[data-tab="'+tabName+'"]'); if(tb) tb.classList.add('active');
+  const content = document.getElementById('tab-'+tabName); if(content) content.classList.remove('hidden');
+  document.querySelectorAll('.mobile-nav button').forEach(x=>{ if(x.dataset.tab === tabName) x.classList.add('active'); else x.classList.remove('active'); });
   if(tabName === 'dash') renderDash();
   if(tabName === 'doctors'){ renderDocList(); renderMain(); }
   if(tabName === 'calls') renderCalls();
 };
 
 function updateMobileNav(){
-  const activeTab = document.querySelector('.tab.active');
-  if(!activeTab) return;
+  const activeTab = document.querySelector('.tab.active'); if(!activeTab) return;
   const tabName = activeTab.dataset.tab;
-  document.querySelectorAll('.mobile-nav button').forEach(x=>{
-    if(x.dataset.tab === tabName) x.classList.add('active');
-    else x.classList.remove('active');
-  });
+  document.querySelectorAll('.mobile-nav button').forEach(x=>{ if(x.dataset.tab === tabName) x.classList.add('active'); else x.classList.remove('active'); });
 }
 
-// ============================================
-// DASHBOARD
-// ============================================
 function renderDash(){
-  const myD = myDoctors();
-  const myC = myCalls();
-  const today = getShamsiToday();
+  const myD = myDoctors(), myC = myCalls(), today = getShamsiToday();
   const dueReminders = myD.filter(d => d.status === 'regular' && d.reminderDate && d.reminderDate <= today).length;
-
   const stats = [
-    { label:'پزشکان', value:myD.length },
-    { label:'کل رویدادها', value:myD.reduce((s,d)=>s+(d.events||[]).length,0) },
-    { label:'امتیاز کل', value:myD.reduce((s,d)=>s+totalEarned(d),0) },
-    { label:'پزشکان کامل', value:myD.filter(isComplete).length },
-    { label:'پزشکان ناقص', value:myD.filter(d=>!isComplete(d)).length },
-    { label:'مانده دریافتی', value:myD.reduce((s,d)=>{ const f=d.finance||{}; return s+Math.max(0,Number(f.total||0)-Number(f.paid||0)); },0) },
-    { label:'تماس‌های پیگیری‌نشده', value:myC.filter(c=>c.follow==='پیگیری‌نشده').length },
-    { label:'یادآوری‌های سررسید', value:dueReminders, isDanger: dueReminders > 0 }
+    { label:'پزشکان', value:myD.length }, { label:'کل رویدادها', value:myD.reduce((s,d)=>s+(d.events||[]).length,0) },
+    { label:'امتیاز کل', value:myD.reduce((s,d)=>s+totalEarned(d),0) }, { label:'پزشکان کامل', value:myD.filter(isComplete).length },
+    { label:'پزشکان ناقص', value:myD.filter(d=>!isComplete(d)).length }, { label:'مانده دریافتی', value:myD.reduce((s,d)=>{ const f=d.finance||{}; return s+Math.max(0,Number(f.total||0)-Number(f.paid||0)); },0) },
+    { label:'تماس‌های پیگیری‌نشده', value:myC.filter(c=>c.follow==='پیگیری‌نشده').length }, { label:'یادآوری‌های سررسید', value:dueReminders, isDanger: dueReminders > 0 }
   ];
   document.getElementById('statsBar').innerHTML = stats.map(s=>`<div class="stat"><div class="label">${s.label}</div><div class="value" style="${s.isDanger?'color:var(--danger)':''}">${num(s.value)}</div></div>`).join('');
   const inc = myD.filter(d=>!isComplete(d)).slice(0,10);
@@ -673,169 +626,75 @@ function renderDash(){
     return `<div style="background:rgba(15,23,42,0.6);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px">
       <div style="font-weight:700;font-size:13px">${esc(fullName(d))} <span class="badge blue">${esc(d.spec||'')}</span> <span class="badge red">${num(rem)} کم</span></div>
       <div style="color:var(--muted);font-size:11px;margin-top:5px">📞 <span class="ltr">${esc(d.phone || '—')}</span> | 🎯 ${num(totalEarned(d))} از ${num(d.creditReq||0)}</div>
-      <div class="actions">
-        <button class="mini green" onclick="goDoctor('${d.id}')">👁 مشاهده</button>
-      </div>
+      <div class="actions"><button class="mini green" onclick="goDoctor('${d.id}')">👁 مشاهده</button></div>
     </div>`;
   }).join('') : '<div class="empty">🎉 همه پزشکان کامل هستند</div>';
 }
 
-// ============================================
-// DOCTORS LIST
-// ============================================
-window.setDocCategory = function(cat) {
-  currentDocCategory = cat;
-  renderDocList();
-};
+window.setDocCategory = function(cat) { currentDocCategory = cat; renderDocList(); };
 
 function renderDocList(){
-  const searchEl = document.getElementById('searchDoctor');
-  if(!searchEl) return;
+  const searchEl = document.getElementById('searchDoctor'); if(!searchEl) return;
   const q = searchEl.value.trim().toLowerCase();
-  
   const allMyDocs = myDoctors().filter(d => !q || fullName(d).toLowerCase().includes(q) || (d.spec||'').toLowerCase().includes(q) || (d.phone||'').includes(q) || (d.nat||'').includes(q));
-  
-  const categories = {
-    'all': { title: 'همه', color: 'var(--text)' },
-    'in_progress': { title: '⚡ در حال اجرا', color: 'var(--accent)' },
-    'completed': { title: '🏆 تمام شده', color: 'var(--success)' },
-    'undecided': { title: '⏳ بلاتکلیف', color: 'var(--warn)' },
-    'regular': { title: '⭐ مشتری ثابت', color: 'var(--purple)' }
-  };
-
+  const categories = { 'all': { title: 'همه', color: 'var(--text)' }, 'in_progress': { title: '⚡ در حال اجرا', color: 'var(--accent)' }, 'completed': { title: '🏆 تمام شده', color: 'var(--success)' }, 'undecided': { title: '⏳ بلاتکلیف', color: 'var(--warn)' }, 'regular': { title: '⭐ مشتری ثابت', color: 'var(--purple)' } };
   const getGroup = (d) => d.status || 'in_progress';
-
   let tabsHtml = '';
   for (const [key, cat] of Object.entries(categories)) {
     const count = key === 'all' ? allMyDocs.length : allMyDocs.filter(d => getGroup(d) === key).length;
     const extraClass = key === 'all' ? 'all' : '';
     tabsHtml += `<button class="cat-tab ${extraClass} ${key} ${currentDocCategory === key ? 'active' : ''}" onclick="setDocCategory('${key}')">${cat.title} (${num(count)})</button>`;
   }
-  
-  const tabsContainer = document.getElementById('docCategoryTabs');
-  if(tabsContainer) tabsContainer.innerHTML = tabsHtml;
-
+  const tabsContainer = document.getElementById('docCategoryTabs'); if(tabsContainer) tabsContainer.innerHTML = tabsHtml;
   const displayDocs = currentDocCategory === 'all' ? allMyDocs : allMyDocs.filter(d => getGroup(d) === currentDocCategory);
-
   const el = document.getElementById('docList');
-  if(!displayDocs.length){ 
-    el.innerHTML='<div class="empty">پزشکی در این دسته‌بندی یافت نشد</div>'; 
-    return; 
-  }
-
+  if(!displayDocs.length){ el.innerHTML='<div class="empty">پزشکی در این دسته‌بندی یافت نشد</div>'; return; }
   const today = getShamsiToday();
   const dueReminders = displayDocs.filter(d => d.reminderDate && d.reminderDate <= today && d.status === 'regular');
-  
   let html = '';
-  if(dueReminders.length > 0 && currentDocCategory !== 'completed') {
-    html += `<div style="background:rgba(248,113,113,0.15);border:1px solid var(--danger);border-radius:8px;padding:8px;margin-bottom:10px;font-size:11px;color:var(--danger);text-align:center;font-weight:700;animation:pulse 1.5s infinite">⚠️ ${dueReminders.length} یادآوری سررسید شده!</div>`;
-  }
-
+  if(dueReminders.length > 0 && currentDocCategory !== 'completed') { html += `<div style="background:rgba(248,113,113,0.15);border:1px solid var(--danger);border-radius:8px;padding:8px;margin-bottom:10px;font-size:11px;color:var(--danger);text-align:center;font-weight:700;animation:pulse 1.5s infinite">⚠️ ${dueReminders.length} یادآوری سررسید شده!</div>`; }
   html += displayDocs.map(d => {
-    const req = Number(d.creditReq||0), total = totalEarned(d);
-    const pct = req ? Math.min(100, Math.round(total/req*100)) : 0;
-    const complete = isComplete(d);
-    const f = d.finance||{};
-    const rem$ = Math.max(0, Number(f.total||0)-Number(f.paid||0));
-    const hasOffline = (d.events||[]).some(e=>e.type==='غیر حضوری');
-    const isDue = d.reminderDate && d.reminderDate <= today && d.status === 'regular';
-    
+    const req = Number(d.creditReq||0), total = totalEarned(d), pct = req ? Math.min(100, Math.round(total/req*100)) : 0;
+    const complete = isComplete(d), f = d.finance||{}, rem$ = Math.max(0, Number(f.total||0)-Number(f.paid||0));
+    const hasOffline = (d.events||[]).some(e=>e.type==='غیر حضوری'), isDue = d.reminderDate && d.reminderDate <= today && d.status === 'regular';
     return `
       <div class="doc-row ${selectedDoctorId===d.id?'active':''}" onclick="selectDoctor('${d.id}')" ${isDue ? 'style="border-right:3px solid var(--danger);background:rgba(248,113,113,0.08)"' : ''}>
-        <div class="doc-name">
-          <span>${esc(fullName(d))} ${isDue ? '<span style="font-size:12px;color:var(--danger)">🔔</span>' : ''}</span>
-          ${d.owner?`<span class="owner-badge ${d.owner}">${d.owner==='morteza'?'مرتضی':'پروین'}</span>`:''}
-        </div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">
-          ${pendingExamWebinars(d)>0?`<span class="exam-badge">📝 آزمون: ${num(pendingExamWebinars(d))}</span>`:''}
-          ${hasOffline?(offlinePurchasedToday(d)?'<span class="offline-badge ok">✅ خرید شده</span>':'<span class="offline-badge wait">🛒 خرید نشده</span>'):''}
-        </div>
+        <div class="doc-name"><span>${esc(fullName(d))} ${isDue ? '<span style="font-size:12px;color:var(--danger)">🔔</span>' : ''}</span>${d.owner?`<span class="owner-badge ${d.owner}">${d.owner==='morteza'?'مرتضی':'پروین'}</span>`:''}</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">${pendingExamWebinars(d)>0?`<span class="exam-badge">📝 آزمون: ${num(pendingExamWebinars(d))}</span>`:''}${hasOffline?(offlinePurchasedToday(d)?'<span class="offline-badge ok">✅ خرید شده</span>':'<span class="offline-badge wait">🛒 خرید نشده</span>'):''}</div>
         <div class="doc-spec">${esc(d.spec||'—')} ${complete?'<span class="badge green" style="margin:0 4px">✔</span>':''}${rem$>0?'<span class="badge yellow" style="margin:0 4px">💸</span>':''}</div>
         ${d.reminderDate ? `<div style="font-size:10px;color:${isDue?'var(--danger)':'var(--muted)'};margin-top:3px;font-weight:700">⏰ سررسید: ${d.reminderDate}</div>` : ''}
         <div class="doc-bar"><div class="fill ${complete?'done':''}" style="width:${pct}%"></div></div>
         <div class="doc-meta"><span>🎯 <b>${num(total)}</b> از ${num(req)}</span><span>${pct}%</span></div>
       </div>`;
   }).join('');
-  
   el.innerHTML = html;
 }
 
-function selectDoctor(id){
-  selectedDoctorId = id;
-  renderDocList();
-  renderMain();
-  updateMobileSelection();
-}
+function selectDoctor(id){ selectedDoctorId = id; renderDocList(); renderMain(); updateMobileSelection(); }
+function updateMobileSelection(){ const app = document.getElementById('appContainer'); if(!app) return; if(selectedDoctorId){ app.classList.add('has-selection'); app.classList.remove('no-selection'); } else { app.classList.remove('has-selection'); app.classList.add('no-selection'); } }
+window.backToList = function(){ selectedDoctorId = null; renderDocList(); renderMain(); updateMobileSelection(); };
 
-function updateMobileSelection(){
-  const app = document.getElementById('appContainer');
-  if(!app) return;
-  if(selectedDoctorId){
-    app.classList.add('has-selection');
-    app.classList.remove('no-selection');
-  } else {
-    app.classList.remove('has-selection');
-    app.classList.add('no-selection');
-  }
-}
-
-window.backToList = function(){
-  selectedDoctorId = null;
-  renderDocList();
-  renderMain();
-  updateMobileSelection();
-};
-
-// ============================================
-// DOCTOR DETAIL
-// ============================================
 function renderMain(){
-  const el = document.getElementById('mainArea');
-  if(!el) return;
-  if(!selectedDoctorId){
-    el.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>';
-    return;
-  }
-  const d = doctors.find(x=>x.id===selectedDoctorId);
-  if(!d || d.deleted){ selectedDoctorId=null; renderMain(); return; }
-  
+  const el = document.getElementById('mainArea'); if(!el) return;
+  if(!selectedDoctorId){ el.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>'; return; }
+  const d = doctors.find(x=>x.id===selectedDoctorId); if(!d || d.deleted){ selectedDoctorId=null; renderMain(); return; }
   const cr = doctorCredits(d), total = totalEarned(d), req = Number(d.creditReq||0), rem = remainingCredits(d);
-  const c = d.card||{}, f = d.finance||{};
-  const rem$ = Math.max(0, Number(f.total||0)-Number(f.paid||0));
-  const complete = rem===0 && req>0;
-  
-  const statusMap = {
-    'in_progress': {txt: '⚡ در حال اجرا', cls: 'blue'},
-    'completed': {txt: '🏆 تمام شده', cls: 'green'},
-    'undecided': {txt: '⏳ بلاتکلیف', cls: 'yellow'},
-    'regular': {txt: '⭐ مشتری ثابت', cls: 'purple'}
-  };
-  const st = statusMap[d.status || 'in_progress'];
-  const isDue = d.status === 'regular' && d.reminderDate && d.reminderDate <= getShamsiToday();
-
+  const c = d.card||{}, f = d.finance||{}, rem$ = Math.max(0, Number(f.total||0)-Number(f.paid||0)), complete = rem===0 && req>0;
+  const statusMap = { 'in_progress': {txt: '⚡ در حال اجرا', cls: 'blue'}, 'completed': {txt: '🏆 تمام شده', cls: 'green'}, 'undecided': {txt: '⏳ بلاتکلیف', cls: 'yellow'}, 'regular': {txt: '⭐ مشتری ثابت', cls: 'purple'} };
+  const st = statusMap[d.status || 'in_progress'], isDue = d.status === 'regular' && d.reminderDate && d.reminderDate <= getShamsiToday();
   el.innerHTML = `
     <button class="back-btn" onclick="backToList()">← بازگشت به لیست</button>
     <div class="doc-header">
       <div class="top">
         <div>
-          <h2>👨‍⚕️ ${esc(fullName(d))} <span class="badge blue">${esc(d.spec||'—')}</span>
-            <span class="badge ${st.cls}">${st.txt}</span>
-            ${complete?'<span class="badge green">✔ امتیاز کامل</span>':'<span class="badge red">⚠️ '+num(rem)+' امتیاز کم</span>'}
-            ${rem$>0?'<span class="badge yellow">💸 بدهکار</span>':''}
-          </h2>
+          <h2>👨‍⚕️ ${esc(fullName(d))} <span class="badge blue">${esc(d.spec||'—')}</span><span class="badge ${st.cls}">${st.txt}</span>${complete?'<span class="badge green">✔ امتیاز کامل</span>':'<span class="badge red">⚠️ '+num(rem)+' امتیاز کم</span>'}${rem$>0?'<span class="badge yellow">💸 بدهکار</span>':''}</h2>
           <div class="meta">📞 <span class="ltr">${esc(d.phone || '—')}</span> ${d.year?' | 📅 <span class="ltr">'+esc(d.year)+'</span>':''}</div>
           ${d.reminderDate ? `<div class="meta" style="color:${isDue?'var(--danger)':'var(--purple)'};font-weight:700">⏰ تاریخ یادآوری: ${d.reminderDate} ${isDue?'(سررسید شده!)':''}</div>` : ''}
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
           <div class="credentials">
-            <div class="cred-box">
-              <div class="cred-label">رمز سامانه</div>
-              <div class="cred-value ltr"><span>${esc(d.pass||'—')}</span><button class="copy-btn" onclick="copyText('${esc(d.pass||'')}',this)">📋</button></div>
-            </div>
-            <div class="cred-box">
-              <div class="cred-label">کد ملی</div>
-              <div class="cred-value ltr"><span>${esc(d.nat||'—')}</span><button class="copy-btn" onclick="copyText('${esc(d.nat||'')}',this)">📋</button></div>
-            </div>
+            <div class="cred-box"><div class="cred-label">رمز سامانه</div><div class="cred-value ltr"><span>${esc(d.pass||'—')}</span><button class="copy-btn" onclick="copyText('${esc(d.pass||'')}',this)">📋</button></div></div>
+            <div class="cred-box"><div class="cred-label">کد ملی</div><div class="cred-value ltr"><span>${esc(d.nat||'—')}</span><button class="copy-btn" onclick="copyText('${esc(d.nat||'')}',this)">📋</button></div></div>
           </div>
           <div style="display:flex;gap:5px;flex-direction:column">
             <button class="mini green" onclick="openIRCME('${esc(d.nat||'')}','${esc(d.pass||'')}')">🔗 ورود به آموزش مداوم</button>
@@ -857,17 +716,7 @@ function renderMain(){
         <div class="info-cell">✅ پرداختی: <b style="color:var(--success)">${num(f.paid||0)}</b></div>
         <div class="info-cell">⏳ باقی: <b style="color:${rem$>0?'var(--danger)':'var(--success)'}">${num(rem$)}</b></div>
       </div>
-      ${(c.num||c.cvv2||c.pass2)?`
-      <div style="margin-top:8px">
-        <button class="mini danger" onclick="toggleCard('card_${d.id}',this)">👁 نمایش کارت بانکی</button>
-        <div id="card_${d.id}" class="hidden" style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:6px;margin-top:6px">
-          <div class="info-cell">شماره کارت: <b class="ltr">${esc(c.num||'—')}</b> <button class="copy-btn" onclick="copyText('${esc(c.num||'')}',this)">📋</button></div>
-          <div class="info-cell">ماه: <b class="ltr">${esc(c.m||'--')}</b></div>
-          <div class="info-cell">سال: <b class="ltr">${esc(c.y||'--')}</b></div>
-          <div class="info-cell">CVV2: <b class="ltr">${esc(c.cvv2||'—')}</b></div>
-          <div class="info-cell">رمز۲: <b class="ltr">${esc(c.pass2||'—')}</b></div>
-        </div>
-      </div>`:''}
+      ${(c.num||c.cvv2||c.pass2)?`<div style="margin-top:8px"><button class="mini danger" onclick="toggleCard('card_${d.id}',this)">👁 نمایش کارت بانکی</button><div id="card_${d.id}" class="hidden" style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:6px;margin-top:6px"><div class="info-cell">شماره کارت: <b class="ltr">${esc(c.num||'—')}</b> <button class="copy-btn" onclick="copyText('${esc(c.num||'')}',this)">📋</button></div><div class="info-cell">ماه: <b class="ltr">${esc(c.m||'--')}</b></div><div class="info-cell">سال: <b class="ltr">${esc(c.y||'--')}</b></div><div class="info-cell">CVV2: <b class="ltr">${esc(c.cvv2||'—')}</b></div><div class="info-cell">رمز۲: <b class="ltr">${esc(c.pass2||'—')}</b></div></div></div>`:''}
     </div>
     <div class="events-grid">
       ${renderEventSection(d, 'وبینار', '💻', 'var(--purple)')}
@@ -879,32 +728,20 @@ function renderMain(){
 
 function eventComplete(e){
   if(e.purchase !== 'انجام شد') return false;
-  if(e.type === 'وبینار'){
-    if(e.attend !== 'انجام شد') return false;
-    if(e.exam === 'رد') return false;
-    if(e.exam === 'ثبت نشده') return false;
-  }
-  if(e.type === 'حضوری'){
-    if(e.attend !== 'انجام شد') return false;
-  }
+  if(e.type === 'وبینار'){ if(e.attend !== 'انجام شد') return false; if(e.exam === 'رد' || e.exam === 'ثبت نشده') return false; }
+  if(e.type === 'حضوری'){ if(e.attend !== 'انجام شد') return false; }
   return true;
 }
 
 function renderEventSection(d, type, icon, color){
   const evs = (d.events||[]).filter(e=>e.type===type).sort((a,b)=>{
-    const aComp = eventComplete(a);
-    const bComp = eventComplete(b);
-    if(aComp && !bComp) return 1;
-    if(!aComp && bComp) return -1;
-    if(a.date && b.date){
-      return a.date.localeCompare(b.date);
-    }
-    if(a.date && !b.date) return -1;
-    if(!a.date && b.date) return 1;
+    const aComp = eventComplete(a), bComp = eventComplete(b);
+    if(aComp && !bComp) return 1; if(!aComp && bComp) return -1;
+    if(a.date && b.date){ return a.date.localeCompare(b.date); }
+    if(a.date && !b.date) return -1; if(!a.date && b.date) return 1;
     return (b.createdAt||0)-(a.createdAt||0);
   });
-  const totalCredit = evs.reduce((s,e)=>s+eventCredit(e),0);
-  const sumAllCredit = evs.reduce((s,e)=>s+Number(e.credit||0),0);
+  const totalCredit = evs.reduce((s,e)=>s+eventCredit(e),0), sumAllCredit = evs.reduce((s,e)=>s+Number(e.credit||0),0);
   return `
     <div class="ev-section">
       <div class="ev-head" style="border-right:3px solid ${color}">
@@ -915,28 +752,18 @@ function renderEventSection(d, type, icon, color){
           <button class="add-btn" onclick="openEventModal(null, '${type}')">➕</button>
         </div>
       </div>
-      <div class="ev-body">
-        ${evs.length ? evs.map(e=>renderEventRow(e)).join('') : `<div class="empty">هنوز ${type}ی ثبت نشده</div>`}
-      </div>
+      <div class="ev-body">${evs.length ? evs.map(e=>renderEventRow(e)).join('') : `<div class="empty">هنوز ${type}ی ثبت نشده</div>`}</div>
     </div>
   `;
 }
 
 function renderEventRow(e){
-  const state = eventState(e);
-  const earned = state==='earned';
-  const failed = state==='failed';
-  const purchaseTxt = e.purchase==='انجام شد' ? '🛒 خرید شده' : '🛒 خرید نشده';
-  const attendTxt = e.attend==='انجام شد' ? '🎟 شرکت شده' : '🎟 شرکت نشده';
-  let examTxt = '📝 آزمون نداده';
-  if(e.exam==='قبول') examTxt = '📝 آزمون داده شده';
-  else if(e.exam==='رد') examTxt = '📝 آزمون رد شده';
+  const state = eventState(e), earned = state==='earned', failed = state==='failed';
+  const purchaseTxt = e.purchase==='انجام شد' ? '🛒 خرید شده' : '🛒 خرید نشده', attendTxt = e.attend==='انجام شد' ? '🎟 شرکت شده' : '🎟 شرکت نشده';
+  let examTxt = '📝 آزمون نداده'; if(e.exam==='قبول') examTxt = '📝 آزمون داده شده'; else if(e.exam==='رد') examTxt = '📝 آزمون رد شده';
   return `
     <div class="event-row ${state}">
-      <div class="event-title" style="display:flex;align-items:center;gap:8px;font-size:15px">
-        <span>${e.num?esc(e.num)+' ':''}${e.title?esc(e.title):''}${!e.num&&!e.title?'رویداد':''}</span>
-        ${e.num?`<button class="copy-btn" style="font-size:13px;padding:3px 8px" onclick="copyText('${esc(e.num)}',this)">📋</button>`:''}
-      </div>
+      <div class="event-title" style="display:flex;align-items:center;gap:8px;font-size:15px"><span>${e.num?esc(e.num)+' ':''}${e.title?esc(e.title):''}${!e.num&&!e.title?'رویداد':''}</span>${e.num?`<button class="copy-btn" style="font-size:13px;padding:3px 8px" onclick="copyText('${esc(e.num)}',this)">📋</button>`:''}</div>
       <div class="event-meta" style="font-size:15px!important;font-weight:600;margin-top:5px">${e.date?'📅 <span class="ltr">'+esc(e.date)+'</span>':''}${e.time?' ⏰ <span class="ltr">'+esc(e.time)+'</span>':''}</div>
       <div class="event-credit"><span style="font-size:19px;font-weight:800;color:${earned?'var(--success)':(failed?'var(--danger)':'var(--muted)')}">${e.credit?num(e.credit):'—'} امتیاز</span></div>
       <div class="status-group" style="${e.type==='وبینار'?'grid-template-columns:1fr 1fr 1fr':(e.type==='غیر حضوری'?'grid-template-columns:1fr 1fr':'grid-template-columns:1fr 1fr')}">
@@ -944,10 +771,7 @@ function renderEventRow(e){
         ${e.type!=='غیر حضوری'?`<button class="stat-pill ${e.attend==='انجام شد'?'ok':''}" onclick="cycleStatus('${e.id}','attend')">${attendTxt}</button>`:''}
         ${e.type==='وبینار'?`<button class="stat-pill ${e.exam==='قبول'?'ok':e.exam==='رد'?'no':'neu'}" onclick="cycleStatus('${e.id}','exam')">${examTxt}</button>`:''}
       </div>
-      <div class="event-actions">
-        <button class="mini" onclick="openEventModal('${e.id}')">✏️</button>
-        <button class="mini danger" onclick="delEvent('${e.id}')">🗑</button>
-      </div>
+      <div class="event-actions"><button class="mini" onclick="openEventModal('${e.id}')">✏️</button><button class="mini danger" onclick="delEvent('${e.id}')">🗑</button></div>
     </div>`;
 }
 
@@ -956,305 +780,172 @@ window.cycleStatus = function(eventId, field){
   const e = (d.events||[]).find(x=>x.id===eventId); if(!e) return;
   if(field==='exam'){ const o=['ثبت نشده','قبول','رد']; e.exam = o[(o.indexOf(e.exam)+1)%3]; }
   else { e[field] = e[field]==='انجام شد' ? 'انجام نشد' : 'انجام شد'; }
-  d.updatedAt = Date.now();
-  save(); renderMain(); renderDocList();
+  d.updatedAt = Date.now(); save(); renderMain(); renderDocList();
 };
 
 window.delEvent = function(eventId){
   if(!confirm('حذف شود؟')) return;
   const d = doctors.find(x=>x.id===selectedDoctorId); if(!d) return;
-  d.events = (d.events||[]).filter(x=>x.id!==eventId);
-  d.updatedAt = Date.now();
+  d.events = (d.events||[]).filter(x=>x.id!==eventId); d.updatedAt = Date.now();
   save(); renderMain(); renderDocList();
 };
 
 window.delDoctor = function(id){
   if(!confirm('این پزشک حذف شود؟')) return;
-  const d = doctors.find(x=>x.id===id);
-  if(!d) return;
-  d.deleted = true;
-  d.updatedAt = Date.now();
+  const d = doctors.find(x=>x.id===id); if(!d) return;
+  d.deleted = true; d.updatedAt = Date.now();
   if(selectedDoctorId===id) selectedDoctorId = null;
   save(); renderAll();
 };
 
-window.goDoctor = function(id){
-  switchTab('doctors');
-  selectDoctor(id);
-};
-
-window.toggleCard = function(id, btn){
-  const el = document.getElementById(id);
-  el.classList.toggle('hidden');
-  btn.textContent = el.classList.contains('hidden') ? '👁 نمایش کارت بانکی' : '🙈 مخفی';
-};
+window.goDoctor = function(id){ switchTab('doctors'); selectDoctor(id); };
+window.toggleCard = function(id, btn){ const el = document.getElementById(id); el.classList.toggle('hidden'); btn.textContent = el.classList.contains('hidden') ? '👁 نمایش کارت بانکی' : '🙈 مخفی'; };
 
 window.copyText = function(text, btn){
   if(!text || text==='—'){ toast('⚠️ چیزی برای کپی نیست'); return; }
   var success = false;
-  try {
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.top = '-9999px';
-    ta.style.left = '-9999px';
-    ta.setAttribute('readonly', '');
-    document.body.appendChild(ta);
-    ta.select();
-    ta.setSelectionRange(0, ta.value.length);
-    success = document.execCommand('copy');
-    document.body.removeChild(ta);
-  } catch(e){}
-  
-  if(!success && navigator.clipboard){
-    navigator.clipboard.writeText(text).then(function(){
-      showCopied(btn);
-    }).catch(function(){
-      toast('❌ کپی نشد — دستی کپی کنید');
-    });
-    return;
-  }
-  
-  if(success){
-    showCopied(btn);
-  } else {
-    toast('❌ کپی نشد — دستی کپی کنید');
-  }
+  try { var ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.top = '-9999px'; ta.setAttribute('readonly', ''); document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, ta.value.length); success = document.execCommand('copy'); document.body.removeChild(ta); } catch(e){}
+  if(!success && navigator.clipboard){ navigator.clipboard.writeText(text).then(function(){ showCopied(btn); }).catch(function(){ toast('❌ کپی نشد'); }); return; }
+  if(success){ showCopied(btn); } else { toast('❌ کپی نشد'); }
 };
 
 function showCopied(btn){
-  if(btn){
-    var old = btn.textContent;
-    btn.textContent = '✅';
-    btn.classList.add('copied');
-    setTimeout(function(){
-      btn.textContent = old;
-      btn.classList.remove('copied');
-    }, 1500);
-  }
+  if(btn){ var old = btn.textContent; btn.textContent = '✅'; btn.classList.add('copied'); setTimeout(function(){ btn.textContent = old; btn.classList.remove('copied'); }, 1500); }
   toast('📋 کپی شد');
 }
 
-// ============================================
-// MODALS
-// ============================================
-window.openModal = function(html){
-  document.getElementById('modalHost').innerHTML = `<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal">${html}</div></div>`;
-};
+window.openModal = function(html){ document.getElementById('modalHost').innerHTML = `<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal">${html}</div></div>`; };
 window.closeModal = function(){ document.getElementById('modalHost').innerHTML=''; };
 
 window.openDoctorModal = function(editId){
-  const d = editId ? doctors.find(x=>x.id===editId) : null;
-  const c = d?.card || {}, f = d?.finance || {};
+  const d = editId ? doctors.find(x=>x.id===editId) : null; const c = d?.card || {}, f = d?.finance || {};
   openModal(`
     <h2>${d?'✏️ ویرایش':'➕ ثبت'} پزشک</h2>
     <form id="mDoctorForm" autocomplete="off">
       <input type="hidden" id="mEditId" value="${d?.id||''}">
-      
       <div class="sect">📌 وضعیت و یادآوری</div>
       <div class="row">
-        <div><label>وضعیت مشتری</label>
-          <select id="mStatus">
-            <option value="in_progress" ${(d?.status||'in_progress')==='in_progress'?'selected':''}>⚡ در حال اجرا</option>
-            <option value="completed" ${d?.status==='completed'?'selected':''}>🏆 تمام شده</option>
-            <option value="undecided" ${d?.status==='undecided'?'selected':''}>⏳ بلاتکلیف</option>
-            <option value="regular" ${d?.status==='regular'?'selected':''}>⭐ مشتری ثابت</option>
-          </select>
-        </div>
-        <div><label>تاریخ یادآوری (سررسید)</label><input autocomplete="off" dir="ltr" placeholder="مثلا 1405/02/15" style="text-align:center" id="mReminderDate" value="${esc(d?.reminderDate||'')}"></div>
+        <div><label>وضعیت مشتری</label><select id="mStatus"><option value="in_progress" ${(d?.status||'in_progress')==='in_progress'?'selected':''}>⚡ در حال اجرا</option><option value="completed" ${d?.status==='completed'?'selected':''}>🏆 تمام شده</option><option value="undecided" ${d?.status==='undecided'?'selected':''}>⏳ بلاتکلیف</option><option value="regular" ${d?.status==='regular'?'selected':''}>⭐ مشتری ثابت</option></select></div>
+        <div><label>تاریخ یادآوری (سررسید)</label><input autocomplete="off" dir="ltr" placeholder="1405/02/15" style="text-align:center" id="mReminderDate" value="${esc(d?.reminderDate||'')}"></div>
       </div>
-
       <div class="sect">👤 اطلاعات فردی</div>
       <div class="row">
-        <!-- ستون راست -->
-        <div>
-          <label>نام *</label>
-          <input autocomplete="off" id="mFirstName" required value="${esc(d?.firstName||'')}">
-          
-          <label>کد ملی *</label>
-          <input autocomplete="off" dir="ltr" style="text-align:center" id="mNat" required maxlength="10" value="${esc(d?.nat||'')}">
-          
-          <label>رمز سامانه *</label>
-          <input autocomplete="off" id="mPass" required value="${esc(d?.pass||'')}">
-          
-          <label>شماره موبایل</label>
-          <input autocomplete="off" dir="ltr" style="text-align:center" id="mPhone" value="${esc(d?.phone||'')}">
-        </div>
-        
-        <!-- ستون چپ -->
-        <div>
-          <label>نام خانوادگی *</label>
-          <input autocomplete="off" id="mLastName" required value="${esc(d?.lastName||'')}">
-          
-          <label>تخصص</label>
-          <input autocomplete="off" id="mSpec" value="${esc(d?.spec||'')}">
-          
-          <label>امتیاز درخواستی</label>
-          <input autocomplete="off" dir="ltr" style="text-align:center" id="mCreditReq" value="${esc(d?.creditReq||'')}">
-          
-          <label>تمدید کارنامه (سال)</label>
-          <input autocomplete="off" dir="ltr" style="text-align:center" id="mYear" value="${esc(d?.year||'')}">
-        </div>
+        <div><label>نام *</label><input autocomplete="off" id="mFirstName" required value="${esc(d?.firstName||'')}"><label>کد ملی *</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mNat" required maxlength="10" value="${esc(d?.nat||'')}"><label>رمز سامانه *</label><input autocomplete="off" id="mPass" required value="${esc(d?.pass||'')}"><label>شماره موبایل</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPhone" value="${esc(d?.phone||'')}"></div>
+        <div><label>نام خانوادگی *</label><input autocomplete="off" id="mLastName" required value="${esc(d?.lastName||'')}"><label>تخصص</label><input autocomplete="off" id="mSpec" value="${esc(d?.spec||'')}"><label>امتیاز درخواستی</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCreditReq" value="${esc(d?.creditReq||'')}"><label>تمدید کارنامه</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mYear" value="${esc(d?.year||'')}"></div>
       </div>
-      
-      <div class="row">
-        <div><label>مالک</label>
-          <select id="mOwner">
-            <option value="morteza" ${(d?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='morteza'?'selected':''}>مرتضی</option>
-            <option value="parvin" ${(d?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='parvin'?'selected':''}>پروین</option>
-          </select>
-        </div>
-        <div></div>
-      </div>
-
+      <div class="row"><div><label>مالک</label><select id="mOwner"><option value="morteza" ${(d?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='morteza'?'selected':''}>مرتضی</option><option value="parvin" ${(d?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='parvin'?'selected':''}>پروین</option></select></div><div></div></div>
       <div class="sect">💳 کارت بانکی (اختیاری)</div>
-      <div class="row">
-        <div><label>شماره کارت</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"></div>
-        <div><label>CVV2</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCvv2" maxlength="4" value="${esc(c.cvv2||'')}"></div>
-      </div>
-      <div class="row">
-        <div><label>ماه انقضا</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardM" maxlength="2" value="${esc(c.m||'')}"></div>
-        <div><label>سال انقضا</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardY" maxlength="2" value="${esc(c.y||'')}"></div>
-      </div>
-      <div class="row">
-        <div><label>رمز دوم کارت</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPass2" value="${esc(c.pass2||'')}"></div>
-        <div></div>
-      </div>
+      <div class="row"><div><label>شماره کارت</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"></div><div><label>CVV2</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCvv2" maxlength="4" value="${esc(c.cvv2||'')}"></div></div>
+      <div class="row"><div><label>ماه</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardM" maxlength="2" value="${esc(c.m||'')}"></div><div><label>سال</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardY" maxlength="2" value="${esc(c.y||'')}"></div></div>
+      <div class="row"><div><label>رمز دوم</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPass2" value="${esc(c.pass2||'')}"></div><div></div></div>
       <div class="sect">💰 هزینه‌ها (تومان)</div>
-      <div class="row3">
-        <div><label>کل هزینه</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mTotal" value="${f.total?Number(f.total).toLocaleString('en-US'):''}"></div>
-        <div><label>پرداختی</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPaid" value="${f.paid?Number(f.paid).toLocaleString('en-US'):''}"></div>
-        <div><label>باقی‌مانده</label><input id="mRem" disabled style="opacity:.7"></div>
-      </div>
-      <button class="btn" type="submit">${d?'💾 ذخیره':'➕ ثبت پزشک'}</button>
-      <button class="btn ghost" type="button" onclick="closeModal()">انصراف</button>
+      <div class="row3"><div><label>کل</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mTotal" value="${f.total?Number(f.total).toLocaleString('en-US'):''}"></div><div><label>پرداختی</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPaid" value="${f.paid?Number(f.paid).toLocaleString('en-US'):''}"></div><div><label>باقی</label><input id="mRem" disabled style="opacity:.7"></div></div>
+      <button class="btn" type="submit">${d?'💾 ذخیره':'➕ ثبت پزشک'}</button><button class="btn ghost" type="button" onclick="closeModal()">انصراف</button>
     </form>
   `);
-  const parseNum = inp => {
-    var v = toEnDigits(String(inp.value)).replace(/,/g,'').replace(/[^0-9]/g,'');
-    return Number(v) || 0;
-  };
-  const fmtNum = inp => {
-    var v = toEnDigits(String(inp.value)).replace(/[^0-9]/g,'');
-    inp.value = v ? parseInt(v).toLocaleString('en-US') : '';
-  };
+  const parseNum = inp => { var v = toEnDigits(String(inp.value)).replace(/,/g,'').replace(/[^0-9]/g,''); return Number(v) || 0; };
+  const fmtNum = inp => { var v = toEnDigits(String(inp.value)).replace(/[^0-9]/g,''); inp.value = v ? parseInt(v).toLocaleString('en-US') : ''; };
   const upd = () => { const t=parseNum(document.getElementById('mTotal')), p=parseNum(document.getElementById('mPaid')); document.getElementById('mRem').value = Math.max(0,t-p).toLocaleString('en-US'); };
-  document.getElementById('mTotal').addEventListener('input',function(){fmtNum(this);upd();});
-  document.getElementById('mPaid').addEventListener('input',function(){fmtNum(this);upd();});
-  upd();
-
+  document.getElementById('mTotal').addEventListener('input',function(){fmtNum(this);upd();}); document.getElementById('mPaid').addEventListener('input',function(){fmtNum(this);upd();}); upd();
   document.getElementById('mDoctorForm').onsubmit = e => {
     e.preventDefault();
     const gv = id => toEnDigits(document.getElementById(id)?.value || '').trim();
-    const data = {
-      firstName:document.getElementById('mFirstName').value.trim(),
-      lastName:document.getElementById('mLastName').value.trim(),
-      spec:document.getElementById('mSpec').value.trim(),
-      nat:gv('mNat'), phone:gv('mPhone'), creditReq:Number(gv('mCreditReq')||0),
-      pass:document.getElementById('mPass').value, year:gv('mYear'),
-      status: document.getElementById('mStatus').value,
-      reminderDate: gv('mReminderDate'),
-      card:{ num:gv('mCardNum'), m:gv('mCardM').padStart(2,'0'), y:gv('mCardY').padStart(2,'0'), cvv2:gv('mCvv2'), pass2:gv('mPass2') },
-      finance:{ total:parseNum(document.getElementById('mTotal')), paid:parseNum(document.getElementById('mPaid')) },
-      owner: document.getElementById('mOwner').value
-    };
+    const data = { firstName:document.getElementById('mFirstName').value.trim(), lastName:document.getElementById('mLastName').value.trim(), spec:document.getElementById('mSpec').value.trim(), nat:gv('mNat'), phone:gv('mPhone'), creditReq:Number(gv('mCreditReq')||0), pass:document.getElementById('mPass').value, year:gv('mYear'), status: document.getElementById('mStatus').value, reminderDate: gv('mReminderDate'), card:{ num:gv('mCardNum'), m:gv('mCardM').padStart(2,'0'), y:gv('mCardY').padStart(2,'0'), cvv2:gv('mCvv2'), pass2:gv('mPass2') }, finance:{ total:parseNum(document.getElementById('mTotal')), paid:parseNum(document.getElementById('mPaid')) }, owner: document.getElementById('mOwner').value };
     const id = document.getElementById('mEditId').value;
-    if(id){ 
-      const doctor = doctors.find(x=>x.id===id);
-      if(doctor){ Object.assign(doctor, data); doctor.updatedAt = Date.now(); toast('✅ ویرایش شد'); }
-    }
+    if(id){ const doctor = doctors.find(x=>x.id===id); if(doctor){ Object.assign(doctor, data); doctor.updatedAt = Date.now(); toast('✅ ویرایش شد'); } }
     else { const n = { id:uid(), ...data, events:[], createdAt:Date.now(), updatedAt: Date.now() }; doctors.unshift(n); selectedDoctorId = n.id; toast('✅ ثبت شد'); }
     save(); closeModal(); renderAll();
   };
 };
 
 window.openEventModal = function(editId, presetType){
-  const d = doctors.find(x=>x.id===selectedDoctorId);
-  if(!d){ toast('⚠️ ابتدا یک پزشک انتخاب کنید'); return; }
-  const existing = editId ? (d.events||[]).find(x=>x.id===editId) : null;
-  const isEdit = !!existing;
-  let type = existing?.type || presetType || 'وبینار';
+  const d = doctors.find(x=>x.id===selectedDoctorId); if(!d){ toast('⚠️ ابتدا یک پزشک انتخاب کنید'); return; }
+  const existing = editId ? (d.events||[]).find(x=>x.id===editId) : null; const isEdit = !!existing; let type = existing?.type || presetType || 'وبینار';
   openModal(`
     <h2>${isEdit?'✏️ ویرایش':'➕ افزودن'} رویداد — ${esc(fullName(d))}</h2>
-    <div class="type-picker">
-      <button type="button" class="type-pick ${type==='وبینار'?'active':''}" data-t="وبینار"><span class="icon">💻</span>وبینار</button>
-      <button type="button" class="type-pick ${type==='حضوری'?'active':''}" data-t="حضوری"><span class="icon">🏢</span>حضوری</button>
-      <button type="button" class="type-pick ${type==='غیر حضوری'?'active':''}" data-t="غیر حضوری"><span class="icon">📁</span>غیر حضوری</button>
-    </div>
-    <form id="mEventForm" autocomplete="off">
-      <div id="dynFields"></div>
-      <button class="btn" type="submit">${isEdit?'💾 ذخیره':'➕ افزودن'}</button>
-      <button class="btn ghost" type="button" onclick="closeModal()">انصراف</button>
-    </form>
+    <div class="type-picker"><button type="button" class="type-pick ${type==='وبینار'?'active':''}" data-t="وبینار"><span class="icon">💻</span>وبینار</button><button type="button" class="type-pick ${type==='حضوری'?'active':''}" data-t="حضوری"><span class="icon">🏢</span>حضوری</button><button type="button" class="type-pick ${type==='غیر حضوری'?'active':''}" data-t="غیر حضوری"><span class="icon">📁</span>غیر حضوری</button></div>
+    <form id="mEventForm" autocomplete="off"><div id="dynFields"></div><button class="btn" type="submit">${isEdit?'💾 ذخیره':'➕ افزودن'}</button><button class="btn ghost" type="button" onclick="closeModal()">انصراف</button></form>
   `);
-  document.querySelectorAll('.type-pick').forEach(b=>b.onclick=()=>{
-    type = b.dataset.t;
-    document.querySelectorAll('.type-pick').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    renderDynFields();
-  });
+  document.querySelectorAll('.type-pick').forEach(b=>b.onclick=()=>{ type = b.dataset.t; document.querySelectorAll('.type-pick').forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderDynFields(); });
   function sel(id, opts, cur){ return `<select id="${id}">${opts.map(o=>{const v=o.v!==undefined?o.v:o;const l=o.l!==undefined?o.l:o;return `<option value="${v}" ${String(v)===String(cur)?'selected':''}>${l}</option>`;}).join('')}</select>`; }
   function renderDynFields(){
-    const e = existing || {};
-    const pd = parseDate(e.date);
-    const [eh, em] = (e.time||'20:00').split(':');
-    if(type==='غیر حضوری'){
-      document.getElementById('dynFields').innerHTML = `
-        <label>شناسه برنامه *</label>
-        <input autocomplete="off" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
-        <label>امتیاز</label>
-        <input autocomplete="off" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">
-        <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:8px;padding:7px;font-size:11px;color:var(--warn);margin-top:7px">📁 نیازی به تاریخ و ساعت ندارد</div>`;
-    } else if(type==='حضوری'){
-      document.getElementById('dynFields').innerHTML = `
-        <label>شناسه برنامه *</label>
-        <input autocomplete="off" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
-        <label>تاریخ (شمسی)</label>
-        <div class="row3">${sel('eYear',YEARS,pd.y)}${sel('eMonth',MONTHS.map((m,i)=>({v:i+1,l:m})),pd.m)}${sel('eDay',DAYS,pd.d)}</div>
-        <label>امتیاز</label>
-        <input autocomplete="off" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">`;
-    } else {
-      document.getElementById('dynFields').innerHTML = `
-        <label>شناسه برنامه *</label>
-        <input autocomplete="off" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}">
-        <label>تاریخ (شمسی)</label>
-        <div class="row3">${sel('eYear',YEARS,pd.y)}${sel('eMonth',MONTHS.map((m,i)=>({v:i+1,l:m})),pd.m)}${sel('eDay',DAYS,pd.d)}</div>
-        <label>امتیاز</label>
-        <input autocomplete="off" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">`;
-    }
+    const e = existing || {}, pd = parseDate(e.date);
+    if(type==='غیر حضوری'){ document.getElementById('dynFields').innerHTML = `<label>شناسه برنامه *</label><input autocomplete="off" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}"><label>امتیاز</label><input autocomplete="off" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}"><div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:8px;padding:7px;font-size:11px;color:var(--warn);margin-top:7px">📁 نیازی به تاریخ و ساعت ندارد</div>`; }
+    else { document.getElementById('dynFields').innerHTML = `<label>شناسه برنامه *</label><input autocomplete="off" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}"><label>تاریخ (شمسی)</label><div class="row3">${sel('eYear',YEARS,pd.y)}${sel('eMonth',MONTHS.map((m,i)=>({v:i+1,l:m})),pd.m)}${sel('eDay',DAYS,pd.d)}</div><label>امتیاز</label><input autocomplete="off" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">`; }
   }
   renderDynFields();
   document.getElementById('mEventForm').onsubmit = ev => {
-    ev.preventDefault();
-    if(!d.events) d.events = [];
+    ev.preventDefault(); if(!d.events) d.events = [];
     const gv = id => toEnDigits(document.getElementById(id)?.value || '').trim();
     let data = { type, credit:Number(gv('eCredit')||0) };
     if(type==='غیر حضوری'){ data.num = gv('eNum'); data.title=''; data.date=''; data.time=''; }
-    else if(type==='حضوری'){ data.num = gv('eNum'); data.title = ''; data.date = formatDate(gv('eYear'),gv('eMonth'),gv('eDay')); data.time=''; }
     else { data.num = gv('eNum'); data.title=''; data.date = formatDate(gv('eYear'),gv('eMonth'),gv('eDay')); data.time = ''; }
     if(isEdit){ Object.assign(existing, data); toast('✅ ویرایش شد'); }
-    else {
-      if(type==='غیر حضوری' && offlinePurchasedToday(d)){
-        if(!confirm('⚠️ امروز غیر حضوری خریده‌اید. ادامه؟')) return;
-      }
-      d.events.unshift({ id:uid(), ...data, purchase:'انجام نشد', attend:'انجام نشد', exam:'ثبت نشده', createdAt:Date.now() });
-      toast('✅ اضافه شد');
-    }
-    d.updatedAt = Date.now();
-    save(); closeModal(); renderMain(); renderDocList();
+    else { if(type==='غیر حضوری' && offlinePurchasedToday(d)){ if(!confirm('⚠️ امروز غیر حضوری خریده‌اید. ادامه؟')) return; } d.events.unshift({ id:uid(), ...data, purchase:'انجام نشد', attend:'انجام نشد', exam:'ثبت نشده', createdAt:Date.now() }); toast('✅ اضافه شد'); }
+    d.updatedAt = Date.now(); save(); closeModal(); renderMain(); renderDocList();
   };
 };
 
 // ============================================
-// CALLS
+// CALLS & MISC
 // ============================================
-const callPhoneEl = document.getElementById('callPhone');
-if(callPhoneEl) callPhoneEl.addEventListener('input', updateCallInfo);
-
+const callPhoneEl = document.getElementById('callPhone'); if(callPhoneEl) callPhoneEl.addEventListener('input', updateCallInfo);
 function updateCallInfo(){
-  const p = normPhone(document.getElementById('callPhone').value);
-  const el = document.getElementById('callCreditInfo');
+  const p = normPhone(document.getElementById('callPhone').value); const el = document.getElementById('callCreditInfo');
   if(!p){ el.innerHTML=''; document.getElementById('callName').value=''; return; }
   const d = doctors.find(x=> !x.deleted && normPhone(x.phone)===p);
   if(!d){ el.innerHTML='<div style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.35);border-radius:12px;padding:14px"><h3 style="color:var(--danger);font-size:14px">❌ این شماره در لیست پزشکان نیست</h3></div>'; return; }
- 
+  document.getElementById('callName').value = fullName(d);
+  const cr = doctorCredits(d), req = Number(d.creditReq||0), total = totalEarned(d), rem = remainingCredits(d);
+  el.innerHTML = `<div style="background:linear-gradient(135deg,rgba(56,189,248,0.12),rgba(34,211,238,0.05));border:1px solid rgba(56,189,248,0.35);border-radius:12px;padding:14px;margin-bottom:10px"><h3 style="color:var(--accent);font-size:14px;margin-bottom:8px">👨‍⚕️ ${esc(fullName(d))} — ${esc(d.spec||'')}</h3><div style="font-size:12px;color:var(--muted);margin-bottom:8px">درخواستی: <b style="color:var(--accent)">${num(req)}</b> | کسب‌شده: <b style="color:var(--success)">${num(total)}</b> | کمبود: <b style="color:${rem>0?'var(--danger)':'var(--success)'}">${num(rem)}</b></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">${['حضوری','وبینار','غیر حضوری'].map(k=>`<div style="background:rgba(15,23,42,0.7);border:1px solid var(--border);border-radius:9px;padding:8px;text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">${typeIcon(k)} ${k}</div><div style="font-size:14px;font-weight:700;color:var(--accent)">${num(cr[k])}</div></div>`).join('')}</div></div>`;
+}
+
+document.getElementById('fCall').onsubmit = e => {
+  e.preventDefault();
+  calls.unshift({ id:uid(), owner:currentUser, phone:toEnDigits(document.getElementById('callPhone').value.trim()), name:document.getElementById('callName').value.trim(), subject:document.getElementById('callSubject').value, follow:document.getElementById('callFollow').value, note:document.getElementById('callNote').value.trim(), createdAt:Date.now(), updatedAt: Date.now() });
+  save(); e.target.reset(); document.getElementById('callCreditInfo').innerHTML=''; renderCalls(); toast('📞 ثبت شد');
+};
+
+function renderCalls(){
+  const searchEl = document.getElementById('searchCall'); if(!searchEl) return;
+  const q = searchEl.value.trim().toLowerCase(), f = document.getElementById('filterCall').value;
+  const arr = myCalls().filter(c=>{ if(f==='pending' && c.follow!=='پیگیری‌نشده') return false; if(f==='doing' && c.follow!=='در حال پیگیری') return false; if(f==='done' && c.follow!=='پیگیری‌شده') return false; if(q && !(c.phone.includes(q) || (c.name||'').toLowerCase().includes(q) || c.subject.toLowerCase().includes(q))) return false; return true; });
+  const el = document.getElementById('listCalls'); if(!arr.length){ el.innerHTML='<div class="empty">تماسی یافت نشد</div>'; return; }
+  const fCls = { 'پیگیری‌نشده':'red', 'در حال پیگیری':'yellow', 'پیگیری‌شده':'green' };
+  el.innerHTML = arr.map(c=>`<div style="background:rgba(15,23,42,0.6);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><div><div style="font-weight:700;font-size:13.5px">${c.name?esc(c.name):'ناشناس'} <span class="badge blue ltr">${esc(c.phone)}</span></div><div style="color:var(--muted);font-size:11px;margin-top:5px">🎯 ${esc(c.subject)} | 🕒 <span class="ltr">${dt(c.createdAt)}</span></div>${c.note?`<div style="background:rgba(56,189,248,0.08);padding:6px 10px;border-radius:8px;border-right:3px solid var(--accent);margin-top:6px;font-size:12px">${esc(c.note)}</div>`:''}</div><div><span class="badge ${fCls[c.follow]||'gray'}">${esc(c.follow)}</span></div></div><div class="actions"><button class="mini" onclick="cycleFollow('${c.id}')">تغییر پیگیری</button><button class="mini danger" onclick="delCall('${c.id}')">🗑 حذف</button></div></div>`).join('');
+}
+
+window.cycleFollow = function(id){ const c=calls.find(x=>x.id===id); if(!c) return; const o=['پیگیری‌نشده','در حال پیگیری','پیگیری‌شده']; c.follow=o[(o.indexOf(c.follow)+1)%3]; c.updatedAt = Date.now(); save(); renderCalls(); };
+window.delCall = function(id){ if(!confirm('حذف شود؟')) return; const c = calls.find(x=>x.id===id); if(!c) return; c.deleted = true; c.updatedAt = Date.now(); save(); renderCalls(); };
+
+function renderAll(){ renderDash(); renderDocList(); renderMain(); renderCalls(); }
+
+document.querySelectorAll('.tab').forEach(t=>{ t.onclick = () => switchTab(t.dataset.tab); });
+document.querySelectorAll('.mobile-nav button').forEach(b=>{ b.onclick = () => switchTab(b.dataset.tab); });
+document.getElementById('searchDoctor').addEventListener('input', renderDocList);
+document.getElementById('searchCall').addEventListener('input', renderCalls);
+document.getElementById('filterCall').addEventListener('change', renderCalls);
+
+window.openIRCME = function(nat, pass){ if(!nat || !pass){ toast('⚠️ کد ملی یا رمز سامانه موجود نیست'); return; } var url = 'https://www.ircme.ir/App_Web/%28Guest%29/Membership/Login.aspx?CenterID=25&u=' + encodeURIComponent(nat) + '&p=' + encodeURIComponent(pass); var w = window.open(url, '_blank'); if(!w || w.closed || typeof w.closed === 'undefined'){ window.location.href = url; } };
+
+function autoAttendEvents(){
+  var today = getShamsiToday(); if(!today) return; var changed = 0;
+  doctors.forEach(function(doc){ if(doc.deleted) return; (doc.events||[]).forEach(function(e){ if(e.purchase === 'انجام شد' && e.attend === 'انجام نشد' && e.date && e.date.length >= 8){ if(today > e.date){ e.attend = 'انجام شد'; changed++; } } }); if(changed > 0) doc.updatedAt = Date.now(); });
+  if(changed > 0){ save(); renderAll(); toast('✅ ' + changed + ' رویداد خودکار به «شرکت شده» تغییر یافت'); }
+}
+
+tick(); setInterval(tick, 30000);
+document.querySelectorAll('.user-picker button').forEach(b=>{ if(b.dataset.user === currentUser) b.classList.add('active'); else b.classList.remove('active'); });
+
+checkLogin();
+renderAll();
+
+setTimeout(syncNow, 500); setInterval(syncNow, 4000);
+document.addEventListener('visibilitychange', () => { if(!document.hidden) syncNow(); });
+window.addEventListener('online', () => syncNow());
+
+setTimeout(autoAttendEvents, 2000); setInterval(autoAttendEvents, 60000);
+document.addEventListener('visibilitychange', function(){ if(!document.hidden) autoAttendEvents(); });
+</script>
+</body>
+</html>
