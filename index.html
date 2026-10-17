@@ -110,20 +110,20 @@ textarea{resize:vertical;min-height:55px}
 .info-box .copy-btn:hover { background: rgba(56,189,248,0.3); color: #fff; }
 @media(max-width:768px){ .info-grid { grid-template-columns: 1fr 1fr; } }
 
-/* ===== New Bank Card Style ===== */
+/* ===== Bank Card Style (Exactly as sketched) ===== */
 .bank-card-wrapper{margin-top:14px}
 .bank-card{background:linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.95)); border:1px solid rgba(56,189,248,0.3); border-radius:16px; padding:16px; position:relative; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.3); backdrop-filter:blur(10px)}
 .bank-card::before{content:''; position:absolute; top:-50%; right:-20%; width:200px; height:200px; background:radial-gradient(circle, rgba(56,189,248,0.15) 0%, transparent 70%); border-radius:50%; pointer-events:none}
-.bank-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
-.bank-chip{width:45px; height:32px; background:linear-gradient(135deg, #fbbf24, #d97706); border-radius:6px; position:relative; box-shadow:inset 0 0 5px rgba(0,0,0,0.5)}
-.bank-chip::after{content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:25px; height:16px; border:1px solid rgba(0,0,0,0.2); border-radius:3px}
-.bank-logo{font-size:18px; font-weight:800; color:rgba(255,255,255,0.5); letter-spacing:1px}
-.bank-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;}
-.bank-cell{background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px; text-align:center; display:flex; flex-direction:column; gap:6px;}
-.bank-cell-label{font-size:11px; color:var(--muted); font-weight:600}
-.bank-cell-val{font-size:15px; font-weight:800; color:#fff; direction:ltr;}
-.bank-copy-btn{grid-column:span 4; background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.4); color:var(--accent); padding:10px; border-radius:10px; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer; transition:.2s; margin-top:4px;}
-.bank-copy-btn:hover{background:rgba(56,189,248,0.25); color:#fff;}
+.bank-row { display: flex; gap: 10px; width: 100%; position: relative; z-index: 1;}
+.bank-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.bank-box.card-number { flex: 3; display: flex; flex-direction: row; justify-content: space-between; padding: 10px 15px;}
+.bank-box.card-number .bank-label { margin-bottom: 0; font-size: 13px;}
+.bank-box.card-number .bank-val { font-size: 18px; letter-spacing: 1px;}
+.bank-box.other { flex: 1; }
+.bank-label { font-size: 11px; color: var(--muted); font-weight: 600; }
+.bank-val { font-size: 15px; font-weight: 800; color: #fff; direction: ltr; }
+.bank-box .copy-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: .2s; font-family: inherit; font-size:12px; margin:0;}
+.bank-box .copy-btn:hover { background: rgba(255,255,255,0.25); }
 
 /* ===== Events Layout (3 Columns) ===== */
 .events-layout{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-top:14px; align-items:start;}
@@ -192,12 +192,10 @@ textarea{resize:vertical;min-height:55px}
   .modal{max-width:100%;padding:16px;border-radius:16px}
   input,select,textarea{font-size:16px!important; padding:12px}
   
-  /* Bank Card Mobile Tweaks */
-  .bank-number{font-size:18px; letter-spacing:1px; margin-bottom:12px}
-  .bank-grid{grid-template-columns:1fr 1fr; gap:8px;}
-  .bank-cell{padding:8px;}
-  .bank-cell-val{font-size:14px;}
-  .bank-copy-btn{grid-column:span 2; padding:8px;}
+  /* Bank Row Mobile Tweaks (Wrap into 2 rows) */
+  .bank-row {flex-wrap: wrap;}
+  .bank-box.card-number {flex: 1 1 100%;}
+  .bank-box.other {flex: 1 1 calc(50% - 5px);}
   
   .events-layout{grid-template-columns:1fr;}
   .event-row{padding:12px}
@@ -767,32 +765,27 @@ function renderMain(){
       ${(c.num||c.cvv2||c.pass2)?`
       <div class="bank-card-wrapper">
         <div class="bank-card">
-          <div class="bank-header">
-            <div class="bank-chip"></div>
-            <div class="bank-logo">IRAN</div>
-          </div>
-          
-          <div class="bank-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
-            <div class="bank-cell" style="grid-column: span 4; display:flex; justify-content:space-between; align-items:center; padding:10px 15px;">
-              <span class="bank-cell-label" style="margin-bottom:0;">شماره کارت</span>
-              <span class="bank-cell-val" style="font-size:18px; letter-spacing:1px;">${esc(c.num||'—')}</span>
-              <button class="copy-btn" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:4px 10px; border-radius:6px; cursor:pointer;" onclick="copyText('${esc(c.num||'')}',this)">📋 کپی</button>
+          <div class="bank-row">
+            <div class="bank-box card-number">
+              <span class="bank-label">شماره کارت</span>
+              <span class="bank-val">${esc(c.num||'—')}</span>
+              <button class="copy-btn" onclick="copyText('${esc(c.num||'')}',this)">📋 کپی</button>
             </div>
-            <div class="bank-cell">
-              <div class="bank-cell-label">ماه</div>
-              <div class="bank-cell-val">${esc(c.m||'--')}</div>
+            <div class="bank-box other">
+              <div class="bank-label">ماه</div>
+              <div class="bank-val">${esc(c.m||'--')}</div>
             </div>
-            <div class="bank-cell">
-              <div class="bank-cell-label">سال</div>
-              <div class="bank-cell-val">${esc(c.y||'--')}</div>
+            <div class="bank-box other">
+              <div class="bank-label">سال</div>
+              <div class="bank-val">${esc(c.y||'--')}</div>
             </div>
-            <div class="bank-cell">
-              <div class="bank-cell-label">CVV2</div>
-              <div class="bank-cell-val">${esc(c.cvv2||'—')}</div>
+            <div class="bank-box other">
+              <div class="bank-label">CVV2</div>
+              <div class="bank-val">${esc(c.cvv2||'—')}</div>
             </div>
-            <div class="bank-cell">
-              <div class="bank-cell-label">رمز دوم</div>
-              <div class="bank-cell-val">${esc(c.pass2||'—')}</div>
+            <div class="bank-box other">
+              <div class="bank-label">رمز دوم</div>
+              <div class="bank-val">${esc(c.pass2||'—')}</div>
             </div>
           </div>
         </div>
