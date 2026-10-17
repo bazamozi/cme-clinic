@@ -93,15 +93,21 @@ textarea{resize:vertical;min-height:55px}
 .empty-state{text-align:center;color:var(--muted);padding:80px 20px}
 .empty-state .big{font-size:50px;display:block;margin-bottom:12px;opacity:.3}
 .doc-header{background:linear-gradient(135deg,rgba(56,189,248,0.08),rgba(34,211,238,0.02));border:1px solid rgba(56,189,248,0.2);border-radius:16px;padding:14px 16px;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,0.1)}
-.doc-header .top{display:flex;justify-content:space-between;align-items:start;gap:10px;flex-wrap:wrap}
-.doc-header h2{color:#fff;font-size:17px;font-weight:800;margin:0}
-.doc-header .meta{color:var(--muted);font-size:12.5px;margin-top:6px;line-height:1.8}
+.doc-header .top{display:flex;justify-content:space-between;align-items:start;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.doc-header h2{color:#fff;font-size:17px;font-weight:800;margin:0;display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+.doc-header .meta{color:var(--muted);font-size:12.5px;margin-top:4px;line-height:1.8}
 
 /* ===== Unified Info Grid ===== */
-.info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
-.info-box { background: rgba(15,23,42,0.5); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; font-size: 14px; font-weight: 700; transition: .2s;}
+.info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+.info-box { background: rgba(15,23,42,0.5); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; font-size: 13.5px; font-weight: 700; transition: .2s; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; position: relative;}
 .info-box:hover { border-color: rgba(56,189,248,0.4); }
-.info-box b { font-size: 16px; font-weight: 800; }
+.info-box .label { font-size: 11.5px; color: var(--muted); font-weight: 600; }
+.info-box .value { font-size: 16px; font-weight: 800; color: #fff; }
+.info-box .value.success { color: var(--success); }
+.info-box .value.danger { color: var(--danger); }
+.info-box .value.blue { color: var(--accent); }
+.info-box .copy-btn { position: absolute; top: 8px; left: 8px; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); color: var(--accent); padding: 2px 6px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: .2s;}
+.info-box .copy-btn:hover { background: rgba(56,189,248,0.3); color: #fff; }
 @media(max-width:768px){ .info-grid { grid-template-columns: 1fr 1fr; } }
 
 /* ===== New Bank Card Style ===== */
@@ -112,7 +118,6 @@ textarea{resize:vertical;min-height:55px}
 .bank-chip{width:45px; height:32px; background:linear-gradient(135deg, #fbbf24, #d97706); border-radius:6px; position:relative; box-shadow:inset 0 0 5px rgba(0,0,0,0.5)}
 .bank-chip::after{content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:25px; height:16px; border:1px solid rgba(0,0,0,0.2); border-radius:3px}
 .bank-logo{font-size:18px; font-weight:800; color:rgba(255,255,255,0.5); letter-spacing:1px}
-.bank-number{direction:ltr; text-align:center; font-size:22px; font-weight:800; letter-spacing:2px; color:#fff; margin-bottom:16px; text-shadow:0 2px 4px rgba(0,0,0,0.5); white-space:nowrap}
 .bank-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;}
 .bank-cell{background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px; text-align:center; display:flex; flex-direction:column; gap:6px;}
 .bank-cell-label{font-size:11px; color:var(--muted); font-weight:600}
@@ -120,14 +125,14 @@ textarea{resize:vertical;min-height:55px}
 .bank-copy-btn{grid-column:span 4; background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.4); color:var(--accent); padding:10px; border-radius:10px; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer; transition:.2s; margin-top:4px;}
 .bank-copy-btn:hover{background:rgba(56,189,248,0.25); color:#fff;}
 
-/* ===== Events Layout ===== */
-.events-layout{display:flex;flex-direction:column;gap:14px; margin-top:14px;}
-.ev-section{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:rgba(15,23,42,0.3); box-shadow:0 4px 15px rgba(0,0,0,0.1);}
+/* ===== Events Layout (3 Columns) ===== */
+.events-layout{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-top:14px; align-items:start;}
+.ev-section{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:rgba(15,23,42,0.3); box-shadow:0 4px 15px rgba(0,0,0,0.1); display:flex; flex-direction:column;}
 .ev-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(15,23,42,0.7);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px}
-.ev-head h3{font-size:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ev-head h3{font-size:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap; margin:0;}
 .ev-head .add-btn{background:rgba(56,189,248,0.1);border:1px solid var(--accent);color:var(--accent);padding:6px 14px;border-radius:8px;font-size:12.5px;cursor:pointer;font-family:inherit;transition:.2s;font-weight:700}
 .ev-head .add-btn:hover{background:rgba(56,189,248,0.2);box-shadow:0 0 10px rgba(56,189,248,0.2)}
-.ev-body{padding:12px}
+.ev-body{padding:12px; flex-grow:1;}
 .event-row{background:rgba(15,23,42,0.5);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;transition:.2s;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
 .event-row:hover{border-color:rgba(255,255,255,0.15);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
 .event-row.earned{border-right:4px solid var(--success);background:rgba(52,211,153,0.04)}
@@ -154,17 +159,14 @@ textarea{resize:vertical;min-height:55px}
 .type-pick .icon{font-size:20px;display:block;margin-bottom:4px}
 
 .mobile-nav{display:none}
-@media(max-width:768px){
+@media(max-width:900px){
   html, body{overflow-x:hidden!important;max-width:100vw}
   .wrap{overflow-x:hidden;max-width:100%}
   .main-area{overflow-x:hidden!important;max-width:100%}
   .doc-header{overflow-x:hidden;max-width:100%}
   .info-grid {grid-template-columns:1fr 1fr !important;}
   .info-box{font-size:13px!important;}
-  .info-box b{font-size:14px!important;}
-  .credentials{flex-wrap:wrap!important;width:100%;justify-content:center}
-  .cred-box{flex:1 1 45%;min-width:0!important}
-  .cred-value{font-size:14px!important}
+  .info-box .value{font-size:14px!important;}
   .doc-header .top > div:last-child{width:100%;flex-direction:row!important;flex-wrap:wrap;justify-content:flex-start!important;margin-top:8px}
   .info-cell{word-break:break-word;overflow-wrap:anywhere}
   [style*="grid-template-columns"]{max-width:100%;overflow:hidden}
@@ -197,6 +199,7 @@ textarea{resize:vertical;min-height:55px}
   .bank-cell-val{font-size:14px;}
   .bank-copy-btn{grid-column:span 2; padding:8px;}
   
+  .events-layout{grid-template-columns:1fr;}
   .event-row{padding:12px}
   .status-group{grid-template-columns:1fr 1fr!important}
   .status-group .stat-pill:last-child{grid-column:span 2}
@@ -705,30 +708,60 @@ function renderMain(){
       <div class="top">
         <div>
           <h2>👨‍⚕️ ${esc(fullName(d))} <span class="badge blue">${esc(d.spec||'—')}</span><span class="badge ${st.cls}">${st.txt}</span>${complete?'<span class="badge green">✔ امتیاز کامل</span>':'<span class="badge red">⚠️ '+num(rem)+' امتیاز کم</span>'}${rem$>0?'<span class="badge yellow">💸 بدهکار</span>':''}</h2>
-          <div class="meta">📞 <span class="ltr">${esc(d.phone || '—')}</span> ${d.year?' | 📅 <span class="ltr">'+esc(d.year)+'</span>':''}</div>
-          ${d.reminderDate ? `<div class="meta" style="color:${isDue?'var(--danger)':'var(--purple)'};font-weight:700">⏰ تاریخ یادآوری: ${d.reminderDate} ${isDue?'(سررسید شده!)':''}</div>` : ''}
         </div>
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
-          <div class="credentials">
-            <div class="cred-box"><div class="cred-label">رمز سامانه</div><div class="cred-value ltr"><span>${esc(d.pass||'—')}</span><button class="copy-btn" onclick="copyText('${esc(d.pass||'')}',this)">📋</button></div></div>
-            <div class="cred-box"><div class="cred-label">کد ملی</div><div class="cred-value ltr"><span>${esc(d.nat||'—')}</span><button class="copy-btn" onclick="copyText('${esc(d.nat||'')}',this)">📋</button></div></div>
-          </div>
-          <div style="display:flex;gap:5px;flex-direction:column">
-            <button class="mini green" onclick="openIRCME('${esc(d.nat||'')}','${esc(d.pass||'')}')">🔗 ورود به آموزش مداوم</button>
-            <button class="mini" onclick="openDoctorModal('${d.id}')">✏️ ویرایش</button>
-            <button class="mini danger" onclick="delDoctor('${d.id}')">🗑 حذف</button>
-          </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          <button class="mini green" onclick="openIRCME('${esc(d.nat||'')}','${esc(d.pass||'')}')">🔗 ورود به آموزش مداوم</button>
+          <button class="mini" onclick="openDoctorModal('${d.id}')">✏️ ویرایش</button>
+          <button class="mini danger" onclick="delDoctor('${d.id}')">🗑 حذف</button>
         </div>
       </div>
       
       <div class="info-grid">
-        <div class="info-box">🎯 امتیاز درخواستی: <b>${num(req)}</b></div>
-        <div class="info-box">📊 مجموع امتیازهای لیست: <b>${num(totalListed)}</b></div>
-        <div class="info-box">⏳ باقی‌مانده: <b style="color:${rem>0?'var(--danger)':'var(--success)'}">${num(rem)}</b></div>
-        
-        <div class="info-box">💰 کل: <b>${num(f.total||0)}</b></div>
-        <div class="info-box">✅ پرداختی: <b style="color:var(--success)">${num(f.paid||0)}</b></div>
-        <div class="info-box">⏳ باقی: <b style="color:${rem$>0?'var(--danger)':'var(--success)'}">${num(rem$)}</b></div>
+        <div class="info-box">
+          <span class="label">📞 موبایل</span>
+          <span class="value ltr">${esc(d.phone || '—')}</span>
+          ${d.phone ? `<button class="copy-btn" onclick="copyText('${esc(d.phone)}',this)">📋</button>` : ''}
+        </div>
+        <div class="info-box">
+          <span class="label">🆔 کد ملی</span>
+          <span class="value ltr">${esc(d.nat || '—')}</span>
+          ${d.nat ? `<button class="copy-btn" onclick="copyText('${esc(d.nat)}',this)">📋</button>` : ''}
+        </div>
+        <div class="info-box">
+          <span class="label">🔑 رمز سامانه</span>
+          <span class="value ltr">${esc(d.pass || '—')}</span>
+          ${d.pass ? `<button class="copy-btn" onclick="copyText('${esc(d.pass)}',this)">📋</button>` : ''}
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-box">
+          <span class="label">🎯 امتیاز درخواستی</span>
+          <span class="value">${num(req)}</span>
+        </div>
+        <div class="info-box">
+          <span class="label">📊 مجموع امتیازهای لیست</span>
+          <span class="value blue">${num(totalListed)}</span>
+        </div>
+        <div class="info-box">
+          <span class="label">⏳ باقی‌مانده</span>
+          <span class="value ${rem>0?'danger':'success'}">${num(rem)}</span>
+        </div>
+      </div>
+      
+      <div class="info-grid">
+        <div class="info-box">
+          <span class="label">💰 کل هزینه</span>
+          <span class="value">${num(f.total||0)}</span>
+        </div>
+        <div class="info-box">
+          <span class="label">✅ پرداختی</span>
+          <span class="value success">${num(f.paid||0)}</span>
+        </div>
+        <div class="info-box">
+          <span class="label">⏳ باقی مالی</span>
+          <span class="value ${rem$>0?'danger':'success'}">${num(rem$)}</span>
+        </div>
       </div>
       
       ${(c.num||c.cvv2||c.pass2)?`
@@ -738,8 +771,13 @@ function renderMain(){
             <div class="bank-chip"></div>
             <div class="bank-logo">IRAN</div>
           </div>
-          <div class="bank-number">${esc(c.num||'—')}</div>
-          <div class="bank-grid">
+          
+          <div class="bank-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+            <div class="bank-cell" style="grid-column: span 4; display:flex; justify-content:space-between; align-items:center; padding:10px 15px;">
+              <span class="bank-cell-label" style="margin-bottom:0;">شماره کارت</span>
+              <span class="bank-cell-val" style="font-size:18px; letter-spacing:1px;">${esc(c.num||'—')}</span>
+              <button class="copy-btn" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:4px 10px; border-radius:6px; cursor:pointer;" onclick="copyText('${esc(c.num||'')}',this)">📋 کپی</button>
+            </div>
             <div class="bank-cell">
               <div class="bank-cell-label">ماه</div>
               <div class="bank-cell-val">${esc(c.m||'--')}</div>
@@ -756,13 +794,12 @@ function renderMain(){
               <div class="bank-cell-label">رمز دوم</div>
               <div class="bank-cell-val">${esc(c.pass2||'—')}</div>
             </div>
-            <button class="bank-copy-btn" onclick="copyText('${esc(c.num||'')}',this)">📋 کپی شماره کارت</button>
           </div>
         </div>
       </div>`:''}
     </div>
     
-    <!-- بخش رویدادها: همه همیشه باز و پشت سر هم -->
+    <!-- بخش رویدادها: به صورت سه ستون عمودی -->
     <div class="events-layout">
       <div class="ev-section">
         ${renderEventSection(d, 'وبینار')}
