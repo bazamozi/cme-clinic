@@ -956,6 +956,123 @@ button[data-filter="vip"].active {
 .vip-reminder.warning { background: rgba(255,193,7,0.2); color: #ffc107; border-color: rgba(255,193,7,0.6); }
 .vip-reminder.info { background: rgba(56,189,248,0.15); color: #38bdf8; border-color: rgba(56,189,248,0.5); }
 </style>
+<style id="vip-alert-css">
+/* 🚨 هشدار سر رسید — قوی و چشمگیر */
+.vip-alert-today {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  color: #ffffff;
+  border: 2px solid #fca5a5;
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 900;
+  margin-top: 6px;
+  box-shadow: 0 0 16px rgba(239,68,68,0.7), 0 0 32px rgba(239,68,68,0.4);
+  animation: vip-pulse-red 1.2s ease-in-out infinite;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  letter-spacing: 0.3px;
+}
+
+.vip-alert-overdue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #7f1d1d, #b91c1c);
+  color: #fef2f2;
+  border: 2px solid #ef4444;
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 900;
+  margin-top: 6px;
+  box-shadow: 0 0 12px rgba(185,28,28,0.7);
+  animation: vip-shake 0.6s ease-in-out infinite;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.vip-alert-soon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: #451a03;
+  border: 2px solid #fcd34d;
+  border-radius: 10px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+  font-weight: 900;
+  margin-top: 6px;
+  box-shadow: 0 0 12px rgba(251,191,36,0.6);
+  animation: vip-pulse-yellow 1.5s ease-in-out infinite;
+}
+
+.vip-reminder {
+  display: inline-block;
+  background: rgba(56,189,248,0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56,189,248,0.4);
+  border-radius: 10px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 5px;
+}
+
+/* انیمیشن‌ها */
+@keyframes vip-pulse-red {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 16px rgba(239,68,68,0.7), 0 0 32px rgba(239,68,68,0.4);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 24px rgba(239,68,68,1), 0 0 48px rgba(239,68,68,0.6);
+  }
+}
+
+@keyframes vip-pulse-yellow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
+}
+
+@keyframes vip-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+/* کارت VIP که امروز سر رسیده — نوار قرمز پشت کارت */
+.doc-row.vip-today,
+.doc-row.vip-overdue {
+  position: relative;
+  border-right: 4px solid #ef4444 !important;
+  background: linear-gradient(90deg, rgba(239,68,68,0.08) 0%, transparent 100%) !important;
+}
+
+.doc-row.vip-soon {
+  border-right: 4px solid #fbbf24 !important;
+  background: linear-gradient(90deg, rgba(251,191,36,0.06) 0%, transparent 100%) !important;
+}
+
+/* در موبایل کوچک‌تر */
+@media (max-width: 768px) {
+  .vip-alert-today,
+  .vip-alert-overdue {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+  .vip-alert-soon {
+    font-size: 11.5px;
+    padding: 4px 10px;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -5084,6 +5201,165 @@ window.isDone = isDone;
   };
 
   console.log('✅ VIP Master فعال');
+})();
+</script>
+<script id="vip-alert-js">
+(function(){
+  if(window._vipAlert) return;
+  window._vipAlert = true;
+
+  // 🎯 helper: status alert بر اساس روز
+  function getAlertHtml(days){
+    if(days === null) return '';
+    if(days === 0){
+      return '<div class="vip-alert-today">🔥 امروز سر رسید! اقدام کنید 🔥</div>';
+    } else if(days < 0){
+      return '<div class="vip-alert-overdue">⚠️ ' + Math.abs(days) + ' روز از سر رسید گذشته! ⚠️</div>';
+    } else if(days <= 3){
+      return '<div class="vip-alert-today" style="background:linear-gradient(135deg,#ea580c,#f97316);">⏰ فقط ' + days + ' روز مانده!</div>';
+    } else if(days <= 7){
+      return '<div class="vip-alert-soon">⏰ ' + days + ' روز تا سر رسید</div>';
+    } else if(days <= 30){
+      return '<div class="vip-reminder" style="background:rgba(251,191,36,0.15);color:#fbbf24;border-color:rgba(251,191,36,0.5);">📅 ' + days + ' روز مانده</div>';
+    } else {
+      return '<div class="vip-reminder">📅 ' + days + ' روز مانده</div>';
+    }
+  }
+  window.getVipAlertHtml = getAlertHtml;
+
+  // 🎯 helper: class برای کارت
+  function getAlertClass(days){
+    if(days === null) return '';
+    if(days <= 0) return 'vip-today';
+    if(days <= 3) return 'vip-overdue';
+    if(days <= 7) return 'vip-soon';
+    return '';
+  }
+  window.getVipAlertClass = getAlertClass;
+
+  // 🎯 Hook روی renderVipList — بهبود نمایش
+  var _t = setInterval(function(){
+    if(typeof window.renderVipList !== 'function') return;
+    if(window._vipAlert_hooked) return;
+    window._vipAlert_hooked = true;
+    clearInterval(_t);
+    
+    var _orig = window.renderVipList;
+    window.renderVipList = function(){
+      try {
+        window.applyVips();
+        var all = window.doctors || [];
+        var u = window.currentUser || 'all';
+        var vips = all.filter(function(d){
+          if(!d.vip) return false;
+          if(u !== 'all' && d.owner !== u) return false;
+          return true;
+        });
+        
+        // مرتب‌سازی: امروز/گذشته اول، بعد نزدیک‌تر
+        vips.sort(function(a, b){
+          var da = window.daysUntil(a.vipDate);
+          var db = window.daysUntil(b.vipDate);
+          if(da === null && db === null) return 0;
+          if(da === null) return 1;
+          if(db === null) return -1;
+          return da - db;
+        });
+        
+        console.log('⭐ VIP render (alert):', vips.length);
+        
+        var el = document.getElementById('docList');
+        if(!el) return;
+        if(vips.length === 0){
+          el.innerHTML = '<div class="empty">⭐ مشتری ثابتی پیدا نشد</div>';
+          return;
+        }
+        
+        el.innerHTML = vips.map(function(d){
+          var name = (d.fname||d.firstName||'') + ' ' + (d.lname||d.lastName||'');
+          var req = Number(d.creditReq||0);
+          var total = (typeof totalEarned === 'function') ? totalEarned(d) : 0;
+          var pct = req ? Math.min(100, Math.round(total/req*100)) : 0;
+          var days = d.vipDate ? window.daysUntil(d.vipDate) : null;
+          var alertHtml = getAlertHtml(days);
+          var alertClass = getAlertClass(days);
+          
+          return '<div class="doc-row ' + alertClass + '" onclick="selectDoctor(\'' + d.id + '\')">' +
+            '<div class="doc-name"><span>' + name + '</span><span class="vip-badge">⭐ مشتری ثابت</span></div>' +
+            alertHtml +
+            '<div class="doc-spec">' + (d.spec||'—') + '</div>' +
+            '<div class="doc-bar"><div class="fill" style="width:' + pct + '%"></div></div>' +
+            '<div class="doc-meta"><span>🎯 <b>' + total + '</b> از ' + req + '</span><span>' + pct + '%</span></div>' +
+          '</div>';
+        }).join('');
+      } catch(e){
+        console.error('vip alert render:', e);
+        return _orig.apply(this, arguments);
+      }
+    };
+    console.log('✅ renderVipList hooked (alert)');
+  }, 300);
+
+  // 🎯 چک روزانه — اگه پزشکی امروز سر رسید داره، نوتیفیکیشن بالای صفحه
+  function checkDailyAlerts(){
+    try {
+      var all = window.doctors || [];
+      var today = [];
+      var overdue = [];
+      all.forEach(function(d){
+        if(!d.vip || !d.vipDate) return;
+        var days = window.daysUntil(d.vipDate);
+        if(days === null) return;
+        if(days === 0) today.push(d);
+        else if(days < 0) overdue.push(d);
+      });
+      
+      var existing = document.getElementById('vipTopAlert');
+      if(existing) existing.remove();
+      
+      if(today.length === 0 && overdue.length === 0) return;
+      
+      var alertDiv = document.createElement('div');
+      alertDiv.id = 'vipTopAlert';
+      alertDiv.style.cssText = 'position:fixed;top:60px;right:16px;left:16px;z-index:9999;background:linear-gradient(135deg,#dc2626,#7f1d1d);color:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 8px 32px rgba(220,38,38,0.6);font-weight:900;font-size:14px;direction:rtl;display:flex;align-items:center;gap:10px;border:2px solid #fca5a5;';
+      
+      var msg = '';
+      if(today.length > 0){
+        msg += '🔥 ' + today.length + ' مشتری ثابت امروز سر رسید! ';
+      }
+      if(overdue.length > 0){
+        msg += '⚠️ ' + overdue.length + ' مشتری ثابت از سر رسید گذشته! ';
+      }
+      
+      var closeBtn = document.createElement('button');
+      closeBtn.textContent = '✕';
+      closeBtn.style.cssText = 'background:transparent;border:none;color:#fff;font-size:20px;cursor:pointer;margin-right:auto;font-weight:900;padding:0 8px;';
+      closeBtn.onclick = function(){ alertDiv.remove(); };
+      
+      var textSpan = document.createElement('span');
+      textSpan.textContent = msg;
+      textSpan.style.flex = '1';
+      textSpan.style.textAlign = 'right';
+      
+      alertDiv.appendChild(textSpan);
+      alertDiv.appendChild(closeBtn);
+      document.body.appendChild(alertDiv);
+      
+      // ۱۰ ثانیه بعد خودکار حذف
+      setTimeout(function(){ 
+        if(alertDiv.parentNode) alertDiv.remove();
+      }, 10000);
+    } catch(e){ console.warn('checkDailyAlerts:', e); }
+  }
+
+  // هر ۳۰ ثانیه چک
+  setTimeout(checkDailyAlerts, 3000);
+  setInterval(function(){
+    if(document.hidden) return;
+    checkDailyAlerts();
+  }, 30000);
+
+  console.log('✅ VIP Alert فعال');
 })();
 </script>
 </body>
