@@ -115,7 +115,7 @@ textarea{resize:vertical;min-height:55px}
 .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
 .info-box { background: rgba(15,23,42,0.5); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; font-size: 13.5px; font-weight: 700; transition: .2s; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; position: relative;}
 .info-box:hover { border-color: rgba(56,189,248,0.4); }
-.info-box .label { font-size: 11.5px; color: var(--muted); font-weight: 600; }
+.info-box .label { font-size: 13.5px; color: var(--muted); font-weight: 600; }
 .info-box .value { font-size: 16px; font-weight: 800; color: #fff; }
 .info-box .value.success { color: var(--success); }
 .info-box .value.danger { color: var(--danger); }
@@ -890,15 +890,17 @@ function renderMain(){
           <span class="value ltr">${esc(d.phone || '—')}</span>
           ${d.phone ? `<button class="copy-btn" onclick="copyText('${esc(d.phone)}',this)">📋</button>` : ''}
         </div>
+        <!-- جابه جایی: رمز سامانه در جایگاه دوم -->
         <div class="info-box">
-          <span class="label">🆔 کد ملی</span>
-          <span class="value ltr">${esc(d.nat || '—')}</span>
-          ${d.nat ? `<button class="copy-btn" onclick="copyText('${esc(d.nat)}',this)">📋</button>` : ''}
-        </div>
-        <div class="info-box">
-          <span class="label">🔑 رمز سامانه</span>
+          <span class="label" style="font-size: 14px;">🔑 رمز سامانه</span>
           <span class="value ltr">${esc(d.pass || '—')}</span>
           ${d.pass ? `<button class="copy-btn" onclick="copyText('${esc(d.pass)}',this)">📋</button>` : ''}
+        </div>
+        <!-- جابه جایی: کد ملی در جایگاه سوم -->
+        <div class="info-box">
+          <span class="label" style="font-size: 14px;">🆔 کد ملی</span>
+          <span class="value ltr">${esc(d.nat || '—')}</span>
+          ${d.nat ? `<button class="copy-btn" onclick="copyText('${esc(d.nat)}',this)">📋</button>` : ''}
         </div>
       </div>
 
