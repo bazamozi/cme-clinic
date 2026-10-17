@@ -456,12 +456,14 @@ function myCalls(){ const arr = calls.filter(c => !c.deleted); return currentUse
 function eventCredit(e){
   if(e.purchase!=='انجام شد') return 0;
   if(e.type==='وبینار'){ if(e.attend!=='انجام شد') return 0; if(e.exam==='رد') return 0; }
+  if(e.type==='غیر حضوری'){ if(e.exam==='رد') return 0; }
   if(e.type==='حضوری'){ if(e.attend!=='انجام شد') return 0; }
   return Number(e.credit||0);
 }
 function eventState(e){
   if(e.purchase!=='انجام شد') return 'partial';
   if(e.type==='وبینار'){ if(e.attend!=='انجام شد') return 'partial'; if(e.exam==='رد') return 'failed'; }
+  if(e.type==='غیر حضوری'){ if(e.exam==='رد') return 'failed'; }
   if(e.type==='حضوری'){ if(e.attend!=='انجام شد') return 'partial'; }
   return 'earned';
 }
@@ -810,6 +812,7 @@ function renderMain(){
 function eventComplete(e){
   if(e.purchase !== 'انجام شد') return false;
   if(e.type === 'وبینار'){ if(e.attend !== 'انجام شد') return false; if(e.exam === 'رد' || e.exam === 'ثبت نشده') return false; }
+  if(e.type === 'غیر حضوری'){ if(e.exam === 'رد' || e.exam === 'ثبت نشده') return false; }
   if(e.type === 'حضوری'){ if(e.attend !== 'انجام شد') return false; }
   return true;
 }
@@ -850,10 +853,10 @@ function renderEventRow(e){
       <div class="event-meta" style="font-size:14px!important;font-weight:600;margin-top:6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">${e.date?'<span>📅 <span class="ltr">'+esc(e.date)+'</span></span>':''}${e.time?'<span>⏰ <span class="ltr">'+esc(e.time)+'</span></span>':''}</div>
       <div class="event-credit"><span style="font-size:20px;font-weight:800;color:${earned?'var(--success)':(failed?'var(--danger)':'var(--muted)')}">${e.credit?num(e.credit):'—'} <span style="font-size:13px;font-weight:600">امتیاز</span></span></div>
       
-      <div class="status-group" style="${e.type==='وبینار'?'grid-template-columns:1fr 1fr 1fr':(e.type==='غیر حضوری'?'grid-template-columns:1fr':'grid-template-columns:1fr 1fr')}">
+      <div class="status-group" style="${e.type==='وبینار'?'grid-template-columns:1fr 1fr 1fr':'grid-template-columns:1fr 1fr'}">
         <button class="stat-pill ${e.purchase==='انجام شد'?'ok':''}" onclick="cycleStatus('${e.id}','purchase')">${purchaseTxt}</button>
-        ${e.type!=='غیر حضوری'?`<button class="stat-pill ${e.attend==='انجام شد'?'ok':''}" onclick="cycleStatus('${e.id}','attend')">${attendTxt}</button>`:''}
-        ${e.type==='وبینار'?`<button class="stat-pill ${e.exam==='قبول'?'ok':e.exam==='رد'?'no':'neu'}" onclick="cycleStatus('${e.id}','exam')">${examTxt}</button>`:''}
+        ${(e.type==='حضوری' || e.type==='وبینار')?`<button class="stat-pill ${e.attend==='انجام شد'?'ok':''}" onclick="cycleStatus('${e.id}','attend')">${attendTxt}</button>`:''}
+        ${(e.type==='وبینار' || e.type==='غیر حضوری')?`<button class="stat-pill ${e.exam==='قبول'?'ok':e.exam==='رد'?'no':'neu'}" onclick="cycleStatus('${e.id}','exam')">${examTxt}</button>`:''}
       </div>
       
       <div class="event-actions"><button class="mini" onclick="openEventModal('${e.id}')">✏️ ویرایش</button><button class="mini danger" onclick="delEvent('${e.id}')">🗑 حذف</button></div>
