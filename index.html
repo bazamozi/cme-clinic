@@ -2520,18 +2520,27 @@ var _docFilter = 'active';  // پیش‌فرض: در حال اجرا
 // transferred
 
 // 2) getDoctorStatus
-function getDoctorStatus(d){
-  var events = (d.events || []);
-  var hasPaid = (d.finance && Number(d.finance.paid || 0) > 0);
-  if(events.length > 0){
-    var allComplete = events.every(function(e){
-      return (typeof eventComplete === 'function') ? eventComplete(e) : false;
-    });
-    if(allComplete) return 'done';
-    return 'active';
-  }
-  if(hasPaid) return 'active';
-  return 'pending';
+function isDone(val){
+  if(val === true) return true;
+  if(!val) return false;
+  var s = String(val);
+  if(s.includes('نشده') || s.includes('نشد') || s.includes('نداده') || s.includes('نکرده')) return false;
+  if(s.includes('انجام شد') || s.includes('قبول') || s.includes('خرید شده') || s.includes('ثبت شده')) return true;
+  return false;
+}
+
+function getDoctorStatus(d) {
+  if(!d) return 'pending';
+  var evs = (d.events||[]).filter(function(e){ return e && e.type; });
+  if(!evs.length) return 'pending';
+  var allComplete = evs.every(function(e){
+    var isInPerson = (e.type === 'حضوری');
+    var p = isDone(e.purchase) || e.buy === true;
+    var a = isDone(e.attend);
+    var ex = isDone(e.exam);
+    return isInPerson ? (p && a) : (p && a && ex);
+  });
+  return allComplete ? 'done' : 'active';
 }
 
 // 3) setDocFilter
