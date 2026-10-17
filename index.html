@@ -4158,5 +4158,43 @@ setTimeout(function(){
 })();
 </script>
 
+<!-- 🎯 FIX-STATUS-LOGIC -->
+<script>
+(function(){
+  function applyFix() {
+    window.isDone = function(val){
+      if(val === true) return true;
+      if(!val) return false;
+      var s = String(val);
+      if(s.includes('نشده') || s.includes('نشد') || s.includes('نداده') || s.includes('نکرده')) return false;
+      if(s.includes('انجام شد') || s.includes('قبول') || s.includes('خرید شده') || s.includes('ثبت شده')) return true;
+      return false;
+    };
+
+    window.getDoctorStatus = function(d){
+      if(!d) return 'pending';
+      var evs = (d.events||[]).filter(e=>e && e.type);
+      if(!evs.length) return 'pending';
+      
+      var allComplete = evs.every(function(e){
+        var isInPerson = (e.type.includes('حضوری') || e.type.includes('inperson'));
+        var p = window.isDone(e.purchase) || e.buy === true;
+        var a = window.isDone(e.attend);
+        var ex = window.isDone(e.exam);
+        return isInPerson ? (p && a) : (p && a && ex);
+      });
+      
+      return allComplete ? 'done' : 'active';
+    };
+
+    if(typeof renderDocList === 'function') renderDocList();
+    if(typeof updateFilterCounts === 'function') updateFilterCounts();
+  }
+
+  // به زور بعد از لود شدن همه کدهای دیگه اجرا میشه
+  setTimeout(applyFix, 1000);
+  setTimeout(applyFix, 3000);
+})();
+</script>
 </body>
 </html>
