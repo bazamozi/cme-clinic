@@ -696,15 +696,41 @@ html.is-logged-in #loginScreen{display:none!important}
 }
 </style>
 
-<style id="bank-card-css">
-/* ============================================
-   🎯 کارت بانکی — افقی، هم‌عرض ردیف مالی، فونت بزرگ
-   ============================================ */
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style id="bank-card-final-golden">
 .bank-card-display {
   display: grid !important;
   grid-template-columns: 2.5fr 0.8fr 0.8fr 0.8fr 1.5fr !important;
-  gap: 6px !important;
+  gap: 5px !important;
   align-items: stretch !important;
   margin-top: 10px !important;
   padding: 0 !important;
@@ -712,180 +738,59 @@ html.is-logged-in #loginScreen{display:none!important}
   border: none !important;
   direction: rtl !important;
   width: 100% !important;
-  max-width: 100% !important;
   box-sizing: border-box !important;
 }
-
-.bank-card-display.hidden {
-  display: grid !important;
-}
-
+.bank-card-display.hidden { display: grid !important; }
 .bank-card-display .bank-cell-compact {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 5px !important;
-  padding: 10px 8px !important;
+  gap: 4px !important;
+  padding: 9px 6px !important;
   margin: 0 !important;
   background: rgba(15, 23, 42, 0.5) !important;
   border: 1px solid rgba(0, 217, 255, 0.18) !important;
   border-radius: 8px !important;
   min-width: 0 !important;
   overflow: hidden !important;
-  box-sizing: border-box !important;
-  white-space: nowrap !important;
 }
-
-/* 🎯 فونت‌های بزرگ‌تر (14-16px) */
 .bank-card-display .bank-cell-compact .label {
-  font-size: 14px !important;
+  font-size: 11.5px !important;
   color: #94a3b8 !important;
   font-weight: 700 !important;
   white-space: nowrap !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  flex-shrink: 0 !important;
-  line-height: 1.2 !important;
 }
-
-.bank-card-display .bank-cell-compact .label::after {
-  content: ':' !important;
-  margin-right: 3px !important;
-  color: #64748b !important;
-}
-
+.bank-card-display .bank-cell-compact .label::after { content: ':' !important; margin-right: 2px !important; color: #64748b !important; }
 .bank-card-display .bank-cell-compact .value {
-  font-size: 15px !important;
+  font-size: 11.5px !important;
   color: #e2e8f0 !important;
   font-weight: 800 !important;
-  font-family: 'SF Mono', Menlo, Consolas, monospace !important;
-  letter-spacing: 0.2px !important;
+  font-family: monospace !important;
   white-space: nowrap !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  min-width: 0 !important;
-  line-height: 1.2 !important;
 }
-
-/* شماره کارت */
 .bank-card-display .bank-cell-compact.card-number {
-  display: flex !important;
-  align-items: center !important;
   justify-content: space-between !important;
-  gap: 6px !important;
-  padding: 8px 10px !important;
+  gap: 4px !important;
+  padding: 8px 8px !important;
   background: rgba(0, 217, 255, 0.08) !important;
   border: 1px solid rgba(0, 217, 255, 0.3) !important;
 }
-
-.bank-card-display .bank-cell-compact.card-number > .icon,
-.bank-card-display .bank-cell-compact.card-number .bank-icon {
-  font-size: 14px !important;
-  flex-shrink: 0 !important;
-}
-
-.bank-card-display .bank-cell-compact.card-number .label {
-  font-size: 13px !important;
-  color: #38bdf8 !important;
-  font-weight: 700 !important;
-  flex-shrink: 0 !important;
-}
-
-.bank-card-display .bank-cell-compact.card-number .label::after {
-  content: ':' !important;
-  color: #38bdf8 !important;
-}
-
-.bank-card-display .bank-cell-compact.card-number .value {
-  font-size: 16px !important;
-  color: #38bdf8 !important;
-  letter-spacing: 0.5px !important;
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  text-align: center !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
-  white-space: nowrap !important;
-}
-
-/* دکمه کپی در کارت بانکی */
-.bank-card-display .bank-cell-compact.card-number .copy-inline,
+.bank-card-display .bank-cell-compact.card-number .label { font-size: 11.5px !important; color: #38bdf8 !important; }
+.bank-card-display .bank-cell-compact.card-number .value { font-size: 11.5px !important; color: #38bdf8 !important; flex: 1 1 auto !important; text-align: center !important; overflow: visible !important; }
 .bank-card-display .bank-cell-compact.card-number button {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 11px !important;
-  padding: 4px 8px !important;
-  border-radius: 4px !important;
-  cursor: pointer !important;
-  background: rgba(0, 217, 255, 0.2) !important;
-  color: #38bdf8 !important;
-  border: 1px solid rgba(0, 217, 255, 0.45) !important;
-  font-weight: 700 !important;
-  margin: 0 !important;
-  flex-shrink: 0 !important;
-  white-space: nowrap !important;
+  font-size: 10.5px !important; padding: 3px 6px !important; border-radius: 4px !important;
+  background: rgba(0, 217, 255, 0.2) !important; color: #38bdf8 !important;
+  border: 1px solid rgba(0, 217, 255, 0.45) !important; font-weight: 700 !important; cursor: pointer !important;
 }
+.bank-card-display .bank-cell-compact:last-child { justify-content: flex-start !important; padding: 9px 10px !important; gap: 6px !important; }
+button[onclick*="toggleCard"] { display: none !important; }
 
-.bank-card-display .bank-cell-compact.card-number .copy-inline:hover,
-.bank-card-display .bank-cell-compact.card-number button:hover {
-  background: rgba(0, 217, 255, 0.3) !important;
-}
-
-/* رمز دوم - کمی پهن‌تر */
-.bank-card-display .bank-cell-compact:last-child {
-  justify-content: flex-start !important;
-  padding: 10px 10px !important;
-  gap: 6px !important;
-}
-
-.bank-card-display .bank-cell-compact:last-child .label {
-  font-size: 13px !important;
-}
-
-.bank-card-display .bank-cell-compact:last-child .value {
-  font-size: 15px !important;
-  letter-spacing: 0.3px !important;
-  flex: 1 1 auto !important;
-  text-align: left !important;
-  overflow: visible !important;
-  white-space: nowrap !important;
-}
-
-/* مخفی کردن دکمه نمایش کارت */
-button[onclick*="toggleCard"] {
-  display: none !important;
-}
-
-/* موبایل */
 @media (max-width: 768px) {
-  .bank-card-display {
-    grid-template-columns: 1fr 1fr 1fr 1fr !important;
-    gap: 5px !important;
-  }
-  .bank-card-display .bank-cell-compact.card-number {
-    grid-column: 1 / -1 !important;
-    margin-bottom: 5px !important;
-  }
-  .bank-card-display .bank-cell-compact:last-child {
-    grid-column: 1 / -1 !important;
-    justify-content: center !important;
-    padding: 10px !important;
-  }
-  .bank-card-display .bank-cell-compact {
-    padding: 8px !important;
-  }
-  .bank-card-display .bank-cell-compact .label,
-  .bank-card-display .bank-cell-compact .value {
-    font-size: 13px !important;
-  }
-  .bank-card-display .bank-cell-compact.card-number .label {
-    font-size: 12px !important;
-  }
-  .bank-card-display .bank-cell-compact.card-number .value {
-    font-size: 14px !important;
-  }
+  .bank-card-display { grid-template-columns: 1fr 1fr 1fr 1fr !important; gap: 4px !important; }
+  .bank-card-display .bank-cell-compact.card-number { grid-column: 1 / -1 !important; margin-bottom: 4px !important; }
+  .bank-card-display .bank-cell-compact:last-child { grid-column: 1 / -1 !important; justify-content: center !important; }
+  .bank-card-display .bank-cell-compact .label, .bank-card-display .bank-cell-compact .value { font-size: 11px !important; }
 }
 </style>
 </head>
@@ -966,6 +871,7 @@ button[onclick*="toggleCard"] {
         <button data-filter="active" class="active" onclick="setDocFilter('active')">⚡ در حال اجرا<span class="cnt" id="cntActive">0</span></button>
         <button data-filter="done" class="done" onclick="setDocFilter('done')">✅ اتمام<span class="cnt" id="cntDone">0</span></button>
         <button data-filter="pending" class="pending" onclick="setDocFilter('pending')">⏳ بلاتکلیف<span class="cnt" id="cntPending">0</span></button>
+      
       </div>
       <div class="doc-list" id="docList"></div>
     </aside>
@@ -1912,9 +1818,11 @@ window.openDoctorModal = function(editId){
       <div class="row">
         <div><label>موبایل</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPhone" value="${esc(d?.phone||'')}"></div>
         <div><label>سال کارنامه</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mYear" value="${esc(d?.year||'')}"></div>
+      
+
       </div>
       <div class="row">
-        <div><label>شماره کارت</label><div style="display:flex;gap:6px"><input autocomplete="off" dir="ltr" style="text-align:center;flex:1" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"><!-- دکمه کپی شماره کارت حذف شد --></div></div>
+        <div><label>شماره کارت</label><div style="display:flex;gap:6px"><input autocomplete="off" dir="ltr" style="text-align:center;flex:1" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"><!-- دکمه کپی حذف شد --></div></div>
         <div><label>CVV2</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCvv2" maxlength="4" value="${esc(c.cvv2||'')}"></div>
       </div>
       <div class="row">
@@ -2713,19 +2621,7 @@ var _docFilter = 'active';  // پیش‌فرض: در حال اجرا
 // transferred
 
 // 2) getDoctorStatus
-function getDoctorStatus(d){
-  var events = (d.events || []);
-  var hasPaid = (d.finance && Number(d.finance.paid || 0) > 0);
-  if(events.length > 0){
-    var allComplete = events.every(function(e){
-      return (typeof eventComplete === 'function') ? eventComplete(e) : false;
-    });
-    if(allComplete) return 'done';
-    return 'active';
-  }
-  if(hasPaid) return 'active';
-  return 'pending';
-}
+
 
 // 3) setDocFilter
 function setDocFilter(filter){
@@ -2944,23 +2840,7 @@ console.log('✅ Login System Loaded');
 // ============================================
 
 if (typeof window.getDoctorStatus === 'undefined') {
-  window.getDoctorStatus = function(d){
-  try {
-    if(!d) return 'pending';
-    var events = (d.events || []).filter(function(e){ return e && e.type; });
-    if(events.length === 0) return 'pending';
-    var allComplete = events.every(function(ev){
-      if(ev.type === 'حضوری'){
-        return ev.buy === true && ev.attend === true;
-      }
-      return ev.buy === true && ev.attend === true && ev.exam === true;
-    });
-    return allComplete ? 'done' : 'active';
-  } catch(e){
-    console.warn('getDoctorStatus error:', e);
-    return 'pending';
-  }
-};
+  
 
 window.showDataSize = function(){
   try {
@@ -3220,23 +3100,7 @@ console.log('✅ Event Tabs v7 (CSS-only) loaded');
 // ═══════════════════════════════════════════════
 
 // ✅ getDoctorStatus — global
-function getDoctorStatus(d){
-  try {
-    if(!d) return 'pending';
-    var events = (d.events || []).filter(function(e){ return e && e.type; });
-    if(events.length === 0) return 'pending';
-    var allComplete = events.every(function(ev){
-      if(ev.type === 'حضوری'){
-        return ev.buy === true && ev.attend === true;
-      }
-      return ev.buy === true && ev.attend === true && ev.exam === true;
-    });
-    return allComplete ? 'done' : 'active';
-  } catch(e){
-    console.warn('getDoctorStatus error:', e);
-    return 'pending';
-  }
-}
+
 window.getDoctorStatus = getDoctorStatus;
 
 // ✅ updateFilterCounts — همه پزشکان (نه فیلتر بر اساس کاربر)
@@ -4227,199 +4091,71 @@ setTimeout(function(){
 
 
 
-<!-- 🛡 Pull Race Guard — جلوگیری از برگشت داده قدیمی بعد از تغییر -->
+
+
+
+
 <script>
 (function(){
-  if(window._raceGuard) return;
-  window._raceGuard = true;
-
-  // 🎯 زمان آخرین تغییر کاربر
-  window._lastUserMutation = window._lastUserMutation || 0;
-  // 🎯 آیا سرور داره اعمال میشه؟
-  window._applyingServerData = false;
-
-  // 🛡 ۱. hook روی triggerAutoSave — علامت‌گذاری تغییر کاربر
-  var _origTrigger = window.triggerAutoSave;
-  if(typeof _origTrigger === 'function' && !window._triggerHooked){
-    window._triggerHooked = true;
-    window.triggerAutoSave = function(reason){
-      // 🎯 اگه این تغییر از pull خودمون اومده، نادیده بگیر
-      if(window._applyingServerData){
-        console.log('⏭ auto-save از pull — نادیده گرفته شد');
-        return;
-      }
-      window._lastUserMutation = Date.now();
-      console.log('🛡 user mutation ثبت شد:', reason);
-      return _origTrigger.apply(this, arguments);
-    };
-  }
-
-  // 🛡 ۲. hook روی safePull — قبل از اعمال، چک کن تغییر کاربر نبوده
-  var _pullInterval = setInterval(function(){
-    var _origPull = window.safePull;
-    if(typeof _origPull !== 'function') return;
-    if(window._pullHooked) { clearInterval(_pullInterval); return; }
-    window._pullHooked = true;
-    clearInterval(_pullInterval);
-
-    window.safePull = async function(){
-      // اگه ۵ ثانیه اخیر تغییر کاربر داشتیم، pull نکن
-      var sinceMutation = Date.now() - (window._lastUserMutation || 0);
-      if(sinceMutation < 5000){
-        console.log('⏭ pull skip — کاربر ' + Math.round(sinceMutation/1000) + ' ثانیه پیش تغییر داد');
-        return { skipped: 'recent-mutation' };
-      }
-
-      // علامت‌گذاری که داریم داده سرور رو اعمال می‌کنیم
-      var result = await _origPull.apply(this, arguments);
-      
-      // اگه pull چیزی اعمال کرد، flag بذار
-      if(result && result.pulled){
-        window._applyingServerData = true;
-        setTimeout(function(){
-          window._applyingServerData = false;
-        }, 800);
-      }
-      
-      return result;
-    };
-    console.log('✅ safePull hooked با race guard');
-  }, 500);
-
-  // 🛡 ۳. hook روی pushToCloud — وقتی push شد، همه pull‌های قدیمی بی‌اعتبار میشن
-  var _pushInterval = setInterval(function(){
-    var _origPush = window.pushToCloud;
-    if(typeof _origPush !== 'function') return;
-    if(window._pushHooked) { clearInterval(_pushInterval); return; }
-    window._pushHooked = true;
-    clearInterval(_pushInterval);
-
-    window.pushToCloud = async function(){
-      var result = await _origPush.apply(this, arguments);
-      // بعد از push موفق، ۱۰ ثانیه pull نکن
-      window._lastUserMutation = Date.now();
-      console.log('🛡 push موفق → pull موقتاً غیرفعال');
-      return result;
-    };
-    console.log('✅ pushToCloud hooked');
-  }, 500);
-
-  // 🛡 ۴. hook مستقیم روی delDoctor/saveDoctor
-  ['delDoctor', 'saveDoctor', 'editDoctor', 'addDoctor'].forEach(function(fn){
-    var _iv = setInterval(function(){
-      if(typeof window[fn] !== 'function') return;
-      if(window['_race_' + fn]) { clearInterval(_iv); return; }
-      window['_race_' + fn] = true;
-      clearInterval(_iv);
-      var orig = window[fn];
-      window[fn] = function(){
-        window._lastUserMutation = Date.now();
-        console.log('🛡 ' + fn + ' → mutation ثبت شد');
-        return orig.apply(this, arguments);
-      };
-    }, 500);
-  });
-
-  // 🛡 ۵. Instant Pull — ولی با احترام به mutation
-  function doInstantPull(){
-    try {
-      if(typeof window.safePull === 'function'){
-        window.safePull();
-      }
-    } catch(e){}
-  }
-
-  if(document.readyState === 'complete'){
-    setTimeout(doInstantPull, 200);
-  } else {
-    window.addEventListener('load', function(){
-      setTimeout(doInstantPull, 200);
-    });
-  }
-  setTimeout(doInstantPull, 1000);
-
-  console.log('✅ Race Guard فعال');
-})();
-</script>
-
-<script id="bank-card-show">
-(function(){
-  if(window._bankCardShowFinal) return;
-  window._bankCardShowFinal = true;
+  if(window._bankCardShow) return;
+  window._bankCardShow = true;
   
-  function show(){
+  function showCards(){
     document.querySelectorAll('.bank-card-display').forEach(function(el){
       el.classList.remove('hidden');
     });
+    // پنهان کردن دکمه نمایش کارت
     document.querySelectorAll('button[onclick*="toggleCard"]').forEach(function(btn){
       btn.style.setProperty('display', 'none', 'important');
     });
   }
   
-  setTimeout(show, 500);
-  setTimeout(show, 1500);
-  setInterval(show, 2500);
+  setTimeout(showCards, 500);
+  setTimeout(showCards, 1500);
+  setInterval(showCards, 2500);
+  
+  // Observer روی mainArea
+  setTimeout(function(){
+    var ma = document.getElementById('mainArea');
+    if(ma){
+      var t;
+      new MutationObserver(function(){
+        clearTimeout(t);
+        t = setTimeout(showCards, 150);
+      }).observe(ma, {childList: true, subtree: false});
+    }
+  }, 1500);
+  
+  console.log('✅ Bank Card Show فعال');
 })();
 </script>
-<script id="auto-save-guard">
-// ═══════════════════════════════════════════════════════════
-// 🛡 AUTO-SAVE GUARD — جلوگیری از پریدن داده‌ها موقع رفرش
-// ═══════════════════════════════════════════════════════════
+
+
+
+
+
+
+
+
+
+
+
+
+<script id="golden-card-fix">
 (function(){
-  if(window._autoSaveGuard) return;
-  window._autoSaveGuard = true;
-
-  var lastHash = '';
-  var isPushing = false;
-
-  // 🎯 تابع محاسبه هش داده‌ها (برای تشخیص تغییر)
-  function getHash() {
-    if(!window.doctors || !Array.isArray(window.doctors)) return '';
-    return window.doctors.length + '_' + JSON.stringify(window.doctors).length;
+  function apply(){
+    document.querySelectorAll('.bank-card-display').forEach(el => el.classList.remove('hidden'));
+    document.querySelectorAll('button[onclick*="toggleCard"]').forEach(btn => btn.style.display = 'none');
+    
+    // حذف دکمه کپی از فرم ثبت پزشک
+    var modal = document.querySelector('.modal');
+    if(modal) {
+      modal.querySelectorAll('button[onclick*="mCardNum"]').forEach(b => b.remove());
+    }
   }
-
-  // 🎯 حلقه بررسی مداوم (هر ۱ ثانیه)
-  setInterval(function(){
-    try {
-      var currentHash = getHash();
-      
-      // اگه تغییری کرده (و قبلاً هم مقدار داشتیم)
-      if(currentHash !== lastHash && lastHash !== '') {
-        console.log('💾 [Auto-Save] تغییر در لیست پزشکان شناسایی شد — ذخیره فوری');
-        
-        // ۱. ذخیره فوری در localStorage
-        try { 
-          localStorage.setItem('cme_doctors', JSON.stringify(window.doctors));
-          localStorage.setItem('cme_last_save', String(Date.now()));
-        } catch(e){}
-        
-        // ۲. Push به سرور (اگه در حال push قبلی نباشیم)
-        if(!isPushing && typeof window.pushToCloud === 'function') {
-          isPushing = true;
-          window.pushToCloud(true).then(function(){
-            isPushing = false;
-            console.log('☁️ [Auto-Save] در سرور ذخیره شد');
-          }).catch(function(){
-            isPushing = false;
-          });
-        }
-        
-        // ۳. رندر شمارنده‌ها
-        if(typeof updateFilterCounts === 'function') updateFilterCounts();
-      }
-      
-      lastHash = currentHash;
-    } catch(e){}
-  }, 1000);
-
-  // 🎯 ذخیره فوری قبل از بستن یا رفرش صفحه
-  window.addEventListener('beforeunload', function(){
-    try {
-      localStorage.setItem('cme_doctors', JSON.stringify(window.doctors || []));
-    } catch(e){}
-  });
-
-  console.log('✅ Auto-Save Guard فعال — داده‌ها فوری ذخیره می‌شن');
+  setTimeout(apply, 500);
+  setTimeout(apply, 1500);
+  setInterval(apply, 2000);
 })();
 </script>
 </body>
