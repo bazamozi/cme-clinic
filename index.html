@@ -5362,5 +5362,111 @@ window.isDone = isDone;
   console.log('✅ VIP Alert فعال');
 })();
 </script>
+<script id="vip-list-keep">
+(function(){
+  if(window._vipListKeep) return;
+  window._vipListKeep = true;
+
+  // ═══════════════════════════════════════════════
+  // 🎯 Hook قوی روی renderDocList
+  // اگه _docFilter === 'vip'، به جای لیست عادی، VIP رو نشون بده
+  // ═══════════════════════════════════════════════
+  var _t = setInterval(function(){
+    if(typeof window.renderDocList !== 'function') return;
+    if(window._vipListKeep_hooked) return;
+    window._vipListKeep_hooked = true;
+    clearInterval(_t);
+
+    var _orig = window.renderDocList;
+    window.renderDocList = function(){
+      // اگه فیلتر VIP فعاله → لیست VIP رو نشون بده
+      if(window._docFilter === 'vip' && typeof window.renderVipList === 'function'){
+        console.log('⭐ renderDocList → renderVipList (vip filter)');
+        try {
+          window.applyVips();
+          window.renderVipList();
+          return;
+        } catch(e){ console.warn('vip render:', e); }
+      }
+      // در غیر این صورت، لیست عادی
+      return _orig.apply(this, arguments);
+    };
+    console.log('✅ renderDocList hooked برای حفظ لیست VIP');
+  }, 300);
+
+  // ═══════════════════════════════════════════════
+  // 🎯 بعد از renderMain — اگه فیلتر VIP فعاله، لیست رو دوباره بساز
+  // ═══════════════════════════════════════════════
+  var _t2 = setInterval(function(){
+    if(typeof window.renderMain !== 'function') return;
+    if(window._vipListKeep_main_hooked) return;
+    window._vipListKeep_main_hooked = true;
+    clearInterval(_t2);
+
+    var _origMain = window.renderMain;
+    window.renderMain = function(){
+      var r = _origMain.apply(this, arguments);
+      // بعد از رندر، اگه فیلتر VIP فعاله، لیست رو برنگردون
+      if(window._docFilter === 'vip' && typeof window.renderVipList === 'function'){
+        setTimeout(function(){
+          try { window.renderVipList(); } catch(e){}
+        }, 100);
+      }
+      return r;
+    };
+    console.log('✅ renderMain hooked');
+  }, 300);
+
+  // ═══════════════════════════════════════════════
+  // 🎯 Hook روی selectDoctor — بعد از انتخاب، لیست VIP رو دوباره پر کن
+  // ═══════════════════════════════════════════════
+  var _t3 = setInterval(function(){
+    if(typeof window.selectDoctor !== 'function') return;
+    if(window._vipListKeep_select_hooked) return;
+    window._vipListKeep_select_hooked = true;
+    clearInterval(_t3);
+
+    var _origSelect = window.selectDoctor;
+    window.selectDoctor = function(){
+      var r = _origSelect.apply(this, arguments);
+      if(window._docFilter === 'vip'){
+        setTimeout(function(){
+          try {
+            window.applyVips();
+            window.renderVipList();
+          } catch(e){}
+        }, 150);
+      }
+      return r;
+    };
+    console.log('✅ selectDoctor hooked');
+  }, 300);
+
+  // ═══════════════════════════════════════════════
+  // 🎯 پشتیبان: هر ۱ ثانیه چک کن اگه فیلتر VIP فعاله ولی لیست خالیه
+  // ═══════════════════════════════════════════════
+  setInterval(function(){
+    if(document.hidden) return;
+    if(window._docFilter !== 'vip') return;
+    
+    var el = document.getElementById('docList');
+    if(!el) return;
+    
+    // چک کن لیست خالیه (پیام "یافت نشد" یا خالی)
+    var isEmpty = el.innerHTML.indexOf('یافت نشد') !== -1 || 
+                  el.innerHTML.indexOf('پیدا نشد') !== -1 ||
+                  el.children.length === 0;
+    
+    if(isEmpty){
+      try {
+        window.applyVips();
+        window.renderVipList();
+      } catch(e){}
+    }
+  }, 1000);
+
+  console.log('✅ VIP List Keep فعال');
+})();
+</script>
 </body>
 </html>
