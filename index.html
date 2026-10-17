@@ -695,15 +695,16 @@ html.is-logged-in #loginScreen{display:none!important}
   }
 }
 </style>
+
 <style id="bank-card-css">
 /* ============================================
-   🎯 کارت بانکی — افقی، هم‌عرض ردیف مالی، فونت یکسان
+   🎯 کارت بانکی — افقی، هم‌عرض ردیف مالی، فونت بزرگ
    ============================================ */
 
 .bank-card-display {
   display: grid !important;
   grid-template-columns: 2.5fr 0.8fr 0.8fr 0.8fr 1.5fr !important;
-  gap: 5px !important;
+  gap: 6px !important;
   align-items: stretch !important;
   margin-top: 10px !important;
   padding: 0 !important;
@@ -724,8 +725,8 @@ html.is-logged-in #loginScreen{display:none!important}
   flex-direction: row !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 4px !important;
-  padding: 9px 7px !important;
+  gap: 5px !important;
+  padding: 10px 8px !important;
   margin: 0 !important;
   background: rgba(15, 23, 42, 0.5) !important;
   border: 1px solid rgba(0, 217, 255, 0.18) !important;
@@ -736,9 +737,9 @@ html.is-logged-in #loginScreen{display:none!important}
   white-space: nowrap !important;
 }
 
-/* همه فونت‌ها یکسان 11.5px */
+/* 🎯 فونت‌های بزرگ‌تر (14-16px) */
 .bank-card-display .bank-cell-compact .label {
-  font-size: 11.5px !important;
+  font-size: 14px !important;
   color: #94a3b8 !important;
   font-weight: 700 !important;
   white-space: nowrap !important;
@@ -750,16 +751,16 @@ html.is-logged-in #loginScreen{display:none!important}
 
 .bank-card-display .bank-cell-compact .label::after {
   content: ':' !important;
-  margin-right: 2px !important;
+  margin-right: 3px !important;
   color: #64748b !important;
 }
 
 .bank-card-display .bank-cell-compact .value {
-  font-size: 11.5px !important;
+  font-size: 15px !important;
   color: #e2e8f0 !important;
   font-weight: 800 !important;
   font-family: 'SF Mono', Menlo, Consolas, monospace !important;
-  letter-spacing: 0 !important;
+  letter-spacing: 0.2px !important;
   white-space: nowrap !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -772,20 +773,20 @@ html.is-logged-in #loginScreen{display:none!important}
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  gap: 4px !important;
-  padding: 8px 8px !important;
+  gap: 6px !important;
+  padding: 8px 10px !important;
   background: rgba(0, 217, 255, 0.08) !important;
   border: 1px solid rgba(0, 217, 255, 0.3) !important;
 }
 
 .bank-card-display .bank-cell-compact.card-number > .icon,
 .bank-card-display .bank-cell-compact.card-number .bank-icon {
-  font-size: 12px !important;
+  font-size: 14px !important;
   flex-shrink: 0 !important;
 }
 
 .bank-card-display .bank-cell-compact.card-number .label {
-  font-size: 11.5px !important;
+  font-size: 13px !important;
   color: #38bdf8 !important;
   font-weight: 700 !important;
   flex-shrink: 0 !important;
@@ -797,9 +798,9 @@ html.is-logged-in #loginScreen{display:none!important}
 }
 
 .bank-card-display .bank-cell-compact.card-number .value {
-  font-size: 11.5px !important;
+  font-size: 16px !important;
   color: #38bdf8 !important;
-  letter-spacing: 0.2px !important;
+  letter-spacing: 0.5px !important;
   flex: 1 1 auto !important;
   min-width: 0 !important;
   text-align: center !important;
@@ -808,14 +809,14 @@ html.is-logged-in #loginScreen{display:none!important}
   white-space: nowrap !important;
 }
 
-/* دکمه کپی */
+/* دکمه کپی در کارت بانکی */
 .bank-card-display .bank-cell-compact.card-number .copy-inline,
 .bank-card-display .bank-cell-compact.card-number button {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  font-size: 10.5px !important;
-  padding: 3px 6px !important;
+  font-size: 11px !important;
+  padding: 4px 8px !important;
   border-radius: 4px !important;
   cursor: pointer !important;
   background: rgba(0, 217, 255, 0.2) !important;
@@ -832,14 +833,19 @@ html.is-logged-in #loginScreen{display:none!important}
   background: rgba(0, 217, 255, 0.3) !important;
 }
 
-/* رمز دوم - کمی پهن‌تر برای جا شدن عدد */
+/* رمز دوم - کمی پهن‌تر */
 .bank-card-display .bank-cell-compact:last-child {
   justify-content: flex-start !important;
-  padding: 9px 10px !important;
+  padding: 10px 10px !important;
   gap: 6px !important;
 }
 
+.bank-card-display .bank-cell-compact:last-child .label {
+  font-size: 13px !important;
+}
+
 .bank-card-display .bank-cell-compact:last-child .value {
+  font-size: 15px !important;
   letter-spacing: 0.3px !important;
   flex: 1 1 auto !important;
   text-align: left !important;
@@ -856,25 +862,29 @@ button[onclick*="toggleCard"] {
 @media (max-width: 768px) {
   .bank-card-display {
     grid-template-columns: 1fr 1fr 1fr 1fr !important;
-    gap: 4px !important;
+    gap: 5px !important;
   }
   .bank-card-display .bank-cell-compact.card-number {
     grid-column: 1 / -1 !important;
-    margin-bottom: 4px !important;
+    margin-bottom: 5px !important;
   }
   .bank-card-display .bank-cell-compact:last-child {
     grid-column: 1 / -1 !important;
     justify-content: center !important;
-    padding: 8px 10px !important;
+    padding: 10px !important;
   }
   .bank-card-display .bank-cell-compact {
-    padding: 8px 8px !important;
+    padding: 8px !important;
   }
   .bank-card-display .bank-cell-compact .label,
-  .bank-card-display .bank-cell-compact .value,
-  .bank-card-display .bank-cell-compact.card-number .label,
+  .bank-card-display .bank-cell-compact .value {
+    font-size: 13px !important;
+  }
+  .bank-card-display .bank-cell-compact.card-number .label {
+    font-size: 12px !important;
+  }
   .bank-card-display .bank-cell-compact.card-number .value {
-    font-size: 11px !important;
+    font-size: 14px !important;
   }
 }
 </style>
@@ -1904,7 +1914,7 @@ window.openDoctorModal = function(editId){
         <div><label>سال کارنامه</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mYear" value="${esc(d?.year||'')}"></div>
       </div>
       <div class="row">
-        <div><label>شماره کارت</label><div style="display:flex;gap:6px"><input autocomplete="off" dir="ltr" style="text-align:center;flex:1" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"><button type="button" class="copy-btn" style="padding:8px 12px;font-size:14px" onclick="copyText(document.getElementById('mCardNum').value,this)">📋</button></div></div>
+        <div><label>شماره کارت</label><div style="display:flex;gap:6px"><input autocomplete="off" dir="ltr" style="text-align:center;flex:1" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"><!-- دکمه کپی شماره کارت حذف شد --></div></div>
         <div><label>CVV2</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCvv2" maxlength="4" value="${esc(c.cvv2||'')}"></div>
       </div>
       <div class="row">
