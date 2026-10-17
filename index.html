@@ -535,6 +535,7 @@ async function pushToCloud(){
     });
     setSyncStatus('success');
   } catch(e){
+    console.error("Push Error:", e);
     setSyncStatus('error');
   } finally {
     isPushing = false;
@@ -549,6 +550,7 @@ async function pullFromCloud(){
   
   try {
     const r = await fetch(SCRIPT_URL + '?t=' + Date.now());
+    if (!r.ok) throw new Error("Network response was not ok");
     const data = await r.json();
     if(!data) return;
     
@@ -557,6 +559,7 @@ async function pullFromCloud(){
     
     // فقط در صورتی که داده‌ها تغییر کرده باشند آپدیت کن
     if(JSON.stringify(remote) !== JSON.stringify(local)){
+      console.log("🔄 دریافت داده‌های جدید از سرور...");
       doctors = remote.doctors;
       calls = remote.calls;
       try {
@@ -567,6 +570,7 @@ async function pullFromCloud(){
       setSyncStatus('success');
     }
   } catch(e){
+    console.error("Pull Error:", e);
     setSyncStatus('error');
   } finally {
     isPulling = false;
