@@ -67,6 +67,15 @@ textarea{resize:vertical;min-height:55px}
 .sidebar{background:rgba(15,23,42,0.55);border:1px solid var(--border);border-radius:14px;padding:12px;height:calc(100vh - 180px);overflow:hidden;display:flex;flex-direction:column}
 .sidebar-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px;flex-wrap:wrap}
 .sidebar-head h2{margin:0;font-size:14px;color:var(--accent)}
+.doc-category-tabs{display:flex;gap:5px;overflow-x:auto;padding-bottom:5px;margin-bottom:9px;scrollbar-width:thin}
+.doc-category-tabs::-webkit-scrollbar{height:4px}
+.doc-category-tabs::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.cat-tab{padding:5px 10px;border-radius:8px;font-size:11.5px;font-weight:700;white-space:nowrap;background:rgba(15,23,42,0.6);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:.2s}
+.cat-tab.active{background:linear-gradient(135deg,rgba(56,189,248,0.2),rgba(34,211,238,0.1));color:var(--accent);border-color:rgba(56,189,248,0.5)}
+.cat-tab.all.active{color:#fff;background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3)}
+.cat-tab.completed.active{color:var(--success);border-color:var(--success);background:rgba(52,211,153,0.15)}
+.cat-tab.undecided.active{color:var(--warn);border-color:var(--warn);background:rgba(251,191,36,0.15)}
+.cat-tab.regular.active{color:var(--purple);border-color:var(--purple);background:rgba(167,139,250,0.15)}
 .doc-list{flex:1;overflow-y:auto;padding-left:4px}
 .doc-row{background:rgba(15,23,42,0.55);border:1px solid var(--border);border-radius:10px;padding:10px 11px;margin-bottom:7px;cursor:pointer;transition:.2s}
 .doc-row:hover{border-color:rgba(56,189,248,0.4);background:rgba(15,23,42,0.8)}
@@ -198,6 +207,7 @@ textarea{resize:vertical;min-height:55px}
 .login-error.show{display:block}
 .logout-btn{background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.4);color:var(--danger);padding:6px 14px;border-radius:9px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:600;transition:.2s}
 .logout-btn:hover{background:rgba(248,113,113,0.3)}
+@keyframes pulse{0%{opacity:1}50%{opacity:0.6}100%{opacity:1}}
 </style>
 </head>
 <body>
@@ -252,6 +262,9 @@ textarea{resize:vertical;min-height:55px}
         <button class="btn sm" onclick="openDoctorModal()">➕ جدید</button>
       </div>
       <input id="searchDoctor" placeholder="🔍 جستجو..." style="margin-bottom:9px">
+      <div class="doc-category-tabs" id="docCategoryTabs">
+        <!-- Tabs will be generated here -->
+      </div>
       <div class="doc-list" id="docList"></div>
     </aside>
     <main class="main-area" id="mainArea">
@@ -328,6 +341,7 @@ let doctors = [];
 let calls = [];
 let selectedDoctorId = null;
 let currentUser = 'morteza';
+let currentDocCategory = 'all'; // Default category tab
 
 try {
   doctors = JSON.parse(localStorage.getItem(K)||'[]');
@@ -358,7 +372,6 @@ function parseDate(s){ const m = String(s||'').match(/(\d+)\/(\d+)\/(\d+)/); if(
 function formatDate(y,m,d){ return `${y}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}`; }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200); }
 
-// تاریخ شمسی امروز
 function getShamsiToday(){
   try {
     var parts = new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
@@ -580,68 +593,85 @@ function renderDash(){
 }
 
 // ============================================
-// DOCTORS LIST (DIVIDED INTO 4 CATEGORIES)
+// DOCTORS LIST WITH CATEGORY TABS
 // ============================================
+window.setDocCategory = function(cat) {
+  currentDocCategory = cat;
+  renderDocList();
+};
+
 function renderDocList(){
   const searchEl = document.getElementById('searchDoctor');
   if(!searchEl) return;
   const q = searchEl.value.trim().toLowerCase();
-  const arr = myDoctors().filter(d => !q || fullName(d).toLowerCase().includes(q) || (d.spec||'').toLowerCase().includes(q) || (d.phone||'').includes(q) || (d.nat||'').includes(q));
-  const el = document.getElementById('docList');
-  if(!el) return;
-  if(!arr.length){ el.innerHTML='<div class="empty">پزشکی یافت نشد</div>'; return; }
-
-  const getGroup = (d) => d.status || 'in_progress'; // Default to in_progress for old records
-  const groups = {
+  
+  // Filter base array by search & ownership
+  const allMyDocs = myDoctors().filter(d => !q || fullName(d).toLowerCase().includes(q) || (d.spec||'').toLowerCase().includes(q) || (d.phone||'').includes(q) || (d.nat||'').includes(q));
+  
+  const categories = {
+    'all': { title: 'همه', color: 'var(--text)' },
     'in_progress': { title: '⚡ در حال اجرا', color: 'var(--accent)' },
     'completed': { title: '🏆 تمام شده', color: 'var(--success)' },
     'undecided': { title: '⏳ بلاتکلیف', color: 'var(--warn)' },
     'regular': { title: '⭐ مشتری ثابت', color: 'var(--purple)' }
   };
 
-  const today = getShamsiToday();
-  const dueReminders = arr.filter(d => d.reminderDate && d.reminderDate <= today && d.status === 'regular');
+  const getGroup = (d) => d.status || 'in_progress';
 
+  // Generate Tabs
+  let tabsHtml = '';
+  for (const [key, cat] of Object.entries(categories)) {
+    const count = key === 'all' ? allMyDocs.length : allMyDocs.filter(d => getGroup(d) === key).length;
+    if(count === 0 && key !== 'all' && key !== 'in_progress') continue; 
+    
+    tabsHtml += `<button class="cat-tab ${key} ${currentDocCategory === key ? 'active' : ''}" onclick="setDocCategory('${key}')">${cat.title} (${num(count)})</button>`;
+  }
+  
+  const tabsContainer = document.getElementById('docCategoryTabs');
+  if(tabsContainer) tabsContainer.innerHTML = tabsHtml;
+
+  // Filter the list based on active category
+  const displayDocs = currentDocCategory === 'all' ? allMyDocs : allMyDocs.filter(d => getGroup(d) === currentDocCategory);
+
+  const el = document.getElementById('docList');
+  if(!displayDocs.length){ 
+    el.innerHTML='<div class="empty">پزشکی در این دسته‌بندی یافت نشد</div>'; 
+    return; 
+  }
+
+  const today = getShamsiToday();
+  const dueReminders = displayDocs.filter(d => d.reminderDate && d.reminderDate <= today && d.status === 'regular');
+  
   let html = '';
-  if(dueReminders.length > 0) {
+  if(dueReminders.length > 0 && currentDocCategory !== 'completed') {
     html += `<div style="background:rgba(248,113,113,0.15);border:1px solid var(--danger);border-radius:8px;padding:8px;margin-bottom:10px;font-size:11px;color:var(--danger);text-align:center;font-weight:700;animation:pulse 1.5s infinite">⚠️ ${dueReminders.length} یادآوری سررسید شده!</div>`;
   }
 
-  for (const [key, group] of Object.entries(groups)) {
-    const dGroup = arr.filter(d => getGroup(d) === key);
-    if (dGroup.length === 0) continue;
+  html += displayDocs.map(d => {
+    const req = Number(d.creditReq||0), total = totalEarned(d);
+    const pct = req ? Math.min(100, Math.round(total/req*100)) : 0;
+    const complete = isComplete(d);
+    const f = d.finance||{};
+    const rem$ = Math.max(0, Number(f.total||0)-Number(f.paid||0));
+    const hasOffline = (d.events||[]).some(e=>e.type==='غیر حضوری');
+    const isDue = d.reminderDate && d.reminderDate <= today && d.status === 'regular';
     
-    html += `<div class="doc-group-header" style="color:${group.color}; font-size:11px; font-weight:800; margin:10px 4px 6px; display:flex; justify-content:space-between; border-bottom:1px solid ${group.color}33; padding-bottom:4px;">
-      <span>${group.title}</span>
-      <span>(${dGroup.length})</span>
-    </div>`;
-    
-    html += dGroup.map(d => {
-      const req = Number(d.creditReq||0), total = totalEarned(d);
-      const pct = req ? Math.min(100, Math.round(total/req*100)) : 0;
-      const complete = isComplete(d);
-      const f = d.finance||{};
-      const rem$ = Math.max(0, Number(f.total||0)-Number(f.paid||0));
-      const hasOffline = (d.events||[]).some(e=>e.type==='غیر حضوری');
-      const isDue = d.reminderDate && d.reminderDate <= today && d.status === 'regular';
-      
-      return `
-        <div class="doc-row ${selectedDoctorId===d.id?'active':''}" onclick="selectDoctor('${d.id}')" ${isDue ? 'style="border-right:3px solid var(--danger);background:rgba(248,113,113,0.08)"' : ''}>
-          <div class="doc-name">
-            <span>${esc(fullName(d))} ${isDue ? '<span style="font-size:12px;color:var(--danger)">🔔</span>' : ''}</span>
-            ${d.owner?`<span class="owner-badge ${d.owner}">${d.owner==='morteza'?'مرتضی':'پروین'}</span>`:''}
-          </div>
-          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">
-            ${pendingExamWebinars(d)>0?`<span class="exam-badge">📝 آزمون: ${num(pendingExamWebinars(d))}</span>`:''}
-            ${hasOffline?(offlinePurchasedToday(d)?'<span class="offline-badge ok">✅ خرید شده</span>':'<span class="offline-badge wait">🛒 خرید نشده</span>'):''}
-          </div>
-          <div class="doc-spec">${esc(d.spec||'—')} ${complete?'<span class="badge green" style="margin:0 4px">✔</span>':''}${rem$>0?'<span class="badge yellow" style="margin:0 4px">💸</span>':''}</div>
-          ${d.reminderDate ? `<div style="font-size:10px;color:${isDue?'var(--danger)':'var(--muted)'};margin-top:3px;font-weight:700">⏰ سررسید: ${d.reminderDate}</div>` : ''}
-          <div class="doc-bar"><div class="fill ${complete?'done':''}" style="width:${pct}%"></div></div>
-          <div class="doc-meta"><span>🎯 <b>${num(total)}</b> از ${num(req)}</span><span>${pct}%</span></div>
-        </div>`;
-    }).join('');
-  }
+    return `
+      <div class="doc-row ${selectedDoctorId===d.id?'active':''}" onclick="selectDoctor('${d.id}')" ${isDue ? 'style="border-right:3px solid var(--danger);background:rgba(248,113,113,0.08)"' : ''}>
+        <div class="doc-name">
+          <span>${esc(fullName(d))} ${isDue ? '<span style="font-size:12px;color:var(--danger)">🔔</span>' : ''}</span>
+          ${d.owner?`<span class="owner-badge ${d.owner}">${d.owner==='morteza'?'مرتضی':'پروین'}</span>`:''}
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">
+          ${pendingExamWebinars(d)>0?`<span class="exam-badge">📝 آزمون: ${num(pendingExamWebinars(d))}</span>`:''}
+          ${hasOffline?(offlinePurchasedToday(d)?'<span class="offline-badge ok">✅ خرید شده</span>':'<span class="offline-badge wait">🛒 خرید نشده</span>'):''}
+        </div>
+        <div class="doc-spec">${esc(d.spec||'—')} ${complete?'<span class="badge green" style="margin:0 4px">✔</span>':''}${rem$>0?'<span class="badge yellow" style="margin:0 4px">💸</span>':''}</div>
+        ${d.reminderDate ? `<div style="font-size:10px;color:${isDue?'var(--danger)':'var(--muted)'};margin-top:3px;font-weight:700">⏰ سررسید: ${d.reminderDate}</div>` : ''}
+        <div class="doc-bar"><div class="fill ${complete?'done':''}" style="width:${pct}%"></div></div>
+        <div class="doc-meta"><span>🎯 <b>${num(total)}</b> از ${num(req)}</span><span>${pct}%</span></div>
+      </div>`;
+  }).join('');
   
   el.innerHTML = html;
 }
