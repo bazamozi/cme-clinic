@@ -5015,5 +5015,117 @@ window.isDone = isDone;
   console.log('✅ VIP Final v8 — با MutationObserver');
 })();
 </script>
+<!-- 🎯 VIP-Exclude-Pending -->
+<script>
+(function(){
+  if(window._vipExcludePending) return;
+  window._vipExcludePending = true;
+  
+  // ═══════════════════════════════════
+  // 🎯 hook روی renderDocList — وقتی فیلتر "pending" هست، VIP ها رو حذف کن
+  // ═══════════════════════════════════
+  var _hookTimer = setInterval(function(){
+    if(typeof window.renderDocList !== 'function') return;
+    if(window._renderDocList_vip_excluded) return;
+    window._renderDocList_vip_excluded = true;
+    clearInterval(_hookTimer);
+    
+    var _orig = window.renderDocList;
+    window.renderDocList = function(){
+      // اگه فیلتر pending هست، موقتاً VIP ها رو pending نبینن
+      var isPending = (window._docFilter === 'pending');
+      
+      if(isPending){
+        // 🎯 بکاپ تابع اصلی getDoctorStatus
+        var _origStatus = window.getDoctorStatus;
+        
+        window.getDoctorStatus = function(d){
+          if(d && d.vip) return 'vip_skip'; // یه وضعیت خاص که با هیچی match نمیشه
+          return _origStatus.call(this, d);
+        };
+        
+        // اجرای render
+        var r = _orig.apply(this, arguments);
+        
+        // برگردوندن تابع اصلی
+        window.getDoctorStatus = _origStatus;
+        
+        return r;
+      }
+      
+      return _orig.apply(this, arguments);
+    };
+    
+    console.log('✅ renderDocList hook برای exclude VIP از pending');
+  }, 500);
+  
+  // ═══════════════════════════════════
+  // 🎯 hook روی updateFilterCounts — شمارش pending بدون VIP
+  // ═══════════════════════════════════
+  var _cntTimer = setInterval(function(){
+    if(typeof window.updateFilterCounts !== 'function') return;
+    if(window._updateFilterCounts_vip_excluded) return;
+    window._updateFilterCounts_vip_excluded = true;
+    clearInterval(_cntTimer);
+    
+    var _origCnt = window.updateFilterCounts;
+    window.updateFilterCounts = function(){
+      try {
+        var all = (typeof window.myDoctors === 'function') ? window.myDoctors() : (window.doctors || []);
+        var counts = {active: 0, done: 0, pending: 0, vip: 0};
+        
+        for(var i = 0; i < all.length; i++){
+          var d = all[i];
+          var st = (typeof window.getDoctorStatus === 'function') ? window.getDoctorStatus(d) : 'pending';
+          
+          if(d.vip){
+            // 🎯 VIP فقط در شمارنده vip
+            counts.vip++;
+            // اگه رویداد کامل داره، در done هم بشمار
+            if(st === 'done') counts.done++;
+            // ولی در pending و active نشمار
+            if(st === 'active') counts.active++;
+          } else {
+            if(counts[st] !== undefined) counts[st]++;
+          }
+        }
+        
+        var ids = {
+          cntActive: counts.active,
+          cntDone: counts.done,
+          cntPending: counts.pending,
+          cntVip: counts.vip
+        };
+        for(var id in ids){
+          var el = document.getElementById(id);
+          if(el && el.textContent !== String(ids[id])) el.textContent = ids[id];
+        }
+        
+        document.querySelectorAll('[data-filter]').forEach(function(btn){
+          var f = btn.getAttribute('data-filter');
+          var cnt = btn.querySelector('.cnt');
+          if(cnt && counts[f] !== undefined && cnt.textContent !== String(counts[f])){
+            cnt.textContent = counts[f];
+          }
+        });
+        
+        return counts;
+      } catch(e){
+        console.warn('updateFilterCounts error:', e);
+        return _origCnt.apply(this, arguments);
+      }
+    };
+    
+    console.log('✅ updateFilterCounts hook برای exclude VIP از pending');
+    
+    // اجرای اولیه
+    setTimeout(function(){
+      try { window.updateFilterCounts(); } catch(e){}
+    }, 500);
+  }, 500);
+  
+  console.log('✅ VIP-Exclude-Pending loaded');
+})();
+</script>
 </body>
 </html>
