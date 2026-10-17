@@ -97,31 +97,23 @@ textarea{resize:vertical;min-height:55px}
 .doc-header h2{color:#fff;font-size:17px;font-weight:800;margin:0}
 .doc-header .meta{color:var(--muted);font-size:12.5px;margin-top:6px;line-height:1.8}
 
-/* ===== New Compact Layout for Stats & Card ===== */
+/* ===== Statistics & Finance Boxes ===== */
 .summary-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:14px}
-@media(max-width:768px){.summary-grid{grid-template-columns:1fr}}
-.summary-box{background:linear-gradient(160deg,rgba(15,23,42,0.8),rgba(30,41,59,0.8));border:1px solid rgba(56,189,248,0.15);border-radius:14px;padding:15px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:8px;transition:.2s}
-.summary-box:hover{border-color:rgba(56,189,248,0.4)}
-.summary-box .s-title{font-size:14px;color:var(--muted);font-weight:600}
-.summary-box .s-val{font-size:26px;font-weight:800;color:var(--accent);direction:ltr}
-.summary-box.earned .s-val{color:var(--success)}
-.summary-box.remaining .s-val{color:var(--danger)}
-
 .finance-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px}
-@media(max-width:768px){.finance-grid{grid-template-columns:1fr}}
-.finance-box{background:rgba(15,23,42,0.4);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;font-size:14.5px;font-weight:700}
-.finance-box b{font-size:16px; font-weight:800}
+@media(max-width:768px){.summary-grid, .finance-grid{grid-template-columns:1fr}}
+.info-cell{background:rgba(15,23,42,0.4);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:15px;font-weight:600;text-align:center}
+.info-cell b{color:var(--accent2);font-size:15px;font-weight:800}
 
+/* ===== New Bank Card Style ===== */
 .bank-card-wrapper{margin-top:14px}
-.bank-card{background:linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.95)); border:1px solid rgba(56,189,248,0.3); border-radius:16px; padding:20px; position:relative; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.3); backdrop-filter:blur(10px)}
+.bank-card{background:linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.95)); border:1px solid rgba(56,189,248,0.3); border-radius:16px; padding:15px 20px; position:relative; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.3); backdrop-filter:blur(10px); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px}
 .bank-card::before{content:''; position:absolute; top:-50%; right:-20%; width:200px; height:200px; background:radial-gradient(circle, rgba(56,189,248,0.15) 0%, transparent 70%); border-radius:50%; pointer-events:none}
-.bank-card-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px}
-.bank-chip{width:45px; height:32px; background:linear-gradient(135deg, #fbbf24, #d97706); border-radius:6px; position:relative; box-shadow:inset 0 0 5px rgba(0,0,0,0.5)}
-.bank-chip::after{content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:25px; height:16px; border:1px solid rgba(0,0,0,0.2); border-radius:3px}
-.bank-logo{font-size:20px; font-weight:800; color:rgba(255,255,255,0.5); letter-spacing:1px}
-.bank-number{direction:ltr; text-align:center; font-size:22px; font-weight:800; letter-spacing:2px; color:#fff; margin-bottom:20px; text-shadow:0 2px 4px rgba(0,0,0,0.5); white-space:nowrap}
-.bank-details{display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:15px}
-.bank-info-group{display:flex; gap:15px; flex-wrap:wrap;}
+.bank-card-header{display:flex; align-items:center; gap:12px;}
+.bank-chip{width:40px; height:28px; background:linear-gradient(135deg, #fbbf24, #d97706); border-radius:5px; position:relative; box-shadow:inset 0 0 5px rgba(0,0,0,0.5)}
+.bank-chip::after{content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:20px; height:14px; border:1px solid rgba(0,0,0,0.2); border-radius:3px}
+.bank-logo{font-size:16px; font-weight:800; color:rgba(255,255,255,0.5); letter-spacing:1px}
+.bank-number{direction:ltr; text-align:center; font-size:19px; font-weight:800; letter-spacing:2px; color:#fff; text-shadow:0 2px 4px rgba(0,0,0,0.5); white-space:nowrap}
+.bank-info-group{display:flex; gap:12px; flex-wrap:wrap; align-items:center;}
 .bank-info-item{display:flex; flex-direction:column; align-items:center; gap:4px}
 .bank-info-label{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px}
 .bank-info-box{background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:6px 10px; font-size:14px; font-weight:800; color:#fff; direction:ltr; min-width:45px; text-align:center; white-space:nowrap; box-shadow:inset 0 2px 4px rgba(0,0,0,0.2)}
@@ -130,9 +122,7 @@ textarea{resize:vertical;min-height:55px}
 
 /* ===== Events Layout ===== */
 .events-layout{display:flex;flex-direction:column;gap:12px; margin-top:14px;}
-.events-nav{display:none;}
-.ev-section{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:rgba(15,23,42,0.3);animation:fadeIn 0.3s ease-out; margin-bottom: 12px;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.ev-section{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:rgba(15,23,42,0.3); margin-bottom: 12px;}
 .ev-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(15,23,42,0.7);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px}
 .ev-head h3{font-size:13.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .ev-head .add-btn{background:rgba(56,189,248,0.1);border:1px solid var(--accent);color:var(--accent);padding:5px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;transition:.2s;font-weight:700}
@@ -169,8 +159,7 @@ textarea{resize:vertical;min-height:55px}
   .wrap{overflow-x:hidden;max-width:100%}
   .main-area{overflow-x:hidden!important;max-width:100%}
   .doc-header{overflow-x:hidden;max-width:100%}
-  .summary-grid {grid-template-columns:1fr !important;}
-  .finance-grid {grid-template-columns:1fr !important;}
+  .summary-grid, .finance-grid {grid-template-columns:1fr !important;}
   .info-cell{font-size:13px!important;padding:8px 10px!important}
   .info-cell b{font-size:13px!important}
   .credentials{flex-wrap:wrap!important;width:100%;justify-content:center}
@@ -202,23 +191,14 @@ textarea{resize:vertical;min-height:55px}
   input,select,textarea{font-size:16px!important; padding:12px}
   
   /* Bank Card Mobile Tweaks */
-  .bank-number{font-size:18px; letter-spacing:1px; margin-bottom:15px}
+  .bank-card{flex-direction:column; align-items:stretch; gap:12px}
+  .bank-card-header{justify-content:space-between; width:100%}
+  .bank-number{font-size:18px; letter-spacing:1px; text-align:center; width:100%}
   .bank-info-group{gap:8px; justify-content:center; width:100%}
   .bank-info-box{font-size:13px; padding:6px 8px; min-width:40px}
-  .bank-details{justify-content:center; flex-direction:column; align-items:center;}
+  .bank-copy-btn{width:100%; justify-content:center;}
   
-  /* Events Mobile Layout - Tabs ON */
-  .events-nav{display:flex; position:sticky; top:-12px; z-index:10; background:rgba(15,23,42,0.95); padding:10px 0; margin-top:-10px; backdrop-filter:blur(10px); border-bottom:1px solid rgba(255,255,255,0.05); gap:8px; overflow-x:auto; scrollbar-width: none;}
-  .events-nav::-webkit-scrollbar { display: none; }
-  .ev-nav-btn{flex:1; padding:8px 10px; border-radius:10px; background:rgba(15,23,42,0.6); border:1px solid var(--border); color:var(--muted); font-family:inherit; font-size:12.5px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; white-space:nowrap;}
-  .ev-nav-btn.active{background:linear-gradient(135deg,rgba(56,189,248,0.2),rgba(34,211,238,0.1)); color:var(--accent); border-color:rgba(56,189,248,0.5); box-shadow:0 4px 15px rgba(56,189,248,0.15);}
-  .ev-nav-btn .count{background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:10px; font-size:11px;}
-  .ev-nav-btn.active .count{background:var(--accent); color:#0f172a;}
-  
-  /* در موبایل فقط بخش فعال نمایش داده می‌شود */
-  .ev-section{display:none;}
-  .ev-section.active-section{display:block;}
-  
+  /* Events */
   .event-row{padding:12px}
   .status-group{grid-template-columns:1fr 1fr!important}
   .status-group .stat-pill:last-child{grid-column:span 2}
@@ -381,7 +361,6 @@ let calls = [];
 let selectedDoctorId = null;
 let currentUser = 'morteza';
 let currentDocCategory = 'all';
-let currentEventTab = 'وبینار'; // فقط برای موبایل استفاده می‌شود
 
 try {
   doctors = JSON.parse(localStorage.getItem(K)||'[]');
@@ -489,6 +468,7 @@ function eventState(e){
 }
 function doctorCredits(d){ const r = { 'حضوری':0, 'وبینار':0, 'غیر حضوری':0 }; (d.events||[]).forEach(e=>{ if(r[e.type]!==undefined) r[e.type] += eventCredit(e); }); return r; }
 function totalEarned(d){ const c=doctorCredits(d); return c['حضوری']+c['وبینار']+c['غیر حضوری']; }
+function totalListedCredits(d){ return (d.events||[]).reduce((s,e)=>s+Number(e.credit||0), 0); }
 function remainingCredits(d){ return Math.max(0, Number(d.creditReq||0) - totalEarned(d)); }
 function isComplete(d){ return remainingCredits(d)===0 && Number(d.creditReq||0)>0; }
 function pendingExamWebinars(d){ return (d.events||[]).filter(e=> e.type==='وبینار' && e.purchase==='انجام شد' && e.attend==='انجام شد' && e.exam==='ثبت نشده').length; }
@@ -658,7 +638,6 @@ function renderDash(){
 }
 
 window.setDocCategory = function(cat) { currentDocCategory = cat; renderDocList(); };
-window.setEventTab = function(tab) { currentEventTab = tab; renderMain(); };
 
 function renderDocList(){
   const searchEl = document.getElementById('searchDoctor'); if(!searchEl) return;
@@ -708,7 +687,7 @@ function renderDocList(){
   el.innerHTML = html;
 }
 
-function selectDoctor(id){ selectedDoctorId = id; currentEventTab = 'وبینار'; renderDocList(); renderMain(); updateMobileSelection(); }
+function selectDoctor(id){ selectedDoctorId = id; renderDocList(); renderMain(); updateMobileSelection(); }
 function updateMobileSelection(){ const app = document.getElementById('appContainer'); if(!app) return; if(selectedDoctorId){ app.classList.add('has-selection'); app.classList.remove('no-selection'); } else { app.classList.remove('has-selection'); app.classList.add('no-selection'); } }
 window.backToList = function(){ selectedDoctorId = null; renderDocList(); renderMain(); updateMobileSelection(); };
 
@@ -717,13 +696,11 @@ function renderMain(){
   if(!selectedDoctorId){ el.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>'; return; }
   const d = doctors.find(x=>x.id===selectedDoctorId); if(!d || d.deleted){ selectedDoctorId=null; renderMain(); return; }
   const cr = doctorCredits(d), total = totalEarned(d), req = Number(d.creditReq||0), rem = remainingCredits(d);
+  const totalListed = totalListedCredits(d);
   const c = d.card||{}, f = d.finance||{}, rem$ = Math.max(0, Number(f.total||0)-Number(f.paid||0)), complete = rem===0 && req>0;
   const statusMap = { 'in_progress': {txt: '⚡ در حال اجرا', cls: 'blue'}, 'completed': {txt: '🏆 تمام شده', cls: 'green'}, 'undecided': {txt: '⏳ بلاتکلیف', cls: 'yellow'}, 'regular': {txt: '⭐ مشتری ثابت', cls: 'purple'} };
   const st = statusMap[d.status || 'in_progress'], isDue = d.status === 'regular' && d.reminderDate && d.reminderDate <= getShamsiToday();
   
-  const evCounts = { 'وبینار': 0, 'غیر حضوری': 0, 'حضوری': 0 };
-  (d.events||[]).forEach(e => { if(evCounts[e.type] !== undefined) evCounts[e.type]++; });
-
   el.innerHTML = `
     <button class="back-btn" onclick="backToList()">← بازگشت به لیست</button>
     <div class="doc-header">
@@ -747,24 +724,15 @@ function renderMain(){
       </div>
       
       <div class="summary-grid">
-        <div class="summary-box">
-          <div class="s-title">🎯 امتیاز درخواستی</div>
-          <div class="s-val">${num(req)}</div>
-        </div>
-        <div class="summary-box earned">
-          <div class="s-title">✅ کل امتیاز کسب‌شده</div>
-          <div class="s-val">${num(total)}</div>
-        </div>
-        <div class="summary-box remaining">
-          <div class="s-title">⏳ باقی‌مانده</div>
-          <div class="s-val">${num(rem)}</div>
-        </div>
+        <div class="info-cell">🎯 امتیاز درخواستی: <b>${num(req)}</b></div>
+        <div class="info-cell">📊 مجموع امتیازهای لیست: <b>${num(totalListed)}</b></div>
+        <div class="info-cell">⏳ باقی‌مانده: <b style="color:${rem>0?'var(--danger)':'var(--success)'}">${num(rem)}</b></div>
       </div>
       
       <div class="finance-grid">
-        <div class="finance-box">💰 کل: <b>${num(f.total||0)}</b></div>
-        <div class="finance-box" style="color:var(--success)">✅ پرداختی: <b>${num(f.paid||0)}</b></div>
-        <div class="finance-box" style="color:${rem$>0?'var(--danger)':'var(--success)'}">⏳ باقی: <b>${num(rem$)}</b></div>
+        <div class="info-cell">💰 کل: <b>${num(f.total||0)}</b></div>
+        <div class="info-cell">✅ پرداختی: <b style="color:var(--success)">${num(f.paid||0)}</b></div>
+        <div class="info-cell">⏳ باقی: <b style="color:${rem$>0?'var(--danger)':'var(--success)'}">${num(rem$)}</b></div>
       </div>
       
       ${(c.num||c.cvv2||c.pass2)?`
@@ -775,20 +743,18 @@ function renderMain(){
             <div class="bank-logo">IRAN</div>
           </div>
           <div class="bank-number">${esc(c.num||'—')}</div>
-          <div class="bank-details">
-            <div class="bank-info-group">
-              <div class="bank-info-item">
-                <div class="bank-info-label">EXPIRES</div>
-                <div class="bank-info-box">${esc(c.m||'--')}/${esc(c.y||'--')}</div>
-              </div>
-              <div class="bank-info-item">
-                <div class="bank-info-label">CVV2</div>
-                <div class="bank-info-box">${esc(c.cvv2||'—')}</div>
-              </div>
-              <div class="bank-info-item">
-                <div class="bank-info-label">رمز دوم</div>
-                <div class="bank-info-box">${esc(c.pass2||'—')}</div>
-              </div>
+          <div class="bank-info-group">
+            <div class="bank-info-item">
+              <div class="bank-info-label">EXPIRES</div>
+              <div class="bank-info-box">${esc(c.m||'--')}/${esc(c.y||'--')}</div>
+            </div>
+            <div class="bank-info-item">
+              <div class="bank-info-label">CVV2</div>
+              <div class="bank-info-box">${esc(c.cvv2||'—')}</div>
+            </div>
+            <div class="bank-info-item">
+              <div class="bank-info-label">رمز دوم</div>
+              <div class="bank-info-box">${esc(c.pass2||'—')}</div>
             </div>
             <button class="bank-copy-btn" onclick="copyText('${esc(c.num||'')}',this)">📋 کپی کارت</button>
           </div>
@@ -796,24 +762,16 @@ function renderMain(){
       </div>`:''}
     </div>
     
-    <!-- بخش رویدادها با تب‌های مجزا -->
+    <!-- بخش رویدادها: همه همیشه باز و پشت سر هم -->
     <div class="events-layout">
-      <div class="events-nav">
-        <button class="ev-nav-btn ${currentEventTab==='وبینار'?'active':''}" onclick="setEventTab('وبینار')">💻 وبینار <span class="count">${num(evCounts['وبینار'])}</span></button>
-        <button class="ev-nav-btn ${currentEventTab==='غیر حضوری'?'active':''}" onclick="setEventTab('غیر حضوری')">📁 غیر حضوری <span class="count">${num(evCounts['غیر حضوری'])}</span></button>
-        <button class="ev-nav-btn ${currentEventTab==='حضوری'?'active':''}" onclick="setEventTab('حضوری')">🏢 حضوری <span class="count">${num(evCounts['حضوری'])}</span></button>
+      <div class="ev-section">
+        ${renderEventSection(d, 'وبینار')}
       </div>
-      
-      <div id="eventSectionsContainer">
-        <div class="ev-section ${currentEventTab==='وبینار'?'active-section':''}" id="section-وبینار">
-          ${renderEventSection(d, 'وبینار')}
-        </div>
-        <div class="ev-section ${currentEventTab==='غیر حضوری'?'active-section':''}" id="section-غیر حضوری">
-          ${renderEventSection(d, 'غیر حضوری')}
-        </div>
-        <div class="ev-section ${currentEventTab==='حضوری'?'active-section':''}" id="section-حضوری">
-          ${renderEventSection(d, 'حضوری')}
-        </div>
+      <div class="ev-section">
+        ${renderEventSection(d, 'غیر حضوری')}
+      </div>
+      <div class="ev-section">
+        ${renderEventSection(d, 'حضوری')}
       </div>
     </div>
   `;
@@ -977,7 +935,6 @@ window.openEventModal = function(editId, presetType){
     if(isEdit){ Object.assign(existing, data); toast('✅ ویرایش شد'); }
     else { if(type==='غیر حضوری' && offlinePurchasedToday(d)){ if(!confirm('⚠️ امروز غیر حضوری خریده‌اید. ادامه؟')) return; } d.events.unshift({ id:uid(), ...data, purchase:'انجام نشد', attend:'انجام نشد', exam:'ثبت نشده', createdAt:Date.now() }); toast('✅ اضافه شد'); }
     d.updatedAt = Date.now(); 
-    currentEventTab = type; // بعد از ثبت، به تب همان رویداد برو
     save(); closeModal(); renderMain(); renderDocList();
   };
 };
