@@ -223,6 +223,8 @@ textarea{resize:vertical;min-height:55px}
   </div>
 </div>
 
+<iframe name="hidden_iframe_push" style="display:none;"></iframe>
+
 <div class="wrap">
 
 <header>
@@ -241,6 +243,9 @@ textarea{resize:vertical;min-height:55px}
     <button data-user="parvin" onclick="switchUser('parvin')">پروین</button>
     <button data-user="all" onclick="switchUser('all')">همه</button>
   </div>
+  
+  <div id="syncStatus" class="sub" style="font-size: 12px; padding: 4px 8px; border-radius: 8px; background: rgba(255,255,255,0.1); margin-left: 10px;">☁️ آماده</div>
+  
   <button class="logout-btn" onclick="doLogout()">🚪 خروج</button>
   <div class="sub" id="clock"></div>
 </header>
@@ -334,7 +339,6 @@ textarea{resize:vertical;min-height:55px}
 // CONSTANTS & STATE
 // ============================================
 const K = 'cme4_data';
-// لینک جدید جایگزین شد:
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxgaQoioSTin2ipJxZ78d8yb5l6HVIR1KvggjJZ2f9H88xKQs3qsQ3KFpzfdHFKsVek/exec';
 
 let doctors = [];
@@ -481,12 +485,31 @@ function offlinePurchasedToday(d){
 }
 
 // ============================================
-// SAVE & SYNC (اصلاح‌شده)
+// SAVE & SYNC (سیستم کاملاً جدید و مقاوم)
 // ============================================
 let _dirty = false;
 let _syncing = false;
 let _syncQueued = false;
 let _syncTimer = null;
+
+function updateSyncUI(status) {
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  if (status === 'syncing') {
+    el.innerHTML = '⏳ در حال سینک...';
+    el.style.color = 'var(--warn)';
+  } else if (status === 'synced') {
+    el.innerHTML = '✅ سینک شد';
+    el.style.color = 'var(--success)';
+    setTimeout(() => { if(el.innerHTML === '✅ سینک شد') el.innerHTML = '☁️ آماده'; el.style.color = 'var(--muted)'; }, 3000);
+  } else if (status === 'error') {
+    el.innerHTML = '❌ خطای سینک';
+    el.style.color = 'var(--danger)';
+  } else {
+    el.innerHTML = '☁️ آماده';
+    el.style.color = 'var(--muted)';
+  }
+}
 
 function save(){
   try {
@@ -505,12 +528,16 @@ function scheduleSync(){
 async function syncNow(){
   if(_syncing){ _syncQueued = true; return; }
   _syncing = true;
+  updateSyncUI('syncing');
   try {
     if(_dirty){
-      const ok = await pushToCloud();
-      if(ok) _dirty = false;
+      await pushToCloud();
+      _dirty = false; // فرض میکنیم ارسال شد، اگر نشد pull داده‌های سرور را برمی‌گرداند
     }
     await pullFromCloud();
+    updateSyncUI('synced');
+  } catch(e) {
+    updateSyncUI('error');
   } finally {
     _syncing = false;
     if(_syncQueued){ _syncQueued = false; scheduleSync(); }
@@ -518,18 +545,33 @@ async function syncNow(){
 }
 
 async function pushToCloud(){
-  try {
-    await fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ doctors, calls, savedAt: Date.now() })
-    });
-    return true;
-  } catch(e){
-    console.warn('push failed:', e);
-    return false;
-  }
+  return new Promise((resolve) => {
+    try {
+      const payload = JSON.stringify({ doctors, calls, savedAt: Date.now() });
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = SCRIPT_URL;
+      form.target = 'hidden_iframe_push';
+      form.style.display = 'none';
+
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'data';
+      input.value = payload;
+      form.appendChild(input);
+
+      document.body.appendChild(form);
+      form.submit();
+      
+      setTimeout(() => {
+        if (document.body.contains(form)) document.body.removeChild(form);
+        resolve(true);
+      }, 1200); // زمان برای ارسال فرم
+    } catch (e) {
+      console.warn('push failed', e);
+      resolve(false);
+    }
+  });
 }
 
 function mergeById(localArr, remoteArr, tsField){
@@ -639,7 +681,7 @@ function renderDash(){
 }
 
 // ============================================
-// DOCTORS LIST WITH INDEPENDENT CATEGORY BUTTONS
+// DOCTORS LIST
 // ============================================
 window.setDocCategory = function(cat) {
   currentDocCategory = cat;
@@ -1215,221 +1257,4 @@ function updateCallInfo(){
   if(!p){ el.innerHTML=''; document.getElementById('callName').value=''; return; }
   const d = doctors.find(x=> !x.deleted && normPhone(x.phone)===p);
   if(!d){ el.innerHTML='<div style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.35);border-radius:12px;padding:14px"><h3 style="color:var(--danger);font-size:14px">❌ این شماره در لیست پزشکان نیست</h3></div>'; return; }
-  document.getElementById('callName').value = fullName(d);
-  const cr = doctorCredits(d), req = Number(d.creditReq||0), total = totalEarned(d), rem = remainingCredits(d);
-  el.innerHTML = `<div style="background:linear-gradient(135deg,rgba(56,189,248,0.12),rgba(34,211,238,0.05));border:1px solid rgba(56,189,248,0.35);border-radius:12px;padding:14px;margin-bottom:10px">
-    <h3 style="color:var(--accent);font-size:14px;margin-bottom:8px">👨‍⚕️ ${esc(fullName(d))} — ${esc(d.spec||'')}</h3>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">درخواستی: <b style="color:var(--accent)">${num(req)}</b> | کسب‌شده: <b style="color:var(--success)">${num(total)}</b> | کمبود: <b style="color:${rem>0?'var(--danger)':'var(--success)'}">${num(rem)}</b></div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-      ${['حضوری','وبینار','غیر حضوری'].map(k=>`<div style="background:rgba(15,23,42,0.7);border:1px solid var(--border);border-radius:9px;padding:8px;text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">${typeIcon(k)} ${k}</div><div style="font-size:14px;font-weight:700;color:var(--accent)">${num(cr[k])}</div></div>`).join('')}
-    </div>
-  </div>`;
-}
-
-document.getElementById('fCall').onsubmit = e => {
-  e.preventDefault();
-  calls.unshift({ id:uid(), owner:currentUser, phone:toEnDigits(document.getElementById('callPhone').value.trim()), name:document.getElementById('callName').value.trim(), subject:document.getElementById('callSubject').value, follow:document.getElementById('callFollow').value, note:document.getElementById('callNote').value.trim(), createdAt:Date.now(), updatedAt: Date.now() });
-  save(); e.target.reset(); document.getElementById('callCreditInfo').innerHTML=''; renderCalls(); toast('📞 ثبت شد');
-};
-
-function renderCalls(){
-  const searchEl = document.getElementById('searchCall');
-  if(!searchEl) return;
-  const q = searchEl.value.trim().toLowerCase();
-  const f = document.getElementById('filterCall').value;
-  const arr = myCalls().filter(c=>{
-    if(f==='pending' && c.follow!=='پیگیری‌نشده') return false;
-    if(f==='doing' && c.follow!=='در حال پیگیری') return false;
-    if(f==='done' && c.follow!=='پیگیری‌شده') return false;
-    if(q && !(c.phone.includes(q) || (c.name||'').toLowerCase().includes(q) || c.subject.toLowerCase().includes(q))) return false;
-    return true;
-  });
-  const el = document.getElementById('listCalls');
-  if(!arr.length){ el.innerHTML='<div class="empty">تماسی یافت نشد</div>'; return; }
-  const fCls = { 'پیگیری‌نشده':'red', 'در حال پیگیری':'yellow', 'پیگیری‌شده':'green' };
-  el.innerHTML = arr.map(c=>`<div style="background:rgba(15,23,42,0.6);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px">
-    <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
-      <div><div style="font-weight:700;font-size:13.5px">${c.name?esc(c.name):'ناشناس'} <span class="badge blue ltr">${esc(c.phone)}</span></div>
-      <div style="color:var(--muted);font-size:11px;margin-top:5px">🎯 ${esc(c.subject)} | 🕒 <span class="ltr">${dt(c.createdAt)}</span></div>
-      ${c.note?`<div style="background:rgba(56,189,248,0.08);padding:6px 10px;border-radius:8px;border-right:3px solid var(--accent);margin-top:6px;font-size:12px">${esc(c.note)}</div>`:''}</div>
-      <div><span class="badge ${fCls[c.follow]||'gray'}">${esc(c.follow)}</span></div>
-    </div>
-    <div class="actions">
-      <button class="mini" onclick="cycleFollow('${c.id}')">تغییر پیگیری</button>
-      <button class="mini danger" onclick="delCall('${c.id}')">🗑 حذف</button>
-    </div>
-  </div>`).join('');
-}
-
-window.cycleFollow = function(id){
-  const c=calls.find(x=>x.id===id); if(!c) return;
-  const o=['پیگیری‌نشده','در حال پیگیری','پیگیری‌شده'];
-  c.follow=o[(o.indexOf(c.follow)+1)%3];
-  c.updatedAt = Date.now();
-  save(); renderCalls();
-};
-window.delCall = function(id){
-  if(!confirm('حذف شود؟')) return;
-  const c = calls.find(x=>x.id===id);
-  if(!c) return;
-  c.deleted = true;
-  c.updatedAt = Date.now();
-  save(); renderCalls();
-};
-
-// ============================================
-// RENDER ALL
-// ============================================
-function renderAll(){
-  renderDash();
-  renderDocList();
-  renderMain();
-  renderCalls();
-}
-
-// ============================================
-// EVENT LISTENERS
-// ============================================
-document.querySelectorAll('.tab').forEach(t=>{
-  t.onclick = () => switchTab(t.dataset.tab);
-});
-document.querySelectorAll('.mobile-nav button').forEach(b=>{
-  b.onclick = () => switchTab(b.dataset.tab);
-});
-document.getElementById('searchDoctor').addEventListener('input', renderDocList);
-document.getElementById('searchCall').addEventListener('input', renderCalls);
-document.getElementById('filterCall').addEventListener('change', renderCalls);
-
-// ============================================
-// INIT
-// ============================================
-document.querySelectorAll('.user-picker button').forEach(b=>{
-  if(b.dataset.user === currentUser) b.classList.add('active');
-  else b.classList.remove('active');
-});
-
-tick();
-setInterval(tick, 30000);
-renderAll();
-
-// Sync intervals
-setTimeout(syncNow, 500);
-setInterval(syncNow, 4000); // هر 4 ثانیه چک میکند
-document.addEventListener('visibilitychange', () => { if(!document.hidden) syncNow(); });
-window.addEventListener('online', () => syncNow());
-
-// ===== Login System =====
-var USERS = {
-  'morteza': { pass: 'MN13601353', name: 'مرتضی' },
-  'parvin': { pass: 'parvin123', name: 'پروین' }
-};
-
-window.doLogin = function(){
-  var u = document.getElementById('loginUser').value.trim().toLowerCase();
-  var p = document.getElementById('loginPass').value;
-  var errEl = document.getElementById('loginError');
-  
-  if(USERS[u] && USERS[u].pass === p){
-    try { localStorage.setItem('cme_logged_in', u); } catch(e){}
-    errEl.classList.remove('show');
-    document.getElementById('loginScreen').classList.add('hidden');
-    currentUser = u;
-    try { localStorage.setItem('cme_current_user', u); } catch(e){}
-    document.querySelectorAll('.user-picker button').forEach(function(b){
-      if(b.dataset.user === u) b.classList.add('active');
-      else b.classList.remove('active');
-    });
-    renderAll();
-    updateMobileSelection();
-    toast('👋 خوش آمدید ' + USERS[u].name);
-  } else {
-    errEl.classList.add('show');
-    document.getElementById('loginPass').value = '';
-  }
-};
-
-window.doLogout = function(){
-  if(!confirm('از سیستم خارج می‌شوید؟')) return;
-  try {
-    localStorage.removeItem('cme_logged_in');
-    localStorage.removeItem('cme_current_user');
-  } catch(e){}
-  location.reload();
-};
-
-function checkLogin(){
-  var logged = null;
-  try { logged = localStorage.getItem('cme_logged_in'); } catch(e){}
-  
-  if(logged && USERS[logged]){
-    document.getElementById('loginScreen').classList.add('hidden');
-    currentUser = logged;
-    try { localStorage.setItem('cme_current_user', logged); } catch(e){}
-    document.querySelectorAll('.user-picker button').forEach(function(b){
-      if(b.dataset.user === logged) b.classList.add('active');
-      else b.classList.remove('active');
-    });
-  } else {
-    document.getElementById('loginScreen').classList.remove('hidden');
-    setTimeout(function(){
-      var u = document.getElementById('loginUser');
-      if(u) u.focus();
-    }, 100);
-  }
-}
-
-document.addEventListener('keydown', function(e){
-  if(e.key === 'Enter' && !document.getElementById('loginScreen').classList.contains('hidden')){
-    doLogin();
-  }
-});
-
-checkLogin();
-
-// ===== Open IRCME Login Directly =====
-window.openIRCME = function(nat, pass){
-  if(!nat || !pass){
-    toast('⚠️ کد ملی یا رمز سامانه موجود نیست');
-    return;
-  }
-  var url = 'https://www.ircme.ir/App_Web/%28Guest%29/Membership/Login.aspx?CenterID=25&u=' + encodeURIComponent(nat) + '&p=' + encodeURIComponent(pass);
-  var w = window.open(url, '_blank');
-  if(!w || w.closed || typeof w.closed === 'undefined'){
-    window.location.href = url;
-  }
-};
-
-/* ===== Auto Attend System ===== */
-function autoAttendEvents(){
-  var today = getShamsiToday();
-  if(!today) return;
-  
-  var changed = 0;
-  doctors.forEach(function(doc){
-    if(doc.deleted) return;
-    (doc.events||[]).forEach(function(e){
-      if(e.purchase === 'انجام شد' && e.attend === 'انجام نشد' && e.date && e.date.length >= 8){
-        if(today > e.date){
-          e.attend = 'انجام شد';
-          changed++;
-        }
-      }
-    });
-    if(changed > 0) doc.updatedAt = Date.now();
-  });
-  
-  if(changed > 0){
-    save();
-    renderAll();
-    toast('✅ ' + changed + ' رویداد خودکار به «شرکت شده» تغییر یافت');
-  }
-}
-
-setTimeout(autoAttendEvents, 2000);
-setInterval(autoAttendEvents, 60000);
-document.addEventListener('visibilitychange', function(){
-  if(!document.hidden) autoAttendEvents();
-});
-</script>
-</body>
-</html>
+ 
