@@ -4296,5 +4296,17 @@ setTimeout(function(){
   setTimeout(showCards, 1500);
 })();
 </script>
+<!-- 🎯 DEFAULT-TAB-FIX -->
+<script>
+(function(){
+  // صبر میکنیم تا کل صفحه لود بشه و برنامه اولیه اجرا بشه
+  setTimeout(function(){
+    // اگر تابع تغییر تب وجود داشت، میریم روی تب پزشکان
+    if(typeof switchTab === 'function'){
+      switchTab('doctors');
+    }
+  }, 300);
+})();
+</script>
 </body>
 </html>
