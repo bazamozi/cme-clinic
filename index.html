@@ -67,10 +67,9 @@ textarea{resize:vertical;min-height:55px}
 .sidebar{background:rgba(15,23,42,0.55);border:1px solid var(--border);border-radius:14px;padding:12px;height:calc(100vh - 180px);overflow:hidden;display:flex;flex-direction:column}
 .sidebar-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px;flex-wrap:wrap}
 .sidebar-head h2{margin:0;font-size:14px;color:var(--accent)}
-.doc-category-tabs{display:flex;gap:5px;overflow-x:auto;padding-bottom:5px;margin-bottom:9px;scrollbar-width:thin}
-.doc-category-tabs::-webkit-scrollbar{height:4px}
-.doc-category-tabs::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
-.cat-tab{padding:5px 10px;border-radius:8px;font-size:11.5px;font-weight:700;white-space:nowrap;background:rgba(15,23,42,0.6);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:.2s}
+.doc-category-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:9px}
+.cat-tab{width:100%;text-align:center;padding:7px 5px;border-radius:8px;font-size:11.5px;font-weight:700;background:rgba(15,23,42,0.6);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:.2s}
+.cat-tab.all{grid-column:span 2}
 .cat-tab.active{background:linear-gradient(135deg,rgba(56,189,248,0.2),rgba(34,211,238,0.1));color:var(--accent);border-color:rgba(56,189,248,0.5)}
 .cat-tab.all.active{color:#fff;background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3)}
 .cat-tab.completed.active{color:var(--success);border-color:var(--success);background:rgba(52,211,153,0.15)}
@@ -593,7 +592,7 @@ function renderDash(){
 }
 
 // ============================================
-// DOCTORS LIST WITH CATEGORY TABS
+// DOCTORS LIST WITH INDEPENDENT CATEGORY BUTTONS
 // ============================================
 window.setDocCategory = function(cat) {
   currentDocCategory = cat;
@@ -618,13 +617,12 @@ function renderDocList(){
 
   const getGroup = (d) => d.status || 'in_progress';
 
-  // Generate Tabs
+  // Generate Tabs (Always show all 4 categories + All)
   let tabsHtml = '';
   for (const [key, cat] of Object.entries(categories)) {
     const count = key === 'all' ? allMyDocs.length : allMyDocs.filter(d => getGroup(d) === key).length;
-    if(count === 0 && key !== 'all' && key !== 'in_progress') continue; 
-    
-    tabsHtml += `<button class="cat-tab ${key} ${currentDocCategory === key ? 'active' : ''}" onclick="setDocCategory('${key}')">${cat.title} (${num(count)})</button>`;
+    const extraClass = key === 'all' ? 'all' : '';
+    tabsHtml += `<button class="cat-tab ${extraClass} ${key} ${currentDocCategory === key ? 'active' : ''}" onclick="setDocCategory('${key}')">${cat.title} (${num(count)})</button>`;
   }
   
   const tabsContainer = document.getElementById('docCategoryTabs');
