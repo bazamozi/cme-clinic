@@ -340,7 +340,7 @@ let doctors = [];
 let calls = [];
 let selectedDoctorId = null;
 let currentUser = 'morteza';
-let currentDocCategory = 'all'; // Default category tab
+let currentDocCategory = 'all';
 
 try {
   doctors = JSON.parse(localStorage.getItem(K)||'[]');
@@ -604,7 +604,6 @@ function renderDocList(){
   if(!searchEl) return;
   const q = searchEl.value.trim().toLowerCase();
   
-  // Filter base array by search & ownership
   const allMyDocs = myDoctors().filter(d => !q || fullName(d).toLowerCase().includes(q) || (d.spec||'').toLowerCase().includes(q) || (d.phone||'').includes(q) || (d.nat||'').includes(q));
   
   const categories = {
@@ -617,7 +616,6 @@ function renderDocList(){
 
   const getGroup = (d) => d.status || 'in_progress';
 
-  // Generate Tabs (Always show all 4 categories + All)
   let tabsHtml = '';
   for (const [key, cat] of Object.entries(categories)) {
     const count = key === 'all' ? allMyDocs.length : allMyDocs.filter(d => getGroup(d) === key).length;
@@ -628,7 +626,6 @@ function renderDocList(){
   const tabsContainer = document.getElementById('docCategoryTabs');
   if(tabsContainer) tabsContainer.innerHTML = tabsHtml;
 
-  // Filter the list based on active category
   const displayDocs = currentDocCategory === 'all' ? allMyDocs : allMyDocs.filter(d => getGroup(d) === currentDocCategory);
 
   const el = document.getElementById('docList');
@@ -959,23 +956,6 @@ window.openDoctorModal = function(editId){
     <h2>${d?'✏️ ویرایش':'➕ ثبت'} پزشک</h2>
     <form id="mDoctorForm" autocomplete="off">
       <input type="hidden" id="mEditId" value="${d?.id||''}">
-      <div class="sect">👤 اطلاعات فردی</div>
-      <div class="row">
-        <div><label>نام *</label><input autocomplete="off" id="mFirstName" required value="${esc(d?.firstName||'')}"></div>
-        <div><label>نام خانوادگی *</label><input autocomplete="off" id="mLastName" required value="${esc(d?.lastName||'')}"></div>
-      </div>
-      <div class="row">
-        <div><label>تخصص *</label><input autocomplete="off" id="mSpec" required value="${esc(d?.spec||'')}"></div>
-        <div><label>کد ملی *</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mNat" required maxlength="10" value="${esc(d?.nat||'')}"></div>
-      </div>
-      <div class="row">
-        <div><label>شماره موبایل *</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPhone" required value="${esc(d?.phone||'')}"></div>
-        <div><label>امتیاز درخواستی *</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCreditReq" required value="${esc(d?.creditReq||'')}"></div>
-      </div>
-      <div class="row">
-        <div><label>رمز سامانه</label><input autocomplete="off" id="mPass" value="${esc(d?.pass||'')}"></div>
-        <div><label>سال کارنامه</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mYear" value="${esc(d?.year||'')}"></div>
-      </div>
       
       <div class="sect">📌 وضعیت و یادآوری</div>
       <div class="row">
@@ -990,6 +970,39 @@ window.openDoctorModal = function(editId){
         <div><label>تاریخ یادآوری (سررسید)</label><input autocomplete="off" dir="ltr" placeholder="مثلا 1405/02/15" style="text-align:center" id="mReminderDate" value="${esc(d?.reminderDate||'')}"></div>
       </div>
 
+      <div class="sect">👤 اطلاعات فردی</div>
+      <div class="row">
+        <!-- ستون راست -->
+        <div>
+          <label>نام *</label>
+          <input autocomplete="off" id="mFirstName" required value="${esc(d?.firstName||'')}">
+          
+          <label>کد ملی *</label>
+          <input autocomplete="off" dir="ltr" style="text-align:center" id="mNat" required maxlength="10" value="${esc(d?.nat||'')}">
+          
+          <label>رمز سامانه *</label>
+          <input autocomplete="off" id="mPass" required value="${esc(d?.pass||'')}">
+          
+          <label>شماره موبایل</label>
+          <input autocomplete="off" dir="ltr" style="text-align:center" id="mPhone" value="${esc(d?.phone||'')}">
+        </div>
+        
+        <!-- ستون چپ -->
+        <div>
+          <label>نام خانوادگی *</label>
+          <input autocomplete="off" id="mLastName" required value="${esc(d?.lastName||'')}">
+          
+          <label>تخصص</label>
+          <input autocomplete="off" id="mSpec" value="${esc(d?.spec||'')}">
+          
+          <label>امتیاز درخواستی</label>
+          <input autocomplete="off" dir="ltr" style="text-align:center" id="mCreditReq" value="${esc(d?.creditReq||'')}">
+          
+          <label>تمدید کارنامه (سال)</label>
+          <input autocomplete="off" dir="ltr" style="text-align:center" id="mYear" value="${esc(d?.year||'')}">
+        </div>
+      </div>
+      
       <div class="row">
         <div><label>مالک</label>
           <select id="mOwner">
@@ -1002,7 +1015,6 @@ window.openDoctorModal = function(editId){
 
       <div class="sect">💳 کارت بانکی (اختیاری)</div>
       <div class="row">
-        <!-- دکمه کپی از اینجا حذف شد -->
         <div><label>شماره کارت</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"></div>
         <div><label>CVV2</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCvv2" maxlength="4" value="${esc(c.cvv2||'')}"></div>
       </div>
