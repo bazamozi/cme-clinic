@@ -695,253 +695,6 @@ html.is-logged-in #loginScreen{display:none!important}
   }
 }
 </style>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<style id="golden-bank-card">
-.bank-card-display { display: grid !important; grid-template-columns: 2.5fr 0.8fr 0.8fr 0.8fr 1.5fr !important; gap: 5px !important; align-items: stretch !important; margin-top: 10px !important; padding: 0 !important; background: transparent !important; border: none !important; direction: rtl !important; width: 100% !important; box-sizing: border-box !important; }
-.bank-card-display.hidden { display: grid !important; }
-.bank-card-display .bank-cell-compact { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 9px 6px !important; margin: 0 !important; background: rgba(15, 23, 42, 0.5) !important; border: 1px solid rgba(0, 217, 255, 0.18) !important; border-radius: 8px !important; min-width: 0 !important; overflow: hidden !important; }
-.bank-card-display .bank-cell-compact .label { font-size: 11.5px !important; color: #94a3b8 !important; font-weight: 700 !important; white-space: nowrap !important; }
-.bank-card-display .bank-cell-compact .label::after { content: ':' !important; margin-right: 2px !important; color: #64748b !important; }
-.bank-card-display .bank-cell-compact .value { font-size: 11.5px !important; color: #e2e8f0 !important; font-weight: 800 !important; font-family: monospace !important; white-space: nowrap !important; }
-.bank-card-display .bank-cell-compact.card-number { justify-content: space-between !important; gap: 4px !important; padding: 8px 8px !important; background: rgba(0, 217, 255, 0.08) !important; border: 1px solid rgba(0, 217, 255, 0.3) !important; }
-.bank-card-display .bank-cell-compact.card-number .label { font-size: 11.5px !important; color: #38bdf8 !important; }
-.bank-card-display .bank-cell-compact.card-number .value { font-size: 11.5px !important; color: #38bdf8 !important; flex: 1 1 auto !important; text-align: center !important; overflow: visible !important; }
-.bank-card-display .bank-cell-compact.card-number button { font-size: 10.5px !important; padding: 3px 6px !important; border-radius: 4px !important; background: rgba(0, 217, 255, 0.2) !important; color: #38bdf8 !important; border: 1px solid rgba(0, 217, 255, 0.45) !important; font-weight: 700 !important; cursor: pointer !important; }
-.bank-card-display .bank-cell-compact:last-child { justify-content: flex-start !important; padding: 9px 10px !important; gap: 6px !important; }
-button[onclick*="toggleCard"] { display: none !important; }
-@media (max-width: 768px) {
-  .bank-card-display { grid-template-columns: 1fr 1fr 1fr 1fr !important; gap: 4px !important; }
-  .bank-card-display .bank-cell-compact.card-number { grid-column: 1 / -1 !important; margin-bottom: 4px !important; }
-  .bank-card-display .bank-cell-compact:last-child { grid-column: 1 / -1 !important; justify-content: center !important; }
-  .bank-card-display .bank-cell-compact .label, .bank-card-display .bank-cell-compact .value { font-size: 11px !important; }
-}
-</style>
-<style id="bank-card-css">
-/* ============================================
-   🎯 کارت بانکی — همه فونت‌ها یکسان، رمز دوم پهن‌تر
-   ============================================ */
-
-.bank-card-display {
-  display: grid !important;
-  grid-template-columns: 2.5fr 0.8fr 0.8fr 0.8fr 1.5fr !important;
-  gap: 5px !important;
-  align-items: stretch !important;
-  margin-top: 10px !important;
-  padding: 0 !important;
-  background: transparent !important;
-  border: none !important;
-  direction: rtl !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-.bank-card-display.hidden {
-  display: grid !important;
-}
-
-.bank-card-display .bank-cell-compact {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 4px !important;
-  padding: 9px 6px !important;
-  margin: 0 !important;
-  background: rgba(15, 23, 42, 0.5) !important;
-  border: 1px solid rgba(0, 217, 255, 0.18) !important;
-  border-radius: 8px !important;
-  min-width: 0 !important;
-  overflow: hidden !important;
-  box-sizing: border-box !important;
-  white-space: nowrap !important;
-}
-
-/* برچسب — همه یکسان */
-.bank-card-display .bank-cell-compact .label {
-  font-size: 11.5px !important;
-  color: #94a3b8 !important;
-  font-weight: 700 !important;
-  white-space: nowrap !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  flex-shrink: 0 !important;
-  line-height: 1.2 !important;
-}
-
-.bank-card-display .bank-cell-compact .label::after {
-  content: ':' !important;
-  margin-right: 2px !important;
-  color: #64748b !important;
-}
-
-/* مقدار — همه یکسان */
-.bank-card-display .bank-cell-compact .value {
-  font-size: 11.5px !important;
-  color: #e2e8f0 !important;
-  font-weight: 800 !important;
-  font-family: 'SF Mono', Menlo, Consolas, monospace !important;
-  letter-spacing: 0 !important;
-  white-space: nowrap !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  min-width: 0 !important;
-  line-height: 1.2 !important;
-}
-
-/* شماره کارت */
-.bank-card-display .bank-cell-compact.card-number {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 4px !important;
-  padding: 8px 8px !important;
-  background: rgba(0, 217, 255, 0.08) !important;
-  border: 1px solid rgba(0, 217, 255, 0.3) !important;
-}
-
-.bank-card-display .bank-cell-compact.card-number > .icon,
-.bank-card-display .bank-cell-compact.card-number .bank-icon {
-  font-size: 12px !important;
-  flex-shrink: 0 !important;
-}
-
-.bank-card-display .bank-cell-compact.card-number .label {
-  font-size: 11.5px !important;
-  color: #38bdf8 !important;
-  font-weight: 700 !important;
-  flex-shrink: 0 !important;
-}
-
-.bank-card-display .bank-cell-compact.card-number .label::after {
-  content: ':' !important;
-  color: #38bdf8 !important;
-}
-
-.bank-card-display .bank-cell-compact.card-number .value {
-  font-size: 11.5px !important;
-  color: #38bdf8 !important;
-  letter-spacing: 0.2px !important;
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  text-align: center !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
-  white-space: nowrap !important;
-}
-
-/* دکمه کپی */
-.bank-card-display .bank-cell-compact.card-number .copy-inline,
-.bank-card-display .bank-cell-compact.card-number button {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 10.5px !important;
-  padding: 3px 6px !important;
-  border-radius: 4px !important;
-  cursor: pointer !important;
-  background: rgba(0, 217, 255, 0.2) !important;
-  color: #38bdf8 !important;
-  border: 1px solid rgba(0, 217, 255, 0.45) !important;
-  font-weight: 700 !important;
-  margin: 0 !important;
-  flex-shrink: 0 !important;
-  white-space: nowrap !important;
-  transition: all 0.15s !important;
-}
-
-.bank-card-display .bank-cell-compact.card-number .copy-inline:hover,
-.bank-card-display .bank-cell-compact.card-number button:hover {
-  background: rgba(0, 217, 255, 0.3) !important;
-}
-
-/* 🎯 رمز دوم — کادر پهن‌تر، فونت مشابه، ولی جای بیشتر */
-.bank-card-display .bank-cell-compact:last-child {
-  justify-content: flex-start !important;
-  padding: 9px 10px !important;
-  gap: 6px !important;
-}
-
-.bank-card-display .bank-cell-compact:last-child .label {
-  font-size: 11.5px !important;
-}
-
-.bank-card-display .bank-cell-compact:last-child .value {
-  font-size: 11.5px !important;
-  letter-spacing: 0.3px !important;
-  flex: 1 1 auto !important;
-  text-align: left !important;
-  min-width: 0 !important;
-  overflow: visible !important;
-  white-space: nowrap !important;
-}
-
-/* مخفی کردن دکمه نمایش کارت */
-button[onclick*="toggleCard"] {
-  display: none !important;
-}
-
-/* موبایل */
-@media (max-width: 768px) {
-  .bank-card-display {
-    grid-template-columns: 1fr 1fr 1fr 1fr !important;
-    gap: 4px !important;
-  }
-  
-  .bank-card-display .bank-cell-compact.card-number {
-    grid-column: 1 / -1 !important;
-    margin-bottom: 4px !important;
-  }
-  
-  .bank-card-display .bank-cell-compact:last-child {
-    grid-column: 1 / -1 !important;
-    justify-content: center !important;
-    padding: 8px 10px !important;
-  }
-  
-  .bank-card-display .bank-cell-compact {
-    padding: 8px 8px !important;
-  }
-  
-  .bank-card-display .bank-cell-compact .label,
-  .bank-card-display .bank-cell-compact .value,
-  .bank-card-display .bank-cell-compact.card-number .label,
-  .bank-card-display .bank-cell-compact.card-number .value {
-    font-size: 11px !important;
-  }
-}
-</style>
-
 </head>
 <body>
 
@@ -1020,10 +773,6 @@ button[onclick*="toggleCard"] {
         <button data-filter="active" class="active" onclick="setDocFilter('active')">⚡ در حال اجرا<span class="cnt" id="cntActive">0</span></button>
         <button data-filter="done" class="done" onclick="setDocFilter('done')">✅ اتمام<span class="cnt" id="cntDone">0</span></button>
         <button data-filter="pending" class="pending" onclick="setDocFilter('pending')">⏳ بلاتکلیف<span class="cnt" id="cntPending">0</span></button>
-      <button class="vip-filter" data-filter="vip" onclick="setDocFilter('vip')">
-        ⭐ مشتری ثابت
-        <span class="cnt" id="cntVip">0</span>
-      </button>
       </div>
       <div class="doc-list" id="docList"></div>
     </aside>
@@ -1095,7 +844,7 @@ button[onclick*="toggleCard"] {
 // CONSTANTS & STATE
 // ============================================
 const K = 'cme4_data';
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmT5q_ke2y9jaLggDeoCOvQWojH2y77kBLnqPL9tKQn3gYABz6_Tr9tyBhJOWgD1vo/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwaF3-rP-QFjp9VurCvwiA-LE9ykM2vi9DaowYyFcxxa5sQMSBy-B6C54_not-n7Iqf/exec';
 
 let doctors = [];
 let calls = [];
@@ -1970,21 +1719,9 @@ window.openDoctorModal = function(editId){
       <div class="row">
         <div><label>موبایل</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPhone" value="${esc(d?.phone||'')}"></div>
         <div><label>سال کارنامه</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mYear" value="${esc(d?.year||'')}"></div>
-      <!-- ⭐ بخش مشتری ثابت -->
-      <div class="form-row" style="grid-column: 1 / -1; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 10px; padding: 12px; background: rgba(255,193,7,0.05); border: 1px dashed rgba(255,193,7,0.4); border-radius: 10px;">
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 800; color: #ffc107; font-size: 14px;">
-          <input type="checkbox" id="mVip" style="width: 20px; height: 20px; cursor: pointer; accent-color: #ffc107;">
-          ⭐ مشتری ثابت (بدون نیاز به تماس)
-        </label>
-        <div style="display: flex; align-items: center; gap: 6px; margin-right: auto;">
-          <label style="color: #94a3b8; font-size: 13px; font-weight: 700;">📅 تاریخ یادآوری:</label>
-          <input type="text" id="mVipDate" placeholder="1405/08/15" style="padding: 8px 12px; background: rgba(15,23,42,0.7); border: 1px solid rgba(255,193,7,0.5); border-radius: 6px; color: #fff; font-family: inherit; width: 130px; text-align: center; font-weight: 700;">
-        </div>
-      </div>
-
       </div>
       <div class="row">
-        <div><label>شماره کارت</label><div style="display:flex;gap:6px"><input autocomplete="off" dir="ltr" style="text-align:center;flex:1" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"><!-- دکمه کپی حذف شد --></div></div>
+        <div><label>شماره کارت</label><div style="display:flex;gap:6px"><input autocomplete="off" dir="ltr" style="text-align:center;flex:1" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"><button type="button" class="copy-btn" style="padding:8px 12px;font-size:14px" onclick="copyText(document.getElementById('mCardNum').value,this)">📋</button></div></div>
         <div><label>CVV2</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCvv2" maxlength="4" value="${esc(c.cvv2||'')}"></div>
       </div>
       <div class="row">
@@ -2783,7 +2520,19 @@ var _docFilter = 'active';  // پیش‌فرض: در حال اجرا
 // transferred
 
 // 2) getDoctorStatus
-
+function getDoctorStatus(d){
+  var events = (d.events || []);
+  var hasPaid = (d.finance && Number(d.finance.paid || 0) > 0);
+  if(events.length > 0){
+    var allComplete = events.every(function(e){
+      return (typeof eventComplete === 'function') ? eventComplete(e) : false;
+    });
+    if(allComplete) return 'done';
+    return 'active';
+  }
+  if(hasPaid) return 'active';
+  return 'pending';
+}
 
 // 3) setDocFilter
 function setDocFilter(filter){
@@ -3002,7 +2751,23 @@ console.log('✅ Login System Loaded');
 // ============================================
 
 if (typeof window.getDoctorStatus === 'undefined') {
-  
+  window.getDoctorStatus = function(d){
+  try {
+    if(!d) return 'pending';
+    var events = (d.events || []).filter(function(e){ return e && e.type; });
+    if(events.length === 0) return 'pending';
+    var allComplete = events.every(function(ev){
+      if(ev.type === 'حضوری'){
+        return ev.buy === true && ev.attend === true;
+      }
+      return ev.buy === true && ev.attend === true && ev.exam === true;
+    });
+    return allComplete ? 'done' : 'active';
+  } catch(e){
+    console.warn('getDoctorStatus error:', e);
+    return 'pending';
+  }
+};
 
 window.showDataSize = function(){
   try {
@@ -3262,7 +3027,23 @@ console.log('✅ Event Tabs v7 (CSS-only) loaded');
 // ═══════════════════════════════════════════════
 
 // ✅ getDoctorStatus — global
-
+function getDoctorStatus(d){
+  try {
+    if(!d) return 'pending';
+    var events = (d.events || []).filter(function(e){ return e && e.type; });
+    if(events.length === 0) return 'pending';
+    var allComplete = events.every(function(ev){
+      if(ev.type === 'حضوری'){
+        return ev.buy === true && ev.attend === true;
+      }
+      return ev.buy === true && ev.attend === true && ev.exam === true;
+    });
+    return allComplete ? 'done' : 'active';
+  } catch(e){
+    console.warn('getDoctorStatus error:', e);
+    return 'pending';
+  }
+}
 window.getDoctorStatus = getDoctorStatus;
 
 // ✅ updateFilterCounts — همه پزشکان (نه فیلتر بر اساس کاربر)
@@ -4366,478 +4147,7 @@ setTimeout(function(){
 
   console.log('✅ Race Guard فعال');
 })();
-
-
-// ============================================
-// 🎯 getDoctorStatus — نسخه نهایی
-// مقادیر واقعی:
-//   purchase: "انجام شد" / "انجام نشد"
-//   attend:   "انجام شد" / "انجام نشد"
-//   exam:     "قبول" / "ثبت نشده"
-// ============================================
-
-function isDone(val){
-  if(val === true) return true;
-  if(val === false || val === null || val === undefined) return false;
-  if(typeof val === 'number') return val > 0;
-  
-  var s = String(val).trim();
-  if(!s) return false;
-  
-  // 🎯 چک منفی (اول اینا چک بشن چون "نشد" شامل "شد" هست)
-  if(s.indexOf('نشده') !== -1) return false;
-  if(s.indexOf('نشد') !== -1) return false;
-  if(s.indexOf('نداده') !== -1) return false;
-  if(s.indexOf('نکرده') !== -1) return false;
-  if(s.indexOf('نکرد') !== -1) return false;
-  if(s.indexOf('خرید نشده') !== -1) return false;
-  if(s.indexOf('ثبت نشده') !== -1) return false;
-  if(s === 'خیر' || s === 'نه' || s === 'false' || s === '0') return false;
-  
-  // 🎯 چک مثبت
-  if(s.indexOf('انجام شد') !== -1) return true;
-  if(s.indexOf('قبول') !== -1) return true;
-  if(s.indexOf('خرید شده') !== -1) return true;
-  if(s.indexOf('ثبت شده') !== -1) return true;
-  if(s === 'بله' || s === 'آری' || s === 'true' || s === '1') return true;
-  if(s === '✓' || s === '✅' || s === '✔') return true;
-  
-  return false;
-}
-
-function getDoctorStatus(d){
-  try {
-    if(!d) return 'pending';
-    var events = (d.events || []).filter(function(e){ return e && e.type; });
-    if(events.length === 0) return 'pending';
-    
-    var allComplete = events.every(function(ev){
-      // تشخیص حضوری
-      var t = (ev.type || '').trim();
-      var isInPerson = (t === 'حضوری' || t === 'inperson' || t === 'in-person');
-      
-      var purchaseDone = isDone(ev.purchase) || ev.buy === true;
-      var attendDone = isDone(ev.attend);
-      var examDone = isDone(ev.exam);
-      
-      // حضوری: خرید + شرکت
-      if(isInPerson){
-        return purchaseDone && attendDone;
-      }
-      // وبینار و غیرحضوری: خرید + شرکت + آزمون
-      return purchaseDone && attendDone && examDone;
-    });
-    
-    return allComplete ? 'done' : 'active';
-  } catch(e){
-    console.warn('getDoctorStatus error:', e);
-    return 'pending';
-  }
-}
-
-window.getDoctorStatus = getDoctorStatus;
-window.isDone = isDone;
-
-
-
-// ============================================
-// 🎯 Auto-Save Hook v2 — ذخیره خودکار در localStorage
-// مشکل: تابع تیک، doctors رو آپدیت می‌کنه ولی localStorage نه
-// راه‌حل: هر تغییر doctors → فوری localStorage
-// ============================================
-
-(function(){
-  if(window._autoSaveHookV2) return;
-  window._autoSaveHookV2 = true;
-  
-  var lastHash = '';
-  var lastSave = 0;
-  
-  // 🎯 hash سریع فقط از فیلدهای مهم
-  function calcHash(){
-    try {
-      var d = (typeof doctors !== 'undefined' && Array.isArray(doctors)) ? doctors : [];
-      var s = d.length + '|';
-      for(var i = 0; i < d.length; i++){
-        var doc = d[i];
-        var evs = doc.events || [];
-        s += (doc.id || '') + ':' + evs.length + ';';
-        for(var j = 0; j < evs.length; j++){
-          var e = evs[j];
-          s += (e.purchase||'') + ',' + (e.attend||'') + ',' + (e.exam||'') + '/';
-        }
-      }
-      return s;
-    } catch(err){ return ''; }
-  }
-  
-  lastHash = calcHash();
-  
-  // 🎯 هر ۸۰۰ms چک کن
-  setInterval(function(){
-    try {
-      var h = calcHash();
-      if(h !== lastHash){
-        var now = Date.now();
-        if(now - lastSave < 400) return; // throttle
-        lastSave = now;
-        lastHash = h;
-        
-        // ۱. ذخیره فوری در localStorage
-        try {
-          localStorage.setItem('cme_doctors', JSON.stringify(doctors));
-          console.log('💾 auto-save localStorage — ' + doctors.length + ' پزشک');
-        } catch(e){
-          console.warn('localStorage save failed:', e);
-        }
-        
-        // ۲. push به سرور (با تأخیر کوتاه)
-        setTimeout(function(){
-          if(typeof window.triggerAutoSave === 'function'){
-            window.triggerAutoSave('tick-changed');
-          } else if(typeof window.pushToCloud === 'function'){
-            window.pushToCloud(true);
-          }
-        }, 300);
-        
-        // ۳. snapshot
-        try {
-          if(typeof window.takeSnapshot === 'function'){
-            window.takeSnapshot();
-          }
-        } catch(e){}
-      }
-    } catch(e){}
-  }, 800);
-  
-  console.log('✅ Auto-Save Hook v2 فعال — localStorage + push');
-})();
-
 </script>
 
-
-
-<script>
-(function(){
-  if(window._bankCardShow) return;
-  window._bankCardShow = true;
-  
-  function showCards(){
-    document.querySelectorAll('.bank-card-display').forEach(function(el){
-      el.classList.remove('hidden');
-    });
-    // پنهان کردن دکمه نمایش کارت
-    document.querySelectorAll('button[onclick*="toggleCard"]').forEach(function(btn){
-      btn.style.setProperty('display', 'none', 'important');
-    });
-  }
-  
-  setTimeout(showCards, 500);
-  setTimeout(showCards, 1500);
-  setInterval(showCards, 2500);
-  
-  // Observer روی mainArea
-  setTimeout(function(){
-    var ma = document.getElementById('mainArea');
-    if(ma){
-      var t;
-      new MutationObserver(function(){
-        clearTimeout(t);
-        t = setTimeout(showCards, 150);
-      }).observe(ma, {childList: true, subtree: false});
-    }
-  }, 1500);
-  
-  console.log('✅ Bank Card Show فعال');
-})();
-</script>
-
-
-
-
-
-<script id="bank-card-show">
-(function(){
-  if(window._bankCardShowV2) return;
-  window._bankCardShowV2 = true;
-  
-  function show(){
-    try {
-      // کارت‌ها رو نشون بده
-      document.querySelectorAll('.bank-card-display').forEach(function(el){
-        el.classList.remove('hidden');
-        el.removeAttribute('hidden');
-      });
-      // دکمه نمایش کارت رو مخفی کن
-      document.querySelectorAll('button').forEach(function(b){
-        var t = (b.textContent || '').trim();
-        if((t.indexOf('نمایش کارت') !== -1 || t.indexOf('کارت بانکی') !== -1) && t.length < 30){
-          b.style.setProperty('display', 'none', 'important');
-        }
-      });
-    } catch(e){}
-  }
-  
-  setTimeout(show, 300);
-  setTimeout(show, 1000);
-  setTimeout(show, 2500);
-  setInterval(show, 2500);
-  
-  setTimeout(function(){
-    var ma = document.getElementById('mainArea');
-    if(ma){
-      var t;
-      new MutationObserver(function(){
-        clearTimeout(t);
-        t = setTimeout(show, 150);
-      }).observe(ma, {childList: true, subtree: false});
-    }
-  }, 1500);
-  
-  console.log('✅ Bank Card Show v2 فعال');
-})();
-</script>
-
-<script id="bank-card-final-v2">
-(function(){
-  if(window._bankCardV2) return;
-  window._bankCardV2 = true;
-  
-  function apply(){
-    try {
-      // کارت‌ها رو نشون بده
-      document.querySelectorAll('.bank-card-display').forEach(function(card){
-        card.classList.remove('hidden');
-        card.removeAttribute('hidden');
-        
-        // 🎯 حذف دکمه‌های کپی داخل کارت
-        card.querySelectorAll('.copy-inline, button.copy-btn, .copy-btn').forEach(function(btn){
-          btn.remove();
-        });
-        
-        // 🎯 درست کردن ترتیب فیلدها برای نمایش افقی
-        card.querySelectorAll('.bank-cell-compact').forEach(function(cell){
-          cell.style.setProperty('display', 'flex', 'important');
-          cell.style.setProperty('flex-direction', 'row', 'important');
-          cell.style.setProperty('align-items', 'center', 'important');
-          cell.style.setProperty('justify-content', 'center', 'important');
-          cell.style.setProperty('gap', '6px', 'important');
-          
-          // label بزرگ
-          var lbl = cell.querySelector('.label');
-          if(lbl){
-            lbl.style.setProperty('font-size', '22px', 'important');
-            lbl.style.setProperty('display', 'inline-block', 'important');
-          }
-          
-          // value بزرگ
-          var val = cell.querySelector('.value');
-          if(val){
-            val.style.setProperty('font-size', '24px', 'important');
-            val.style.setProperty('display', 'inline-block', 'important');
-          }
-        });
-      });
-      
-      // دکمه نمایش کارت رو حذف کن
-      document.querySelectorAll('button').forEach(function(b){
-        var t = (b.textContent || '').trim();
-        if((t.indexOf('نمایش کارت') !== -1 || t.indexOf('کارت بانکی') !== -1) && t.length < 30){
-          b.style.setProperty('display', 'none', 'important');
-        }
-      });
-    } catch(e){}
-  }
-  
-  [200, 500, 1000, 2000, 3000].forEach(function(t){ setTimeout(apply, t); });
-  setInterval(apply, 2500);
-  
-  setTimeout(function(){
-    var ma = document.getElementById('mainArea');
-    if(ma){
-      var deb;
-      new MutationObserver(function(){
-        clearTimeout(deb);
-        deb = setTimeout(apply, 150);
-      }).observe(ma, {childList: true, subtree: false});
-    }
-  }, 1500);
-  
-  console.log('✅ Bank Card v2 — فونت بزرگ، بدون کپی');
-})();
-</script>
-
-<script id="bank-card-final-v3">
-(function(){
-  if(window._bankCardV3) return;
-  window._bankCardV3 = true;
-  
-  function fix(){
-    try {
-      // ۱. کارت‌ها رو نشون بده
-      document.querySelectorAll('.bank-card-display').forEach(function(card){
-        card.classList.remove('hidden');
-        card.removeAttribute('hidden');
-        
-        // ۲. اصلاح ساختار شماره کارت
-        var numCell = card.querySelector('.bank-cell-compact.card-number');
-        if(numCell){
-          // چک کن دکمه کپی هست یا نه
-          var hasCopy = numCell.querySelector('.copy-inline, button');
-          if(!hasCopy){
-            // اضافه کردن دکمه کپی
-            var val = numCell.querySelector('.value');
-            var num = val ? val.textContent.trim() : '';
-            if(num && num !== '—'){
-              var copyBtn = document.createElement('button');
-              copyBtn.type = 'button';
-              copyBtn.className = 'copy-inline';
-              copyBtn.textContent = '📋 کپی';
-              copyBtn.onclick = function(e){
-                e.preventDefault();
-                e.stopPropagation();
-                try {
-                  navigator.clipboard.writeText(num);
-                  copyBtn.textContent = '✅';
-                  setTimeout(function(){ copyBtn.textContent = '📋 کپی'; }, 1500);
-                } catch(err){
-                  console.warn(err);
-                }
-              };
-              numCell.appendChild(copyBtn);
-            }
-          }
-          
-          // استایل grid
-          numCell.style.setProperty('display', 'grid', 'important');
-          numCell.style.setProperty('grid-template-columns', 'auto auto 1fr auto', 'important');
-          numCell.style.setProperty('align-items', 'center', 'important');
-          numCell.style.setProperty('gap', '6px', 'important');
-          numCell.style.setProperty('padding', '8px 10px', 'important');
-        }
-      });
-      
-      // ۳. دکمه نمایش کارت رو مخفی کن
-      document.querySelectorAll('button').forEach(function(b){
-        var t = (b.textContent || '').trim();
-        if((t.indexOf('نمایش کارت') !== -1 || t.indexOf('کارت بانکی') !== -1) && t.length < 30){
-          b.style.setProperty('display', 'none', 'important');
-        }
-      });
-    } catch(e){ console.warn('bankFix:', e); }
-  }
-  
-  [200, 500, 1000, 2000].forEach(function(t){ setTimeout(fix, t); });
-  setInterval(fix, 2500);
-  
-  setTimeout(function(){
-    var ma = document.getElementById('mainArea');
-    if(ma){
-      var deb;
-      new MutationObserver(function(){
-        clearTimeout(deb);
-        deb = setTimeout(fix, 150);
-      }).observe(ma, {childList: true, subtree: false});
-    }
-  }, 1500);
-  
-  console.log('✅ Bank Card v3 — فونت یکسان + کپی برگشت');
-})();
-</script>
-
-
-<script id="golden-fix-before-vip">
-// ═══════════════════════════════════════════════════════════
-// 🎯 دقیقاً همون کدهایی که قبل از کلمه «حیاتی» کار می‌کردند
-// ═══════════════════════════════════════════════════════════
-
-// ۱. تعریف وضعیت‌ها و شمارش
-window.isDone = function(val){
-  if(val === true) return true;
-  if(!val) return false;
-  var s = String(val);
-  if(s.includes('نشده') || s.includes('نشد') || s.includes('نداده') || s.includes('نکرده')) return false;
-  if(s.includes('انجام شد') || s.includes('قبول') || s.includes('خرید شده') || s.includes('ثبت شده')) return true;
-  return false;
-};
-
-window.getDoctorStatus = function(d){
-  if(!d) return 'pending';
-  var evs = (d.events||[]).filter(e=>e && e.type);
-  if(!evs.length) return 'pending';
-  var allComplete = evs.every(e => {
-    var isInPerson = (e.type === 'حضوری');
-    var p = window.isDone(e.purchase) || e.buy === true;
-    var a = window.isDone(e.attend);
-    var ex = window.isDone(e.exam);
-    return isInPerson ? (p && a) : (p && a && ex);
-  });
-  return allComplete ? 'done' : 'active';
-};
-
-window.updateFilterCounts = function(){
-  try {
-    var all = (typeof window.myDoctors === 'function') ? window.myDoctors() : (window.doctors || []);
-    var counts = {active:0, done:0, pending:0};
-    all.forEach(d => {
-      var s = window.getDoctorStatus(d);
-      if(counts[s]!==undefined) counts[s]++;
-    });
-    var ids = {cntActive: counts.active, cntDone: counts.done, cntPending: counts.pending};
-    for(var id in ids) {
-      var el = document.getElementById(id);
-      if(el) el.textContent = ids[id];
-    }
-  } catch(e){}
-};
-if(!window._cntInterval) window._cntInterval = setInterval(() => window.updateFilterCounts(), 1000);
-
-// ۲. سینک دقیق (pull & push) که مک و گوشی رو هماهنگ می‌کرد
-window.pullFromCloud = async function(){
-  try {
-    var url = SCRIPT_URL + '?action=data&t=' + Date.now();
-    var resp = await fetch(url);
-    var text = await resp.text();
-    if(text.startsWith('<!DOCTYPE') || text.startsWith('<html')) return;
-    var data = JSON.parse(text);
-    var serverDocs = data.doctors || [];
-    
-    if(serverDocs.length === 0 && (window.doctors||[]).length > 0) return; // محافظ
-    
-    var localJSON = JSON.stringify(window.doctors || []);
-    var serverJSON = JSON.stringify(serverDocs);
-    
-    if(serverJSON !== localJSON){
-      window.doctors.length = 0;
-      serverDocs.forEach(d => window.doctors.push(d));
-      localStorage.setItem('cme_doctors', serverJSON);
-      if(typeof renderDocList === 'function') renderDocList();
-      if(typeof renderMain === 'function') renderMain();
-      window.updateFilterCounts();
-    }
-  } catch(e){}
-};
-
-window.pushToCloud = async function(){
-  if(window._isPushing) return;
-  window._isPushing = true;
-  try {
-    await fetch(SCRIPT_URL, { method: 'POST', headers: {'Content-Type':'text/plain'}, body: JSON.stringify({doctors: window.doctors, calls: window.calls||[], updatedAt: Date.now()}) });
-    localStorage.setItem('cme_doctors', JSON.stringify(window.doctors));
-  } catch(e){} finally { window._isPushing = false; }
-};
-
-// Auto-Sync هر ۱۰ ثانیه
-if(!window._syncInterval) window._syncInterval = setInterval(() => { if(!document.hidden) window.pullFromCloud(); }, 10000);
-
-// ۳. کارت بانکی دقیقاً با استایل درست
-setInterval(() => {
-  document.querySelectorAll('.bank-card-display').forEach(el => el.classList.remove('hidden'));
-  document.querySelectorAll('button[onclick*="toggleCard"]').forEach(btn => btn.style.display = 'none');
-}, 1000);
-
-setTimeout(() => window.updateFilterCounts(), 1000);
-setTimeout(() => window.pullFromCloud(), 1500);
-</script>
 </body>
 </html>
