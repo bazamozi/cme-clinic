@@ -97,13 +97,16 @@ textarea{resize:vertical;min-height:55px}
 .credit-box .val.success{color:var(--success)}
 .credit-box .val.danger{color:var(--danger)}
 .credit-box .val.neutral{color:#e2e8f0}
-.credentials{display:flex;gap:10px;flex-wrap:wrap}
-.cred-box{background:linear-gradient(135deg,rgba(15,23,42,0.9),rgba(30,41,59,0.9));border:1px solid rgba(56,189,248,0.4);border-radius:12px;padding:10px 18px;min-width:150px;text-align:center}
-.cred-label{font-size:13px;color:var(--accent2);font-weight:700;margin-bottom:6px}
-.cred-value{font-size:20px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px}
-.copy-btn{background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.4);color:var(--accent);padding:4px 9px;border-radius:6px;font-size:13px;cursor:pointer;font-family:inherit}
+
+/* اصلاح سایز باکس‌های رمز و کد ملی */
+.credentials{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.cred-box{background:linear-gradient(135deg,rgba(15,23,42,0.9),rgba(30,41,59,0.9));border:1px solid rgba(56,189,248,0.4);border-radius:10px;padding:6px 12px;min-width:120px;text-align:center}
+.cred-label{font-size:11px;color:var(--accent2);font-weight:700;margin-bottom:4px}
+.cred-value{font-size:15px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px}
+.copy-btn{background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.4);color:var(--accent);padding:2px 7px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit}
 .copy-btn:hover{background:rgba(56,189,248,0.3);color:#fff}
 .copy-btn.copied{background:rgba(52,211,153,0.3);border-color:var(--success);color:var(--success)}
+
 .events-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 @media(max-width:1100px){.events-grid{grid-template-columns:1fr}}
 .ev-section{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:rgba(15,23,42,0.35)}
@@ -135,7 +138,6 @@ textarea{resize:vertical;min-height:55px}
 .type-pick .icon{font-size:18px;display:block;margin-bottom:2px}
 .mobile-nav{display:none}
 @media(max-width:768px){
-  /* ===== Fix overflow in detail view ===== */
   html, body{overflow-x:hidden!important;max-width:100vw}
   .wrap{overflow-x:hidden;max-width:100%}
   .main-area{overflow-x:hidden!important;max-width:100%}
@@ -145,24 +147,16 @@ textarea{resize:vertical;min-height:55px}
   .credit-box .val{font-size:14px!important}
   .info-cell{font-size:12px!important;padding:6px 8px!important}
   .info-cell b{font-size:12px!important}
-  /* کارت بانکی: ۲ ستونه */
   #card_ + div{grid-template-columns:1fr 1fr!important}
   .bank-row > div[style*="grid-template-columns:1.4fr 1fr 1fr 1fr 1fr"]{grid-template-columns:1fr 1fr!important}
-  /* سه جعبه مالی: ۳ ستونه اما کوچکتر */
   .doc-header > div[style*="grid-template-columns:1fr 1fr 1fr"]{grid-template-columns:1fr 1fr 1fr!important;gap:5px!important}
-  /* credentials */
-  .credentials{flex-wrap:wrap!important;width:100%}
+  .credentials{flex-wrap:wrap!important;width:100%;justify-content:center}
   .cred-box{flex:1 1 45%;min-width:0!important}
-  .cred-value{font-size:16px!important}
-  /* دکمه‌های ویرایش/حذف */
+  .cred-value{font-size:14px!important}
   .doc-header .top > div:last-child{width:100%;flex-direction:row!important;flex-wrap:wrap;justify-content:flex-start!important;margin-top:8px}
-  /* events grid */
   .events-grid{grid-template-columns:1fr!important}
-  /* info-cell در bank */
   .info-cell{word-break:break-word;overflow-wrap:anywhere}
-  /* هر grid فیکس شده */
   [style*="grid-template-columns"]{max-width:100%;overflow:hidden}
-
   body{padding:6px 6px 70px 6px}
   header{padding:6px 10px;border-radius:10px}
   h1{font-size:13px}
@@ -366,7 +360,26 @@ const MINUTES = []; for(let m=0;m<60;m+=5) MINUTES.push(String(m).padStart(2,'0'
 function parseDate(s){ const m = String(s||'').match(/(\d+)\/(\d+)\/(\d+)/); if(!m) return {y:1405,m:7,d:1}; return {y:+m[1],m:+m[2],d:+m[3]}; }
 function formatDate(y,m,d){ return `${y}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}`; }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200); }
-function tick(){ const d=new Date(); const p=x=>String(x).padStart(2,'0'); const el=document.getElementById('clock'); if(el) el.textContent=`${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ساعت ${p(d.getHours())}:${p(d.getMinutes())}`; }
+
+// اصلاح: نمایش تاریخ شمسی در ساعت هدر
+function tick(){ 
+  const d=new Date(); 
+  const p=x=>String(x).padStart(2,'0'); 
+  const el=document.getElementById('clock'); 
+  if(el) {
+    let shamsiDate = '';
+    try {
+      const parts = new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(d);
+      const y = parts.find(p => p.type === 'year').value;
+      const m = parts.find(p => p.type === 'month').value;
+      const day = parts.find(p => p.type === 'day').value;
+      shamsiDate = `${y}/${m}/${day}`;
+    } catch(e) {
+      shamsiDate = `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())}`;
+    }
+    el.textContent = `${shamsiDate} ساعت ${p(d.getHours())}:${p(d.getMinutes())}`;
+  }
+}
 
 // تبدیل ارقام فارسی به انگلیسی در همه inputها
 document.addEventListener('input', e => {
@@ -384,17 +397,14 @@ window.switchUser = function(user){
   try { localStorage.setItem('cme_current_user', user); } catch(e){}
   selectedDoctorId = null;
   
-  // پاک کردن پنل وسط
   const ma = document.getElementById('mainArea');
   if(ma) ma.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>';
   
-  // آپدیت دکمه‌ها
   document.querySelectorAll('.user-picker button').forEach(b=>{
     if(b.dataset.user === user) b.classList.add('active');
     else b.classList.remove('active');
   });
   
-  // رندر
   renderDash();
   renderDocList();
   renderCalls();
@@ -423,7 +433,6 @@ function eventCredit(e){
   if(e.type==='حضوری'){
     if(e.attend!=='انجام شد') return 0;
   }
-  // غیر حضوری: فقط خرید کافیه
   return Number(e.credit||0);
 }
 function eventState(e){
@@ -518,13 +527,11 @@ window.switchTab = function(tabName){
   const content = document.getElementById('tab-'+tabName);
   if(content) content.classList.remove('hidden');
   
-  // نوار موبایل
   document.querySelectorAll('.mobile-nav button').forEach(x=>{
     if(x.dataset.tab === tabName) x.classList.add('active');
     else x.classList.remove('active');
   });
   
-  // رندر
   if(tabName === 'dash') renderDash();
   if(tabName === 'doctors'){ renderDocList(); renderMain(); }
   if(tabName === 'calls') renderCalls();
@@ -561,7 +568,7 @@ function renderDash(){
     const rem = remainingCredits(d);
     return `<div style="background:rgba(15,23,42,0.6);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px">
       <div style="font-weight:700;font-size:13px">${esc(fullName(d))} <span class="badge blue">${esc(d.spec||'')}</span> <span class="badge red">${num(rem)} کم</span></div>
-      <div style="color:var(--muted);font-size:11px;margin-top:5px">📞 <span class="ltr">${esc(d.phone)}</span> | 🎯 ${num(totalEarned(d))} از ${num(d.creditReq||0)}</div>
+      <div style="color:var(--muted);font-size:11px;margin-top:5px">📞 <span class="ltr">${esc(d.phone || '—')}</span> | 🎯 ${num(totalEarned(d))} از ${num(d.creditReq||0)}</div>
       <div class="actions">
         <button class="mini green" onclick="goDoctor('${d.id}')">👁 مشاهده</button>
       </div>
@@ -656,7 +663,7 @@ function renderMain(){
             ${complete?'<span class="badge green">✔ امتیاز کامل</span>':'<span class="badge red">⚠️ '+num(rem)+' امتیاز کم</span>'}
             ${rem$>0?'<span class="badge yellow">💸 بدهکار</span>':''}
           </h2>
-          <div class="meta">📞 <span class="ltr">${esc(d.phone)}</span> ${d.year?' | 📅 <span class="ltr">'+esc(d.year)+'</span>':''}</div>
+          <div class="meta">📞 <span class="ltr">${esc(d.phone || '—')}</span> ${d.year?' | 📅 <span class="ltr">'+esc(d.year)+'</span>':''}</div>
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
           <div class="credentials">
@@ -721,7 +728,6 @@ function eventComplete(e){
   if(e.type === 'حضوری'){
     if(e.attend !== 'انجام شد') return false;
   }
-  // غیر حضوری: فقط خرید کافیه
   return true;
 }
 
@@ -729,10 +735,8 @@ function renderEventSection(d, type, icon, color){
   const evs = (d.events||[]).filter(e=>e.type===type).sort((a,b)=>{
     const aComp = eventComplete(a);
     const bComp = eventComplete(b);
-    // تکمیل‌شده‌ها برن ته صف
     if(aComp && !bComp) return 1;
     if(!aComp && bComp) return -1;
-    // هر دو تکمیل یا هر دو ناتکمیل → مرتب‌سازی بر اساس تاریخ (نزدیک‌ترین بالا)
     if(a.date && b.date){
       return a.date.localeCompare(b.date);
     }
@@ -826,7 +830,6 @@ window.copyText = function(text, btn){
   
   var success = false;
   
-  // روش ۱: execCommand (روش مطمئن‌تر روی همه مرورگرها)
   try {
     var ta = document.createElement('textarea');
     ta.value = text;
@@ -839,16 +842,12 @@ window.copyText = function(text, btn){
     ta.setSelectionRange(0, ta.value.length);
     success = document.execCommand('copy');
     document.body.removeChild(ta);
-  } catch(e){
-    console.log('execCommand failed:', e);
-  }
+  } catch(e){}
   
-  // روش ۲: navigator.clipboard (روش مدرن)
   if(!success && navigator.clipboard){
     navigator.clipboard.writeText(text).then(function(){
       showCopied(btn);
-    }).catch(function(e){
-      console.log('clipboard failed:', e);
+    }).catch(function(){
       toast('❌ کپی نشد — دستی کپی کنید');
     });
     return;
@@ -1169,13 +1168,9 @@ window.doLogin = function(){
   var errEl = document.getElementById('loginError');
   
   if(USERS[u] && USERS[u].pass === p){
-    // ورود موفق
-    try {
-      localStorage.setItem('cme_logged_in', u);
-    } catch(e){}
+    try { localStorage.setItem('cme_logged_in', u); } catch(e){}
     errEl.classList.remove('show');
     document.getElementById('loginScreen').classList.add('hidden');
-    // تنظیم کاربر فعال
     currentUser = u;
     try { localStorage.setItem('cme_current_user', u); } catch(e){}
     document.querySelectorAll('.user-picker button').forEach(function(b){
@@ -1200,13 +1195,11 @@ window.doLogout = function(){
   location.reload();
 };
 
-// چک کردن وضعیت ورود در بارگذاری
 function checkLogin(){
   var logged = null;
   try { logged = localStorage.getItem('cme_logged_in'); } catch(e){}
   
   if(logged && USERS[logged]){
-    // قبلاً وارد شده
     document.getElementById('loginScreen').classList.add('hidden');
     currentUser = logged;
     try { localStorage.setItem('cme_current_user', logged); } catch(e){}
@@ -1215,7 +1208,6 @@ function checkLogin(){
       else b.classList.remove('active');
     });
   } else {
-    // نیاز به ورود
     document.getElementById('loginScreen').classList.remove('hidden');
     setTimeout(function(){
       var u = document.getElementById('loginUser');
@@ -1224,14 +1216,12 @@ function checkLogin(){
   }
 }
 
-// Enter برای ورود
 document.addEventListener('keydown', function(e){
   if(e.key === 'Enter' && !document.getElementById('loginScreen').classList.contains('hidden')){
     doLogin();
   }
 });
 
-// چک ورود
 checkLogin();
 
 // ===== Quick Login to IRCME =====
@@ -1241,23 +1231,6 @@ window.quickLogin = function(nat, pass, name){
     return;
   }
   
-  // کپی کد ملی به کلیپ‌بورد
-  function copyToClip(text){
-    try {
-      var ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.top = '-9999px';
-      document.body.appendChild(ta);
-      ta.select();
-      ta.setSelectionRange(0, ta.value.length);
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      return true;
-    } catch(e){ return false; }
-  }
-  
-  // مودال راهنما
   var html = `
     <h2>🔗 ورود سریع به آموزش مداوم</h2>
     <div style="background:linear-gradient(135deg,rgba(56,189,248,0.15),rgba(34,211,238,0.08));border:1px solid rgba(56,189,248,0.4);border-radius:12px;padding:14px;margin-bottom:14px">
@@ -1298,36 +1271,28 @@ window.quickLogin = function(nat, pass, name){
   openModal(html);
 };
 
-// ===== Open IRCME Login =====
 window.openIRCME = function(nat, pass){
   if(!nat || !pass){
     toast('⚠️ کد ملی یا رمز سامانه موجود نیست');
     return;
   }
   var url = 'https://www.ircme.ir/App_Web/%28Guest%29/Membership/Login.aspx?CenterID=25&u=' + encodeURIComponent(nat) + '&p=' + encodeURIComponent(pass);
-  console.log('🔗 باز کردن:', url);
-  
-  // روش ۱: window.open
   var w = window.open(url, '_blank');
-  
-  // اگه popup بلاک شد، روش ۲: location.href
   if(!w || w.closed || typeof w.closed === 'undefined'){
-    console.log('⚠️ popup بلاک شد، روش جایگزین');
     window.location.href = url;
   }
 };
 
 /* ===== Auto Attend System ===== */
+// اصلاح: استفاده از en-US-u-ca-persian برای گرفتن تاریخ دقیق با صفر
 function getShamsiToday(){
   try {
-    var s = new Intl.DateTimeFormat('fa-IR', {
-      year: 'numeric', month: '2-digit', day: '2-digit'
-    }).format(new Date());
-    s = toEnDigits(s);
-    // اطمینان از فرمت صحیح
-    return s;
+    var parts = new Intl.DateTimeFormat('en-US-u-ca-persian', { year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+    var y = parts.find(p => p.type === 'year').value;
+    var m = parts.find(p => p.type === 'month').value;
+    var d = parts.find(p => p.type === 'day').value;
+    return `${y}/${m}/${d}`;
   } catch(e){
-    console.log('خطا در تاریخ شمسی:', e);
     return null;
   }
 }
@@ -1339,9 +1304,7 @@ function autoAttendEvents(){
   var changed = 0;
   doctors.forEach(function(doc){
     (doc.events||[]).forEach(function(e){
-      // فقط رویدادهایی که خرید شدن و شرکت نشدن و تاریخشون گذشته
       if(e.purchase === 'انجام شد' && e.attend === 'انجام نشد' && e.date && e.date.length >= 8){
-        // مقایسه: اگه امروز بعد از تاریخ رویداد باشه
         if(today > e.date){
           e.attend = 'انجام شد';
           changed++;
@@ -1354,21 +1317,16 @@ function autoAttendEvents(){
     save();
     renderAll();
     toast('✅ ' + changed + ' رویداد خودکار به «شرکت شده» تغییر یافت');
-    console.log('Auto-attend:', changed, 'events. Today:', today);
   }
 }
 
-// تست دستی - می‌تونی در Console بزنی: testAutoAttend()
 window.testAutoAttend = function(){
   console.log('امروز (شمسی):', getShamsiToday());
   autoAttendEvents();
 };
 
-// اجرا در بارگذاری
 setTimeout(autoAttendEvents, 2000);
-// هر ۱ دقیقه چک کن
 setInterval(autoAttendEvents, 60000);
-// هر بار برگشتن به تب
 document.addEventListener('visibilitychange', function(){
   if(!document.hidden) autoAttendEvents();
 });
