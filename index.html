@@ -779,6 +779,19 @@ button[onclick*="toggleCard"] { display: none !important; }
   .bank-card-display .bank-cell-compact .label, .bank-card-display .bank-cell-compact .value, .bank-card-display .bank-cell-compact.card-number .label, .bank-card-display .bank-cell-compact.card-number .value { font-size: 15px !important; }
 }
 </style>
+<style id="hide-modal-copy-btn">
+/* 🎯 مخفی کردن دکمه کپیِ داخل فرم ثبت/ویرایش پزشک (که mCardNum رو کپی میکنه) */
+button[onclick*="mCardNum"] {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  pointer-events: none !important;
+}
+</style>
 </head>
 <body>
 
