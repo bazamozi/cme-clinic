@@ -233,8 +233,8 @@ textarea{resize:vertical;min-height:55px}
     <div class="sub">حضوری 🏢 | وبینار 💻 | غیر حضوری 📁</div>
   </div>
   <div class="tabs" id="mainTabs">
-    <button class="tab active" data-tab="dash">📊 داشبورد</button>
-    <button class="tab" data-tab="doctors">👨‍⚕️ دفتر پزشکان</button>
+    <button class="tab" data-tab="dash">📊 داشبورد</button>
+    <button class="tab active" data-tab="doctors">👨‍⚕️ دفتر پزشکان</button>
     <button class="tab" data-tab="calls">📞 تماس‌ها</button>
   </div>
   <div class="user-picker" id="userPicker">
@@ -244,14 +244,19 @@ textarea{resize:vertical;min-height:55px}
     <button data-user="all" onclick="switchUser('all')">همه</button>
   </div>
   
-  <div id="syncStatus" class="sub" style="font-size: 12px; padding: 4px 8px; border-radius: 8px; background: rgba(255,255,255,0.1); margin-left: 10px;">☁️ آماده</div>
-  <button class="mini" onclick="syncNow()" style="margin-left: 10px;" title="همگام‌سازی دستی">🔄</button>
+  <div style="display:flex; gap:5px; align-items:center; margin-left:10px;">
+    <div id="syncStatus" class="sub" style="font-size: 12px; padding: 4px 8px; border-radius: 8px; background: rgba(255,255,255,0.1); min-width: 80px; text-align:center; transition: 0.3s;">☁️ آماده</div>
+    <button class="mini" onclick="syncNow(true)" title="همگام‌سازی دستی">🔄</button>
+    <button class="mini" onclick="exportData()" title="پشتیبان‌گیری (دانلود فایل)">💾</button>
+    <button class="mini" onclick="document.getElementById('importFile').click()" title="بازیابی (آپلود فایل)">📂</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+  </div>
   
   <button class="logout-btn" onclick="doLogout()">🚪 خروج</button>
   <div class="sub" id="clock"></div>
 </header>
 
-<div class="tab-content" id="tab-dash">
+<div class="tab-content hidden" id="tab-dash">
   <div class="stats" id="statsBar"></div>
   <div class="panel" style="margin-top:12px">
     <h2>⚠️ پزشکانی که امتیازشان کامل نیست</h2>
@@ -259,7 +264,7 @@ textarea{resize:vertical;min-height:55px}
   </div>
 </div>
 
-<div class="tab-content hidden" id="tab-doctors">
+<div class="tab-content" id="tab-doctors">
   <div class="app no-selection" id="appContainer">
     <aside class="sidebar">
       <div class="sidebar-head">
@@ -327,7 +332,7 @@ textarea{resize:vertical;min-height:55px}
 </div>
 <nav class="mobile-nav">
   <button data-tab="dash"><span class="icon">📊</span>داشبورد</button>
-  <button data-tab="doctors"><span class="icon">👨‍⚕️</span>پزشکان</button>
+  <button data-tab="doctors" class="active"><span class="icon">👨‍⚕️</span>پزشکان</button>
   <button data-tab="calls"><span class="icon">📞</span>تماس‌ها</button>
 </nav>
 <div class="toast" id="toast"></div>
@@ -455,6 +460,51 @@ function pendingExamWebinars(d){ return (d.events||[]).filter(e=> e.type==='وب
 function offlinePurchasedToday(d){ const t=new Date(); const y=t.getFullYear(), m=t.getMonth(), day=t.getDate(); return (d.events||[]).some(e=>{ if(e.type!=='غیر حضوری' || e.purchase!=='انجام شد') return false; const d2=new Date(e.createdAt); return d2.getFullYear()===y && d2.getMonth()===m && d2.getDate()===day; }); }
 
 // ============================================
+// BACKUP & RESTORE
+// ============================================
+window.exportData = function() {
+  const dataStr = JSON.stringify({ doctors, calls, exportedAt: Date.now() }, null, 2);
+  const blob = new Blob([dataStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `cme_backup_${(getShamsiToday()||'date').replace(/\//g,'-')}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('💾 فایل پشتیبان دانلود شد');
+};
+
+window.importData = function(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if(data && (Array.isArray(data.doctors) || Array.isArray(data.calls))) {
+        if(!confirm('⚠️ با این کار اطلاعات فایل پشتیبان با داده‌های فعلی ادغام می‌شوند (نسخه‌های جدیدتر جایگزین می‌شوند). ادامه؟')) { event.target.value = ''; return; }
+        
+        // Merge using updatedAt to prevent data loss
+        doctors = mergeById(doctors, data.doctors || [], 'updatedAt');
+        calls = mergeById(calls, data.calls || [], 'updatedAt');
+        
+        save();
+        renderAll();
+        toast('✅ بازیابی با موفقیت انجام شد');
+      } else {
+        toast('❌ فایل معتبر نیست');
+      }
+    } catch(err) {
+      toast('❌ خطا در خواندن فایل');
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+};
+
+// ============================================
 // SAVE & SYNC
 // ============================================
 let _dirty = false, _syncing = false, _syncQueued = false, _syncTimer = null;
@@ -474,18 +524,27 @@ function save(){
 
 function scheduleSync(){ clearTimeout(_syncTimer); _syncTimer = setTimeout(syncNow, 400); }
 
-async function syncNow(){
+async function syncNow(isManual = false){
   if(_syncing){ _syncQueued = true; return; }
-  _syncing = true; updateSyncUI('syncing');
+  _syncing = true;
+  
+  const wasDirty = _dirty;
+  
+  // فقط اگر تغییری وجود داشت یا کاربر دکمه را زد، وضعیت را نشان بده
+  if (wasDirty || isManual) updateSyncUI('syncing');
+
   try {
-    if(_dirty){ 
+    if(wasDirty){ 
       await pushToCloud(); 
       _dirty = false; 
-      await new Promise(r => setTimeout(r, 1200)); // صبر برای ثبت در گوگل شیت
+      await new Promise(r => setTimeout(r, 1000)); // صبر برای ثبت در سرور
     }
     await pullFromCloud();
-    updateSyncUI('synced');
-  } catch(e) { updateSyncUI('error'); } finally {
+    
+    if (wasDirty || isManual) updateSyncUI('synced');
+  } catch(e) { 
+    if (wasDirty || isManual) updateSyncUI('error'); 
+  } finally {
     _syncing = false; if(_syncQueued){ _syncQueued = false; scheduleSync(); }
   }
 }
@@ -499,7 +558,7 @@ async function pushToCloud(){
       const input = document.createElement('input');
       input.type = 'hidden'; input.name = 'data'; input.value = payload; form.appendChild(input);
       document.body.appendChild(form); form.submit();
-      setTimeout(() => { if (document.body.contains(form)) document.body.removeChild(form); resolve(true); }, 1200);
+      setTimeout(() => { if (document.body.contains(form)) document.body.removeChild(form); resolve(true); }, 1000);
     } catch (e) { console.warn('push failed', e); resolve(false); }
   });
 }
