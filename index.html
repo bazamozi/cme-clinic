@@ -723,6 +723,29 @@ html.is-logged-in #loginScreen{display:none!important}
 
 
 
+
+
+
+<style id="golden-bank-card">
+.bank-card-display { display: grid !important; grid-template-columns: 2.5fr 0.8fr 0.8fr 0.8fr 1.5fr !important; gap: 5px !important; align-items: stretch !important; margin-top: 10px !important; padding: 0 !important; background: transparent !important; border: none !important; direction: rtl !important; width: 100% !important; box-sizing: border-box !important; }
+.bank-card-display.hidden { display: grid !important; }
+.bank-card-display .bank-cell-compact { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 9px 6px !important; margin: 0 !important; background: rgba(15, 23, 42, 0.5) !important; border: 1px solid rgba(0, 217, 255, 0.18) !important; border-radius: 8px !important; min-width: 0 !important; overflow: hidden !important; }
+.bank-card-display .bank-cell-compact .label { font-size: 11.5px !important; color: #94a3b8 !important; font-weight: 700 !important; white-space: nowrap !important; }
+.bank-card-display .bank-cell-compact .label::after { content: ':' !important; margin-right: 2px !important; color: #64748b !important; }
+.bank-card-display .bank-cell-compact .value { font-size: 11.5px !important; color: #e2e8f0 !important; font-weight: 800 !important; font-family: monospace !important; white-space: nowrap !important; }
+.bank-card-display .bank-cell-compact.card-number { justify-content: space-between !important; gap: 4px !important; padding: 8px 8px !important; background: rgba(0, 217, 255, 0.08) !important; border: 1px solid rgba(0, 217, 255, 0.3) !important; }
+.bank-card-display .bank-cell-compact.card-number .label { font-size: 11.5px !important; color: #38bdf8 !important; }
+.bank-card-display .bank-cell-compact.card-number .value { font-size: 11.5px !important; color: #38bdf8 !important; flex: 1 1 auto !important; text-align: center !important; overflow: visible !important; }
+.bank-card-display .bank-cell-compact.card-number button { font-size: 10.5px !important; padding: 3px 6px !important; border-radius: 4px !important; background: rgba(0, 217, 255, 0.2) !important; color: #38bdf8 !important; border: 1px solid rgba(0, 217, 255, 0.45) !important; font-weight: 700 !important; cursor: pointer !important; }
+.bank-card-display .bank-cell-compact:last-child { justify-content: flex-start !important; padding: 9px 10px !important; gap: 6px !important; }
+button[onclick*="toggleCard"] { display: none !important; }
+@media (max-width: 768px) {
+  .bank-card-display { grid-template-columns: 1fr 1fr 1fr 1fr !important; gap: 4px !important; }
+  .bank-card-display .bank-cell-compact.card-number { grid-column: 1 / -1 !important; margin-bottom: 4px !important; }
+  .bank-card-display .bank-cell-compact:last-child { grid-column: 1 / -1 !important; justify-content: center !important; }
+  .bank-card-display .bank-cell-compact .label, .bank-card-display .bank-cell-compact .value { font-size: 11px !important; }
+}
+</style>
 <style id="bank-card-css">
 /* ============================================
    🎯 کارت بانکی — همه فونت‌ها یکسان، رمز دوم پهن‌تر
@@ -919,27 +942,6 @@ button[onclick*="toggleCard"] {
 }
 </style>
 
-
-<style id="golden-bank-card">
-.bank-card-display { display: grid !important; grid-template-columns: 2.5fr 0.8fr 0.8fr 0.8fr 1.5fr !important; gap: 5px !important; align-items: stretch !important; margin-top: 10px !important; padding: 0 !important; background: transparent !important; border: none !important; direction: rtl !important; width: 100% !important; box-sizing: border-box !important; }
-.bank-card-display.hidden { display: grid !important; }
-.bank-card-display .bank-cell-compact { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 9px 6px !important; margin: 0 !important; background: rgba(15, 23, 42, 0.5) !important; border: 1px solid rgba(0, 217, 255, 0.18) !important; border-radius: 8px !important; min-width: 0 !important; overflow: hidden !important; }
-.bank-card-display .bank-cell-compact .label { font-size: 11.5px !important; color: #94a3b8 !important; font-weight: 700 !important; white-space: nowrap !important; }
-.bank-card-display .bank-cell-compact .label::after { content: ':' !important; margin-right: 2px !important; color: #64748b !important; }
-.bank-card-display .bank-cell-compact .value { font-size: 11.5px !important; color: #e2e8f0 !important; font-weight: 800 !important; font-family: monospace !important; white-space: nowrap !important; }
-.bank-card-display .bank-cell-compact.card-number { justify-content: space-between !important; gap: 4px !important; padding: 8px 8px !important; background: rgba(0, 217, 255, 0.08) !important; border: 1px solid rgba(0, 217, 255, 0.3) !important; }
-.bank-card-display .bank-cell-compact.card-number .label { font-size: 11.5px !important; color: #38bdf8 !important; }
-.bank-card-display .bank-cell-compact.card-number .value { font-size: 11.5px !important; color: #38bdf8 !important; flex: 1 1 auto !important; text-align: center !important; overflow: visible !important; }
-.bank-card-display .bank-cell-compact.card-number button { font-size: 10.5px !important; padding: 3px 6px !important; border-radius: 4px !important; background: rgba(0, 217, 255, 0.2) !important; color: #38bdf8 !important; border: 1px solid rgba(0, 217, 255, 0.45) !important; font-weight: 700 !important; cursor: pointer !important; }
-.bank-card-display .bank-cell-compact:last-child { justify-content: flex-start !important; padding: 9px 10px !important; gap: 6px !important; }
-button[onclick*="toggleCard"] { display: none !important; }
-@media (max-width: 768px) {
-  .bank-card-display { grid-template-columns: 1fr 1fr 1fr 1fr !important; gap: 4px !important; }
-  .bank-card-display .bank-cell-compact.card-number { grid-column: 1 / -1 !important; margin-bottom: 4px !important; }
-  .bank-card-display .bank-cell-compact:last-child { grid-column: 1 / -1 !important; justify-content: center !important; }
-  .bank-card-display .bank-cell-compact .label, .bank-card-display .bank-cell-compact .value { font-size: 11px !important; }
-}
-</style>
 </head>
 <body>
 
