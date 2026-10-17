@@ -4798,6 +4798,12 @@ window.isDone = isDone;
       var localJSON = JSON.stringify(localDocs);
       var serverJSON = JSON.stringify(serverDocs);
       
+      // 🛡 محافظ: اگه سرور خالی بود ولی محلی پر بود، دست نزن
+      if(serverDocs.length === 0 && localDocs.length > 0){
+        console.log('⚠️ سرور خالی — pull لغو شد (محافظ)');
+        return { ok: true, count: localDocs.length, skipped: 'server-empty' };
+      }
+      
       if(serverJSON !== localJSON){
         console.log('🔄 اعمال داده سرور روی محلی');
         
