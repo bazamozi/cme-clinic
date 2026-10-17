@@ -4756,5 +4756,162 @@ window.isDone = isDone;
 
 
 
+<script id="sync-fix">
+// ═══════════════════════════════════════════════════════════
+// 🎯 SYNC FIX — pullFromCloud با action=data
+// ═══════════════════════════════════════════════════════════
+(function(){
+  if(window._syncFix) return;
+  window._syncFix = true;
+
+  // ─────────────────────────────────────────
+  // 🎯 pullFromCloud جدید — درست با action=data
+  // ─────────────────────────────────────────
+  window.pullFromCloud = async function(){
+    try {
+      var url = SCRIPT_URL + '?action=data&t=' + Date.now();
+      console.log('📥 pull از:', url);
+      
+      var resp = await fetch(url);
+      var text = await resp.text();
+      
+      // چک: HTML برگشت؟
+      if(text.startsWith('<!DOCTYPE') || text.startsWith('<html')){
+        console.error('❌ سرور HTML برگردوند — URL اشتباه');
+        return { error: 'HTML response' };
+      }
+      
+      var data = JSON.parse(text);
+      var serverDocs = data.doctors || [];
+      
+      console.log('📥 سرور: ' + serverDocs.length + ' پزشک');
+      
+      // اعمال روی محلی — فقط اگه سرور بیشتر یا متفاوت باشه
+      var localDocs = window.doctors || [];
+      
+      // اگه تعداد یا محتوا متفاوته، به‌روز کن
+      var localJSON = JSON.stringify(localDocs);
+      var serverJSON = JSON.stringify(serverDocs);
+      
+      if(serverJSON !== localJSON){
+        console.log('🔄 اعمال داده سرور روی محلی');
+        
+        // بازنویسی doctors
+        if(window.doctors){
+          window.doctors.length = 0;
+          for(var i = 0; i < serverDocs.length; i++){
+            window.doctors.push(serverDocs[i]);
+          }
+        }
+        
+        // calls
+        if(data.calls && window.calls){
+          window.calls.length = 0;
+          for(var j = 0; j < data.calls.length; j++){
+            window.calls.push(data.calls[j]);
+          }
+        }
+        
+        // ذخیره در localStorage
+        try { localStorage.setItem('cme_doctors', JSON.stringify(serverDocs)); } catch(e){}
+        
+        // 🎯 VIP merge
+        if(typeof window.applyVips === 'function'){
+          try { window.applyVips(); } catch(e){}
+        }
+        
+        // رندر
+        if(typeof renderDocList === 'function') renderDocList();
+        if(typeof renderMain === 'function') renderMain();
+        if(typeof updateFilterCounts === 'function') updateFilterCounts();
+      } else {
+        console.log('✅ محلی و سرور همگام‌ان');
+      }
+      
+      return { ok: true, count: serverDocs.length };
+    } catch(e){
+      console.error('❌ pull error:', e);
+      return { error: e.message };
+    }
+  };
+
+  // ─────────────────────────────────────────
+  // 🎯 pushToCloud — مطمئن‌سازی که کار می‌کنه
+  // ─────────────────────────────────────────
+  window.pushToCloud = async function(force){
+    if(window._syncFix_pushing) return { skipped: true };
+    window._syncFix_pushing = true;
+    
+    try {
+      var all = window.doctors || [];
+      var calls = window.calls || [];
+      
+      console.log('📤 push: ' + all.length + ' پزشک');
+      
+      var payload = {
+        doctors: all,
+        calls: calls,
+        updatedAt: Date.now()
+      };
+      
+      var resp = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify(payload)
+      });
+      
+      var result = await resp.json();
+      
+      // ذخیره محلی
+      try { localStorage.setItem('cme_doctors', JSON.stringify(all)); } catch(e){}
+      try { localStorage.setItem('cme_last_save', String(Date.now())); } catch(e){}
+      
+      console.log('✅ push موفق — ' + (result.size||0) + ' بایت');
+      window._syncFix_pushing = false;
+      return result;
+    } catch(e){
+      console.error('❌ push error:', e);
+      window._syncFix_pushing = false;
+      throw e;
+    }
+  };
+
+  // ─────────────────────────────────────────
+  // 🎯 Auto-pull هر ۱۰ ثانیه (اگه tab فعاله)
+  // ─────────────────────────────────────────
+  setInterval(function(){
+    if(document.hidden) return;
+    if(window._syncFix_pushing) return;
+    // فقط اگه ۵ ثانیه اخیر push نکردیم
+    var lastSave = Number(localStorage.getItem('cme_last_save') || 0);
+    if(Date.now() - lastSave < 5000) return;
+    
+    window.pullFromCloud().catch(function(){});
+  }, 10000);
+
+  // ─────────────────────────────────────────
+  // 🎯 Auto-push بعد از تغییرات
+  // ─────────────────────────────────────────
+  window._lastDataHash = '';
+  setInterval(function(){
+    if(document.hidden) return;
+    try {
+      var hash = JSON.stringify(window.doctors || []).length + '_' + (window.doctors||[]).length;
+      if(hash !== window._lastDataHash){
+        if(window._lastDataHash !== ''){
+          // تغییر کرد → schedule push
+          clearTimeout(window._syncPushTimer);
+          window._syncPushTimer = setTimeout(function(){
+            window.pushToCloud(true).catch(function(){});
+          }, 2000);
+        }
+        window._lastDataHash = hash;
+      }
+    } catch(e){}
+  }, 1500);
+
+  console.log('✅ Sync Fix فعال — pull/push درست');
+})();
+</script>
 </body>
 </html>
