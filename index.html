@@ -390,7 +390,8 @@ textarea{resize:vertical;min-height:55px}
 
 <script>
 const K = 'cme4_data';
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxgaQoioSTin2ipJxZ78d8yb5l6HVIR1KvggjJZ2f9H88xKQs3qsQ3KFpzfdHFKsVek/exec';
+// آدرس جدید اسکریپت (Web App) شما
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzRrPWvhzHKtpETdaq96rovlH3aibgqblXyDSFjPnCaX-aOToHqj7UOvy87VN1G_v/exec';
 
 let doctors = [];
 let calls = [];
@@ -1212,6 +1213,60 @@ window.addEventListener('online', () => syncNow());
 
 setTimeout(autoAttendEvents, 2000); setInterval(autoAttendEvents, 60000);
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) autoAttendEvents(); });
+
+// ============================================
+// بخش نمایش تماس ورودی (Webhook Integration)
+// ============================================
+let lastProcessedCallId = null;
+
+function checkIncomingCalls() {
+  // یک پارامتر تصادفی اضافه می‌کنیم تا مرورگر کش نکند
+  const url = SCRIPT_URL + '?action=getLastCall&t=' + Date.now();
+  
+  fetch(url)
+    .then(res => {
+      if (!res.ok) throw new Error('Network error');
+      return res.json();
+    })
+    .then(data => {
+      // بررسی می‌کنیم که آیا داده جدید معتبر است یا خیر
+      if (data && data.EventType === 'CallIncomingStarted' && data.CallerNumber) {
+        // جلوگیری از پردازش تکراری یک تماس بر اساس CallId
+        if (data.CallId === lastProcessedCallId) return; 
+        lastProcessedCallId = data.CallId;
+
+        // اصلاح شماره (اضافه کردن صفر اول اگر ۱۰ رقمی بود)
+        let callerNumber = data.CallerNumber;
+        if (callerNumber.length === 10 && callerNumber.startsWith('9')) {
+          callerNumber = '0' + callerNumber;
+        }
+
+        // نمایش پیام
+        toast('📞 تماس ورودی جدید از شماره: ' + callerNumber);
+        
+        // پیدا کردن پزشک در لیست
+        const doctor = doctors.find(d => !d.deleted && normPhone(d.phone) === normPhone(callerNumber));
+        
+        if (doctor) {
+          selectedDoctorId = doctor.id;
+          currentMobileEventTab = 'وبینار';
+          renderDocList();
+          renderMain();
+          updateMobileSelection();
+          toast('👨‍⚕️ پروفایل ' + fullName(doctor) + ' باز شد.');
+        } else {
+          toast('❓ شماره ناشناس: ' + callerNumber);
+        }
+      }
+    })
+    .catch(err => {
+      // نادیده گرفتن خطاها
+    });
+}
+
+// شروع بررسی هر ۳ ثانیه
+setInterval(checkIncomingCalls, 3000);
+
 </script>
 </body>
 </html>
