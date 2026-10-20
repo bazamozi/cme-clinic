@@ -52,7 +52,7 @@ textarea{resize:vertical;min-height:55px}
 .badge.yellow{background:rgba(251,191,36,0.15);color:var(--warn);border:1px solid rgba(251,191,36,0.2)}
 .badge.gray{background:rgba(148,163,184,0.15);color:var(--muted);border:1px solid rgba(148,163,184,0.2)}
 .actions{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
-.mini{border:1px solid var(--border);background:rgba(255,255,255,0.03);color:var(--muted);padding:7px 12px;border-radius:9px;font-size:13px;cursor:pointer;font-family:inherit;transition:.2s}
+.mini{border:1px solid var(--border);background:rgba(255,255,255,0.03);color:var(--muted);padding:7px 12px;border-radius:9px;font-size:13px;cursor:pointer;font-family:inherit;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
 .mini:hover{color:var(--accent);border-color:var(--accent);background:rgba(56,189,248,0.1)}
 .mini.danger:hover{color:var(--danger);border-color:var(--danger);background:rgba(248,113,113,0.1)}
 .mini.green:hover{color:var(--success);border-color:var(--success);background:rgba(52,211,153,0.1)}
@@ -79,7 +79,6 @@ textarea{resize:vertical;min-height:55px}
 .doc-row:hover{border-color:rgba(56,189,248,0.3);background:rgba(15,23,42,0.7);transform:translateY(-2px)}
 .doc-row.active{border-color:var(--accent);background:linear-gradient(135deg,rgba(56,189,248,0.1),rgba(34,211,238,0.05));box-shadow:0 4px 15px rgba(56,189,248,0.1)}
 
-/* ===== انیمیشن‌های اطلاع‌رسانی ===== */
 @keyframes flashRed {
     0%, 100% { background-color: rgba(248,113,113,0.1); box-shadow: 0 0 5px rgba(248,113,113,0.2); }
     50% { background-color: rgba(248,113,113,0.3); box-shadow: 0 0 15px rgba(248,113,113,0.6); }
@@ -111,7 +110,6 @@ textarea{resize:vertical;min-height:55px}
 .doc-header h2{color:#fff;font-size:17px;font-weight:800;margin:0;display:flex;align-items:center;flex-wrap:wrap;gap:5px}
 .doc-header .meta{color:var(--muted);font-size:12.5px;margin-top:4px;line-height:1.8}
 
-/* ===== Unified Info Grid ===== */
 .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
 .info-box { background: rgba(15,23,42,0.5); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; font-size: 13.5px; font-weight: 700; transition: .2s; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; position: relative;}
 .info-box:hover { border-color: rgba(56,189,248,0.4); }
@@ -124,7 +122,6 @@ textarea{resize:vertical;min-height:55px}
 .info-box .copy-btn:hover { background: rgba(56,189,248,0.3); color: #fff; }
 @media(max-width:768px){ .info-grid { grid-template-columns: 1fr 1fr; } }
 
-/* ===== Bank Card Style ===== */
 .bank-card-wrapper{margin-top:14px}
 .bank-card{background:linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.95)); border:1px solid rgba(56,189,248,0.3); border-radius:16px; padding:16px; position:relative; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.3); backdrop-filter:blur(10px)}
 .bank-card::before{content:''; position:absolute; top:-50%; right:-20%; width:200px; height:200px; background:radial-gradient(circle, rgba(56,189,248,0.15) 0%, transparent 70%); border-radius:50%; pointer-events:none}
@@ -139,23 +136,10 @@ textarea{resize:vertical;min-height:55px}
 .bank-box .copy-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: .2s; font-family: inherit; font-size:12px; margin:0;}
 .bank-box .copy-btn:hover { background: rgba(255,255,255,0.25); }
 
-/* ===== Events Layout (3 Columns with Grid Header) ===== */
 .events-layout{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-top:14px; align-items:start;}
 .ev-section{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:rgba(15,23,42,0.3); box-shadow:0 4px 15px rgba(0,0,0,0.1); display:flex; flex-direction:column;}
-
-/* دکمه‌های تب موبایل (در دسکتاپ مخفی هستند) */
 .mobile-event-tabs { display: none; }
-
-/* هدر رویدادها با Grid برای نظم کامل */
-.ev-head {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  background: rgba(15,23,42,0.7);
-  border-bottom: 1px solid var(--border);
-}
+.ev-head { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(15,23,42,0.7); border-bottom: 1px solid var(--border); }
 .ev-head h3 { font-size: 14px; display: flex; align-items: center; gap: 6px; margin: 0; white-space: nowrap; }
 .ev-stats-wrap { display: flex; justify-content: center; gap: 6px; }
 .ev-stat-pill { background: linear-gradient(135deg,rgba(56,189,248,0.15),rgba(34,211,238,0.05)); border: 1px solid rgba(56,189,248,0.3); border-radius: 8px; padding: 4px 10px; font-size: 12.5px; font-weight: 800; color: var(--accent); white-space: nowrap; }
@@ -240,7 +224,6 @@ textarea{resize:vertical;min-height:55px}
 }
 .back-btn{display:none}
 
-/* ===== Login Screen ===== */
 #loginScreen{position:fixed;inset:0;background:linear-gradient(160deg,#0f172a,#1e293b);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px}
 #loginScreen.hidden{display:none}
 .login-box{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:35px 30px;max-width:380px;width:100%;backdrop-filter:blur(20px);box-shadow:0 30px 80px rgba(0,0,0,0.6);animation:zoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)}
@@ -283,6 +266,7 @@ textarea{resize:vertical;min-height:55px}
   <div class="tabs" id="mainTabs">
     <button class="tab" data-tab="dash">📊 داشبورد</button>
     <button class="tab active" data-tab="doctors">👨‍⚕️ دفتر پزشکان</button>
+    <button class="tab" data-tab="contacts">📇 مخاطبین</button>
     <button class="tab" data-tab="calls">📞 تماس‌ها</button>
   </div>
   <div class="user-picker" id="userPicker">
@@ -295,8 +279,8 @@ textarea{resize:vertical;min-height:55px}
   <div style="display:flex; gap:6px; align-items:center; margin-left:10px;">
     <div id="syncStatus" class="sub" style="font-size: 12px; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,0.05); border:1px solid var(--border); min-width: 85px; text-align:center; transition: 0.3s; font-weight:700;">☁️ آماده</div>
     <button class="mini" onclick="syncNow(true)" title="همگام‌سازی دستی">🔄</button>
-    <button class="mini" onclick="exportData()" title="پشتیبان‌گیری (دانلود فایل)">💾</button>
-    <button class="mini" onclick="document.getElementById('importFile').click()" title="بازیابی (آپلود فایل)">📂</button>
+    <button class="mini" onclick="exportData()" title="پشتیبان‌گیری">💾</button>
+    <button class="mini" onclick="document.getElementById('importFile').click()" title="بازیابی">📂</button>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
   </div>
   
@@ -326,6 +310,17 @@ textarea{resize:vertical;min-height:55px}
     <main class="main-area" id="mainArea">
       <div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>
     </main>
+  </div>
+</div>
+
+<div class="tab-content hidden" id="tab-contacts">
+  <div class="panel">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <h2 style="margin:0;">📇 لیست مخاطبین</h2>
+      <button class="btn sm" onclick="openContactModal()">➕ افزودن مخاطب جدید</button>
+    </div>
+    <input id="searchContact" placeholder="🔍 جستجو در نام یا شماره..." style="margin-bottom:12px">
+    <div id="listContacts"></div>
   </div>
 </div>
 
@@ -381,10 +376,12 @@ textarea{resize:vertical;min-height:55px}
 <nav class="mobile-nav">
   <button data-tab="dash"><span class="icon">📊</span>داشبورد</button>
   <button data-tab="doctors" class="active"><span class="icon">👨‍⚕️</span>پزشکان</button>
+  <button data-tab="contacts"><span class="icon">📇</span>مخاطبین</button>
   <button data-tab="calls"><span class="icon">📞</span>تماس‌ها</button>
 </nav>
 <div class="toast" id="toast"></div>
 <div id="modalHost"></div>
+<audio id="ringtone" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
 <script>
 const K = 'cme4_data';
@@ -392,6 +389,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyMYBl--LmDnW014gDK6
 
 let doctors = [];
 let calls = [];
+let contacts = [];
 let selectedDoctorId = null;
 let currentUser = 'morteza';
 let currentDocCategory = 'all';
@@ -400,6 +398,7 @@ let currentMobileEventTab = 'وبینار';
 try {
   doctors = JSON.parse(localStorage.getItem(K)||'[]');
   calls = JSON.parse(localStorage.getItem(K+'_calls')||'[]');
+  contacts = JSON.parse(localStorage.getItem(K+'_contacts')||'[]');
   var savedU = localStorage.getItem('cme_current_user');
   if(savedU) currentUser = savedU;
 } catch(e){}
@@ -419,7 +418,16 @@ const DAYS = []; for(let d=1;d<=31;d++) DAYS.push(d);
 
 function parseDate(s){ const m = String(s||'').match(/(\d+)\/(\d+)\/(\d+)/); if(!m) return {y:1405,m:7,d:1}; return {y:+m[1],m:+m[2],d:+m[3]}; }
 function formatDate(y,m,d){ return `${y}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}`; }
-function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2500); }
+function toast(msg, type='info'){ 
+  const t=document.getElementById('toast'); 
+  t.textContent=msg; 
+  if(type==='danger'){ t.style.background = 'linear-gradient(135deg, #ef4444, #b91c1c)'; }
+  else if(type==='warn'){ t.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)'; }
+  else { t.style.background = 'linear-gradient(135deg, #0ea5e9, #0284c7)'; }
+  t.classList.add('show'); 
+  clearTimeout(t._t); 
+  t._t=setTimeout(()=>t.classList.remove('show'),4000); 
+}
 
 function getDaysDifference(shamsiDateStr) {
     if (!shamsiDateStr || !shamsiDateStr.includes('/')) return null;
@@ -492,6 +500,7 @@ window.doLogin = function(){
     try { localStorage.setItem('cme_current_user', u); } catch(e){}
     document.querySelectorAll('.user-picker button').forEach(function(b){ if(b.dataset.user === u) b.classList.add('active'); else b.classList.remove('active'); });
     renderAll(); updateMobileSelection(); toast('👋 خوش آمدید ' + USERS[u].name);
+    requestNotificationPermission();
   } else { errEl.classList.add('show'); document.getElementById('loginPass').value = ''; }
 };
 
@@ -504,9 +513,18 @@ function checkLogin(){
     currentUser = logged;
     try { localStorage.setItem('cme_current_user', logged); } catch(e){}
     document.querySelectorAll('.user-picker button').forEach(function(b){ if(b.dataset.user === logged) b.classList.add('active'); else b.classList.remove('active'); });
+    requestNotificationPermission();
   } else {
     document.getElementById('loginScreen').classList.remove('hidden');
     setTimeout(function(){ var u = document.getElementById('loginUser'); if(u) u.focus(); }, 100);
+  }
+}
+
+function requestNotificationPermission() {
+  if ("Notification" in window) {
+    if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+      Notification.requestPermission();
+    }
   }
 }
 
@@ -517,11 +535,12 @@ window.switchUser = function(user){
   selectedDoctorId = null;
   const ma = document.getElementById('mainArea'); if(ma) ma.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>';
   document.querySelectorAll('.user-picker button').forEach(b=>{ if(b.dataset.user === user) b.classList.add('active'); else b.classList.remove('active'); });
-  renderDash(); renderDocList(); renderCalls(); updateMobileSelection(); updateMobileNav();
+  renderDash(); renderDocList(); renderCalls(); renderContacts(); updateMobileSelection(); updateMobileNav();
 };
 
 function myDoctors(){ const arr = doctors.filter(d => !d.deleted); return currentUser === 'all' ? arr : arr.filter(d => d.owner === currentUser); }
 function myCalls(){ const arr = calls.filter(c => !c.deleted); return currentUser === 'all' ? arr : arr.filter(c => c.owner === currentUser); }
+function myContacts(){ const arr = contacts.filter(c => !c.deleted); return currentUser === 'all' ? arr : arr.filter(c => c.owner === currentUser); }
 
 function eventCredit(e){
   if(e.purchase!=='انجام شد') return 0;
@@ -546,7 +565,7 @@ function pendingExamWebinars(d){ return (d.events||[]).filter(e=> e.type==='وب
 function offlinePurchasedToday(d){ const t=new Date(); const y=t.getFullYear(), m=t.getMonth(), day=t.getDate(); return (d.events||[]).some(e=>{ if(e.type!=='غیر حضوری' || e.purchase!=='انجام شد') return false; const d2=new Date(e.createdAt); return d2.getFullYear()===y && d2.getMonth()===m && d2.getDate()===day; }); }
 
 window.exportData = function() {
-  const dataStr = JSON.stringify({ doctors, calls, exportedAt: Date.now() }, null, 2);
+  const dataStr = JSON.stringify({ doctors, calls, contacts, exportedAt: Date.now() }, null, 2);
   const blob = new Blob([dataStr], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -562,10 +581,11 @@ window.importData = function(event) {
   reader.onload = function(e) {
     try {
       const data = JSON.parse(e.target.result);
-      if(data && (Array.isArray(data.doctors) || Array.isArray(data.calls))) {
+      if(data) {
         if(!confirm('⚠️ با این کار اطلاعات فایل پشتیبان با داده‌های فعلی ادغام می‌شوند. ادامه؟')) { event.target.value = ''; return; }
         doctors = mergeById(doctors, data.doctors || [], 'updatedAt');
         calls = mergeById(calls, data.calls || [], 'updatedAt');
+        contacts = mergeById(contacts, data.contacts || [], 'updatedAt');
         save(); renderAll(); toast('✅ بازیابی با موفقیت انجام شد');
       } else { toast('❌ فایل معتبر نیست'); }
     } catch(err) { toast('❌ خطا در خواندن فایل'); }
@@ -585,7 +605,11 @@ function updateSyncUI(status) {
 }
 
 function save(){
-  try { localStorage.setItem(K, JSON.stringify(doctors)); localStorage.setItem(K+'_calls', JSON.stringify(calls)); } catch(e){}
+  try { 
+    localStorage.setItem(K, JSON.stringify(doctors)); 
+    localStorage.setItem(K+'_calls', JSON.stringify(calls)); 
+    localStorage.setItem(K+'_contacts', JSON.stringify(contacts));
+  } catch(e){}
   _dirty = true; scheduleSync();
 }
 
@@ -609,7 +633,7 @@ async function syncNow(isManual = false){
 async function pushToCloud(){
   return new Promise((resolve) => {
     try {
-      const payload = JSON.stringify({ doctors, calls, savedAt: Date.now() });
+      const payload = JSON.stringify({ doctors, calls, contacts, savedAt: Date.now() });
       const form = document.createElement('form');
       form.method = 'POST'; form.action = SCRIPT_URL; form.target = 'hidden_iframe_push'; form.style.display = 'none';
       const input = document.createElement('input');
@@ -632,7 +656,6 @@ function mergeById(localArr, remoteArr, tsField){
   return Array.from(map.values());
 }
 
-// ارتباط با گوگل از طریق JSONP
 function jsonp(url, callback) {
   const script = document.createElement('script');
   const uniqueName = 'jsonp_' + Date.now() + Math.floor(Math.random() * 1000);
@@ -654,10 +677,19 @@ function pullFromCloud(){
     if(!data) return;
     const newDocs  = mergeById(doctors, data.doctors || [], 'updatedAt');
     const newCalls = mergeById(calls,   data.calls   || [], 'updatedAt');
-    const changed = JSON.stringify(newDocs) !== JSON.stringify(doctors) || JSON.stringify(newCalls) !== JSON.stringify(calls);
-    doctors = newDocs; calls = newCalls;
+    const newContacts = mergeById(contacts, data.contacts || [], 'updatedAt');
+    
+    const changed = JSON.stringify(newDocs) !== JSON.stringify(doctors) || 
+                    JSON.stringify(newCalls) !== JSON.stringify(calls) ||
+                    JSON.stringify(newContacts) !== JSON.stringify(contacts);
+                    
+    doctors = newDocs; calls = newCalls; contacts = newContacts;
     if(changed){
-      try { localStorage.setItem(K, JSON.stringify(doctors)); localStorage.setItem(K+'_calls', JSON.stringify(calls)); } catch(e){}
+      try { 
+        localStorage.setItem(K, JSON.stringify(doctors)); 
+        localStorage.setItem(K+'_calls', JSON.stringify(calls)); 
+        localStorage.setItem(K+'_contacts', JSON.stringify(contacts));
+      } catch(e){}
       renderAll();
     }
   });
@@ -672,6 +704,7 @@ window.switchTab = function(tabName){
   if(tabName === 'dash') renderDash();
   if(tabName === 'doctors'){ renderDocList(); renderMain(); }
   if(tabName === 'calls') renderCalls();
+  if(tabName === 'contacts') renderContacts();
 };
 
 function updateMobileNav(){
@@ -1011,15 +1044,108 @@ window.openEventModal = function(editId, presetType){
   };
 };
 
+// ============================================
+// CONTACTS SECTION
+// ============================================
+function renderContacts() {
+  const searchEl = document.getElementById('searchContact'); if(!searchEl) return;
+  const q = searchEl.value.trim().toLowerCase();
+  const arr = myContacts().filter(c => !q || c.name.toLowerCase().includes(q) || c.phone.includes(q));
+  
+  const el = document.getElementById('listContacts');
+  if (!arr.length) { el.innerHTML = '<div class="empty">مخاطبی یافت نشد</div>'; return; }
+  
+  el.innerHTML = arr.map(c => `
+    <div style="background:rgba(15,23,42,0.6); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div>
+        <div style="font-weight:700; font-size:14.5px;">${esc(c.name)}</div>
+        <div style="color:var(--muted); font-size:12px; margin-top:4px;">📞 <span class="ltr">${esc(c.phone)}</span> ${c.category ? ` | 🏷️ ${esc(c.category)}` : ''}</div>
+        ${c.note ? `<div style="color:var(--warn); font-size:11.5px; margin-top:6px;">📝 ${esc(c.note)}</div>` : ''}
+      </div>
+      <div style="display:flex; gap:6px;">
+        <a class="mini" href="tel:${esc(c.phone)}" style="padding:6px 10px;">📞 تماس</a>
+        <a class="mini" href="sms:${esc(c.phone)}" style="padding:6px 10px;">💬 پیامک</a>
+        <button class="mini" onclick="openContactModal('${c.id}')">✏️</button>
+        <button class="mini danger" onclick="delContact('${c.id}')">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+window.openContactModal = function(editId) {
+  const c = editId ? contacts.find(x => x.id === editId) : null;
+  openModal(`
+    <h2>${c ? '✏️ ویرایش' : '➕ ثبت'} مخاطب</h2>
+    <form id="mContactForm" autocomplete="off">
+      <input type="hidden" id="cEditId" value="${c?.id||''}">
+      <div class="row">
+        <div><label>نام و نام خانوادگی *</label><input id="cName" required value="${esc(c?.name||'')}"></div>
+        <div><label>شماره تماس *</label><input id="cPhone" dir="ltr" required value="${esc(c?.phone||'')}"></div>
+      </div>
+      <div class="row">
+        <div><label>دسته‌بندی</label><input id="cCategory" placeholder="مثلا: همکار، تامین‌کننده..." value="${esc(c?.category||'')}"></div>
+        <div><label>مالک</label><select id="cOwner"><option value="morteza" ${(c?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='morteza'?'selected':''}>مرتضی</option><option value="parvin" ${(c?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='parvin'?'selected':''}>پروین</option></select></div>
+      </div>
+      <label>یادداشت</label>
+      <textarea id="cNote">${esc(c?.note||'')}</textarea>
+      <button class="btn" type="submit">${c ? '💾 ذخیره' : '➕ ثبت'}</button>
+      <button class="btn ghost" type="button" onclick="closeModal()">انصراف</button>
+    </form>
+  `);
+  
+  document.getElementById('mContactForm').onsubmit = e => {
+    e.preventDefault();
+    const gv = id => toEnDigits(document.getElementById(id)?.value || '').trim();
+    const data = {
+      name: document.getElementById('cName').value.trim(),
+      phone: gv('cPhone'),
+      category: document.getElementById('cCategory').value.trim(),
+      note: document.getElementById('cNote').value.trim(),
+      owner: document.getElementById('cOwner').value
+    };
+    const id = document.getElementById('cEditId').value;
+    if(id) {
+      const contact = contacts.find(x => x.id === id);
+      if(contact) { Object.assign(contact, data); contact.updatedAt = Date.now(); toast('✅ ویرایش شد'); }
+    } else {
+      contacts.unshift({ id: uid(), ...data, createdAt: Date.now(), updatedAt: Date.now() });
+      toast('✅ مخاطب ثبت شد');
+    }
+    save(); closeModal(); renderContacts();
+  };
+};
+
+window.delContact = function(id) {
+  if(!confirm('حذف شود؟')) return;
+  const c = contacts.find(x => x.id === id); if(!c) return;
+  c.deleted = true; c.updatedAt = Date.now();
+  save(); renderContacts();
+};
+
+// ============================================
+// CALLS SECTION
+// ============================================
 const callPhoneEl = document.getElementById('callPhone'); if(callPhoneEl) callPhoneEl.addEventListener('input', updateCallInfo);
 function updateCallInfo(){
   const p = normPhone(document.getElementById('callPhone').value); const el = document.getElementById('callCreditInfo');
   if(!p){ el.innerHTML=''; document.getElementById('callName').value=''; return; }
+  
   const d = doctors.find(x=> !x.deleted && normPhone(x.phone)===p);
-  if(!d){ el.innerHTML='<div style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.35);border-radius:12px;padding:14px"><h3 style="color:var(--danger);font-size:14px">❌ این شماره در لیست پزشکان نیست</h3></div>'; return; }
-  document.getElementById('callName').value = fullName(d);
-  const cr = doctorCredits(d), req = Number(d.creditReq||0), total = totalEarned(d), rem = remainingCredits(d);
-  el.innerHTML = `<div style="background:linear-gradient(135deg,rgba(56,189,248,0.12),rgba(34,211,238,0.05));border:1px solid rgba(56,189,248,0.35);border-radius:12px;padding:14px;margin-bottom:10px"><h3 style="color:var(--accent);font-size:14px;margin-bottom:8px">👨‍⚕️ ${esc(fullName(d))} — ${esc(d.spec||'')}</h3><div style="font-size:12px;color:var(--muted);margin-bottom:8px">درخواستی: <b style="color:var(--accent)">${num(req)}</b> | کسب‌شده: <b style="color:var(--success)">${num(total)}</b> | کمبود: <b style="color:${rem>0?'var(--danger)':'var(--success)'}">${num(rem)}</b></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">${['حضوری','وبینار','غیر حضوری'].map(k=>`<div style="background:rgba(15,23,42,0.7);border:1px solid var(--border);border-radius:9px;padding:8px;text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">${typeIcon(k)} ${k}</div><div style="font-size:14px;font-weight:700;color:var(--accent)">${num(cr[k])}</div></div>`).join('')}</div></div>`;
+  const c = contacts.find(x=> !x.deleted && normPhone(x.phone)===p);
+  
+  if(!d && !c){ 
+    el.innerHTML='<div style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.35);border-radius:12px;padding:14px"><h3 style="color:var(--danger);font-size:14px">❌ این شماره در سیستم نیست</h3></div>'; 
+    return; 
+  }
+  
+  if(d) {
+    document.getElementById('callName').value = fullName(d);
+    const cr = doctorCredits(d), req = Number(d.creditReq||0), total = totalEarned(d), rem = remainingCredits(d);
+    el.innerHTML = `<div style="background:linear-gradient(135deg,rgba(56,189,248,0.12),rgba(34,211,238,0.05));border:1px solid rgba(56,189,248,0.35);border-radius:12px;padding:14px;margin-bottom:10px"><h3 style="color:var(--accent);font-size:14px;margin-bottom:8px">👨‍⚕️ ${esc(fullName(d))} — ${esc(d.spec||'')}</h3><div style="font-size:12px;color:var(--muted);margin-bottom:8px">درخواستی: <b style="color:var(--accent)">${num(req)}</b> | کسب‌شده: <b style="color:var(--success)">${num(total)}</b> | کمبود: <b style="color:${rem>0?'var(--danger)':'var(--success)'}">${num(rem)}</b></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">${['حضوری','وبینار','غیر حضوری'].map(k=>`<div style="background:rgba(15,23,42,0.7);border:1px solid var(--border);border-radius:9px;padding:8px;text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:4px">${typeIcon(k)} ${k}</div><div style="font-size:14px;font-weight:700;color:var(--accent)">${num(cr[k])}</div></div>`).join('')}</div></div>`;
+  } else if (c) {
+    document.getElementById('callName').value = c.name;
+    el.innerHTML = `<div style="background:linear-gradient(135deg,rgba(167,139,250,0.12),rgba(167,139,250,0.05));border:1px solid rgba(167,139,250,0.35);border-radius:12px;padding:14px;margin-bottom:10px"><h3 style="color:var(--purple);font-size:14px;">📇 مخاطب: ${esc(c.name)}</h3><div style="font-size:12px;color:var(--muted);margin-top:4px;">${c.note || 'بدون یادداشت'}</div></div>`;
+  }
 }
 
 document.getElementById('fCall').onsubmit = e => {
@@ -1034,18 +1160,25 @@ function renderCalls(){
   const arr = myCalls().filter(c=>{ if(f==='pending' && c.follow!=='پیگیری‌نشده') return false; if(f==='doing' && c.follow!=='در حال پیگیری') return false; if(f==='done' && c.follow!=='پیگیری‌شده') return false; if(q && !(c.phone.includes(q) || (c.name||'').toLowerCase().includes(q) || c.subject.toLowerCase().includes(q))) return false; return true; });
   const el = document.getElementById('listCalls'); if(!arr.length){ el.innerHTML='<div class="empty">تماسی یافت نشد</div>'; return; }
   const fCls = { 'پیگیری‌نشده':'red', 'در حال پیگیری':'yellow', 'پیگیری‌شده':'green' };
-  el.innerHTML = arr.map(c=>`<div style="background:rgba(15,23,42,0.6);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><div><div style="font-weight:700;font-size:13.5px">${c.name?esc(c.name):'ناشناس'} <span class="badge blue ltr">${esc(c.phone)}</span></div><div style="color:var(--muted);font-size:11px;margin-top:5px">🎯 ${esc(c.subject)} | 🕒 <span class="ltr">${dt(c.createdAt)}</span></div>${c.note?`<div style="background:rgba(56,189,248,0.08);padding:6px 10px;border-radius:8px;border-right:3px solid var(--accent);margin-top:6px;font-size:12px">${esc(c.note)}</div>`:''}</div><div><span class="badge ${fCls[c.follow]||'gray'}">${esc(c.follow)}</span></div></div><div class="actions"><button class="mini" onclick="cycleFollow('${c.id}')">تغییر پیگیری</button><button class="mini danger" onclick="delCall('${c.id}')">🗑 حذف</button></div></div>`).join('');
+  el.innerHTML = arr.map(c=>`<div style="background:rgba(15,23,42,0.6);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><div><div style="font-weight:700;font-size:13.5px">${c.name?esc(c.name):'ناشناس'} <span class="badge blue ltr">${esc(c.phone)}</span></div><div style="color:var(--muted);font-size:11px;margin-top:5px">🎯 ${esc(c.subject)} | 🕒 <span class="ltr">${dt(c.createdAt)}</span></div>${c.note?`<div style="background:rgba(56,189,248,0.08);padding:6px 10px;border-radius:8px;border-right:3px solid var(--accent);margin-top:6px;font-size:12px">${esc(c.note)}</div>`:''}</div><div><span class="badge ${fCls[c.follow]||'gray'}">${esc(c.follow)}</span></div></div>
+  <div class="actions">
+    <a class="mini" href="tel:${esc(c.phone)}">📞 تماس</a>
+    <a class="mini" href="sms:${esc(c.phone)}">💬 پیامک</a>
+    <button class="mini" onclick="cycleFollow('${c.id}')">تغییر پیگیری</button>
+    <button class="mini danger" onclick="delCall('${c.id}')">🗑 حذف</button>
+  </div></div>`).join('');
 }
 
 window.cycleFollow = function(id){ const c=calls.find(x=>x.id===id); if(!c) return; const o=['پیگیری‌نشده','در حال پیگیری','پیگیری‌شده']; c.follow=o[(o.indexOf(c.follow)+1)%3]; c.updatedAt = Date.now(); save(); renderCalls(); };
 window.delCall = function(id){ if(!confirm('حذف شود؟')) return; const c = calls.find(x=>x.id===id); if(!c) return; c.deleted = true; c.updatedAt = Date.now(); save(); renderCalls(); };
 
-function renderAll(){ renderDash(); renderDocList(); renderMain(); renderCalls(); }
+function renderAll(){ renderDash(); renderDocList(); renderMain(); renderCalls(); renderContacts(); }
 
 document.querySelectorAll('.tab').forEach(t=>{ t.onclick = () => switchTab(t.dataset.tab); });
 document.querySelectorAll('.mobile-nav button').forEach(b=>{ b.onclick = () => switchTab(b.dataset.tab); });
 document.getElementById('searchDoctor').addEventListener('input', renderDocList);
 document.getElementById('searchCall').addEventListener('input', renderCalls);
+document.getElementById('searchContact').addEventListener('input', renderContacts);
 document.getElementById('filterCall').addEventListener('change', renderCalls);
 
 window.openIRCME = function(nat, pass){ if(!nat || !pass){ toast('⚠️ کد ملی یا رمز سامانه موجود نیست'); return; } var url = 'https://www.ircme.ir/App_Web/%28Guest%29/Membership/Login.aspx?CenterID=25&u=' + encodeURIComponent(nat) + '&p=' + encodeURIComponent(pass); var w = window.open(url, '_blank'); if(!w || w.closed || typeof w.closed === 'undefined'){ window.location.href = url; } };
@@ -1086,36 +1219,60 @@ function checkIncomingCalls() {
       }
 
       const doctor = doctors.find(d => !d.deleted && normPhone(d.phone) === normPhone(callerNumber));
-      const callerName = doctor ? fullName(doctor) : 'شماره ناشناس';
+      const contact = contacts.find(c => !c.deleted && normPhone(c.phone) === normPhone(callerNumber));
+      
+      let callerName = 'شماره ناشناس';
+      let alertType = 'info';
+      let alertMessage = '📞 تماس ورودی جدید از شماره: ' + callerNumber;
 
-      // ثبت خودکار تماس در تب تماس‌ها
+      if (doctor) {
+        callerName = fullName(doctor);
+        const rem = remainingCredits(doctor);
+        const f = doctor.finance || {};
+        const rem$ = Math.max(0, Number(f.total||0) - Number(f.paid||0));
+        
+        // ساخت پیام اخطار
+        alertMessage = `📞 تماس از 👨‍⚕️ ${callerName}`;
+        if (rem > 0) { alertMessage += ` | ⚠️ ${num(rem)} امتیاز کم`; alertType = 'warn'; }
+        if (rem$ > 0) { alertMessage += ` | 💸 ${num(rem$)} تومان بدهکار`; alertType = 'danger'; }
+        
+        // باز کردن پروفایل
+        selectedDoctorId = doctor.id;
+        currentMobileEventTab = 'وبینار';
+        renderDocList();
+        renderMain();
+        updateMobileSelection();
+      } else if (contact) {
+        callerName = contact.name;
+        alertMessage = `📞 تماس از مخاطب: ${callerName}`;
+      }
+
+      // پخش صدا
+      try { document.getElementById('ringtone').play(); } catch(err) {}
+      
+      // نوتیفیکیشن دسکتاپ
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("تماس ورودی", { body: alertMessage, icon: "https://cdn-icons-png.flaticon.com/512/724/724664.png" });
+      }
+
+      // نمایش پیام در سایت
+      toast(alertMessage, alertType);
+
+      // ثبت تماس در لیست
       calls.unshift({
         id: uid(),
         owner: currentUser,
         phone: callerNumber,
         name: callerName,
-        subject: 'تماس ورودی',
+        subject: doctor ? 'تماس پزشک' : (contact ? 'تماس مخاطب' : 'تماس ناشناس'),
         follow: 'پیگیری‌نشده',
         note: 'ثبت خودکار توسط سیستم تلفن',
         createdAt: Date.now(),
         updatedAt: Date.now()
       });
       
-      save(); // ذخیره در دیتابیس
-      renderCalls(); // آپدیت تب تماس‌ها
-
-      toast('📞 تماس ورودی جدید از شماره: ' + callerNumber);
-      
-      if (doctor) {
-        selectedDoctorId = doctor.id;
-        currentMobileEventTab = 'وبینار';
-        renderDocList();
-        renderMain();
-        updateMobileSelection();
-        toast('👨‍⚕️ پروفایل ' + fullName(doctor) + ' باز شد.');
-      } else {
-        toast('❓ شماره ناشناس: ' + callerNumber);
-      }
+      save(); 
+      renderCalls(); 
     }
   });
 }
