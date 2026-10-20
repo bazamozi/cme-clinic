@@ -1044,9 +1044,6 @@ window.openEventModal = function(editId, presetType){
   };
 };
 
-// ============================================
-// CONTACTS SECTION
-// ============================================
 function renderContacts() {
   const searchEl = document.getElementById('searchContact'); if(!searchEl) return;
   const q = searchEl.value.trim().toLowerCase();
@@ -1122,9 +1119,6 @@ window.delContact = function(id) {
   save(); renderContacts();
 };
 
-// ============================================
-// CALLS SECTION
-// ============================================
 const callPhoneEl = document.getElementById('callPhone'); if(callPhoneEl) callPhoneEl.addEventListener('input', updateCallInfo);
 function updateCallInfo(){
   const p = normPhone(document.getElementById('callPhone').value); const el = document.getElementById('callCreditInfo');
@@ -1202,9 +1196,6 @@ window.addEventListener('online', () => syncNow());
 setTimeout(autoAttendEvents, 2000); setInterval(autoAttendEvents, 60000);
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) autoAttendEvents(); });
 
-// ============================================
-// بخش نمایش و ثبت تماس ورودی (Webhook Integration)
-// ============================================
 let lastProcessedCallId = null;
 
 function checkIncomingCalls() {
@@ -1231,12 +1222,10 @@ function checkIncomingCalls() {
         const f = doctor.finance || {};
         const rem$ = Math.max(0, Number(f.total||0) - Number(f.paid||0));
         
-        // ساخت پیام اخطار
         alertMessage = `📞 تماس از 👨‍⚕️ ${callerName}`;
         if (rem > 0) { alertMessage += ` | ⚠️ ${num(rem)} امتیاز کم`; alertType = 'warn'; }
         if (rem$ > 0) { alertMessage += ` | 💸 ${num(rem$)} تومان بدهکار`; alertType = 'danger'; }
         
-        // باز کردن پروفایل
         selectedDoctorId = doctor.id;
         currentMobileEventTab = 'وبینار';
         renderDocList();
@@ -1247,18 +1236,14 @@ function checkIncomingCalls() {
         alertMessage = `📞 تماس از مخاطب: ${callerName}`;
       }
 
-      // پخش صدا
       try { document.getElementById('ringtone').play(); } catch(err) {}
       
-      // نوتیفیکیشن دسکتاپ
       if ("Notification" in window && Notification.permission === "granted") {
         new Notification("تماس ورودی", { body: alertMessage, icon: "https://cdn-icons-png.flaticon.com/512/724/724664.png" });
       }
 
-      // نمایش پیام در سایت
       toast(alertMessage, alertType);
 
-      // ثبت تماس در لیست
       calls.unshift({
         id: uid(),
         owner: currentUser,
