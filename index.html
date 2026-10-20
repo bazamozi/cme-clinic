@@ -388,7 +388,6 @@ textarea{resize:vertical;min-height:55px}
 
 <script>
 const K = 'cme4_data';
-// آدرس جدید اسکریپت (Web App) شما
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyMYBl--LmDnW014gDK63HF6_hqQgpzKlccvtw_P2rWmgumwBEDLg7S5gzrHrBkShm18A/exec';
 
 let doctors = [];
@@ -1071,7 +1070,7 @@ setTimeout(autoAttendEvents, 2000); setInterval(autoAttendEvents, 60000);
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) autoAttendEvents(); });
 
 // ============================================
-// بخش نمایش تماس ورودی (Webhook Integration)
+// بخش نمایش و ثبت تماس ورودی (Webhook Integration)
 // ============================================
 let lastProcessedCallId = null;
 
@@ -1086,9 +1085,26 @@ function checkIncomingCalls() {
         callerNumber = '0' + callerNumber;
       }
 
-      toast('📞 تماس ورودی جدید از شماره: ' + callerNumber);
-      
       const doctor = doctors.find(d => !d.deleted && normPhone(d.phone) === normPhone(callerNumber));
+      const callerName = doctor ? fullName(doctor) : 'شماره ناشناس';
+
+      // ثبت خودکار تماس در تب تماس‌ها
+      calls.unshift({
+        id: uid(),
+        owner: currentUser,
+        phone: callerNumber,
+        name: callerName,
+        subject: 'تماس ورودی',
+        follow: 'پیگیری‌نشده',
+        note: 'ثبت خودکار توسط سیستم تلفن',
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      });
+      
+      save(); // ذخیره در دیتابیس
+      renderCalls(); // آپدیت تب تماس‌ها
+
+      toast('📞 تماس ورودی جدید از شماره: ' + callerNumber);
       
       if (doctor) {
         selectedDoctorId = doctor.id;
