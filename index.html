@@ -898,12 +898,12 @@ function renderMain(){
         <div class="info-box" style="display:flex; flex-direction:row; align-items:center; justify-content:space-between; gap:8px; padding:8px 12px;">
             <div style="display:flex; flex-direction:column; align-items:center; flex:1;">
                 <span class="label" style="font-size:12px; color:var(--purple); margin-bottom:4px;">💻 وبینار</span>
-                <input type="text" id="inpManualWebinar" value="${esc(d.manualWebinar||'')}" style="padding:4px; text-align:center; font-size:14px; font-weight:800; height:32px; border-radius:8px; width:100%;" onchange="saveManualCredits('${d.id}', 'manualWebinar', this.value)">
+                <span class="value" style="font-size:16px; font-weight:800; color:#fff;">${num(d.manualWebinar||0)}</span>
             </div>
             <div style="width:1px; height:40px; background:var(--border);"></div>
             <div style="display:flex; flex-direction:column; align-items:center; flex:1;">
                 <span class="label" style="font-size:12px; color:var(--warn); margin-bottom:4px;">📁 غیرحضوری</span>
-                <input type="text" id="inpManualOffline" value="${esc(d.manualOffline||'')}" style="padding:4px; text-align:center; font-size:14px; font-weight:800; height:32px; border-radius:8px; width:100%;" onchange="saveManualCredits('${d.id}', 'manualOffline', this.value)">
+                <span class="value" style="font-size:16px; font-weight:800; color:#fff;">${num(d.manualOffline||0)}</span>
             </div>
         </div>
       </div>
@@ -1045,6 +1045,13 @@ window.openDoctorModal = function(editId, defaultPhone){
         <div><label>نام *</label><input autocomplete="off" id="mFirstName" required value="${esc(d?.firstName||'')}"><label>کد ملی *</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mNat" required maxlength="10" value="${esc(d?.nat||'')}"><label>رمز سامانه *</label><input autocomplete="off" id="mPass" required value="${esc(d?.pass||'')}"><label>شماره موبایل</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPhone" value="${esc(phoneVal)}"></div>
         <div><label>نام خانوادگی *</label><input autocomplete="off" id="mLastName" required value="${esc(d?.lastName||'')}"><label>تخصص</label><input autocomplete="off" id="mSpec" value="${esc(d?.spec||'')}"><label>امتیاز درخواستی</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCreditReq" value="${esc(d?.creditReq||'')}"><label>تمدید کارنامه</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mYear" value="${esc(d?.year||'')}"></div>
       </div>
+      
+      <div class="sect">📊 امتیازات دستی (وبینار و غیرحضوری)</div>
+      <div class="row">
+          <div><label>امتیاز وبینار 💻</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mManualWebinar" value="${esc(d?.manualWebinar||'')}"></div>
+          <div><label>امتیاز غیرحضوری 📁</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mManualOffline" value="${esc(d?.manualOffline||'')}"></div>
+      </div>
+
       <div class="row"><div><label>مالک</label><select id="mOwner"><option value="morteza" ${(d?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='morteza'?'selected':''}>مرتضی</option><option value="parvin" ${(d?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='parvin'?'selected':''}>پروین</option></select></div><div></div></div>
       
       <div class="sect">📝 پیگیری و توضیحات</div>
@@ -1066,21 +1073,28 @@ window.openDoctorModal = function(editId, defaultPhone){
   document.getElementById('mDoctorForm').onsubmit = e => {
     e.preventDefault();
     const gv = id => toEnDigits(document.getElementById(id)?.value || '').trim();
-    const data = { firstName:document.getElementById('mFirstName').value.trim(), lastName:document.getElementById('mLastName').value.trim(), spec:document.getElementById('mSpec').value.trim(), nat:gv('mNat'), phone:gv('mPhone'), creditReq:Number(gv('mCreditReq')||0), pass:document.getElementById('mPass').value, year:gv('mYear'), reminderDate: gv('mReminderDate'), followUp: document.getElementById('mFollowUp').value.trim(), card:{ num:gv('mCardNum'), m:gv('mCardM').padStart(2,'0'), y:gv('mCardY').padStart(2,'0'), cvv2:gv('mCvv2'), pass2:gv('mPass2') }, finance:{ total:parseNum(document.getElementById('mTotal')), paid:parseNum(document.getElementById('mPaid')) }, owner: document.getElementById('mOwner').value };
+    const data = { 
+        firstName: document.getElementById('mFirstName').value.trim(), 
+        lastName: document.getElementById('mLastName').value.trim(), 
+        spec: document.getElementById('mSpec').value.trim(), 
+        nat: gv('mNat'), 
+        phone: gv('mPhone'), 
+        creditReq: Number(gv('mCreditReq')||0), 
+        manualWebinar: Number(gv('mManualWebinar')||0),
+        manualOffline: Number(gv('mManualOffline')||0),
+        pass: document.getElementById('mPass').value, 
+        year: gv('mYear'), 
+        reminderDate: gv('mReminderDate'), 
+        followUp: document.getElementById('mFollowUp').value.trim(), 
+        card: { num: gv('mCardNum'), m: gv('mCardM').padStart(2,'0'), y: gv('mCardY').padStart(2,'0'), cvv2: gv('mCvv2'), pass2: gv('mPass2') }, 
+        finance: { total: parseNum(document.getElementById('mTotal')), paid: parseNum(document.getElementById('mPaid')) }, 
+        owner: document.getElementById('mOwner').value 
+    };
     const id = document.getElementById('mEditId').value;
     if(id){ const doctor = doctors.find(x=>x.id===id); if(doctor){ Object.assign(doctor, data); doctor.updatedAt = Date.now(); toast('✅ ویرایش شد'); } }
     else { const n = { id:uid(), ...data, events:[], createdAt:Date.now(), updatedAt: Date.now() }; doctors.unshift(n); selectedDoctorId = n.id; toast('✅ ثبت شد'); }
     save(); closeModal(); renderAll();
   };
-};
-
-window.saveManualCredits = function(doctorId, field, value) {
-    const d = doctors.find(x => x.id === doctorId);
-    if(!d) return;
-    d[field] = Number(toEnDigits(value)) || 0;
-    d.updatedAt = Date.now();
-    save(); // ذخیره در حافظه و همگام‌سازی ابری
-    toast('✅ امتیاز دستی ذخیره شد');
 };
 
 window.openEventModal = function(editId, presetType){
