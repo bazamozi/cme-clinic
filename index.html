@@ -164,7 +164,6 @@ textarea{resize:vertical;min-height:55px}
 .stat-pill.neu{background:rgba(148,163,184,0.1);color:var(--muted)}
 .event-actions{display:flex;gap:8px;margin-top:10px;justify-content:flex-end}
 
-/* 🔥 اصلاح z-index مودال برای قرارگیری روی بنر تماس */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
 .modal{background:linear-gradient(160deg,#0f172a,#1e293b);border:1px solid var(--border);border-radius:16px;padding:20px;max-width:580px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.6);animation:zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)}
 @keyframes zoomIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
@@ -175,7 +174,6 @@ textarea{resize:vertical;min-height:55px}
 .type-pick.active{background:linear-gradient(135deg,rgba(56,189,248,0.2),rgba(34,211,238,0.1));color:var(--accent);border-color:rgba(56,189,248,0.5);box-shadow:0 4px 15px rgba(56,189,248,0.15)}
 .type-pick .icon{font-size:20px;display:block;margin-bottom:4px}
 
-/* ====== چیدمان تب تماس‌ها ====== */
 .calls-container { max-width: 1000px; margin: 0 auto; }
 .call-filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .call-filter-btn { flex: 1; padding: 8px 12px; border-radius: 10px; font-size: 13px; font-weight: 700; background: rgba(15,23,42,0.6); border: 1px solid var(--border); color: var(--muted); cursor: pointer; transition: 0.2s; font-family: inherit; }
@@ -222,6 +220,7 @@ textarea{resize:vertical;min-height:55px}
   
   <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; border-top:1px solid rgba(255,255,255,0.1); padding-top:16px;">
      <button id="btnViewProfile" class="mini" style="display:none; background:rgba(56,189,248,0.15); color:var(--accent); border-color:var(--accent);" onclick="viewIncomingProfile()">👁 مشاهده پروفایل</button>
+     <button id="btnRegisterProfile" class="mini" style="display:none; background:rgba(52,211,153,0.15); color:var(--success); border-color:var(--success);" onclick="registerFromCallBanner()">👤 ثبت پروفایل</button>
      <button class="mini" style="background:rgba(251,191,36,0.15); color:var(--warn); border-color:rgba(251,191,36,0.4);" onclick="openCallNoteModal()">📝 ثبت یادداشت</button>
      <a id="btnTelegram" class="mini" href="#" target="_blank" style="color:var(--accent); border-color:rgba(56,189,248,0.4);">✈️ تلگرام</a>
      <a id="btnBale" class="mini" href="#" target="_blank" style="color:var(--success); border-color:rgba(52,211,153,0.4);">💬 بله</a>
@@ -1297,6 +1296,11 @@ window.viewIncomingProfile = function() {
   hideCallBanner();
 };
 
+window.registerFromCallBanner = function() {
+  if(!currentIncomingCallRecord) return;
+  openDoctorModal(null, currentIncomingCallRecord.phone);
+};
+
 window.openCallNoteModal = function() {
   if(!currentIncomingCallRecord) return;
   const c = currentIncomingCallRecord;
@@ -1387,8 +1391,16 @@ function checkIncomingCalls() {
           alertBox.textContent = alertMessage;
           alertBox.style.color = alertType === 'danger' ? 'var(--danger)' : (alertType === 'warn' ? 'var(--warn)' : 'var(--muted)');
           
-          const btnProfile = document.getElementById('btnViewProfile');
-          if (doctor || contact) btnProfile.style.display = 'inline-flex'; else btnProfile.style.display = 'none';
+          const btnViewProfile = document.getElementById('btnViewProfile');
+          const btnRegisterProfile = document.getElementById('btnRegisterProfile');
+          
+          if (doctor || contact) {
+              btnViewProfile.style.display = 'inline-flex';
+              btnRegisterProfile.style.display = 'none';
+          } else {
+              btnViewProfile.style.display = 'none';
+              btnRegisterProfile.style.display = 'inline-flex';
+          }
           
           document.getElementById('btnTelegram').href = `https://t.me/+98${cleanPhoneForLink(callerNumber)}`;
           document.getElementById('btnBale').href = `https://ble.ir/+98${cleanPhoneForLink(callerNumber)}`;
@@ -1410,7 +1422,7 @@ function checkIncomingCalls() {
             name: callerName,
             subject: doctor ? 'تماس پزشک' : (contact ? 'تماس مخاطب' : 'تماس ناشناس'),
             follow: 'پیگیری‌نشده',
-            note: 'ثبت خودکار توسط سیستم تلفن',
+            note: '', // خالی کردن متن خودکار
             createdAt: Date.now(),
             updatedAt: Date.now(),
             type: 'incoming'
