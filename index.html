@@ -538,6 +538,59 @@ const cleanPhoneForLink = p => {
     return s;
 };
 
+/* =========================================================
+   ★★★ نرمال‌سازی شماره برای بله (فقط نمایش) ★★★
+   شماره را به فرمت 09xxxxxxxxx تبدیل می‌کند تا کاربر
+   بتواند در بله جستجو کند.
+   ========================================================= */
+const normalizePhoneForSearch = p => {
+    let s = toEnDigits(String(p || '')).replace(/\D/g, '');
+    if (s.startsWith('98') && s.length > 10) s = s.substring(2);
+    if (!s.startsWith('0')) s = '0' + s;
+    return s;
+};
+
+/* =========================================================
+   ★★★ باز کردن بله با کپی شماره ★★★
+   چون بله لینک عمیق پیوی بر اساس شماره تلفن ندارد،
+   شماره را کپی می‌کنیم و کاربر را به بله می‌فرستیم.
+   ========================================================= */
+window.openBaleWithCopy = function(phone) {
+    const displayNumber = normalizePhoneForSearch(phone);
+    if (!displayNumber || displayNumber === '0') {
+        toast('⚠️ شماره نامعتبر است');
+        return;
+    }
+    const showToast = () => toast(`📋 شماره ${displayNumber} کپی شد. در بله جستجو کنید.`);
+    try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(displayNumber).then(showToast).catch(() => {
+                try {
+                    const ta = document.createElement('textarea');
+                    ta.value = displayNumber;
+                    ta.style.position = 'fixed';
+                    ta.style.top = '-9999px';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    showToast();
+                } catch(e) {}
+            });
+        } else {
+            const ta = document.createElement('textarea');
+            ta.value = displayNumber;
+            ta.style.position = 'fixed';
+            ta.style.top = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            showToast();
+        }
+    } catch(e) {}
+};
+
 function isSamePhone(p1, p2) {
     const n1 = cleanPhoneForLink(p1);
     const n2 = cleanPhoneForLink(p2);
@@ -683,11 +736,6 @@ function myDoctors(){ const arr = doctors.filter(d => !d.deleted); return curren
 function myCalls(){ const arr = calls.filter(c => !c.deleted); return currentUser === 'all' ? arr : arr.filter(c => c.owner === currentUser); }
 function myContacts(){ const arr = contacts.filter(c => !c.deleted); return currentUser === 'all' ? arr : arr.filter(c => c.owner === currentUser); }
 
-/* =========================================================
-   ★★★ اصلاح شد: getAutoStatus ★★★
-   برای اینکه پزشک در دسته «تکمیل شده» قرار بگیرد، تمام رویدادهایش
-   باید حتماً در وضعیت «earned» (کامل) باشند.
-   ========================================================= */
 function getAutoStatus(d) {
     const req = Number(d.creditReq || 0);
     const total = totalEarned(d);
@@ -700,7 +748,6 @@ function getAutoStatus(d) {
 
     if (!hasEvents && !hasFinance && total === 0) return 'new';
 
-    // همه رویدادهای ثبت‌شده باید کاملاً کامل باشند (هیچ گزینه‌ای غیرفعال نباشد)
     const allEventsComplete = hasEvents && events.every(e => eventState(e) === 'earned');
 
     const isCreditsDone = req > 0 ? total >= req : true;
@@ -711,10 +758,6 @@ function getAutoStatus(d) {
     return 'in_progress';
 }
 
-/* =========================================================
-   ★★★ اصلاح شد: eventCredit ★★★
-   فقط در صورتی امتیاز داده می‌شود که آزمون «قبول» شده باشد
-   ========================================================= */
 function eventCredit(e){
   if(e.purchase!=='انجام شد') return 0;
   if(e.type==='وبینار'){ 
@@ -730,10 +773,6 @@ function eventCredit(e){
   return Number(e.credit||0);
 }
 
-/* =========================================================
-   ★★★ اصلاح شد: eventState ★★★
-   اگر هر کدام از گزینه‌ها غیرفعال باشد، حالت partial برمی‌گردد
-   ========================================================= */
 function eventState(e){
   if(e.purchase!=='انجام شد') return 'partial';
   if(e.type==='وبینار'){ 
@@ -961,7 +1000,6 @@ function renderDocList(){
   
   let allMyDocs = myDoctors().filter(d => !q || fullName(d).toLowerCase().includes(q) || (d.spec||'').toLowerCase().includes(q) || (d.phone||'').includes(q) || (d.nat||'').includes(q));
   
-  // محاسبه دقیق وضعیت برای هر پزشک
   allMyDocs = allMyDocs.map(d => ({ ...d, _autoStatus: getAutoStatus(d) }));
 
   allMyDocs.sort((a, b) => {
@@ -1343,7 +1381,7 @@ function renderContacts() {
         <button class="mini" onclick="copyText('${esc(c.phone)}', this)">📋 کپی</button>
         <a class="mini" href="sms:${esc(c.phone)}" style="padding:6px 10px;">💬 پیامک</a>
         <a class="mini" href="https://t.me/+98${cleanPhoneForLink(c.phone)}" target="_blank" style="padding:6px 10px; color:var(--accent); border-color:rgba(56,189,248,0.4);">✈️ تلگرام</a>
-        <a class="mini" href="https://ble.ir/+98${cleanPhoneForLink(c.phone)}" target="_blank" style="padding:6px 10px; color:var(--success); border-color:rgba(52,211,153,0.4);">💬 بله</a>
+        <a class="mini" href="https://ble.ir" target="_blank" onclick="openBaleWithCopy('${esc(c.phone)}')" style="padding:6px 10px; color:var(--success); border-color:rgba(52,211,153,0.4);">💬 بله</a>
         <button class="mini" onclick="openContactModal('${c.id}')">✏️</button>
         <button class="mini danger" onclick="delContact('${c.id}')">🗑</button>
       </div>
@@ -1511,7 +1549,7 @@ function renderCalls(){
         <button class="mini" onclick="copyText('${esc(c.phone)}', this)">📋 کپی</button>
         <a class="mini" href="sms:${esc(c.phone)}">💬 پیامک</a>
         <a class="mini" href="https://t.me/+98${cleanNum}" target="_blank" style="color: var(--accent); border-color: rgba(56,189,248,0.4);">✈️ تلگرام</a>
-        <a class="mini" href="https://ble.ir/+98${cleanNum}" target="_blank" style="color: var(--success); border-color: rgba(52,211,153,0.4);">💬 بله</a>
+        <a class="mini" href="https://ble.ir" target="_blank" onclick="openBaleWithCopy('${esc(c.phone)}')" style="color: var(--success); border-color: rgba(52,211,153,0.4);">💬 بله</a>
         <button class="mini" onclick="cycleFollow('${c.id}')">🔄 پیگیری</button>
         <button class="mini" onclick="toggleMissed('${c.id}')" style="${c.type==='missed'?'background:rgba(248,113,113,0.2); color:var(--danger); border-color:var(--danger);':''}">${c.type==='missed' ? '✅ پاسخ داده' : '❌ بی‌پاسخ'}</button>
         <button class="mini danger" onclick="delCall('${c.id}')">🗑 حذف</button>
@@ -1704,8 +1742,13 @@ function checkIncomingCalls() {
               btnRegisterProfile.style.display = 'inline-flex';
           }
           
+          // تلگرام: لینک مستقیم
           document.getElementById('btnTelegram').href = `https://t.me/+98${cleanPhoneForLink(callerNumber)}`;
-          document.getElementById('btnBale').href = `https://ble.ir/+98${cleanPhoneForLink(callerNumber)}`;
+          
+          // بله: کپی شماره + باز کردن ble.ir
+          const btnBale = document.getElementById('btnBale');
+          btnBale.href = 'https://ble.ir';
+          btnBale.onclick = function() { openBaleWithCopy(callerNumber); };
           
           document.getElementById('incomingCallBanner').classList.remove('hidden');
 
