@@ -163,7 +163,9 @@ textarea{resize:vertical;min-height:55px}
 .stat-pill.no{background:rgba(248,113,113,0.15);color:var(--danger);border-color:rgba(248,113,113,0.4);box-shadow:0 0 10px rgba(248,113,113,0.1)}
 .stat-pill.neu{background:rgba(148,163,184,0.1);color:var(--muted)}
 .event-actions{display:flex;gap:8px;margin-top:10px;justify-content:flex-end}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+
+/* 🔥 اصلاح z-index مودال برای قرارگیری روی بنر تماس */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
 .modal{background:linear-gradient(160deg,#0f172a,#1e293b);border:1px solid var(--border);border-radius:16px;padding:20px;max-width:580px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.6);animation:zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)}
 @keyframes zoomIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
 .modal h2{color:var(--accent);font-size:15px;margin-bottom:12px;font-weight:800}
@@ -514,7 +516,6 @@ function myDoctors(){ const arr = doctors.filter(d => !d.deleted); return curren
 function myCalls(){ const arr = calls.filter(c => !c.deleted); return currentUser === 'all' ? arr : arr.filter(c => c.owner === currentUser); }
 function myContacts(){ const arr = contacts.filter(c => !c.deleted); return currentUser === 'all' ? arr : arr.filter(c => c.owner === currentUser); }
 
-// 🔥 تابع جدید: تشخیص خودکار وضعیت پزشک
 function getAutoStatus(d) {
     const req = Number(d.creditReq || 0);
     const total = totalEarned(d);
@@ -524,15 +525,12 @@ function getAutoStatus(d) {
     const hasEvents = (d.events || []).length > 0;
     const hasFinance = fTotal > 0 || fPaid > 0;
 
-    // ۱. تازه‌وارد (هیچ رویدادی و هیچ پرداختی ندارد)
     if (!hasEvents && !hasFinance) return 'new';
 
-    // ۲. تکمیل شده (امتیازها به حد نصاب رسیده و بدهی مالی صفر است)
     const isCreditsDone = req > 0 && total >= req;
     const isFinanceDone = fTotal === 0 || fPaid >= fTotal;
     if (isCreditsDone && isFinanceDone) return 'completed';
 
-    // ۳. در جریان (بقیه موارد)
     return 'in_progress';
 }
 
@@ -761,13 +759,9 @@ window.setDocCategory = function(cat) { currentDocCategory = cat; renderDocList(
 function renderDocList(){
   const searchEl = document.getElementById('searchDoctor'); if(!searchEl) return;
   const q = searchEl.value.trim().toLowerCase();
-  
-  // اولویت‌بندی برای مرتب‌سازی: تازه‌واردها بالا، تکمیل شده‌ها پایین
   const statusPriority = { 'new': 1, 'in_progress': 2, 'completed': 3 };
   
   let allMyDocs = myDoctors().filter(d => !q || fullName(d).toLowerCase().includes(q) || (d.spec||'').toLowerCase().includes(q) || (d.phone||'').includes(q) || (d.nat||'').includes(q));
-  
-  // اضافه کردن وضعیت خودکار به هر پزشک برای مرتب‌سازی
   allMyDocs = allMyDocs.map(d => ({ ...d, _autoStatus: getAutoStatus(d) }));
 
   allMyDocs.sort((a, b) => {
@@ -842,7 +836,6 @@ function renderMain(){
   const totalListed = totalListedCredits(d);
   const c = d.card||{}, f = d.finance||{}, rem$ = Math.max(0, Number(f.total||0)-Number(f.paid||0)), complete = rem===0 && req>0;
   
-  // 🔥 استفاده از وضعیت خودکار در صفحه پروفایل
   const autoStatus = getAutoStatus(d);
   const statusMap = { 
     'new': {txt: '🆕 تازه‌وارد', cls: 'purple'}, 
@@ -1017,7 +1010,6 @@ window.openDoctorModal = function(editId, defaultPhone){
       <input type="hidden" id="mEditId" value="${d?.id||''}">
       <div class="sect">📌 وضعیت و یادآوری</div>
       <div class="row">
-        <!-- فیلد وضعیت حذف شد و جایش تاریخ یادآوری تمام‌عرض شد -->
         <div style="grid-column: span 2;"><label>تاریخ یادآوری (سررسید)</label><input autocomplete="off" dir="ltr" placeholder="1405/02/15" style="text-align:center" id="mReminderDate" value="${esc(d?.reminderDate||'')}"></div>
       </div>
       <div class="sect">👤 اطلاعات فردی</div>
@@ -1325,6 +1317,9 @@ window.openCallNoteModal = function() {
     </form>
   `);
   
+  // فوکوس خودکار روی باکس یادداشت
+  setTimeout(() => { const el = document.getElementById('nNote'); if(el) el.focus(); }, 150);
+
   document.getElementById('mNoteForm').onsubmit = ev => {
     ev.preventDefault();
     c.follow = document.getElementById('nFollow').value;
