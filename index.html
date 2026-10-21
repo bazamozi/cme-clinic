@@ -91,6 +91,16 @@ textarea{resize:vertical;min-height:55px}
 .pulse-danger { animation: pulse 1.2s infinite; }
 .pulse-warn { animation: pulse 2s infinite; }
 
+@keyframes highlightPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(56,189,248,0); }
+  50% { box-shadow: 0 0 0 8px rgba(56,189,248,0.4); }
+}
+.call-card.highlight-call {
+  animation: highlightPulse 1.2s ease-in-out 3;
+  border-color: var(--accent) !important;
+  background: rgba(56,189,248,0.08) !important;
+}
+
 .doc-name{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:15px;font-weight:700}
 .doc-spec{color:var(--muted);font-size:11px;margin-top:3px}
 .doc-bar{height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;margin-top:8px}
@@ -185,7 +195,7 @@ textarea{resize:vertical;min-height:55px}
 .call-card.incoming { border-right: 4px solid var(--success); background: rgba(52,211,153,0.03); }
 .call-card.outgoing { border-right: 4px solid var(--accent); background: rgba(56,189,248,0.03); }
 .call-header { display: flex; justify-content: space-between; align-items: flex-start; }
-.call-name { font-size: 16px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; }
+.call-name { font-size: 16px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .call-phone { font-size: 24px; font-weight: 900; color: var(--accent); direction: ltr; margin-top: 8px; letter-spacing: 1.5px; display: block; text-decoration: none; }
 .call-phone:hover { text-decoration: underline; }
 .call-meta { font-size: 12.5px; color: var(--muted); margin-top: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -249,14 +259,13 @@ textarea{resize:vertical;min-height:55px}
   </div>
   
   <div style="display:flex; gap:6px; align-items:center; margin-left:10px;">
-    <div id="syncStatus" class="sub" style="font-size: 12px; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,0.05); border:1px solid var(--border); min-width: 85px; text-align:center; transition: 0.3s; font-weight:700;">☁️ آماده</div>
+    <span id="syncStatus" class="mini" style="min-width:90px; text-align:center; cursor:default;">☁️ آماده</span>
     <button class="mini" onclick="syncNow(true)" title="همگام‌سازی دستی">🔄</button>
     <button class="mini" onclick="exportData()" title="پشتیبان‌گیری">💾</button>
     <button class="mini" onclick="document.getElementById('importFile').click()" title="بازیابی">📂</button>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    <button class="mini" onclick="doLogout()" title="خروج">🚪 خروج</button>
   </div>
-  
-  <button class="logout-btn" onclick="doLogout()">🚪 خروج</button>
   <div class="sub" id="clock" style="font-weight:600"></div>
 </header>
 
@@ -305,10 +314,11 @@ textarea{resize:vertical;min-height:55px}
       </div>
       
       <div class="call-filters">
-        <button class="call-filter-btn active" onclick="setCallFilter('all')">همه موارد</button>
-        <button class="call-filter-btn" onclick="setCallFilter('incoming')">دریافتی 📥</button>
-        <button class="call-filter-btn" onclick="setCallFilter('outgoing')">ارسالی 📤</button>
-        <button class="call-filter-btn" onclick="setCallFilter('missed')">بی‌پاسخ ❌</button>
+        <button class="call-filter-btn active" data-filter="all" onclick="setCallFilter('all')">همه موارد</button>
+        <button class="call-filter-btn" data-filter="incoming" onclick="setCallFilter('incoming')">دریافتی 📥</button>
+        <button class="call-filter-btn" data-filter="outgoing" onclick="setCallFilter('outgoing')">ارسالی 📤</button>
+        <button class="call-filter-btn" data-filter="missed" onclick="setCallFilter('missed')">بی‌پاسخ ❌</button>
+        <button class="call-filter-btn" data-filter="noted" onclick="setCallFilter('noted')">📝 دارای یادداشت</button>
       </div>
 
       <div class="row" style="margin-bottom:16px">
@@ -327,12 +337,7 @@ textarea{resize:vertical;min-height:55px}
 </div>
 
 </div>
-<nav class="mobile-nav">
-  <button data-tab="dash"><span class="icon">📊</span>داشبورد</button>
-  <button data-tab="doctors" class="active"><span class="icon">👨‍⚕️</span>پزشکان</button>
-  <button data-tab="contacts"><span class="icon">📇</span>مخاطبین</button>
-  <button data-tab="calls"><span class="icon">📞</span>تماس‌ها</button>
-</nav>
+
 <div class="toast" id="toast"></div>
 <div id="modalHost"></div>
 <audio id="ringtone" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
@@ -508,7 +513,7 @@ window.switchUser = function(user){
   selectedDoctorId = null;
   const ma = document.getElementById('mainArea'); if(ma) ma.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>';
   document.querySelectorAll('.user-picker button').forEach(b=>{ if(b.dataset.user === user) b.classList.add('active'); else b.classList.remove('active'); });
-  renderDash(); renderDocList(); renderCalls(); renderContacts(); updateMobileSelection(); updateMobileNav();
+  renderDash(); renderDocList(); renderCalls(); renderContacts(); updateMobileSelection();
 };
 
 function myDoctors(){ const arr = doctors.filter(d => !d.deleted); return currentUser === 'all' ? arr : arr.filter(d => d.owner === currentUser); }
@@ -590,9 +595,9 @@ let _dirty = false, _syncing = false, _syncQueued = false, _syncTimer = null;
 function updateSyncUI(status) {
   const el = document.getElementById('syncStatus'); if (!el) return;
   if (status === 'syncing') { el.innerHTML = '⏳ در حال سینک...'; el.style.color = 'var(--warn)'; el.style.borderColor = 'var(--warn)'; }
-  else if (status === 'synced') { el.innerHTML = '✅ سینک شد'; el.style.color = 'var(--success)'; el.style.borderColor = 'var(--success)'; setTimeout(() => { if(el.innerHTML === '✅ سینک شد') { el.innerHTML = '☁️ آماده'; el.style.color = 'var(--muted)'; el.style.borderColor = 'var(--border)'; } }, 3000); }
+  else if (status === 'synced') { el.innerHTML = '✅ سینک شد'; el.style.color = 'var(--success)'; el.style.borderColor = 'var(--success)'; setTimeout(() => { if(el.innerHTML === '✅ سینک شد') { el.innerHTML = '☁️ آماده'; el.style.color = ''; el.style.borderColor = ''; } }, 3000); }
   else if (status === 'error') { el.innerHTML = '❌ خطای سینک'; el.style.color = 'var(--danger)'; el.style.borderColor = 'var(--danger)'; }
-  else { el.innerHTML = '☁️ آماده'; el.style.color = 'var(--muted)'; el.style.borderColor = 'var(--border)'; }
+  else { el.innerHTML = '☁️ آماده'; el.style.color = ''; el.style.borderColor = ''; }
 }
 
 function save(){
@@ -708,18 +713,11 @@ window.switchTab = function(tabName){
   document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden'));
   const tb = document.querySelector('.tab[data-tab="'+tabName+'"]'); if(tb) tb.classList.add('active');
   const content = document.getElementById('tab-'+tabName); if(content) content.classList.remove('hidden');
-  document.querySelectorAll('.mobile-nav button').forEach(x=>{ if(x.dataset.tab === tabName) x.classList.add('active'); else x.classList.remove('active'); });
   if(tabName === 'dash') renderDash();
   if(tabName === 'doctors'){ renderDocList(); renderMain(); }
   if(tabName === 'calls') renderCalls();
   if(tabName === 'contacts') renderContacts();
 };
-
-function updateMobileNav(){
-  const activeTab = document.querySelector('.tab.active'); if(!activeTab) return;
-  const tabName = activeTab.dataset.tab;
-  document.querySelectorAll('.mobile-nav button').forEach(x=>{ if(x.dataset.tab === tabName) x.classList.add('active'); else x.classList.remove('active'); });
-}
 
 function renderDash(){
   const myD = myDoctors(), myC = myCalls(), today = getShamsiToday();
@@ -1154,8 +1152,7 @@ window.delContact = function(id) {
 window.setCallFilter = function(filter) {
   currentCallFilter = filter;
   document.querySelectorAll('.call-filter-btn').forEach(btn => {
-    if(btn.textContent.includes(filter === 'all' ? 'همه' : filter === 'incoming' ? 'دریافتی' : filter === 'outgoing' ? 'ارسالی' : 'بی‌پاسخ')) btn.classList.add('active');
-    else btn.classList.remove('active');
+    btn.classList.toggle('active', btn.dataset.filter === filter);
   });
   renderCalls();
 };
@@ -1177,12 +1174,36 @@ window.openCallProfile = function(phone) {
   }
 };
 
+window.highlightCall = function(id) {
+  // ریست فیلترها تا رکورد همیشه دیده بشه
+  const searchEl = document.getElementById('searchCall');
+  const filterEl = document.getElementById('filterCall');
+  if (searchEl) searchEl.value = '';
+  if (filterEl) filterEl.value = 'all';
+  currentCallFilter = 'all';
+  document.querySelectorAll('.call-filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === 'all');
+  });
+
+  switchTab('calls');
+
+  setTimeout(() => {
+    const card = document.querySelector(`[data-call-id="${id}"]`);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.add('highlight-call');
+      setTimeout(() => card.classList.remove('highlight-call'), 3000);
+    }
+  }, 200);
+};
+
 function renderCalls(){
   const searchEl = document.getElementById('searchCall'); if(!searchEl) return;
   const q = searchEl.value.trim().toLowerCase(), f = document.getElementById('filterCall').value;
   
   const arr = myCalls().filter(c => {
-    if (currentCallFilter !== 'all' && c.type !== currentCallFilter) return false;
+    if (currentCallFilter === 'noted') { if (!c.note || !c.note.trim()) return false; }
+    else if (currentCallFilter !== 'all' && c.type !== currentCallFilter) return false;
     if(f==='pending' && c.follow!=='پیگیری‌نشده') return false; 
     if(f==='doing' && c.follow!=='در حال پیگیری') return false; 
     if(f==='done' && c.follow!=='پیگیری‌شده') return false; 
@@ -1206,13 +1227,14 @@ function renderCalls(){
     const cleanNum = cleanPhoneForLink(c.phone);
     
     return `
-    <div class="call-card ${typeClass}">
+    <div class="call-card ${typeClass}" data-call-id="${c.id}">
       <div class="call-header">
         <div>
           <div class="call-name">
             <span title="${typeLabel}" style="font-size: 18px;">${typeIcon}</span>
             ${c.name ? esc(c.name) : 'ناشناس'} 
             <span class="badge ${fCls[c.follow]||'gray'}" style="margin-right:8px; font-size:11px;">${esc(c.follow)}</span>
+            ${c.note && c.note.trim() ? '<span class="badge blue" style="font-size:11px;">📝 یادداشت</span>' : ''}
           </div>
           <a href="tel:${esc(c.phone)}" class="call-phone" title="تماس مستقیم">${esc(c.phone)}</a>
           <div class="call-meta">
@@ -1245,7 +1267,6 @@ window.delCall = function(id){ if(!confirm('حذف شود؟')) return; const c =
 function renderAll(){ renderDash(); renderDocList(); renderMain(); renderCalls(); renderContacts(); }
 
 document.querySelectorAll('.tab').forEach(t=>{ t.onclick = () => switchTab(t.dataset.tab); });
-document.querySelectorAll('.mobile-nav button').forEach(b=>{ b.onclick = () => switchTab(b.dataset.tab); });
 document.getElementById('searchDoctor').addEventListener('input', renderDocList);
 document.getElementById('searchCall').addEventListener('input', renderCalls);
 document.getElementById('searchContact').addEventListener('input', renderContacts);
@@ -1328,7 +1349,18 @@ window.openCallNoteModal = function() {
     c.follow = document.getElementById('nFollow').value;
     c.note = document.getElementById('nNote').value.trim();
     c.updatedAt = Date.now();
-    save(); renderCalls(); closeModal(); toast('✅ یادداشت ثبت شد');
+    save();
+    closeModal();
+
+    // بنر تماس رو ببند (چون کاربر کارش تموم شده)
+    if (!document.getElementById('incomingCallBanner').classList.contains('hidden')) {
+      hideCallBanner();
+    }
+
+    toast('✅ یادداشت ثبت شد — انتقال به تب تماس‌ها', 'info');
+
+    // برو به تماس‌ها و همون رکورد رو هایلایت کن
+    highlightCall(c.id);
   };
 };
 
