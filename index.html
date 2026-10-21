@@ -72,8 +72,8 @@ textarea{resize:vertical;min-height:55px}
 .cat-tab.active{background:linear-gradient(135deg,rgba(56,189,248,0.25),rgba(34,211,238,0.15));color:var(--accent);border-color:rgba(56,189,248,0.5);box-shadow:0 2px 10px rgba(56,189,248,0.15)}
 .cat-tab.all.active{color:#fff;background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3)}
 .cat-tab.completed.active{color:var(--success);border-color:var(--success);background:rgba(52,211,153,0.15);box-shadow:0 2px 10px rgba(52,211,153,0.15)}
-.cat-tab.undecided.active{color:var(--warn);border-color:var(--warn);background:rgba(251,191,36,0.15);box-shadow:0 2px 10px rgba(251,191,36,0.15)}
-.cat-tab.regular.active{color:var(--purple);border-color:var(--purple);background:rgba(167,139,250,0.15);box-shadow:0 2px 10px rgba(167,139,250,0.15)}
+.cat-tab.in_progress.active{color:var(--warn);border-color:var(--warn);background:rgba(251,191,36,0.15);box-shadow:0 2px 10px rgba(251,191,36,0.15)}
+.cat-tab.new.active{color:var(--purple);border-color:var(--purple);background:rgba(167,139,250,0.15);box-shadow:0 2px 10px rgba(167,139,250,0.15)}
 .doc-list{flex:1;overflow-y:auto;padding-left:4px;scroll-behavior:smooth}
 .doc-row{background:rgba(15,23,42,0.4);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer;transition:.25s;position:relative;overflow:hidden;}
 .doc-row:hover{border-color:rgba(56,189,248,0.3);background:rgba(15,23,42,0.7);transform:translateY(-2px)}
@@ -173,7 +173,7 @@ textarea{resize:vertical;min-height:55px}
 .type-pick.active{background:linear-gradient(135deg,rgba(56,189,248,0.2),rgba(34,211,238,0.1));color:var(--accent);border-color:rgba(56,189,248,0.5);box-shadow:0 4px 15px rgba(56,189,248,0.15)}
 .type-pick .icon{font-size:20px;display:block;margin-bottom:4px}
 
-/* ====== چیدمان جدید تب تماس‌ها ====== */
+/* ====== چیدمان تب تماس‌ها ====== */
 .calls-container { max-width: 1000px; margin: 0 auto; }
 .call-filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .call-filter-btn { flex: 1; padding: 8px 12px; border-radius: 10px; font-size: 13px; font-weight: 700; background: rgba(15,23,42,0.6); border: 1px solid var(--border); color: var(--muted); cursor: pointer; transition: 0.2s; font-family: inherit; }
@@ -295,7 +295,7 @@ textarea{resize:vertical;min-height:55px}
   </div>
 </div>
 
-<!-- ====== تب تماس‌ها (فقط لیست) ====== -->
+<!-- ====== تب تماس‌ها ====== -->
 <div class="tab-content hidden" id="tab-calls">
   <div class="calls-container">
     <div class="panel" style="margin-bottom: 0;">
@@ -513,6 +513,28 @@ window.switchUser = function(user){
 function myDoctors(){ const arr = doctors.filter(d => !d.deleted); return currentUser === 'all' ? arr : arr.filter(d => d.owner === currentUser); }
 function myCalls(){ const arr = calls.filter(c => !c.deleted); return currentUser === 'all' ? arr : arr.filter(c => c.owner === currentUser); }
 function myContacts(){ const arr = contacts.filter(c => !c.deleted); return currentUser === 'all' ? arr : arr.filter(c => c.owner === currentUser); }
+
+// 🔥 تابع جدید: تشخیص خودکار وضعیت پزشک
+function getAutoStatus(d) {
+    const req = Number(d.creditReq || 0);
+    const total = totalEarned(d);
+    const f = d.finance || {};
+    const fTotal = Number(f.total || 0);
+    const fPaid = Number(f.paid || 0);
+    const hasEvents = (d.events || []).length > 0;
+    const hasFinance = fTotal > 0 || fPaid > 0;
+
+    // ۱. تازه‌وارد (هیچ رویدادی و هیچ پرداختی ندارد)
+    if (!hasEvents && !hasFinance) return 'new';
+
+    // ۲. تکمیل شده (امتیازها به حد نصاب رسیده و بدهی مالی صفر است)
+    const isCreditsDone = req > 0 && total >= req;
+    const isFinanceDone = fTotal === 0 || fPaid >= fTotal;
+    if (isCreditsDone && isFinanceDone) return 'completed';
+
+    // ۳. در جریان (بقیه موارد)
+    return 'in_progress';
+}
 
 function eventCredit(e){
   if(e.purchase!=='انجام شد') return 0;
@@ -739,25 +761,37 @@ window.setDocCategory = function(cat) { currentDocCategory = cat; renderDocList(
 function renderDocList(){
   const searchEl = document.getElementById('searchDoctor'); if(!searchEl) return;
   const q = searchEl.value.trim().toLowerCase();
-  const statusPriority = { 'in_progress': 1, 'undecided': 2, 'regular': 3, 'completed': 4 };
+  
+  // اولویت‌بندی برای مرتب‌سازی: تازه‌واردها بالا، تکمیل شده‌ها پایین
+  const statusPriority = { 'new': 1, 'in_progress': 2, 'completed': 3 };
+  
   let allMyDocs = myDoctors().filter(d => !q || fullName(d).toLowerCase().includes(q) || (d.spec||'').toLowerCase().includes(q) || (d.phone||'').includes(q) || (d.nat||'').includes(q));
+  
+  // اضافه کردن وضعیت خودکار به هر پزشک برای مرتب‌سازی
+  allMyDocs = allMyDocs.map(d => ({ ...d, _autoStatus: getAutoStatus(d) }));
+
   allMyDocs.sort((a, b) => {
-    const pA = statusPriority[a.status || 'in_progress'] || 5;
-    const pB = statusPriority[b.status || 'in_progress'] || 5;
+    const pA = statusPriority[a._autoStatus] || 5;
+    const pB = statusPriority[b._autoStatus] || 5;
     if (pA !== pB) return pA - pB;
     return (b.updatedAt || 0) - (a.updatedAt || 0);
   });
 
-  const categories = { 'all': { title: 'همه', color: 'var(--text)' }, 'in_progress': { title: '⚡ در حال اجرا', color: 'var(--accent)' }, 'completed': { title: '🏆 تمام شده', color: 'var(--success)' }, 'undecided': { title: '⏳ بلاتکلیف', color: 'var(--warn)' }, 'regular': { title: '⭐ مشتری ثابت', color: 'var(--purple)' } };
-  const getGroup = (d) => d.status || 'in_progress';
+  const categories = { 
+    'all': { title: 'همه' }, 
+    'new': { title: '🆕 تازه‌وارد' }, 
+    'in_progress': { title: '⚡ در جریان' }, 
+    'completed': { title: '🏆 تکمیل شده' } 
+  };
+  
   let tabsHtml = '';
   for (const [key, cat] of Object.entries(categories)) {
-    const count = key === 'all' ? allMyDocs.length : allMyDocs.filter(d => getGroup(d) === key).length;
+    const count = key === 'all' ? allMyDocs.length : allMyDocs.filter(d => d._autoStatus === key).length;
     const extraClass = key === 'all' ? 'all' : '';
     tabsHtml += `<button class="cat-tab ${extraClass} ${key} ${currentDocCategory === key ? 'active' : ''}" onclick="setDocCategory('${key}')">${cat.title} (${num(count)})</button>`;
   }
   const tabsContainer = document.getElementById('docCategoryTabs'); if(tabsContainer) tabsContainer.innerHTML = tabsHtml;
-  const displayDocs = currentDocCategory === 'all' ? allMyDocs : allMyDocs.filter(d => getGroup(d) === currentDocCategory);
+  const displayDocs = currentDocCategory === 'all' ? allMyDocs : allMyDocs.filter(d => d._autoStatus === currentDocCategory);
   const el = document.getElementById('docList');
   if(!displayDocs.length){ el.innerHTML='<div class="empty">پزشکی در این دسته‌بندی یافت نشد</div>'; return; }
   
@@ -807,8 +841,16 @@ function renderMain(){
   const cr = doctorCredits(d), total = totalEarned(d), req = Number(d.creditReq||0), rem = remainingCredits(d);
   const totalListed = totalListedCredits(d);
   const c = d.card||{}, f = d.finance||{}, rem$ = Math.max(0, Number(f.total||0)-Number(f.paid||0)), complete = rem===0 && req>0;
-  const statusMap = { 'in_progress': {txt: '⚡ در حال اجرا', cls: 'blue'}, 'completed': {txt: '🏆 تمام شده', cls: 'green'}, 'undecided': {txt: '⏳ بلاتکلیف', cls: 'yellow'}, 'regular': {txt: '⭐ مشتری ثابت', cls: 'purple'} };
-  const st = statusMap[d.status || 'in_progress'];
+  
+  // 🔥 استفاده از وضعیت خودکار در صفحه پروفایل
+  const autoStatus = getAutoStatus(d);
+  const statusMap = { 
+    'new': {txt: '🆕 تازه‌وارد', cls: 'purple'}, 
+    'in_progress': {txt: '⚡ در جریان', cls: 'yellow'}, 
+    'completed': {txt: '🏆 تکمیل شده', cls: 'green'} 
+  };
+  const st = statusMap[autoStatus];
+
   const daysLeft = getDaysDifference(d.reminderDate);
   let reminderBadge = '';
   if (daysLeft !== null) {
@@ -975,8 +1017,8 @@ window.openDoctorModal = function(editId, defaultPhone){
       <input type="hidden" id="mEditId" value="${d?.id||''}">
       <div class="sect">📌 وضعیت و یادآوری</div>
       <div class="row">
-        <div><label>وضعیت مشتری</label><select id="mStatus"><option value="in_progress" ${(d?.status||'in_progress')==='in_progress'?'selected':''}>⚡ در حال اجرا</option><option value="completed" ${d?.status==='completed'?'selected':''}>🏆 تمام شده</option><option value="undecided" ${d?.status==='undecided'?'selected':''}>⏳ بلاتکلیف</option><option value="regular" ${d?.status==='regular'?'selected':''}>⭐ مشتری ثابت</option></select></div>
-        <div><label>تاریخ یادآوری (سررسید)</label><input autocomplete="off" dir="ltr" placeholder="1405/02/15" style="text-align:center" id="mReminderDate" value="${esc(d?.reminderDate||'')}"></div>
+        <!-- فیلد وضعیت حذف شد و جایش تاریخ یادآوری تمام‌عرض شد -->
+        <div style="grid-column: span 2;"><label>تاریخ یادآوری (سررسید)</label><input autocomplete="off" dir="ltr" placeholder="1405/02/15" style="text-align:center" id="mReminderDate" value="${esc(d?.reminderDate||'')}"></div>
       </div>
       <div class="sect">👤 اطلاعات فردی</div>
       <div class="row">
@@ -1004,7 +1046,7 @@ window.openDoctorModal = function(editId, defaultPhone){
   document.getElementById('mDoctorForm').onsubmit = e => {
     e.preventDefault();
     const gv = id => toEnDigits(document.getElementById(id)?.value || '').trim();
-    const data = { firstName:document.getElementById('mFirstName').value.trim(), lastName:document.getElementById('mLastName').value.trim(), spec:document.getElementById('mSpec').value.trim(), nat:gv('mNat'), phone:gv('mPhone'), creditReq:Number(gv('mCreditReq')||0), pass:document.getElementById('mPass').value, year:gv('mYear'), status: document.getElementById('mStatus').value, reminderDate: gv('mReminderDate'), followUp: document.getElementById('mFollowUp').value.trim(), card:{ num:gv('mCardNum'), m:gv('mCardM').padStart(2,'0'), y:gv('mCardY').padStart(2,'0'), cvv2:gv('mCvv2'), pass2:gv('mPass2') }, finance:{ total:parseNum(document.getElementById('mTotal')), paid:parseNum(document.getElementById('mPaid')) }, owner: document.getElementById('mOwner').value };
+    const data = { firstName:document.getElementById('mFirstName').value.trim(), lastName:document.getElementById('mLastName').value.trim(), spec:document.getElementById('mSpec').value.trim(), nat:gv('mNat'), phone:gv('mPhone'), creditReq:Number(gv('mCreditReq')||0), pass:document.getElementById('mPass').value, year:gv('mYear'), reminderDate: gv('mReminderDate'), followUp: document.getElementById('mFollowUp').value.trim(), card:{ num:gv('mCardNum'), m:gv('mCardM').padStart(2,'0'), y:gv('mCardY').padStart(2,'0'), cvv2:gv('mCvv2'), pass2:gv('mPass2') }, finance:{ total:parseNum(document.getElementById('mTotal')), paid:parseNum(document.getElementById('mPaid')) }, owner: document.getElementById('mOwner').value };
     const id = document.getElementById('mEditId').value;
     if(id){ const doctor = doctors.find(x=>x.id===id); if(doctor){ Object.assign(doctor, data); doctor.updatedAt = Date.now(); toast('✅ ویرایش شد'); } }
     else { const n = { id:uid(), ...data, events:[], createdAt:Date.now(), updatedAt: Date.now() }; doctors.unshift(n); selectedDoctorId = n.id; toast('✅ ثبت شد'); }
