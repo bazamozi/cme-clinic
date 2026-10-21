@@ -256,6 +256,18 @@ textarea{resize:vertical;min-height:55px}
 
 <iframe name="hidden_iframe_push" style="display:none;"></iframe>
 
+<!-- باکس نمایش تماس ورودی -->
+<div id="incomingCallBanner" class="hidden" style="position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:99999; background:linear-gradient(135deg, #1e293b, #0f172a); border:2px solid var(--accent); border-radius:20px; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,0.8); text-align:center; width:90%; max-width:450px;">
+  <div style="font-size:18px; color:var(--accent); margin-bottom:12px; font-weight:800;">📞 تماس ورودی</div>
+  <div id="incomingCallerName" style="font-size:24px; font-weight:800; color:#fff; margin-bottom:8px;">ناشناس</div>
+  <div id="incomingCallerNumber" class="ltr" style="font-size:42px; font-weight:900; color:var(--success); margin-bottom:16px; letter-spacing:3px;">0912...</div>
+  <div id="incomingCallAlert" style="margin-bottom:20px; font-size:14px; font-weight:700; line-height:1.6;"></div>
+  <div style="display:flex; gap:10px; justify-content:center;">
+     <a id="callBackBtn" class="btn" style="margin:0; padding:12px 24px; width:auto; background:var(--success); color:#000; font-size:16px; font-weight:800; text-decoration:none;" href="#">📞 تماس</a>
+     <button class="btn" style="margin:0; padding:12px 24px; width:auto; background:var(--danger); color:#fff; font-size:16px; font-weight:800;" onclick="hideCallBanner()">❌ بستن</button>
+  </div>
+</div>
+
 <div class="wrap">
 
 <header>
@@ -395,6 +407,7 @@ let selectedDoctorId = null;
 let currentUser = 'morteza';
 let currentDocCategory = 'all';
 let currentMobileEventTab = 'وبینار';
+let activeCallId = null;
 
 try {
   doctors = JSON.parse(localStorage.getItem(K)||'[]');
@@ -846,7 +859,7 @@ function renderMain(){
       </div>
       
       <div class="info-grid">
-        <div class="info-box"><span class="label">📞 موبایل</span><span class="value ltr">${esc(d.phone || '—')}</span>${d.phone ? `<button class="copy-btn" onclick="copyText('${esc(d.phone)}',this)">📋</button>` : ''}</div>
+        <div class="info-box"><span class="label">📞 موبایل</span><span class="value ltr" style="font-size:18px;">${esc(d.phone || '—')}</span>${d.phone ? `<button class="copy-btn" onclick="copyText('${esc(d.phone)}',this)">📋</button>` : ''}</div>
         <div class="info-box"><span class="label" style="font-size: 14px;">🔑 رمز سامانه</span><span class="value ltr">${esc(d.pass || '—')}</span>${d.pass ? `<button class="copy-btn" onclick="copyText('${esc(d.pass)}',this)">📋</button>` : ''}</div>
         <div class="info-box"><span class="label" style="font-size: 14px;">🆔 کد ملی</span><span class="value ltr">${esc(d.nat || '—')}</span>${d.nat ? `<button class="copy-btn" onclick="copyText('${esc(d.nat)}',this)">📋</button>` : ''}</div>
       </div>
@@ -1155,7 +1168,7 @@ function renderCalls(){
   const arr = myCalls().filter(c=>{ if(f==='pending' && c.follow!=='پیگیری‌نشده') return false; if(f==='doing' && c.follow!=='در حال پیگیری') return false; if(f==='done' && c.follow!=='پیگیری‌شده') return false; if(q && !(c.phone.includes(q) || (c.name||'').toLowerCase().includes(q) || c.subject.toLowerCase().includes(q))) return false; return true; });
   const el = document.getElementById('listCalls'); if(!arr.length){ el.innerHTML='<div class="empty">تماسی یافت نشد</div>'; return; }
   const fCls = { 'پیگیری‌نشده':'red', 'در حال پیگیری':'yellow', 'پیگیری‌شده':'green' };
-  el.innerHTML = arr.map(c=>`<div style="background:rgba(15,23,42,0.6);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><div><div style="font-weight:700;font-size:13.5px">${c.name?esc(c.name):'ناشناس'} <span class="badge blue ltr">${esc(c.phone)}</span></div><div style="color:var(--muted);font-size:11px;margin-top:5px">🎯 ${esc(c.subject)} | 🕒 <span class="ltr">${dt(c.createdAt)}</span></div>${c.note?`<div style="background:rgba(56,189,248,0.08);padding:6px 10px;border-radius:8px;border-right:3px solid var(--accent);margin-top:6px;font-size:12px">${esc(c.note)}</div>`:''}</div><div><span class="badge ${fCls[c.follow]||'gray'}">${esc(c.follow)}</span></div></div>
+  el.innerHTML = arr.map(c=>`<div style="background:rgba(15,23,42,0.6);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><div><div style="font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:5px;">${c.name?esc(c.name):'ناشناس'} <span class="badge blue ltr">${esc(c.phone)}</span></div><div style="color:var(--muted);font-size:11px;margin-top:5px">🎯 ${esc(c.subject)} | 🕒 <span class="ltr">${dt(c.createdAt)}</span></div>${c.note?`<div style="background:rgba(56,189,248,0.08);padding:6px 10px;border-radius:8px;border-right:3px solid var(--accent);margin-top:6px;font-size:12px">${esc(c.note)}</div>`:''}</div><div><span class="badge ${fCls[c.follow]||'gray'}">${esc(c.follow)}</span></div></div>
   <div class="actions">
     <a class="mini" href="tel:${esc(c.phone)}">📞 تماس</a>
     <a class="mini" href="sms:${esc(c.phone)}">💬 پیامک</a>
@@ -1197,11 +1210,15 @@ window.addEventListener('online', () => syncNow());
 setTimeout(autoAttendEvents, 2000); setInterval(autoAttendEvents, 60000);
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) autoAttendEvents(); });
 
-let lastProcessedCallId = null;
+function hideCallBanner() {
+  document.getElementById('incomingCallBanner').classList.add('hidden');
+  try { document.getElementById('ringtone').pause(); document.getElementById('ringtone').currentTime = 0; } catch(e){}
+  activeCallId = null;
+}
 
 function checkIncomingCalls() {
   jsonp(SCRIPT_URL + '?action=getLastCall&t=' + Date.now(), function(data) {
-    if (data && data.EventType === 'CallIncomingStarted' && data.CallerNumber) {
+    if (data && data.EventType && data.CallerNumber) {
       if (data.CallId === lastProcessedCallId) return; 
       lastProcessedCallId = data.CallId;
 
@@ -1214,8 +1231,8 @@ function checkIncomingCalls() {
       const contact = contacts.find(c => !c.deleted && normPhone(c.phone) === normPhone(callerNumber));
       
       let callerName = 'شماره ناشناس';
+      let alertMessage = '';
       let alertType = 'info';
-      let alertMessage = '📞 تماس ورودی جدید از شماره: ' + callerNumber;
 
       if (doctor) {
         callerName = fullName(doctor);
@@ -1223,7 +1240,7 @@ function checkIncomingCalls() {
         const f = doctor.finance || {};
         const rem$ = Math.max(0, Number(f.total||0) - Number(f.paid||0));
         
-        alertMessage = `📞 تماس از 👨‍⚕️ ${callerName}`;
+        alertMessage = `👨‍⚕️ ${callerName}`;
         if (rem > 0) { alertMessage += ` | ⚠️ ${num(rem)} امتیاز کم`; alertType = 'warn'; }
         if (rem$ > 0) { alertMessage += ` | 💸 ${num(rem$)} تومان بدهکار`; alertType = 'danger'; }
         
@@ -1234,31 +1251,53 @@ function checkIncomingCalls() {
         updateMobileSelection();
       } else if (contact) {
         callerName = contact.name;
-        alertMessage = `📞 تماس از مخاطب: ${callerName}`;
+        alertMessage = `📇 مخاطب: ${callerName}`;
+      } else {
+        alertMessage = 'شماره ناشناس';
       }
 
-      try { document.getElementById('ringtone').play(); } catch(err) {}
-      
-      if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("تماس ورودی", { body: alertMessage, icon: "https://cdn-icons-png.flaticon.com/512/724/724664.png" });
+      if (data.EventType === 'CallIncomingStarted') {
+        activeCallId = data.CallId;
+        
+        document.getElementById('incomingCallerName').textContent = callerName;
+        document.getElementById('incomingCallerNumber').textContent = callerNumber;
+        
+        const alertBox = document.getElementById('incomingCallAlert');
+        alertBox.textContent = alertMessage;
+        alertBox.style.color = alertType === 'danger' ? 'var(--danger)' : (alertType === 'warn' ? 'var(--warn)' : 'var(--muted)');
+        
+        document.getElementById('callBackBtn').href = `tel:${callerNumber}`;
+        
+        document.getElementById('incomingCallBanner').classList.remove('hidden');
+
+        try { document.getElementById('ringtone').play(); } catch(err) {}
+        
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification("تماس ورودی", { body: alertMessage, icon: "https://cdn-icons-png.flaticon.com/512/724/724664.png" });
+        }
+
+        toast(alertMessage, alertType);
+
+        calls.unshift({
+          id: uid(),
+          owner: currentUser,
+          phone: callerNumber,
+          name: callerName,
+          subject: doctor ? 'تماس ورودی (پزشک)' : (contact ? 'تماس ورودی (مخاطب)' : 'تماس ناشناس'),
+          follow: 'پیگیری‌نشده',
+          note: 'ثبت خودکار توسط سیستم تلفن',
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        });
+        
+        save(); 
+        renderCalls(); 
       }
-
-      toast(alertMessage, alertType);
-
-      calls.unshift({
-        id: uid(),
-        owner: currentUser,
-        phone: callerNumber,
-        name: callerName,
-        subject: doctor ? 'تماس پزشک' : (contact ? 'تماس مخاطب' : 'تماس ناشناس'),
-        follow: 'پیگیری‌نشده',
-        note: 'ثبت خودکار توسط سیستم تلفن',
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-      });
-      
-      save(); 
-      renderCalls(); 
+      else if (data.EventType === 'CallIncomingEnded' || data.EventType === 'CallIncomingTransferCompleted') {
+        if (activeCallId === data.CallId) {
+          hideCallBanner();
+        }
+      }
     }
   });
 }
