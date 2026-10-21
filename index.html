@@ -173,7 +173,6 @@ textarea{resize:vertical;min-height:55px}
 .type-pick.active{background:linear-gradient(135deg,rgba(56,189,248,0.2),rgba(34,211,238,0.1));color:var(--accent);border-color:rgba(56,189,248,0.5);box-shadow:0 4px 15px rgba(56,189,248,0.15)}
 .type-pick .icon{font-size:20px;display:block;margin-bottom:4px}
 
-/* ===== استایل‌های اختصاصی تب تماس‌ها ===== */
 .calls-container { max-width: 750px; margin: 0 auto; }
 .call-filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .call-filter-btn { flex: 1; padding: 8px 12px; border-radius: 10px; font-size: 13px; font-weight: 700; background: rgba(15,23,42,0.6); border: 1px solid var(--border); color: var(--muted); cursor: pointer; transition: 0.2s; font-family: inherit; }
@@ -274,15 +273,20 @@ textarea{resize:vertical;min-height:55px}
 
 <iframe name="hidden_iframe_push" style="display:none;"></iframe>
 
-<!-- باکس نمایش تماس ورودی -->
-<div id="incomingCallBanner" class="hidden" style="position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:99999; background:linear-gradient(135deg, #1e293b, #0f172a); border:2px solid var(--accent); border-radius:20px; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,0.8); text-align:center; width:90%; max-width:450px;">
+<!-- باکس نمایش تماس ورودی با دکمه‌های عملیات -->
+<div id="incomingCallBanner" class="hidden" style="position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:99999; background:linear-gradient(135deg, #1e293b, #0f172a); border:2px solid var(--accent); border-radius:20px; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,0.8); text-align:center; width:90%; max-width:500px;">
   <div style="font-size:18px; color:var(--accent); margin-bottom:12px; font-weight:800;">📞 تماس ورودی</div>
   <div id="incomingCallerName" style="font-size:24px; font-weight:800; color:#fff; margin-bottom:8px;">ناشناس</div>
   <div id="incomingCallerNumber" class="ltr" style="font-size:42px; font-weight:900; color:var(--success); margin-bottom:16px; letter-spacing:3px;">0912...</div>
   <div id="incomingCallAlert" style="margin-bottom:20px; font-size:14px; font-weight:700; line-height:1.6;"></div>
-  <div style="display:flex; gap:10px; justify-content:center;">
-     <button class="btn" style="margin:0; padding:12px 24px; width:auto; background:var(--success); color:#000; font-size:16px; font-weight:800;" onclick="copyText(document.getElementById('incomingCallerNumber').textContent, this)">📋 کپی شماره</button>
-     <button class="btn" style="margin:0; padding:12px 24px; width:auto; background:var(--danger); color:#fff; font-size:16px; font-weight:800;" onclick="hideCallBanner()">❌ بستن</button>
+  
+  <!-- دکمه‌های عملیات فوری روی پاپ آپ -->
+  <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; border-top:1px solid rgba(255,255,255,0.1); padding-top:16px;">
+     <button id="btnViewProfile" class="mini" style="display:none; background:rgba(56,189,248,0.15); color:var(--accent); border-color:var(--accent);" onclick="viewIncomingProfile()">👁 مشاهده پروفایل</button>
+     <button class="mini" style="background:rgba(251,191,36,0.15); color:var(--warn); border-color:rgba(251,191,36,0.4);" onclick="openCallNoteModal()">📝 ثبت یادداشت</button>
+     <a id="btnTelegram" class="mini" href="#" target="_blank" style="color:var(--accent); border-color:rgba(56,189,248,0.4);">✈️ تلگرام</a>
+     <a id="btnBale" class="mini" href="#" target="_blank" style="color:var(--success); border-color:rgba(52,211,153,0.4);">💬 بله</a>
+     <button class="mini danger" onclick="hideCallBanner()">❌ بستن</button>
   </div>
 </div>
 
@@ -442,6 +446,8 @@ let lastProcessedCallId = null;
 let activeCallId = null;
 let callBannerTimeout = null;
 let currentCallFilter = 'all'; // 'all', 'incoming', 'outgoing', 'missed'
+let currentIncomingCallRecord = null; // برای دکمه‌های پاپ‌آپ
+let currentIncomingMatch = null; // برای پیدا کردن پزشک/مخاطب
 
 try {
   doctors = JSON.parse(localStorage.getItem(K)||'[]');
@@ -458,7 +464,6 @@ const num = n => toEnDigits(Number(n||0).toLocaleString('en-US'));
 const dt = ts => { const d = new Date(ts); const p = x=>String(x).padStart(2,'0'); return `${p(d.getHours())}:${p(d.getMinutes())} - ${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())}`; };
 const normPhone = p => toEnDigits(String(p||'')).replace(/\D/g,'');
 
-// تابع هوشمند برای تطبیق شماره‌ها (فقط ۱۰ رقم آخر رو چک میکنه تا با هر فرمتی کار کنه)
 function isSamePhone(p1, p2) {
     const n1 = normPhone(p1);
     const n2 = normPhone(p2);
@@ -1239,17 +1244,11 @@ function renderCalls(){
   const q = searchEl.value.trim().toLowerCase(), f = document.getElementById('filterCall').value;
   
   const arr = myCalls().filter(c => {
-    // فیلتر تب‌های بالا
     if (currentCallFilter !== 'all' && c.type !== currentCallFilter) return false;
-    
-    // فیلتر وضعیت پیگیری
     if(f==='pending' && c.follow!=='پیگیری‌نشده') return false; 
     if(f==='doing' && c.follow!=='در حال پیگیری') return false; 
     if(f==='done' && c.follow!=='پیگیری‌شده') return false; 
-    
-    // فیلتر جستجو
     if(q && !(c.phone.includes(q) || (c.name||'').toLowerCase().includes(q) || c.subject.toLowerCase().includes(q))) return false; 
-    
     return true; 
   });
   
@@ -1334,6 +1333,46 @@ function hideCallBanner() {
   if (callBannerTimeout) clearTimeout(callBannerTimeout);
 }
 
+window.viewIncomingProfile = function() {
+  if(!currentIncomingMatch) return;
+  if (currentIncomingMatch.doctor) {
+    switchTab('doctors');
+    selectDoctor(currentIncomingMatch.doctor.id);
+  } else if (currentIncomingMatch.contact) {
+    switchTab('contacts');
+  }
+  hideCallBanner();
+};
+
+window.openCallNoteModal = function() {
+  if(!currentIncomingCallRecord) return;
+  const c = currentIncomingCallRecord;
+  openModal(`
+    <h2>📝 ثبت یادداشت برای تماس</h2>
+    <div style="font-size: 18px; font-weight: 800; color: var(--accent); margin-bottom: 16px; text-align: center; direction: ltr;">${esc(c.phone)}</div>
+    <form id="mNoteForm">
+      <label>وضعیت پیگیری</label>
+      <select id="nFollow">
+        <option value="پیگیری‌نشده" ${c.follow==='پیگیری‌نشده'?'selected':''}>پیگیری‌نشده</option>
+        <option value="در حال پیگیری" ${c.follow==='در حال پیگیری'?'selected':''}>در حال پیگیری</option>
+        <option value="پیگیری‌شده" ${c.follow==='پیگیری‌شده'?'selected':''}>پیگیری‌شده</option>
+      </select>
+      <label>یادداشت</label>
+      <textarea id="nNote" placeholder="توضیحات تماس را اینجا وارد کنید...">${esc(c.note||'')}</textarea>
+      <button class="btn" type="submit">💾 ذخیره</button>
+      <button class="btn ghost" type="button" onclick="closeModal()">انصراف</button>
+    </form>
+  `);
+  
+  document.getElementById('mNoteForm').onsubmit = ev => {
+    ev.preventDefault();
+    c.follow = document.getElementById('nFollow').value;
+    c.note = document.getElementById('nNote').value.trim();
+    c.updatedAt = Date.now();
+    save(); renderCalls(); closeModal(); toast('✅ یادداشت ثبت شد');
+  };
+};
+
 function checkIncomingCalls() {
   jsonp(SCRIPT_URL + '?action=getLastCall&t=' + Date.now(), function(data) {
     if (data && data.EventType === 'CallIncomingStarted' && data.CallerNumber) {
@@ -1351,6 +1390,8 @@ function checkIncomingCalls() {
 
         const doctor = doctors.find(d => !d.deleted && isSamePhone(d.phone, callerNumber));
         const contact = contacts.find(c => !c.deleted && isSamePhone(c.phone, callerNumber));
+        
+        currentIncomingMatch = { doctor, contact };
         
         let callerName = 'شماره ناشناس';
         let alertMessage = '';
@@ -1384,6 +1425,13 @@ function checkIncomingCalls() {
         alertBox.textContent = alertMessage;
         alertBox.style.color = alertType === 'danger' ? 'var(--danger)' : (alertType === 'warn' ? 'var(--warn)' : 'var(--muted)');
         
+        // تنظیم دکمه‌های پاپ آپ
+        const btnProfile = document.getElementById('btnViewProfile');
+        if (doctor || contact) btnProfile.style.display = 'inline-flex'; else btnProfile.style.display = 'none';
+        
+        document.getElementById('btnTelegram').href = `https://t.me/+98${callerNumber.replace(/^0/, '')}`;
+        document.getElementById('btnBale').href = `https://ble.ir/+98${callerNumber.replace(/^0/, '')}`;
+        
         document.getElementById('incomingCallBanner').classList.remove('hidden');
 
         try { document.getElementById('ringtone').play(); } catch(err) {}
@@ -1394,7 +1442,8 @@ function checkIncomingCalls() {
 
         toast(alertMessage, alertType);
 
-        calls.unshift({
+        // ایجاد رکورد جدید
+        currentIncomingCallRecord = {
           id: uid(),
           owner: currentUser,
           phone: callerNumber,
@@ -1405,7 +1454,9 @@ function checkIncomingCalls() {
           createdAt: Date.now(),
           updatedAt: Date.now(),
           type: 'incoming'
-        });
+        };
+        
+        calls.unshift(currentIncomingCallRecord);
         
         save(); 
         renderCalls(); 
