@@ -173,23 +173,23 @@ textarea{resize:vertical;min-height:55px}
 .type-pick.active{background:linear-gradient(135deg,rgba(56,189,248,0.2),rgba(34,211,238,0.1));color:var(--accent);border-color:rgba(56,189,248,0.5);box-shadow:0 4px 15px rgba(56,189,248,0.15)}
 .type-pick .icon{font-size:20px;display:block;margin-bottom:4px}
 
-/* استایل‌های اختصاصی تب تماس‌ها */
+/* ===== استایل‌های اختصاصی تب تماس‌ها ===== */
 .calls-container { max-width: 750px; margin: 0 auto; }
 .call-filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .call-filter-btn { flex: 1; padding: 8px 12px; border-radius: 10px; font-size: 13px; font-weight: 700; background: rgba(15,23,42,0.6); border: 1px solid var(--border); color: var(--muted); cursor: pointer; transition: 0.2s; font-family: inherit; }
 .call-filter-btn:hover { background: rgba(255,255,255,0.05); }
 .call-filter-btn.active { background: var(--accent); color: #062334; border-color: var(--accent); box-shadow: 0 2px 10px rgba(56,189,248,0.3); }
-.call-card { background: rgba(15,23,42,0.6); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px; transition: 0.2s; }
+.call-card { background: rgba(15,23,42,0.6); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px; transition: 0.2s; }
 .call-card:hover { border-color: rgba(56,189,248,0.3); background: rgba(15,23,42,0.8); }
-.call-card.missed { border-right: 4px solid var(--danger); }
-.call-card.incoming { border-right: 4px solid var(--success); }
-.call-card.outgoing { border-right: 4px solid var(--accent); }
+.call-card.missed { border-right: 4px solid var(--danger); background: rgba(248,113,113,0.03); }
+.call-card.incoming { border-right: 4px solid var(--success); background: rgba(52,211,153,0.03); }
+.call-card.outgoing { border-right: 4px solid var(--accent); background: rgba(56,189,248,0.03); }
 .call-header { display: flex; justify-content: space-between; align-items: flex-start; }
 .call-name { font-size: 15px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px; }
-.call-phone { font-size: 20px; font-weight: 900; color: var(--accent); direction: ltr; margin-top: 4px; letter-spacing: 1px; }
-.call-meta { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.call-phone { font-size: 22px; font-weight: 900; color: var(--accent); direction: ltr; margin-top: 6px; letter-spacing: 1px; }
+.call-meta { font-size: 11.5px; color: var(--muted); margin-top: 6px; }
 .call-actions { display: flex; gap: 6px; flex-wrap: wrap; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px; }
-.call-actions .mini { padding: 5px 10px; font-size: 12px; }
+.call-actions .mini { padding: 6px 12px; font-size: 12.5px; }
 
 .mobile-nav{display:none}
 @media(max-width:900px){
@@ -356,8 +356,8 @@ textarea{resize:vertical;min-height:55px}
 
 <div class="tab-content hidden" id="tab-calls">
   <div class="calls-container">
-    <div class="panel">
-      <h2>ثبت تماس جدید (خروجی)</h2>
+    <div class="panel" style="margin-bottom: 20px;">
+      <h2>ثبت تماس خروجی (دستی)</h2>
       <form id="fCall">
         <div class="row">
           <div><label>شماره تماس‌گیرنده</label><input id="callPhone" required placeholder="0912..."></div>
@@ -388,8 +388,11 @@ textarea{resize:vertical;min-height:55px}
         <button class="btn" type="submit">📞 ثبت تماس</button>
       </form>
     </div>
+
     <div class="panel">
-      <h2>لیست تماس‌ها</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2 style="margin:0;">لیست تماس‌ها</h2>
+      </div>
       
       <div class="call-filters">
         <button class="call-filter-btn active" onclick="setCallFilter('all')">همه موارد</button>
@@ -398,7 +401,7 @@ textarea{resize:vertical;min-height:55px}
         <button class="call-filter-btn" onclick="setCallFilter('missed')">بی‌پاسخ ❌</button>
       </div>
 
-      <div class="row" style="margin-bottom:10px">
+      <div class="row" style="margin-bottom:16px">
         <input id="searchCall" placeholder="🔍 جستجو در شماره یا نام">
         <select id="filterCall">
           <option value="all">همه وضعیت‌های پیگیری</option>
@@ -454,6 +457,15 @@ const toEnDigits = s => String(s??'').replace(/[۰-۹]/g,d=>'0123456789'['۰۱۲
 const num = n => toEnDigits(Number(n||0).toLocaleString('en-US'));
 const dt = ts => { const d = new Date(ts); const p = x=>String(x).padStart(2,'0'); return `${p(d.getHours())}:${p(d.getMinutes())} - ${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())}`; };
 const normPhone = p => toEnDigits(String(p||'')).replace(/\D/g,'');
+
+// تابع هوشمند برای تطبیق شماره‌ها (فقط ۱۰ رقم آخر رو چک میکنه تا با هر فرمتی کار کنه)
+function isSamePhone(p1, p2) {
+    const n1 = normPhone(p1);
+    const n2 = normPhone(p2);
+    if (!n1 || !n2) return false;
+    return n1.slice(-10) === n2.slice(-10);
+}
+
 const typeIcon = t => t==='حضوری'?'🏢':t==='وبینار'?'💻':'📁';
 const fullName = d => ((d.firstName||'')+' '+(d.lastName||'')).trim()||'بی‌نام';
 
@@ -1171,8 +1183,8 @@ function updateCallInfo(){
   const p = normPhone(document.getElementById('callPhone').value); const el = document.getElementById('callCreditInfo');
   if(!p){ el.innerHTML=''; document.getElementById('callName').value=''; return; }
   
-  const d = doctors.find(x=> !x.deleted && normPhone(x.phone)===p);
-  const c = contacts.find(x=> !x.deleted && normPhone(x.phone)===p);
+  const d = doctors.find(x=> !x.deleted && isSamePhone(x.phone, p));
+  const c = contacts.find(x=> !x.deleted && isSamePhone(x.phone, p));
   
   if(!d && !c){ 
     el.innerHTML='<div style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.35);border-radius:12px;padding:14px"><h3 style="color:var(--danger);font-size:14px">❌ این شماره در سیستم نیست</h3></div>'; 
@@ -1241,7 +1253,7 @@ function renderCalls(){
     return true; 
   });
   
-  const el = document.getElementById('listCalls'); if(!arr.length){ el.innerHTML='<div class="empty">تماسی با این فیلتر یافت نشد</div>'; return; }
+  const el = document.getElementById('listCalls'); if(!arr.length){ el.innerHTML='<div class="empty" style="padding: 40px; text-align: center; color: var(--muted);">تماسی با این فیلتر یافت نشد</div>'; return; }
   
   const fCls = { 'پیگیری‌نشده':'red', 'در حال پیگیری':'yellow', 'پیگیری‌شده':'green' };
   
@@ -1258,7 +1270,7 @@ function renderCalls(){
       <div class="call-header">
         <div>
           <div class="call-name">
-            <span title="${typeLabel}">${typeIcon}</span>
+            <span title="${typeLabel}" style="font-size: 18px;">${typeIcon}</span>
             ${c.name ? esc(c.name) : 'ناشناس'} 
             <span class="badge ${fCls[c.follow]||'gray'}" style="margin-right:8px; font-size:11px;">${esc(c.follow)}</span>
           </div>
@@ -1267,7 +1279,7 @@ function renderCalls(){
         </div>
       </div>
       
-      ${c.note ? `<div style="background:rgba(56,189,248,0.08); padding:6px 10px; border-radius:6px; border-right:2px solid var(--accent); font-size:12px; color:var(--muted);">${esc(c.note)}</div>` : ''}
+      ${c.note ? `<div style="background:rgba(56,189,248,0.08); padding:8px 12px; border-radius:8px; border-right:3px solid var(--accent); font-size:13px; color:var(--muted);">${esc(c.note)}</div>` : ''}
 
       <div class="call-actions">
         <button class="mini" onclick="copyText('${esc(c.phone)}', this)">📋 کپی</button>
@@ -1275,7 +1287,7 @@ function renderCalls(){
         <a class="mini" href="https://t.me/+98${esc(c.phone).replace(/^0/, '')}" target="_blank" style="color: var(--accent); border-color: rgba(56,189,248,0.4);">✈️ تلگرام</a>
         <a class="mini" href="https://ble.ir/+98${esc(c.phone).replace(/^0/, '')}" target="_blank" style="color: var(--success); border-color: rgba(52,211,153,0.4);">💬 بله</a>
         <button class="mini" onclick="cycleFollow('${c.id}')">🔄 پیگیری</button>
-        <button class="mini" onclick="toggleMissed('${c.id}')">${c.type==='missed' ? '✅ پاسخ داده' : '❌ بی‌پاسخ'}</button>
+        <button class="mini" onclick="toggleMissed('${c.id}')" style="${c.type==='missed'?'background:rgba(248,113,113,0.2); color:var(--danger); border-color:var(--danger);':''}">${c.type==='missed' ? '✅ پاسخ داده' : '❌ بی‌پاسخ'}</button>
         <button class="mini danger" onclick="delCall('${c.id}')">🗑</button>
       </div>
     </div>`;
@@ -1337,8 +1349,8 @@ function checkIncomingCalls() {
           callerNumber = '0' + callerNumber;
         }
 
-        const doctor = doctors.find(d => !d.deleted && normPhone(d.phone) === normPhone(callerNumber));
-        const contact = contacts.find(c => !c.deleted && normPhone(c.phone) === normPhone(callerNumber));
+        const doctor = doctors.find(d => !d.deleted && isSamePhone(d.phone, callerNumber));
+        const contact = contacts.find(c => !c.deleted && isSamePhone(c.phone, callerNumber));
         
         let callerName = 'شماره ناشناس';
         let alertMessage = '';
