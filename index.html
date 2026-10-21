@@ -397,7 +397,6 @@ textarea{resize:vertical;min-height:55px}
 
 <script>
 const K = 'cme4_data';
-// ⚠️ لینک جدید شما دقیقاً اینجا قرار گرفت ⚠️
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxl4UYo-pMlrcIFIQS2rDghVi9D8toNdFfH2k_UDqSiW0hsT0yKJ6P9GZR4fwa12W2sng/exec';
 
 let doctors = [];
@@ -407,7 +406,9 @@ let selectedDoctorId = null;
 let currentUser = 'morteza';
 let currentDocCategory = 'all';
 let currentMobileEventTab = 'وبینار';
+let lastProcessedCallId = null;
 let activeCallId = null;
+let callBannerTimeout = null;
 
 try {
   doctors = JSON.parse(localStorage.getItem(K)||'[]');
@@ -1214,51 +1215,52 @@ function hideCallBanner() {
   document.getElementById('incomingCallBanner').classList.add('hidden');
   try { document.getElementById('ringtone').pause(); document.getElementById('ringtone').currentTime = 0; } catch(e){}
   activeCallId = null;
+  if (callBannerTimeout) clearTimeout(callBannerTimeout);
 }
 
 function checkIncomingCalls() {
   jsonp(SCRIPT_URL + '?action=getLastCall&t=' + Date.now(), function(data) {
-    if (data && data.EventType && data.CallerNumber) {
-      if (data.CallId === lastProcessedCallId) return; 
-      lastProcessedCallId = data.CallId;
-
-      let callerNumber = data.CallerNumber;
-      if (callerNumber.length === 10 && callerNumber.startsWith('9')) {
-        callerNumber = '0' + callerNumber;
-      }
-
-      const doctor = doctors.find(d => !d.deleted && normPhone(d.phone) === normPhone(callerNumber));
-      const contact = contacts.find(c => !c.deleted && normPhone(c.phone) === normPhone(callerNumber));
+    if (data && data.EventType === 'CallIncomingStarted' && data.CallerNumber) {
+      const isNewCall = data.CallId !== lastProcessedCallId;
+      const bannerVisible = !document.getElementById('incomingCallBanner').classList.contains('hidden');
       
-      let callerName = 'شماره ناشناس';
-      let alertMessage = '';
-      let alertType = 'info';
-
-      if (doctor) {
-        callerName = fullName(doctor);
-        const rem = remainingCredits(doctor);
-        const f = doctor.finance || {};
-        const rem$ = Math.max(0, Number(f.total||0) - Number(f.paid||0));
-        
-        alertMessage = `👨‍⚕️ ${callerName}`;
-        if (rem > 0) { alertMessage += ` | ⚠️ ${num(rem)} امتیاز کم`; alertType = 'warn'; }
-        if (rem$ > 0) { alertMessage += ` | 💸 ${num(rem$)} تومان بدهکار`; alertType = 'danger'; }
-        
-        selectedDoctorId = doctor.id;
-        currentMobileEventTab = 'وبینار';
-        renderDocList();
-        renderMain();
-        updateMobileSelection();
-      } else if (contact) {
-        callerName = contact.name;
-        alertMessage = `📇 مخاطب: ${callerName}`;
-      } else {
-        alertMessage = 'شماره ناشناس';
-      }
-
-      if (data.EventType === 'CallIncomingStarted') {
+      if (isNewCall) {
+        lastProcessedCallId = data.CallId;
         activeCallId = data.CallId;
         
+        let callerNumber = data.CallerNumber;
+        if (callerNumber.length === 10 && callerNumber.startsWith('9')) {
+          callerNumber = '0' + callerNumber;
+        }
+
+        const doctor = doctors.find(d => !d.deleted && normPhone(d.phone) === normPhone(callerNumber));
+        const contact = contacts.find(c => !c.deleted && normPhone(c.phone) === normPhone(callerNumber));
+        
+        let callerName = 'شماره ناشناس';
+        let alertMessage = '';
+        let alertType = 'info';
+
+        if (doctor) {
+          callerName = fullName(doctor);
+          const rem = remainingCredits(doctor);
+          const f = doctor.finance || {};
+          const rem$ = Math.max(0, Number(f.total||0) - Number(f.paid||0));
+          alertMessage = `👨‍⚕️ ${callerName}`;
+          if (rem > 0) { alertMessage += ` | ⚠️ ${num(rem)} امتیاز کم`; alertType = 'warn'; }
+          if (rem$ > 0) { alertMessage += ` | 💸 ${num(rem$)} تومان بدهکار`; alertType = 'danger'; }
+          
+          selectedDoctorId = doctor.id;
+          currentMobileEventTab = 'وبینار';
+          renderDocList();
+          renderMain();
+          updateMobileSelection();
+        } else if (contact) {
+          callerName = contact.name;
+          alertMessage = `📇 مخاطب: ${callerName}`;
+        } else {
+          alertMessage = 'شماره ناشناس';
+        }
+
         document.getElementById('incomingCallerName').textContent = callerName;
         document.getElementById('incomingCallerNumber').textContent = callerNumber;
         
@@ -1267,7 +1269,6 @@ function checkIncomingCalls() {
         alertBox.style.color = alertType === 'danger' ? 'var(--danger)' : (alertType === 'warn' ? 'var(--warn)' : 'var(--muted)');
         
         document.getElementById('callBackBtn').href = `tel:${callerNumber}`;
-        
         document.getElementById('incomingCallBanner').classList.remove('hidden');
 
         try { document.getElementById('ringtone').play(); } catch(err) {}
@@ -1292,11 +1293,12 @@ function checkIncomingCalls() {
         
         save(); 
         renderCalls(); 
-      }
-      else if (data.EventType === 'CallIncomingEnded' || data.EventType === 'CallIncomingTransferCompleted') {
-        if (activeCallId === data.CallId) {
-          hideCallBanner();
+
+        if (data.hasEnded) {
+          callBannerTimeout = setTimeout(hideCallBanner, 15000);
         }
+      } else if (data.hasEnded && bannerVisible) {
+        hideCallBanner();
       }
     }
   });
