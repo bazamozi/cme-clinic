@@ -263,7 +263,7 @@ textarea{resize:vertical;min-height:55px}
   <div id="incomingCallerNumber" class="ltr" style="font-size:42px; font-weight:900; color:var(--success); margin-bottom:16px; letter-spacing:3px;">0912...</div>
   <div id="incomingCallAlert" style="margin-bottom:20px; font-size:14px; font-weight:700; line-height:1.6;"></div>
   <div style="display:flex; gap:10px; justify-content:center;">
-     <a id="callBackBtn" class="btn" style="margin:0; padding:12px 24px; width:auto; background:var(--success); color:#000; font-size:16px; font-weight:800; text-decoration:none;" href="#">📞 تماس</a>
+     <button class="btn" style="margin:0; padding:12px 24px; width:auto; background:var(--success); color:#000; font-size:16px; font-weight:800;" onclick="copyText(document.getElementById('incomingCallerNumber').textContent, this)">📋 کپی شماره</button>
      <button class="btn" style="margin:0; padding:12px 24px; width:auto; background:var(--danger); color:#fff; font-size:16px; font-weight:800;" onclick="hideCallBanner()">❌ بستن</button>
   </div>
 </div>
@@ -1071,11 +1071,11 @@ function renderContacts() {
     <div style="background:rgba(15,23,42,0.6); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
       <div>
         <div style="font-weight:700; font-size:14.5px;">${esc(c.name)}</div>
-        <div style="color:var(--muted); font-size:12px; margin-top:4px;">📞 <span class="ltr">${esc(c.phone)}</span> ${c.category ? ` | 🏷️ ${esc(c.category)}` : ''}</div>
+        <div style="color:var(--muted); font-size:12px; margin-top:4px;">📞 <span class="ltr" style="font-size:16px; font-weight:800; color:var(--accent);">${esc(c.phone)}</span> ${c.category ? ` | 🏷️ ${esc(c.category)}` : ''}</div>
         ${c.note ? `<div style="color:var(--warn); font-size:11.5px; margin-top:6px;">📝 ${esc(c.note)}</div>` : ''}
       </div>
-      <div style="display:flex; gap:6px;">
-        <a class="mini" href="tel:${esc(c.phone)}" style="padding:6px 10px;">📞 تماس</a>
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <button class="mini" onclick="copyText('${esc(c.phone)}', this)">📋 کپی</button>
         <a class="mini" href="sms:${esc(c.phone)}" style="padding:6px 10px;">💬 پیامک</a>
         <a class="mini" href="https://t.me/+98${esc(c.phone).replace(/^0/, '')}" target="_blank" style="padding:6px 10px; color:var(--accent); border-color:rgba(56,189,248,0.4);">✈️ تلگرام</a>
         <a class="mini" href="https://ble.ir/+98${esc(c.phone).replace(/^0/, '')}" target="_blank" style="padding:6px 10px; color:var(--success); border-color:rgba(52,211,153,0.4);">💬 بله</a>
@@ -1161,7 +1161,7 @@ function updateCallInfo(){
 
 document.getElementById('fCall').onsubmit = e => {
   e.preventDefault();
-  calls.unshift({ id:uid(), owner:currentUser, phone:toEnDigits(document.getElementById('callPhone').value.trim()), name:document.getElementById('callName').value.trim(), subject:document.getElementById('callSubject').value, follow:document.getElementById('callFollow').value, note:document.getElementById('callNote').value.trim(), createdAt:Date.now(), updatedAt: Date.now() });
+  calls.unshift({ id:uid(), owner:currentUser, phone:toEnDigits(document.getElementById('callPhone').value.trim()), name:document.getElementById('callName').value.trim(), subject:document.getElementById('callSubject').value, follow:document.getElementById('callFollow').value, note:document.getElementById('callNote').value.trim(), createdAt:Date.now(), updatedAt: Date.now(), type: 'outgoing' });
   save(); e.target.reset(); document.getElementById('callCreditInfo').innerHTML=''; renderCalls(); toast('📞 ثبت شد');
 };
 
@@ -1169,17 +1169,44 @@ function renderCalls(){
   const searchEl = document.getElementById('searchCall'); if(!searchEl) return;
   const q = searchEl.value.trim().toLowerCase(), f = document.getElementById('filterCall').value;
   const arr = myCalls().filter(c=>{ if(f==='pending' && c.follow!=='پیگیری‌نشده') return false; if(f==='doing' && c.follow!=='در حال پیگیری') return false; if(f==='done' && c.follow!=='پیگیری‌شده') return false; if(q && !(c.phone.includes(q) || (c.name||'').toLowerCase().includes(q) || c.subject.toLowerCase().includes(q))) return false; return true; });
+  
   const el = document.getElementById('listCalls'); if(!arr.length){ el.innerHTML='<div class="empty">تماسی یافت نشد</div>'; return; }
+  
   const fCls = { 'پیگیری‌نشده':'red', 'در حال پیگیری':'yellow', 'پیگیری‌شده':'green' };
-  el.innerHTML = arr.map(c=>`<div style="background:rgba(15,23,42,0.6);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><div><div style="font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:5px;">${c.name?esc(c.name):'ناشناس'} <span class="ltr" style="font-size:16px; font-weight:800; color:var(--accent); margin-right:5px;">${esc(c.phone)}</span></div><div style="color:var(--muted);font-size:11px;margin-top:5px">🎯 ${esc(c.subject)} | 🕒 <span class="ltr">${dt(c.createdAt)}</span></div>${c.note?`<div style="background:rgba(56,189,248,0.08);padding:6px 10px;border-radius:8px;border-right:3px solid var(--accent);margin-top:6px;font-size:12px">${esc(c.note)}</div>`:''}</div><div><span class="badge ${fCls[c.follow]||'gray'}">${esc(c.follow)}</span></div></div>
-  <div class="actions">
-    <a class="mini" href="tel:${esc(c.phone)}">📞 تماس</a>
-    <a class="mini" href="sms:${esc(c.phone)}">💬 پیامک</a>
-    <a class="mini" href="https://t.me/+98${esc(c.phone).replace(/^0/, '')}" target="_blank" style="color: var(--accent); border-color: rgba(56,189,248,0.4);">✈️ تلگرام</a>
-    <a class="mini" href="https://ble.ir/+98${esc(c.phone).replace(/^0/, '')}" target="_blank" style="color: var(--success); border-color: rgba(52,211,153,0.4);">💬 بله</a>
-    <button class="mini" onclick="cycleFollow('${c.id}')">تغییر پیگیری</button>
-    <button class="mini danger" onclick="delCall('${c.id}')">🗑 حذف</button>
-  </div></div>`).join('');
+  
+  el.innerHTML = arr.map(c => {
+    const isOut = c.type === 'outgoing';
+    const typeIcon = isOut ? '📤' : '📥';
+    const typeColor = isOut ? 'var(--accent)' : 'var(--success)';
+    const typeLabel = isOut ? 'خروجی' : 'ورودی';
+    
+    return `
+    <div style="background:rgba(15,23,42,0.6); border:1px solid var(--border); border-right: 4px solid ${typeColor}; border-radius:12px; padding:14px; margin-bottom:10px; display:flex; flex-direction:column; gap:12px;">
+      
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+        <div>
+          <div style="font-weight:700; font-size:15px; display:flex; align-items:center; gap:6px;">
+            <span title="${typeLabel}">${typeIcon}</span>
+            ${c.name ? esc(c.name) : 'ناشناس'} 
+            <span class="badge ${fCls[c.follow]||'gray'}" style="margin-right:8px; font-size:11px;">${esc(c.follow)}</span>
+          </div>
+          <div class="ltr" style="font-size:22px; font-weight:900; color:var(--accent); margin-top:6px; letter-spacing:1px;">${esc(c.phone)}</div>
+          <div style="color:var(--muted); font-size:12px; margin-top:6px;">🎯 ${esc(c.subject)} &nbsp;|&nbsp; 🕒 <span class="ltr">${dt(c.createdAt)}</span></div>
+        </div>
+      </div>
+      
+      ${c.note ? `<div style="background:rgba(56,189,248,0.08); padding:8px 12px; border-radius:8px; border-right:3px solid var(--accent); font-size:13px;">${esc(c.note)}</div>` : ''}
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap; border-top:1px solid rgba(255,255,255,0.05); padding-top:12px;">
+        <button class="mini" onclick="copyText('${esc(c.phone)}', this)">📋 کپی شماره</button>
+        <a class="mini" href="sms:${esc(c.phone)}">💬 پیامک</a>
+        <a class="mini" href="https://t.me/+98${esc(c.phone).replace(/^0/, '')}" target="_blank" style="color: var(--accent); border-color: rgba(56,189,248,0.4);">✈️ تلگرام</a>
+        <a class="mini" href="https://ble.ir/+98${esc(c.phone).replace(/^0/, '')}" target="_blank" style="color: var(--success); border-color: rgba(52,211,153,0.4);">💬 بله</a>
+        <button class="mini" onclick="cycleFollow('${c.id}')">🔄 تغییر پیگیری</button>
+        <button class="mini danger" onclick="delCall('${c.id}')">🗑 حذف</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 window.cycleFollow = function(id){ const c=calls.find(x=>x.id===id); if(!c) return; const o=['پیگیری‌نشده','در حال پیگیری','پیگیری‌شده']; c.follow=o[(o.indexOf(c.follow)+1)%3]; c.updatedAt = Date.now(); save(); renderCalls(); };
@@ -1272,7 +1299,6 @@ function checkIncomingCalls() {
         alertBox.textContent = alertMessage;
         alertBox.style.color = alertType === 'danger' ? 'var(--danger)' : (alertType === 'warn' ? 'var(--warn)' : 'var(--muted)');
         
-        document.getElementById('callBackBtn').href = `tel:${callerNumber}`;
         document.getElementById('incomingCallBanner').classList.remove('hidden');
 
         try { document.getElementById('ringtone').play(); } catch(err) {}
@@ -1288,11 +1314,12 @@ function checkIncomingCalls() {
           owner: currentUser,
           phone: callerNumber,
           name: callerName,
-          subject: doctor ? 'تماس ورودی (پزشک)' : (contact ? 'تماس ورودی (مخاطب)' : 'تماس ناشناس'),
+          subject: doctor ? 'تماس پزشک' : (contact ? 'تماس مخاطب' : 'تماس ناشناس'),
           follow: 'پیگیری‌نشده',
           note: 'ثبت خودکار توسط سیستم تلفن',
           createdAt: Date.now(),
-          updatedAt: Date.now()
+          updatedAt: Date.now(),
+          type: 'incoming'
         });
         
         save(); 
