@@ -773,7 +773,7 @@ function renderDocList(){
 
   const categories = { 
     'all': { title: 'همه' }, 
-    'new': { title: '🆕 تازه‌وارد' }, 
+    'new': { title: '📋 پیگیری' }, 
     'in_progress': { title: '⚡ در جریان' }, 
     'completed': { title: '🏆 تکمیل شده' } 
   };
@@ -838,7 +838,7 @@ function renderMain(){
   
   const autoStatus = getAutoStatus(d);
   const statusMap = { 
-    'new': {txt: '🆕 تازه‌وارد', cls: 'purple'}, 
+    'new': {txt: '📋 پیگیری', cls: 'purple'}, 
     'in_progress': {txt: '⚡ در جریان', cls: 'yellow'}, 
     'completed': {txt: '🏆 تکمیل شده', cls: 'green'} 
   };
@@ -1317,7 +1317,6 @@ window.openCallNoteModal = function() {
     </form>
   `);
   
-  // فوکوس خودکار روی باکس یادداشت
   setTimeout(() => { const el = document.getElementById('nNote'); if(el) el.focus(); }, 150);
 
   document.getElementById('mNoteForm').onsubmit = ev => {
