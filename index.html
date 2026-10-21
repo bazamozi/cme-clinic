@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>دفتر بازآموزی پزشکان</title>
 <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+
+<!-- تنظیمات اپلیکیشن (PWA) برای نصب روی گوشی -->
+<link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;دفتر بازآموزی پزشکان&quot;,&quot;short_name&quot;:&quot;بازآموزی&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#0f172a&quot;,&quot;theme_color&quot;:&quot;#0f172a&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;https://cdn-icons-png.flaticon.com/512/3135/3135715.png&quot;,&quot;sizes&quot;:&quot;512x512&quot;,&quot;type&quot;:&quot;image/png&quot;}]}">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#0f172a">
+
 <style>
 :root{--bg1:#0f172a;--bg2:#1e293b;--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--accent:#38bdf8;--accent2:#22d3ee;--success:#34d399;--danger:#f87171;--warn:#fbbf24;--purple:#a78bfa;--text:#e2e8f0;--muted:#94a3b8;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0;font-family:Vazirmatn,Tahoma,sans-serif;-webkit-tap-highlight-color:transparent}
@@ -62,7 +69,6 @@ textarea{resize:vertical;min-height:55px}
 .hidden{display:none!important}
 .ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
 .app{display:grid;grid-template-columns:340px 1fr;gap:14px}
-@media(max-width:900px){.app{grid-template-columns:1fr}}
 .sidebar{background:rgba(15,23,42,0.4);border:1px solid var(--border);border-radius:16px;padding:14px;height:calc(100vh - 180px);overflow:hidden;display:flex;flex-direction:column;backdrop-filter:blur(10px)}
 .sidebar-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .sidebar-head h2{margin:0;font-size:15px;color:var(--accent)}
@@ -130,7 +136,6 @@ textarea{resize:vertical;min-height:55px}
 .info-box .value.blue { color: var(--accent); }
 .info-box .copy-btn { position: absolute; top: 8px; left: 8px; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); color: var(--accent); padding: 2px 6px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: .2s;}
 .info-box .copy-btn:hover { background: rgba(56,189,248,0.3); color: #fff; }
-@media(max-width:768px){ .info-grid { grid-template-columns: 1fr 1fr; } }
 
 .bank-card-wrapper{margin-top:14px}
 .bank-card{background:linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.95)); border:1px solid rgba(56,189,248,0.3); border-radius:16px; padding:16px; position:relative; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.3); backdrop-filter:blur(10px)}
@@ -223,6 +228,57 @@ textarea{resize:vertical;min-height:55px}
     word-break: break-word;
     flex: 1;
 }
+
+/* =========================================
+   تنظیمات اختصاصی گوشی موبایل (شبیه اپلیکیشن)
+   این بخش در مک مینی هیچ تغییری ایجاد نمی‌کند
+   ========================================= */
+@media(max-width: 900px){
+    body { padding: 8px; padding-bottom: env(safe-area-inset-bottom); }
+    .wrap { max-width: 100%; }
+    
+    header { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px; }
+    header > div:first-child { text-align: center; margin-bottom: 5px; }
+    .tabs { justify-content: center; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 5px; }
+    .tab { flex-shrink: 0; }
+    .user-picker { justify-content: center; }
+    header > div:nth-child(4) { justify-content: center; }
+    #clock { text-align: center; }
+    
+    /* تبدیل لیست و پروفایل به حالت لایه‌ای (Stack) */
+    .app { grid-template-columns: 1fr; display: block; height: calc(100vh - 260px); margin-top: 5px; }
+    .sidebar { height: 100%; overflow-y: auto; display: flex; padding-bottom: 20px; border-radius: 12px; }
+    .main-area { height: 100%; overflow-y: auto; padding-bottom: 20px; border-radius: 12px; }
+    
+    .app.no-selection .main-area { display: none; }
+    .app.has-selection .sidebar { display: none; }
+    .app.has-selection .main-area { display: block; }
+
+    .back-btn { display: flex; width: 100%; justify-content: center; padding: 12px; background: rgba(56,189,248,0.15); color: var(--accent); border: 1px solid var(--accent); border-radius: 10px; font-weight: 800; font-family: inherit; font-size: 14px; cursor: pointer; margin-bottom: 15px; }
+    
+    .doc-header .top { flex-direction: column; }
+    .doc-header .top > div:last-child { width: 100%; justify-content: center; margin-top: 10px; }
+    .doc-header h2 { font-size: 15px; justify-content: center; text-align: center; }
+    
+    .info-grid { grid-template-columns: 1fr 1fr !important; gap: 8px; }
+    .info-box { padding: 10px; font-size: 12px; }
+    .info-box .value { font-size: 14px; }
+    
+    .events-layout { grid-template-columns: 1fr; }
+    .mobile-event-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+    .mobile-ev-tab { flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 700; background: rgba(15,23,42,0.6); border: 1px solid var(--border); color: var(--muted); cursor: pointer; font-family: inherit; }
+    .mobile-ev-tab.active { background: var(--accent); color: #062334; border-color: var(--accent); }
+    .ev-section { display: none; }
+    .ev-section.active-mobile { display: flex; }
+    
+    .modal { padding: 15px; max-height: 95vh; }
+    .call-phone { font-size: 20px; }
+    .call-actions { grid-template-columns: 1fr 1fr; }
+}
+
+@media(min-width: 901px){
+    .back-btn { display: none; }
+}
 </style>
 </head>
 <body>
@@ -278,7 +334,6 @@ textarea{resize:vertical;min-height:55px}
     <button data-user="all" onclick="switchUser('all')">همه</button>
   </div>
   
-  <!-- دکمه‌های هدر با متن اضافه شده -->
   <div style="display:flex; gap:6px; align-items:center; margin-left:10px; flex-wrap:wrap;">
     <span id="syncStatus" class="mini" style="min-width:90px; text-align:center; cursor:default;">☁️ آماده</span>
     <button class="mini" onclick="syncNow(true)" title="همگام‌سازی دستی">🔄 همگام‌سازی</button>
@@ -1631,6 +1686,14 @@ setTimeout(() => {
   try { checkIncomingCalls(); } catch(e){}
   _refreshPolling();
 }, 500);
+
+// فعال‌سازی قابلیت اپلیکیشن (PWA) برای نصب روی گوشی
+if ('serviceWorker' in navigator) {
+    const swCode = `self.addEventListener('fetch', function(event) {});`;
+    const blob = new Blob([swCode], {type: 'application/javascript'});
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(() => console.log('PWA Ready'));
+}
 </script>
 </body>
 </html>
