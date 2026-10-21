@@ -280,7 +280,6 @@ textarea{resize:vertical;min-height:55px}
   <div id="incomingCallerNumber" class="ltr" style="font-size:42px; font-weight:900; color:var(--success); margin-bottom:16px; letter-spacing:3px;">0912...</div>
   <div id="incomingCallAlert" style="margin-bottom:20px; font-size:14px; font-weight:700; line-height:1.6;"></div>
   
-  <!-- دکمه‌های عملیات فوری روی پاپ آپ -->
   <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; border-top:1px solid rgba(255,255,255,0.1); padding-top:16px;">
      <button id="btnViewProfile" class="mini" style="display:none; background:rgba(56,189,248,0.15); color:var(--accent); border-color:var(--accent);" onclick="viewIncomingProfile()">👁 مشاهده پروفایل</button>
      <button class="mini" style="background:rgba(251,191,36,0.15); color:var(--warn); border-color:rgba(251,191,36,0.4);" onclick="openCallNoteModal()">📝 ثبت یادداشت</button>
@@ -445,9 +444,9 @@ let currentMobileEventTab = 'وبینار';
 let lastProcessedCallId = null;
 let activeCallId = null;
 let callBannerTimeout = null;
-let currentCallFilter = 'all'; // 'all', 'incoming', 'outgoing', 'missed'
-let currentIncomingCallRecord = null; // برای دکمه‌های پاپ‌آپ
-let currentIncomingMatch = null; // برای پیدا کردن پزشک/مخاطب
+let currentCallFilter = 'all';
+let currentIncomingCallRecord = null;
+let currentIncomingMatch = null;
 
 try {
   doctors = JSON.parse(localStorage.getItem(K)||'[]');
@@ -924,6 +923,8 @@ function renderMain(){
         <div class="info-box"><span class="label">⏳ باقی مالی</span><span class="value ${rem$>0?'danger':'success'}">${num(rem$)}</span></div>
       </div>
       
+      ${d.followUp ? `<div class="info-box" style="margin-top: 12px; background:rgba(251,191,36,0.05); border-color:rgba(251,191,36,0.2);"><span class="label" style="color:var(--warn);">📝 پیگیری و توضیحات</span><span class="value" style="font-size:14px; font-weight:600; color:#fff; text-align:right;">${esc(d.followUp)}</span></div>` : ''}
+      
       ${(c.num||c.cvv2||c.pass2)?`
       <div class="bank-card-wrapper">
         <div class="bank-card">
@@ -1037,8 +1038,9 @@ function showCopied(btn){ if(btn){ var old = btn.textContent; btn.textContent = 
 window.openModal = function(html){ document.getElementById('modalHost').innerHTML = `<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal">${html}</div></div>`; };
 window.closeModal = function(){ document.getElementById('modalHost').innerHTML=''; };
 
-window.openDoctorModal = function(editId){
+window.openDoctorModal = function(editId, defaultPhone){
   const d = editId ? doctors.find(x=>x.id===editId) : null; const c = d?.card || {}, f = d?.finance || {};
+  const phoneVal = d?.phone || defaultPhone || '';
   openModal(`
     <h2>${d?'✏️ ویرایش':'➕ ثبت'} پزشک</h2>
     <form id="mDoctorForm" autocomplete="off">
@@ -1050,10 +1052,14 @@ window.openDoctorModal = function(editId){
       </div>
       <div class="sect">👤 اطلاعات فردی</div>
       <div class="row">
-        <div><label>نام *</label><input autocomplete="off" id="mFirstName" required value="${esc(d?.firstName||'')}"><label>کد ملی *</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mNat" required maxlength="10" value="${esc(d?.nat||'')}"><label>رمز سامانه *</label><input autocomplete="off" id="mPass" required value="${esc(d?.pass||'')}"><label>شماره موبایل</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPhone" value="${esc(d?.phone||'')}"></div>
+        <div><label>نام *</label><input autocomplete="off" id="mFirstName" required value="${esc(d?.firstName||'')}"><label>کد ملی *</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mNat" required maxlength="10" value="${esc(d?.nat||'')}"><label>رمز سامانه *</label><input autocomplete="off" id="mPass" required value="${esc(d?.pass||'')}"><label>شماره موبایل</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPhone" value="${esc(phoneVal)}"></div>
         <div><label>نام خانوادگی *</label><input autocomplete="off" id="mLastName" required value="${esc(d?.lastName||'')}"><label>تخصص</label><input autocomplete="off" id="mSpec" value="${esc(d?.spec||'')}"><label>امتیاز درخواستی</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCreditReq" value="${esc(d?.creditReq||'')}"><label>تمدید کارنامه</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mYear" value="${esc(d?.year||'')}"></div>
       </div>
       <div class="row"><div><label>مالک</label><select id="mOwner"><option value="morteza" ${(d?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='morteza'?'selected':''}>مرتضی</option><option value="parvin" ${(d?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='parvin'?'selected':''}>پروین</option></select></div><div></div></div>
+      
+      <div class="sect">📝 پیگیری و توضیحات</div>
+      <textarea id="mFollowUp" placeholder="توضیحات کلی یا وضعیت پیگیری...">${esc(d?.followUp||'')}</textarea>
+
       <div class="sect">💳 کارت بانکی (اختیاری)</div>
       <div class="row"><div><label>شماره کارت</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"></div><div><label>CVV2</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCvv2" maxlength="4" value="${esc(c.cvv2||'')}"></div></div>
       <div class="row"><div><label>ماه</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardM" maxlength="2" value="${esc(c.m||'')}"></div><div><label>سال</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardY" maxlength="2" value="${esc(c.y||'')}"></div></div>
@@ -1070,7 +1076,7 @@ window.openDoctorModal = function(editId){
   document.getElementById('mDoctorForm').onsubmit = e => {
     e.preventDefault();
     const gv = id => toEnDigits(document.getElementById(id)?.value || '').trim();
-    const data = { firstName:document.getElementById('mFirstName').value.trim(), lastName:document.getElementById('mLastName').value.trim(), spec:document.getElementById('mSpec').value.trim(), nat:gv('mNat'), phone:gv('mPhone'), creditReq:Number(gv('mCreditReq')||0), pass:document.getElementById('mPass').value, year:gv('mYear'), status: document.getElementById('mStatus').value, reminderDate: gv('mReminderDate'), card:{ num:gv('mCardNum'), m:gv('mCardM').padStart(2,'0'), y:gv('mCardY').padStart(2,'0'), cvv2:gv('mCvv2'), pass2:gv('mPass2') }, finance:{ total:parseNum(document.getElementById('mTotal')), paid:parseNum(document.getElementById('mPaid')) }, owner: document.getElementById('mOwner').value };
+    const data = { firstName:document.getElementById('mFirstName').value.trim(), lastName:document.getElementById('mLastName').value.trim(), spec:document.getElementById('mSpec').value.trim(), nat:gv('mNat'), phone:gv('mPhone'), creditReq:Number(gv('mCreditReq')||0), pass:document.getElementById('mPass').value, year:gv('mYear'), status: document.getElementById('mStatus').value, reminderDate: gv('mReminderDate'), followUp: document.getElementById('mFollowUp').value.trim(), card:{ num:gv('mCardNum'), m:gv('mCardM').padStart(2,'0'), y:gv('mCardY').padStart(2,'0'), cvv2:gv('mCvv2'), pass2:gv('mPass2') }, finance:{ total:parseNum(document.getElementById('mTotal')), paid:parseNum(document.getElementById('mPaid')) }, owner: document.getElementById('mOwner').value };
     const id = document.getElementById('mEditId').value;
     if(id){ const doctor = doctors.find(x=>x.id===id); if(doctor){ Object.assign(doctor, data); doctor.updatedAt = Date.now(); toast('✅ ویرایش شد'); } }
     else { const n = { id:uid(), ...data, events:[], createdAt:Date.now(), updatedAt: Date.now() }; doctors.unshift(n); selectedDoctorId = n.id; toast('✅ ثبت شد'); }
@@ -1239,6 +1245,16 @@ window.toggleMissed = function(id) {
   save(); renderCalls();
 };
 
+window.openCallProfile = function(phone) {
+  const doc = doctors.find(x => !x.deleted && isSamePhone(x.phone, phone));
+  if (doc) {
+    switchTab('doctors');
+    selectDoctor(doc.id);
+  } else {
+    openDoctorModal(null, phone);
+  }
+};
+
 function renderCalls(){
   const searchEl = document.getElementById('searchCall'); if(!searchEl) return;
   const q = searchEl.value.trim().toLowerCase(), f = document.getElementById('filterCall').value;
@@ -1264,6 +1280,8 @@ function renderCalls(){
     if (c.type === 'outgoing') { typeClass = 'outgoing'; typeIcon = '📤'; typeLabel = 'ارسالی'; }
     else if (c.type === 'missed') { typeClass = 'missed'; typeIcon = '❌'; typeLabel = 'بی‌پاسخ'; }
     
+    const hasDoc = doctors.some(x => !x.deleted && isSamePhone(x.phone, c.phone));
+    
     return `
     <div class="call-card ${typeClass}">
       <div class="call-header">
@@ -1281,6 +1299,7 @@ function renderCalls(){
       ${c.note ? `<div style="background:rgba(56,189,248,0.08); padding:8px 12px; border-radius:8px; border-right:3px solid var(--accent); font-size:13px; color:var(--muted);">${esc(c.note)}</div>` : ''}
 
       <div class="call-actions">
+        <button class="mini green" onclick="openCallProfile('${esc(c.phone)}')">👤 ${hasDoc ? 'پروفایل' : 'ثبت پروفایل'}</button>
         <button class="mini" onclick="copyText('${esc(c.phone)}', this)">📋 کپی</button>
         <a class="mini" href="sms:${esc(c.phone)}">💬 پیامک</a>
         <a class="mini" href="https://t.me/+98${esc(c.phone).replace(/^0/, '')}" target="_blank" style="color: var(--accent); border-color: rgba(56,189,248,0.4);">✈️ تلگرام</a>
