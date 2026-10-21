@@ -6,7 +6,6 @@
 <title>دفتر بازآموزی پزشکان</title>
 <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
 
-<!-- تنظیمات اپلیکیشن (PWA) برای نصب روی گوشی -->
 <link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;دفتر بازآموزی پزشکان&quot;,&quot;short_name&quot;:&quot;بازآموزی&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#0f172a&quot;,&quot;theme_color&quot;:&quot;#0f172a&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;https://cdn-icons-png.flaticon.com/512/3135/3135715.png&quot;,&quot;sizes&quot;:&quot;512x512&quot;,&quot;type&quot;:&quot;image/png&quot;}]}">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -686,7 +685,8 @@ function myContacts(){ const arr = contacts.filter(c => !c.deleted); return curr
 
 /* =========================================================
    ★★★ اصلاح شد: getAutoStatus ★★★
-   حالا همه رویدادها باید earned باشند تا پزشک completed شود
+   برای اینکه پزشک در دسته «تکمیل شده» قرار بگیرد، تمام رویدادهایش
+   باید حتماً در وضعیت «earned» (کامل) باشند.
    ========================================================= */
 function getAutoStatus(d) {
     const req = Number(d.creditReq || 0);
@@ -700,7 +700,7 @@ function getAutoStatus(d) {
 
     if (!hasEvents && !hasFinance && total === 0) return 'new';
 
-    // ★ اصلاح اصلی: همه رویدادها باید کامل (earned) باشند
+    // همه رویدادهای ثبت‌شده باید کاملاً کامل باشند (هیچ گزینه‌ای غیرفعال نباشد)
     const allEventsComplete = hasEvents && events.every(e => eventState(e) === 'earned');
 
     const isCreditsDone = req > 0 ? total >= req : true;
@@ -713,16 +713,16 @@ function getAutoStatus(d) {
 
 /* =========================================================
    ★★★ اصلاح شد: eventCredit ★★★
-   برای وبینار و غیرحضوری، فقط آزمون «قبول» امتیاز می‌گیرد
+   فقط در صورتی امتیاز داده می‌شود که آزمون «قبول» شده باشد
    ========================================================= */
 function eventCredit(e){
   if(e.purchase!=='انجام شد') return 0;
   if(e.type==='وبینار'){ 
     if(e.attend!=='انجام شد') return 0; 
-    if(e.exam!=='قبول') return 0;   // ← اصلاح شد
+    if(e.exam!=='قبول') return 0;
   }
   if(e.type==='غیر حضوری'){ 
-    if(e.exam!=='قبول') return 0;   // ← اصلاح شد
+    if(e.exam!=='قبول') return 0;
   }
   if(e.type==='حضوری'){ 
     if(e.attend!=='انجام شد') return 0; 
@@ -732,18 +732,18 @@ function eventCredit(e){
 
 /* =========================================================
    ★★★ اصلاح شد: eventState ★★★
-   حالت partial برای آزمون ثبت‌نشده
+   اگر هر کدام از گزینه‌ها غیرفعال باشد، حالت partial برمی‌گردد
    ========================================================= */
 function eventState(e){
   if(e.purchase!=='انجام شد') return 'partial';
   if(e.type==='وبینار'){ 
     if(e.attend!=='انجام شد') return 'partial'; 
     if(e.exam==='رد') return 'failed'; 
-    if(e.exam!=='قبول') return 'partial';   // ← اصلاح شد
+    if(e.exam!=='قبول') return 'partial';
   }
   if(e.type==='غیر حضوری'){ 
     if(e.exam==='رد') return 'failed'; 
-    if(e.exam!=='قبول') return 'partial';   // ← اصلاح شد
+    if(e.exam!=='قبول') return 'partial';
   }
   if(e.type==='حضوری'){ 
     if(e.attend!=='انجام شد') return 'partial'; 
@@ -958,20 +958,26 @@ function renderDocList(){
   const searchEl = document.getElementById('searchDoctor'); if(!searchEl) return;
   const q = searchEl.value.trim().toLowerCase();
   const statusPriority = { 'new': 1, 'in_progress': 2, 'completed': 3 };
+  
   let allMyDocs = myDoctors().filter(d => !q || fullName(d).toLowerCase().includes(q) || (d.spec||'').toLowerCase().includes(q) || (d.phone||'').includes(q) || (d.nat||'').includes(q));
+  
+  // محاسبه دقیق وضعیت برای هر پزشک
   allMyDocs = allMyDocs.map(d => ({ ...d, _autoStatus: getAutoStatus(d) }));
+
   allMyDocs.sort((a, b) => {
     const pA = statusPriority[a._autoStatus] || 5;
     const pB = statusPriority[b._autoStatus] || 5;
     if (pA !== pB) return pA - pB;
     return (b.updatedAt || 0) - (a.updatedAt || 0);
   });
+
   const categories = { 
     'all': { title: 'همه' }, 
     'new': { title: '📋 پیگیری' }, 
     'in_progress': { title: '⚡ در جریان' }, 
     'completed': { title: '🏆 تکمیل شده' } 
   };
+  
   let tabsHtml = '';
   for (const [key, cat] of Object.entries(categories)) {
     const count = key === 'all' ? allMyDocs.length : allMyDocs.filter(d => d._autoStatus === key).length;
@@ -979,9 +985,11 @@ function renderDocList(){
     tabsHtml += `<button class="cat-tab ${extraClass} ${key} ${currentDocCategory === key ? 'active' : ''}" onclick="setDocCategory('${key}')">${cat.title} (${num(count)})</button>`;
   }
   const tabsContainer = document.getElementById('docCategoryTabs'); if(tabsContainer) tabsContainer.innerHTML = tabsHtml;
+  
   const displayDocs = currentDocCategory === 'all' ? allMyDocs : allMyDocs.filter(d => d._autoStatus === currentDocCategory);
   const el = document.getElementById('docList');
   if(!displayDocs.length){ el.innerHTML='<div class="empty">پزشکی در این دسته‌بندی یافت نشد</div>'; return; }
+  
   let html = '';
   html += displayDocs.map(d => {
     const req = Number(d.creditReq||0), total = totalEarned(d), pct = req ? Math.min(100, Math.round(total/req*100)) : 0;
@@ -1043,6 +1051,7 @@ function renderMain(){
   const cr = doctorCredits(d), total = totalEarned(d), req = Number(d.creditReq||0), rem = remainingCredits(d);
   const totalListed = totalListedCredits(d);
   const c = d.card||{}, f = d.finance||{}, rem$ = Math.max(0, Number(f.total||0)-Number(f.paid||0)), complete = rem===0 && req>0;
+  
   const autoStatus = getAutoStatus(d);
   const statusMap = { 
     'new': {txt: '📋 پیگیری', cls: 'purple'}, 
@@ -1050,6 +1059,7 @@ function renderMain(){
     'completed': {txt: '🏆 تکمیل شده', cls: 'green'} 
   };
   const st = statusMap[autoStatus];
+
   const daysLeft = getDaysDifference(d.reminderDate);
   let reminderBadge = '';
   if (daysLeft !== null) {
@@ -1058,6 +1068,7 @@ function renderMain(){
       else if (daysLeft <= 3) reminderBadge = `<span class="badge yellow pulse-warn" style="font-weight:800; font-size:12px;">⏳ ${daysLeft} روز مانده</span>`;
       else reminderBadge = `<span class="badge yellow" style="font-weight:800; font-size:12px;">⏳ ${daysLeft} روز مانده</span>`;
   }
+
   el.innerHTML = `
     <button class="back-btn" onclick="backToList()">← بازگشت به لیست</button>
     <div class="doc-header">
@@ -1072,11 +1083,13 @@ function renderMain(){
           <button class="mini danger" onclick="delDoctor('${d.id}')">🗑 حذف</button>
         </div>
       </div>
+      
       <div class="info-grid">
         <div class="info-box"><span class="label">📞 موبایل</span><span class="value ltr" style="font-size:18px;">${esc(d.phone || '—')}</span>${d.phone ? `<button class="copy-btn" onclick="copyText('${esc(d.phone)}',this)">📋</button>` : ''}</div>
         <div class="info-box"><span class="label" style="font-size: 14px;">🔑 رمز سامانه</span><span class="value ltr">${esc(d.pass || '—')}</span>${d.pass ? `<button class="copy-btn" onclick="copyText('${esc(d.pass)}',this)">📋</button>` : ''}</div>
         <div class="info-box"><span class="label" style="font-size: 14px;">🆔 کد ملی</span><span class="value ltr">${esc(d.nat || '—')}</span>${d.nat ? `<button class="copy-btn" onclick="copyText('${esc(d.nat)}',this)">📋</button>` : ''}</div>
       </div>
+
       <div class="info-grid">
         <div class="info-box"><span class="label">🎯 امتیاز درخواستی</span><span class="value">${num(req)}</span></div>
         <div class="info-box"><span class="label">📊 مجموع امتیازهای لیست</span><span class="value blue">${num(totalListed)}</span></div>
@@ -1092,12 +1105,15 @@ function renderMain(){
             </div>
         </div>
       </div>
+      
       <div class="info-grid">
         <div class="info-box"><span class="label">💰 کل هزینه</span><span class="value">${num(f.total||0)}</span></div>
         <div class="info-box"><span class="label">✅ پرداختی</span><span class="value success">${num(f.paid||0)}</span></div>
         <div class="info-box"><span class="label">⏳ باقی مالی</span><span class="value ${rem$>0?'danger':'success'}">${num(rem$)}</span></div>
       </div>
+      
       ${d.followUp ? `<div class="info-box" style="margin-top: 12px; background:rgba(251,191,36,0.05); border-color:rgba(251,191,36,0.2);"><span class="label" style="color:var(--warn);">📝 پیگیری و توضیحات</span><span class="value" style="font-size:14px; font-weight:600; color:#fff; text-align:right;">${esc(d.followUp)}</span></div>` : ''}
+      
       ${(c.num||c.cvv2||c.pass2)?`
       <div class="bank-card-wrapper">
         <div class="bank-card">
@@ -1111,6 +1127,7 @@ function renderMain(){
         </div>
       </div>`:''}
     </div>
+    
     <div class="events-layout">
       <div class="mobile-event-tabs">
         <button class="mobile-ev-tab ${currentMobileEventTab==='وبینار'?'active':''}" onclick="switchMobileEventTab('وبینار')">💻 وبینار</button>
@@ -1226,14 +1243,18 @@ window.openDoctorModal = function(editId, defaultPhone){
         <div><label>نام *</label><input autocomplete="off" id="mFirstName" required value="${esc(d?.firstName||'')}"><label>کد ملی *</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mNat" required maxlength="10" value="${esc(d?.nat||'')}"><label>رمز سامانه *</label><input autocomplete="off" id="mPass" required value="${esc(d?.pass||'')}"><label>شماره موبایل</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPhone" value="${esc(phoneVal)}"></div>
         <div><label>نام خانوادگی *</label><input autocomplete="off" id="mLastName" required value="${esc(d?.lastName||'')}"><label>تخصص</label><input autocomplete="off" id="mSpec" value="${esc(d?.spec||'')}"><label>امتیاز درخواستی</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCreditReq" value="${esc(d?.creditReq||'')}"><label>تمدید کارنامه</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mYear" value="${esc(d?.year||'')}"></div>
       </div>
+      
       <div class="sect">📊 امتیازات دستی (وبینار و غیرحضوری)</div>
       <div class="row">
           <div><label>امتیاز وبینار 💻</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mManualWebinar" value="${esc(d?.manualWebinar||'')}"></div>
           <div><label>امتیاز غیرحضوری 📁</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mManualOffline" value="${esc(d?.manualOffline||'')}"></div>
       </div>
+
       <div class="row"><div><label>مالک</label><select id="mOwner"><option value="morteza" ${(d?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='morteza'?'selected':''}>مرتضی</option><option value="parvin" ${(d?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='parvin'?'selected':''}>پروین</option></select></div><div></div></div>
+      
       <div class="sect">📝 پیگیری و توضیحات</div>
       <textarea id="mFollowUp" placeholder="توضیحات کلی یا وضعیت پیگیری...">${esc(d?.followUp||'')}</textarea>
+
       <div class="sect">💳 کارت بانکی (اختیاری)</div>
       <div class="row"><div><label>شماره کارت</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"></div><div><label>CVV2</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCvv2" maxlength="4" value="${esc(c.cvv2||'')}"></div></div>
       <div class="row"><div><label>ماه</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardM" maxlength="2" value="${esc(c.m||'')}"></div><div><label>سال</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardY" maxlength="2" value="${esc(c.y||'')}"></div></div>
@@ -1306,8 +1327,10 @@ function renderContacts() {
   const searchEl = document.getElementById('searchContact'); if(!searchEl) return;
   const q = searchEl.value.trim().toLowerCase();
   const arr = myContacts().filter(c => !q || c.name.toLowerCase().includes(q) || c.phone.includes(q));
+  
   const el = document.getElementById('listContacts');
   if (!arr.length) { el.innerHTML = '<div class="empty">مخاطبی یافت نشد</div>'; return; }
+  
   el.innerHTML = arr.map(c => `
     <div style="background:rgba(15,23,42,0.6); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
       <div>
@@ -1348,6 +1371,7 @@ window.openContactModal = function(editId) {
       <button class="btn ghost" type="button" onclick="closeModal()">انصراف</button>
     </form>
   `);
+  
   document.getElementById('mContactForm').onsubmit = e => {
     e.preventDefault();
     const gv = id => toEnDigits(document.getElementById(id)?.value || '').trim();
@@ -1411,7 +1435,9 @@ window.highlightCall = function(id) {
   document.querySelectorAll('.call-filter-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.filter === 'all');
   });
+
   switchTab('calls');
+
   setTimeout(() => {
     const card = document.querySelector(`[data-call-id="${id}"]`);
     if (card) {
@@ -1425,6 +1451,7 @@ window.highlightCall = function(id) {
 function renderCalls(){
   const searchEl = document.getElementById('searchCall'); if(!searchEl) return;
   const q = searchEl.value.trim().toLowerCase(), f = document.getElementById('filterCall').value;
+  
   const arr = myCalls().filter(c => {
     if (currentCallFilter === 'noted') { if (!c.note || !c.note.trim()) return false; }
     else if (currentCallFilter !== 'all' && c.type !== currentCallFilter) return false;
@@ -1434,16 +1461,22 @@ function renderCalls(){
     if(q && !(c.phone.includes(q) || (c.name||'').toLowerCase().includes(q) || c.subject.toLowerCase().includes(q))) return false; 
     return true; 
   });
+  
   const el = document.getElementById('listCalls'); if(!arr.length){ el.innerHTML='<div class="empty" style="padding: 40px; text-align: center; color: var(--muted);">تماسی با این فیلتر یافت نشد</div>'; return; }
+  
   const fCls = { 'پیگیری‌نشده':'red', 'در حال پیگیری':'yellow', 'پیگیری‌شده':'green' };
+  
   el.innerHTML = arr.map(c => {
     let typeClass = 'incoming';
     let typeIcon = '📥';
     let typeLabel = 'دریافتی';
+    
     if (c.type === 'outgoing') { typeClass = 'outgoing'; typeIcon = '📤'; typeLabel = 'ارسالی'; }
     else if (c.type === 'missed') { typeClass = 'missed'; typeIcon = '❌'; typeLabel = 'بی‌پاسخ'; }
+    
     const hasDoc = doctors.some(x => !x.deleted && isSamePhone(x.phone, c.phone));
     const cleanNum = cleanPhoneForLink(c.phone);
+    
     return `
     <div class="call-card ${typeClass}" data-call-id="${c.id}">
       <div class="call-header">
@@ -1460,6 +1493,7 @@ function renderCalls(){
           </div>
         </div>
       </div>
+      
       ${c.note ? `
         <div class="call-note-box">
             <div class="note-text">📝 ${esc(c.note)}</div>
@@ -1470,6 +1504,7 @@ function renderCalls(){
             <button class="mini" onclick="openCallNoteModal('${c.id}')" style="padding:6px 12px; font-size:13px; color:var(--accent); border-color:rgba(56,189,248,0.4);">📝 افزودن یادداشت</button>
         </div>
       `}
+
       <div class="call-actions">
         <a class="mini btn-call" href="tel:${esc(c.phone)}">📞 تماس</a>
         <button class="mini green" onclick="openCallProfile('${esc(c.phone)}')">👤 ${hasDoc ? 'پروفایل' : 'ثبت پروفایل'}</button>
@@ -1549,13 +1584,16 @@ window.registerFromCallBanner = function() {
 window.openCallNoteModal = function(id) {
   let c = null;
   let isFromBanner = false;
+
   if (id) {
     c = calls.find(x => x.id === id);
   } else {
     c = currentIncomingCallRecord;
     isFromBanner = true;
   }
+  
   if(!c) return;
+
   openModal(`
     <h2>📝 ${isFromBanner ? 'ثبت' : 'ویرایش'} یادداشت تماس</h2>
     <div style="font-size: 18px; font-weight: 800; color: var(--accent); margin-bottom: 16px; text-align: center; direction: ltr;">${esc(c.phone)}</div>
@@ -1572,7 +1610,9 @@ window.openCallNoteModal = function(id) {
       <button class="btn ghost" type="button" onclick="closeModal()">انصراف</button>
     </form>
   `);
+  
   setTimeout(() => { const el = document.getElementById('nNote'); if(el) el.focus(); }, 150);
+
   document.getElementById('mNoteForm').onsubmit = ev => {
     ev.preventDefault();
     c.follow = document.getElementById('nFollow').value;
@@ -1580,6 +1620,7 @@ window.openCallNoteModal = function(id) {
     c.updatedAt = Date.now();
     save();
     closeModal();
+
     if (isFromBanner) {
       if (!document.getElementById('incomingCallBanner').classList.contains('hidden')) {
         hideCallBanner();
@@ -1598,25 +1639,32 @@ function checkIncomingCalls() {
     let done = false;
     const finish = () => { if (!done) { done = true; resolve(); } };
     const timeout = setTimeout(finish, POLL_CFG.CALL_TIMEOUT);
+
     jsonp(SCRIPT_URL + '?action=getLastCall&t=' + Date.now(), function(data) {
       clearTimeout(timeout);
       if (data && data.EventType === 'CallIncomingStarted' && data.CallerNumber) {
         const isNewCall = data.CallId !== lastProcessedCallId;
         const bannerVisible = !document.getElementById('incomingCallBanner').classList.contains('hidden');
+        
         if (isNewCall) {
           lastProcessedCallId = data.CallId;
           activeCallId = data.CallId;
           _callRinging = true;
+          
           let callerNumber = data.CallerNumber;
           if (callerNumber.length === 10 && callerNumber.startsWith('9')) {
             callerNumber = '0' + callerNumber;
           }
+
           const doctor = doctors.find(d => !d.deleted && isSamePhone(d.phone, callerNumber));
           const contact = contacts.find(c => !c.deleted && isSamePhone(c.phone, callerNumber));
+          
           currentIncomingMatch = { doctor, contact };
+          
           let callerName = 'شماره ناشناس';
           let alertMessage = '';
           let alertType = 'info';
+
           if (doctor) {
             callerName = fullName(doctor);
             const rem = remainingCredits(doctor);
@@ -1625,6 +1673,7 @@ function checkIncomingCalls() {
             alertMessage = `👨‍⚕️ ${callerName}`;
             if (rem > 0) { alertMessage += ` | ⚠️ ${num(rem)} امتیاز کم`; alertType = 'warn'; }
             if (rem$ > 0) { alertMessage += ` | 💸 ${num(rem$)} تومان بدهکار`; alertType = 'danger'; }
+            
             selectedDoctorId = doctor.id;
             currentMobileEventTab = 'وبینار';
             renderDocList();
@@ -1636,13 +1685,17 @@ function checkIncomingCalls() {
           } else {
             alertMessage = 'شماره ناشناس';
           }
+
           document.getElementById('incomingCallerName').textContent = callerName;
           document.getElementById('incomingCallerNumber').textContent = callerNumber;
+          
           const alertBox = document.getElementById('incomingCallAlert');
           alertBox.textContent = alertMessage;
           alertBox.style.color = alertType === 'danger' ? 'var(--danger)' : (alertType === 'warn' ? 'var(--warn)' : 'var(--muted)');
+          
           const btnViewProfile = document.getElementById('btnViewProfile');
           const btnRegisterProfile = document.getElementById('btnRegisterProfile');
+          
           if (doctor || contact) {
               btnViewProfile.style.display = 'inline-flex';
               btnRegisterProfile.style.display = 'none';
@@ -1650,14 +1703,20 @@ function checkIncomingCalls() {
               btnViewProfile.style.display = 'none';
               btnRegisterProfile.style.display = 'inline-flex';
           }
+          
           document.getElementById('btnTelegram').href = `https://t.me/+98${cleanPhoneForLink(callerNumber)}`;
           document.getElementById('btnBale').href = `https://ble.ir/+98${cleanPhoneForLink(callerNumber)}`;
+          
           document.getElementById('incomingCallBanner').classList.remove('hidden');
+
           try { document.getElementById('ringtone').play(); } catch(err) {}
+          
           if ("Notification" in window && Notification.permission === "granted") {
             new Notification("تماس ورودی", { body: alertMessage, icon: "https://cdn-icons-png.flaticon.com/512/724/724664.png" });
           }
+
           toast(alertMessage, alertType);
+
           currentIncomingCallRecord = {
             id: uid(),
             owner: currentUser,
@@ -1670,9 +1729,12 @@ function checkIncomingCalls() {
             updatedAt: Date.now(),
             type: 'incoming'
           };
+          
           calls.unshift(currentIncomingCallRecord);
+          
           save(); 
           renderCalls(); 
+
           if (data.hasEnded) {
             callBannerTimeout = setTimeout(hideCallBanner, 15000);
           }
@@ -1706,6 +1768,7 @@ let _pollLastActive = Date.now();
 let _callRinging    = false;
 
 function _isIdle(){ return Date.now() - _pollLastActive > POLL_CFG.IDLE_AFTER; }
+
 function _syncDelay(){
   if (document.hidden || !navigator.onLine) return POLL_CFG.SYNC_HIDDEN;
   return _isIdle() ? POLL_CFG.SYNC_IDLE : POLL_CFG.SYNC_VISIBLE;
@@ -1715,6 +1778,7 @@ function _callDelay(){
   if (_callRinging) return POLL_CFG.CALL_RINGING;
   return _isIdle() ? POLL_CFG.CALL_IDLE : POLL_CFG.CALL_VISIBLE;
 }
+
 function _armSyncTimer(){
   if (_pollSyncTimer) clearTimeout(_pollSyncTimer);
   const base = _syncDelay();
@@ -1725,6 +1789,7 @@ function _armSyncTimer(){
     _armSyncTimer();
   }, base + backoff);
 }
+
 function _armCallTimer(){
   if (_pollCallTimer) clearTimeout(_pollCallTimer);
   const base = _callDelay();
@@ -1734,6 +1799,7 @@ function _armCallTimer(){
     _armCallTimer();
   }, base);
 }
+
 function _refreshPolling(){ _armSyncTimer(); _armCallTimer(); }
 
 document.addEventListener('visibilitychange', () => {
