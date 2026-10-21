@@ -204,7 +204,7 @@ textarea{resize:vertical;min-height:55px}
 .btn-call { background: rgba(52,211,153,0.15) !important; color: var(--success) !important; border-color: rgba(52,211,153,0.4) !important; font-weight: 800 !important; }
 .btn-call:hover { background: rgba(52,211,153,0.3) !important; box-shadow: 0 0 10px rgba(52,211,153,0.3); }
 
-/* استایل جدید برای باکس یادداشت در لیست تماس‌ها */
+/* استایل باکس یادداشت در لیست تماس‌ها */
 .call-note-box {
     background: rgba(56,189,248,0.1);
     padding: 12px;
@@ -895,7 +895,17 @@ function renderMain(){
       <div class="info-grid">
         <div class="info-box"><span class="label">🎯 امتیاز درخواستی</span><span class="value">${num(req)}</span></div>
         <div class="info-box"><span class="label">📊 مجموع امتیازهای لیست</span><span class="value blue">${num(totalListed)}</span></div>
-        <div class="info-box"><span class="label">⏳ باقی‌مانده</span><span class="value ${rem>0?'danger':'success'}">${num(rem)}</span></div>
+        <div class="info-box" style="display:flex; flex-direction:row; align-items:center; justify-content:space-between; gap:8px; padding:8px 12px;">
+            <div style="display:flex; flex-direction:column; align-items:center; flex:1;">
+                <span class="label" style="font-size:12px; color:var(--purple); margin-bottom:4px;">💻 وبینار</span>
+                <input type="text" id="inpManualWebinar" value="${esc(d.manualWebinar||'')}" style="padding:4px; text-align:center; font-size:14px; font-weight:800; height:32px; border-radius:8px; width:100%;" onchange="saveManualCredits('${d.id}', 'manualWebinar', this.value)">
+            </div>
+            <div style="width:1px; height:40px; background:var(--border);"></div>
+            <div style="display:flex; flex-direction:column; align-items:center; flex:1;">
+                <span class="label" style="font-size:12px; color:var(--warn); margin-bottom:4px;">📁 غیرحضوری</span>
+                <input type="text" id="inpManualOffline" value="${esc(d.manualOffline||'')}" style="padding:4px; text-align:center; font-size:14px; font-weight:800; height:32px; border-radius:8px; width:100%;" onchange="saveManualCredits('${d.id}', 'manualOffline', this.value)">
+            </div>
+        </div>
       </div>
       
       <div class="info-grid">
@@ -1062,6 +1072,15 @@ window.openDoctorModal = function(editId, defaultPhone){
     else { const n = { id:uid(), ...data, events:[], createdAt:Date.now(), updatedAt: Date.now() }; doctors.unshift(n); selectedDoctorId = n.id; toast('✅ ثبت شد'); }
     save(); closeModal(); renderAll();
   };
+};
+
+window.saveManualCredits = function(doctorId, field, value) {
+    const d = doctors.find(x => x.id === doctorId);
+    if(!d) return;
+    d[field] = Number(toEnDigits(value)) || 0;
+    d.updatedAt = Date.now();
+    save(); // ذخیره در حافظه و همگام‌سازی ابری
+    toast('✅ امتیاز دستی ذخیره شد');
 };
 
 window.openEventModal = function(editId, presetType){
