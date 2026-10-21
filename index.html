@@ -231,24 +231,50 @@ textarea{resize:vertical;min-height:55px}
 
 /* =========================================
    تنظیمات اختصاصی گوشی موبایل (شبیه اپلیکیشن)
-   این بخش در مک مینی هیچ تغییری ایجاد نمی‌کند
    ========================================= */
+.mobile-bottom-nav { display: none; }
+
 @media(max-width: 900px){
-    body { padding: 8px; padding-bottom: env(safe-area-inset-bottom); }
+    body { padding: 8px; padding-bottom: 80px; } /* فضا برای منوی پایین */
     .wrap { max-width: 100%; }
     
-    header { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px; }
-    header > div:first-child { text-align: center; margin-bottom: 5px; }
-    .tabs { justify-content: center; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 5px; }
-    .tab { flex-shrink: 0; }
-    .user-picker { justify-content: center; }
-    header > div:nth-child(4) { justify-content: center; }
-    #clock { text-align: center; }
+    /* هدر چسبان و شیشه‌ای */
+    header { 
+        position: sticky; top: 0; z-index: 1000; 
+        margin: -8px -8px 12px -8px; border-radius: 0 0 16px 16px;
+        background: rgba(15,23,42,0.85); backdrop-filter: blur(15px);
+        display: flex; flex-direction: column; gap: 8px; padding: 12px;
+    }
+    header > div:first-child { text-align: center; }
+    .tabs { display: none !important; } /* مخفی کردن تب‌های بالا */
     
-    /* تبدیل لیست و پروفایل به حالت لایه‌ای (Stack) */
-    .app { grid-template-columns: 1fr; display: block; height: calc(100vh - 260px); margin-top: 5px; }
-    .sidebar { height: 100%; overflow-y: auto; display: flex; padding-bottom: 20px; border-radius: 12px; }
-    .main-area { height: 100%; overflow-y: auto; padding-bottom: 20px; border-radius: 12px; }
+    .user-picker { justify-content: center; width: 100%; }
+    .header-actions { display: flex; justify-content: center; gap: 6px; width: 100%; flex-wrap: wrap; }
+    #clock { text-align: center; margin-top: 5px; }
+
+    /* منوی ناوبری پایین */
+    .mobile-bottom-nav {
+        display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+        background: rgba(15,23,42,0.95); backdrop-filter: blur(15px);
+        border-top: 1px solid var(--border); z-index: 1000;
+        padding: 8px 10px; padding-bottom: calc(8px + env(safe-area-inset-bottom));
+        justify-content: space-around;
+    }
+    .mobile-bottom-nav button {
+        background: transparent; border: none; color: var(--muted);
+        font-family: inherit; font-size: 11px; font-weight: 700;
+        display: flex; flex-direction: column; align-items: center; gap: 4px;
+        padding: 6px 12px; border-radius: 10px; cursor: pointer; transition: 0.2s;
+    }
+    .mobile-bottom-nav button .icon { font-size: 20px; }
+    .mobile-bottom-nav button.active {
+        color: var(--accent); background: rgba(56,189,248,0.1);
+    }
+
+    /* حل مشکل اسکرول */
+    .app { display: block; height: auto; }
+    .sidebar { height: auto; overflow-y: visible; padding-bottom: 20px; border-radius: 12px; }
+    .main-area { height: auto; overflow-y: visible; padding-bottom: 20px; border-radius: 12px; }
     
     .app.no-selection .main-area { display: none; }
     .app.has-selection .sidebar { display: none; }
@@ -260,9 +286,15 @@ textarea{resize:vertical;min-height:55px}
     .doc-header .top > div:last-child { width: 100%; justify-content: center; margin-top: 10px; }
     .doc-header h2 { font-size: 15px; justify-content: center; text-align: center; }
     
+    /* دو ستونه کردن کادرها */
     .info-grid { grid-template-columns: 1fr 1fr !important; gap: 8px; }
     .info-box { padding: 10px; font-size: 12px; }
     .info-box .value { font-size: 14px; }
+    
+    /* کارت بانکی */
+    .bank-row { flex-wrap: wrap; }
+    .bank-box.card-number { flex: 100%; width: 100%; }
+    .bank-box.other { flex: 1 1 18%; min-width: 60px; }
     
     .events-layout { grid-template-columns: 1fr; }
     .mobile-event-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
@@ -278,6 +310,7 @@ textarea{resize:vertical;min-height:55px}
 
 @media(min-width: 901px){
     .back-btn { display: none; }
+    .header-actions { display: flex; gap: 6px; align-items: center; margin-left: 10px; }
 }
 </style>
 </head>
@@ -334,7 +367,7 @@ textarea{resize:vertical;min-height:55px}
     <button data-user="all" onclick="switchUser('all')">همه</button>
   </div>
   
-  <div style="display:flex; gap:6px; align-items:center; margin-left:10px; flex-wrap:wrap;">
+  <div class="header-actions">
     <span id="syncStatus" class="mini" style="min-width:90px; text-align:center; cursor:default;">☁️ آماده</span>
     <button class="mini" onclick="syncNow(true)" title="همگام‌سازی دستی">🔄 همگام‌سازی</button>
     <button class="mini" onclick="exportData()" title="پشتیبان‌گیری">💾 پشتیبان</button>
@@ -413,6 +446,13 @@ textarea{resize:vertical;min-height:55px}
 </div>
 
 </div>
+
+<nav class="mobile-bottom-nav">
+    <button data-tab="dash" onclick="switchTab('dash')"><span class="icon">📊</span>داشبورد</button>
+    <button data-tab="doctors" class="active" onclick="switchTab('doctors')"><span class="icon">👨‍⚕️</span>پزشکان</button>
+    <button data-tab="contacts" onclick="switchTab('contacts')"><span class="icon">📇</span>مخاطبین</button>
+    <button data-tab="calls" onclick="switchTab('calls')"><span class="icon">📞</span>تماس‌ها</button>
+</nav>
 
 <div class="toast" id="toast"></div>
 <div id="modalHost"></div>
@@ -787,6 +827,8 @@ function pullFromCloud(){
 window.switchTab = function(tabName){
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden'));
+  document.querySelectorAll('.mobile-bottom-nav button').forEach(x=>{ if(x.dataset.tab === tabName) x.classList.add('active'); else x.classList.remove('active'); });
+  
   const tb = document.querySelector('.tab[data-tab="'+tabName+'"]'); if(tb) tb.classList.add('active');
   const content = document.getElementById('tab-'+tabName); if(content) content.classList.remove('hidden');
   if(tabName === 'dash') renderDash();
@@ -889,9 +931,24 @@ function renderDocList(){
   el.innerHTML = html;
 }
 
-function selectDoctor(id){ selectedDoctorId = id; currentMobileEventTab = 'وبینار'; renderDocList(); renderMain(); updateMobileSelection(); }
+function selectDoctor(id){ 
+    selectedDoctorId = id; 
+    currentMobileEventTab = 'وبینار'; 
+    renderDocList(); 
+    renderMain(); 
+    updateMobileSelection(); 
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // اسکرول به بالا در موبایل
+}
+
 function updateMobileSelection(){ const app = document.getElementById('appContainer'); if(!app) return; if(selectedDoctorId){ app.classList.add('has-selection'); app.classList.remove('no-selection'); } else { app.classList.remove('has-selection'); app.classList.add('no-selection'); } }
-window.backToList = function(){ selectedDoctorId = null; renderDocList(); renderMain(); updateMobileSelection(); };
+
+window.backToList = function(){ 
+    selectedDoctorId = null; 
+    renderDocList(); 
+    renderMain(); 
+    updateMobileSelection(); 
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // اسکرول به بالا در موبایل
+};
 
 window.switchMobileEventTab = function(tab) {
   currentMobileEventTab = tab;
