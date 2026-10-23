@@ -168,9 +168,9 @@ body.dark-mode .btn-outline:hover { background: #334155; }
 .btn-danger:hover { background: #fee2e2; }
 body.dark-mode .btn-danger { background: #7f1d1d; color: #fca5a5; border-color: #991b1b; }
 
-/* گرید اطلاعات (ردیف‌های افقی و کوچک‌تر شده) */
-.info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; width: 68%; }
-.bank-info-grid { display: grid; grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 24px; width: 68%; }
+/* گریدهای اطلاعات بازنویسی شده */
+.info-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; width: 100%; }
+.info-grid-3 { display: grid; grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr 2.5fr; gap: 12px; margin-bottom: 24px; width: 100%; }
 
 .info-box { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; position: relative; }
 .info-box .label { font-size: 11.5px; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
@@ -260,10 +260,6 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
 .back-btn { display: none; }
 .mobile-event-tabs { display: none; }
 
-@media (max-width: 1200px) {
-  .info-grid, .bank-info-grid { width: 80%; }
-}
-
 @media (max-width: 1000px) {
   .events-layout { grid-template-columns: 1fr 1fr; }
 }
@@ -305,9 +301,12 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
   .mobile-bottom-nav button .icon { font-size: 20px; }
   .mobile-bottom-nav button.active { color: var(--accent-hover); background: var(--accent-light); }
   
-  .info-grid { grid-template-columns: 1fr 1fr !important; width: 100%; }
-  .bank-info-grid { grid-template-columns: 1fr 1fr !important; width: 100%; }
-  .bank-info-grid > div:first-child { grid-column: span 2; }
+  /* گریدهای موبایل */
+  .info-grid-4 { grid-template-columns: 1fr 1fr !important; }
+  .info-grid-3 { grid-template-columns: 1fr 1fr !important; }
+  .info-grid-3 > div:nth-child(1) { grid-column: span 2; } /* شماره کارت */
+  .info-grid-3 > div:nth-child(6) { grid-column: span 2; } /* کادر امتیازات دستی */
+  
   .row, .row3 { grid-template-columns: 1fr; }
 }
 </style>
@@ -1065,7 +1064,8 @@ function renderMain(){
       </div>
     </div>
 
-    <div class="info-grid">
+    <!-- ردیف اول: کد ملی، رمز سامانه، موبایل، امتیاز درخواستی -->
+    <div class="info-grid-4">
       <div class="info-box">
         <span class="label">🆔 کد ملی</span>
         <span class="value ltr">${esc(d.nat || '—')}</span>
@@ -1081,44 +1081,35 @@ function renderMain(){
         <span class="value ltr">${esc(d.phone || '—')}</span>
         ${d.phone ? `<button class="copy-btn" onclick="copyText('${esc(d.phone)}',this)">📋</button>` : ''}
       </div>
-    </div>
-
-    <div class="info-grid">
-      <div class="info-box"><span class="label">🎯 امتیاز درخواستی</span><span class="value">${num(req)}</span></div>
-      <div class="info-box"><span class="label">📊 مجموع لیست</span><span class="value blue">${num(totalListed)}</span></div>
-      
-      <!-- کادر سه گزینه‌ای امتیازات دستی -->
-      <div class="info-box" style="flex-direction:row; align-items:center; justify-content:space-between; padding:8px 4px;">
-          <div style="display:flex; flex-direction:column; align-items:center; flex:1;">
-              <span class="label" style="color:var(--purple); font-size:10px;">💻 وبینار</span>
-              <span class="value" style="font-size:14px;">${num(d.manualWebinar||0)}</span>
-          </div>
-          <div style="width:1px; height:30px; background:var(--border-color);"></div>
-          <div style="display:flex; flex-direction:column; align-items:center; flex:1;">
-              <span class="label" style="color:var(--warn); font-size:10px;">📁 غیرحضوری</span>
-              <span class="value" style="font-size:14px;">${num(d.manualOffline||0)}</span>
-          </div>
-          <div style="width:1px; height:30px; background:var(--border-color);"></div>
-          <div style="display:flex; flex-direction:column; align-items:center; flex:1;">
-              <span class="label" style="color:var(--teal); font-size:10px;">🏢 حضوری</span>
-              <span class="value" style="font-size:14px;">${num(d.manualInPerson||0)}</span>
-          </div>
+      <div class="info-box">
+        <span class="label">🎯 امتیاز درخواستی</span>
+        <span class="value">${num(req)}</span>
       </div>
     </div>
 
-    <div class="info-grid">
-      <div class="info-box"><span class="label">💰 کل هزینه</span><span class="value">${num(f.total||0)}</span></div>
-      <div class="info-box"><span class="label">✅ پرداختی</span><span class="value success">${num(f.paid||0)}</span></div>
-      <div class="info-box"><span class="label">⏳ باقی مالی</span><span class="value ${rem$>0?'danger':'success'}">${num(rem$)}</span></div>
+    <!-- ردیف دوم: کل هزینه، پرداختی، باقی مانده، مجموع لیست -->
+    <div class="info-grid-4">
+      <div class="info-box">
+        <span class="label">💰 کل هزینه</span>
+        <span class="value">${num(f.total||0)}</span>
+      </div>
+      <div class="info-box">
+        <span class="label">✅ پرداختی</span>
+        <span class="value success">${num(f.paid||0)}</span>
+      </div>
+      <div class="info-box">
+        <span class="label">⏳ باقی مالی</span>
+        <span class="value ${rem$>0?'danger':'success'}">${num(rem$)}</span>
+      </div>
+      <div class="info-box">
+        <span class="label">📊 مجموع لیست</span>
+        <span class="value blue">${num(totalListed)}</span>
+      </div>
     </div>
-    
-    ${d.followUp ? `<div style="background:#fffbeb; border:1px solid #fef3c7; border-radius:12px; padding:16px; margin-bottom:20px;">
-      <div style="font-size:12px; color:#d97706; font-weight:800; margin-bottom:6px;">📝 پیگیری و توضیحات</div>
-      <div style="font-size:13.5px; color:var(--text-main); line-height:1.6;">${esc(d.followUp)}</div>
-    </div>` : ''}
-    
-    ${(c.num||c.cvv2||c.pass2)?`
-    <div class="bank-info-grid">
+
+    <!-- ردیف سوم: مشخصات کارت + کادر ۳تایی امتیازات دستی -->
+    <div class="info-grid-3">
+      ${(c.num||c.cvv2||c.pass2)?`
         <div class="info-box">
             <span class="label" style="margin-bottom:4px;">شماره کارت</span>
             <div style="display:flex; align-items:center; justify-content:center; gap:8px; width:100%;">
@@ -1130,7 +1121,35 @@ function renderMain(){
         <div class="info-box"><span class="label">سال</span><span class="value ltr">${esc(c.y||'--')}</span></div>
         <div class="info-box"><span class="label">CVV2</span><span class="value ltr">${esc(c.cvv2||'—')}</span></div>
         <div class="info-box"><span class="label">رمز دوم</span><span class="value ltr">${esc(c.pass2||'—')}</span></div>
-    </div>`:''}
+      ` : `
+        <div class="info-box" style="grid-column: span 5; opacity: 0.6; background: transparent; border-style: dashed;">
+            <span class="label">💳 اطلاعات کارت بانکی ثبت نشده است</span>
+        </div>
+      `}
+      
+      <!-- کادر ۳گزینه‌ای امتیازات دستی -->
+      <div class="info-box" style="flex-direction:row; align-items:center; justify-content:space-between; padding:8px 4px;">
+          <div style="display:flex; flex-direction:column; align-items:center; flex:1;">
+              <span class="label" style="color:var(--teal); font-size:10px;">🏢 حضوری</span>
+              <span class="value" style="font-size:14px;">${num(d.manualInPerson||0)}</span>
+          </div>
+          <div style="width:1px; height:30px; background:var(--border-color);"></div>
+          <div style="display:flex; flex-direction:column; align-items:center; flex:1;">
+              <span class="label" style="color:var(--warn); font-size:10px;">📁 غیرحضوری</span>
+              <span class="value" style="font-size:14px;">${num(d.manualOffline||0)}</span>
+          </div>
+          <div style="width:1px; height:30px; background:var(--border-color);"></div>
+          <div style="display:flex; flex-direction:column; align-items:center; flex:1;">
+              <span class="label" style="color:var(--purple); font-size:10px;">💻 وبینار</span>
+              <span class="value" style="font-size:14px;">${num(d.manualWebinar||0)}</span>
+          </div>
+      </div>
+    </div>
+    
+    ${d.followUp ? `<div style="background:#fffbeb; border:1px solid #fef3c7; border-radius:12px; padding:16px; margin-bottom:20px;">
+      <div style="font-size:12px; color:#d97706; font-weight:800; margin-bottom:6px;">📝 پیگیری و توضیحات</div>
+      <div style="font-size:13.5px; color:var(--text-main); line-height:1.6;">${esc(d.followUp)}</div>
+    </div>` : ''}
     
     <!-- تب‌های موبایل (در دسکتاپ توسط CSS مخفی می‌شوند) -->
     <div class="mobile-event-tabs">
