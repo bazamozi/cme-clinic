@@ -492,7 +492,6 @@ try {
   var savedU = localStorage.getItem('cme_current_user');
   if(savedU) currentUser = savedU;
   
-  // بررسی حالت شب
   if(localStorage.getItem('cme_dark_mode') === 'true') {
     document.body.classList.add('dark-mode');
     document.getElementById('themeToggleBtn').innerHTML = '☀️';
@@ -945,7 +944,6 @@ function renderDocList(){
     return (b.updatedAt || 0) - (a.updatedAt || 0);
   });
 
-  // ترتیب جدید از راست به چپ: در جریان، کامل، پیگیری، همه
   const categories = { 'in_progress': { title: '⚡ در جریان' }, 'completed': { title: '🏆 کامل' }, 'new': { title: '📋 پیگیری' }, 'all': { title: 'همه' } };
   let tabsHtml = '';
   for (const [key, cat] of Object.entries(categories)) {
@@ -1326,13 +1324,18 @@ window.openDoctorModal = function(editId, defaultPhone){
 };
 
 window.openEventModal = function(editId, presetType){
-  const d = doctors.find(x=>x.id===selectedDoctorId); if(!d){ toast('⚠️ ابتدا یک پزشک انتخاب کنید'); return; }
-  const existing = editId ? (d.events||[]).find(x=>x.id===editId) : null; const isEdit = !!existing; let type = existing?.type || presetType || 'وبینار';
+  const initialD = doctors.find(x=>x.id===selectedDoctorId); 
+  if(!initialD){ toast('⚠️ ابتدا یک پزشک انتخاب کنید'); return; }
+  const existing = editId ? (initialD.events||[]).find(x=>x.id===editId) : null; 
+  const isEdit = !!existing; 
+  let type = existing?.type || presetType || 'وبینار';
+
   openModal(`
     <h2>${isEdit?'✏️ ویرایش':'➕ افزودن'} رویداد</h2>
     <div class="type-picker"><button type="button" class="type-pick ${type==='وبینار'?'active':''}" data-t="وبینار"><span class="icon">💻</span>وبینار</button><button type="button" class="type-pick ${type==='حضوری'?'active':''}" data-t="حضوری"><span class="icon">🏢</span>حضوری</button><button type="button" class="type-pick ${type==='غیر حضوری'?'active':''}" data-t="غیر حضوری"><span class="icon">📁</span>غیر حضوری</button></div>
     <form id="mEventForm" autocomplete="off"><div id="dynFields"></div><button class="btn btn-primary" type="submit" style="width:100%; margin-top:20px;">${isEdit?'💾 ذخیره':'➕ افزودن'}</button><button class="btn btn-outline" type="button" onclick="closeModal()" style="width:100%; margin-top:10px;">انصراف</button></form>
   `);
+  
   document.querySelectorAll('.type-pick').forEach(b=>b.onclick=()=>{ type = b.dataset.t; document.querySelectorAll('.type-pick').forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderDynFields(); });
   
   function sel(id, opts, cur){ return `<select id="${id}">${opts.map(o=>{const v=o.v!==undefined?o.v:o;const l=o.l!==undefined?o.l:o;return `<option value="${v}" ${String(v)===String(cur)?'selected':''}>${l}</option>`;}).join('')}</select>`; }
@@ -1348,19 +1351,34 @@ window.openEventModal = function(editId, presetType){
   renderDynFields();
   
   document.getElementById('mEventForm').onsubmit = ev => {
-    ev.preventDefault(); if(!d.events) d.events = [];
+    ev.preventDefault(); 
+    
+    // گرفتن مجدد اطلاعات پزشک از حافظه برای جلوگیری از تداخل با همگام‌سازی آنی
+    const currentDoc = doctors.find(x=>x.id===selectedDoctorId);
+    if(!currentDoc) return;
+    if(!currentDoc.events) currentDoc.events = [];
+
     const gv = id => toEnDigits(document.getElementById(id)?.value || '').trim();
     let data = { type, credit:Number(gv('eCredit')||0) };
     if(type==='غیر حضوری'){ data.num = gv('eNum'); data.title=''; data.date=''; data.time=''; }
     else { data.num = gv('eNum'); data.title=''; data.date = formatDate(gv('eYear'),gv('eMonth'),gv('eDay')); data.time = ''; }
     
-    if(isEdit){ Object.assign(existing, data); existing.updatedAt = Date.now(); toast('✅ ویرایش شد'); }
+    if(isEdit){ 
+      const currentExisting = currentDoc.events.find(x=>x.id===editId);
+      if(currentExisting) {
+        Object.assign(currentExisting, data); 
+        currentExisting.updatedAt = Date.now(); 
+        toast('✅ ویرایش شد'); 
+      }
+    }
     else { 
-      if(type==='غیر حضوری' && offlinePurchasedToday(d)){ if(!confirm('⚠️ امروز غیر حضوری خریده‌اید. ادامه؟')) return; } 
-      d.events.unshift({ id:uid(), ...data, purchase:'انجام نشد', attend:'انجام نشد', exam:'ثبت نشده', createdAt:Date.now(), updatedAt:Date.now() }); 
+      if(type==='غیر حضوری' && offlinePurchasedToday(currentDoc)){ if(!confirm('⚠️ امروز غیر حضوری خریده‌اید. ادامه؟')) return; } 
+      currentDoc.events.unshift({ id:uid(), ...data, purchase:'انجام نشد', attend:'انجام نشد', exam:'ثبت نشده', createdAt:Date.now(), updatedAt:Date.now() }); 
       toast('✅ اضافه شد'); 
     }
-    d.updatedAt = Date.now(); save(); closeModal(); renderMain(); renderDocList();
+    
+    currentDoc.updatedAt = Date.now(); 
+    save(); closeModal(); renderMain(); renderDocList();
   };
 };
 
@@ -1604,6 +1622,8 @@ window.openCallNoteModal = function(id) {
   else { c = currentIncomingCallRecord; isFromBanner = true; }
   if(!c) return;
 
+  const callId = c.id;
+
   openModal(`
     <h2>📝 ${isFromBanner ? 'ثبت' : 'ویرایش'} یادداشت تماس</h2>
     <div style="font-size: 20px; font-weight: 800; color: var(--teal); margin-bottom: 20px; text-align: center; direction: ltr;">${esc(c.phone)}</div>
@@ -1625,14 +1645,17 @@ window.openCallNoteModal = function(id) {
 
   document.getElementById('mNoteForm').onsubmit = ev => {
     ev.preventDefault();
-    c.follow = document.getElementById('nFollow').value;
-    c.note = document.getElementById('nNote').value.trim();
-    c.updatedAt = Date.now();
+    const currentC = calls.find(x => x.id === callId);
+    if (currentC) {
+      currentC.follow = document.getElementById('nFollow').value;
+      currentC.note = document.getElementById('nNote').value.trim();
+      currentC.updatedAt = Date.now();
+    }
     save(); closeModal();
     if (isFromBanner) {
       if (!document.getElementById('incomingCallBanner').classList.contains('hidden')) hideCallBanner();
       toast('✅ یادداشت ثبت شد — انتقال به تب تماس‌ها', 'info');
-      highlightCall(c.id);
+      highlightCall(callId);
     } else {
       toast('✅ یادداشت ویرایش شد', 'info');
       renderCalls();
