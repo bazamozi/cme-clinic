@@ -44,7 +44,7 @@ body.dark-mode {
   --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.3), 0 4px 6px -2px rgba(0,0,0,0.2);
 }
 body.dark-mode .top-header, body.dark-mode .sidebar-list-panel, body.dark-mode .main-area, body.dark-mode .panel, body.dark-mode .stat-card, body.dark-mode .ev-section, body.dark-mode .event-row, body.dark-mode .doc-row, body.dark-mode .modal, body.dark-mode .call-card, body.dark-mode .contact-card, body.dark-mode .mobile-bottom-nav { background-color: var(--card-bg); color: var(--text-main); }
-body.dark-mode input, body.dark-mode select, body.dark-mode textarea, body.dark-mode .info-box, body.dark-mode .wide-info-box, body.dark-mode .stat-pill, body.dark-mode .cat-tab, body.dark-mode .mini { background-color: var(--bg-body); color: var(--text-main); border-color: var(--border-color); }
+body.dark-mode input, body.dark-mode select, body.dark-mode textarea, body.dark-mode .info-box, body.dark-mode .stat-pill, body.dark-mode .cat-tab, body.dark-mode .mini { background-color: var(--bg-body); color: var(--text-main); border-color: var(--border-color); }
 body.dark-mode .btn-outline { background-color: transparent; color: var(--text-main); }
 body.dark-mode .ev-head { background-color: var(--bg-body); border-color: var(--border-color); }
 body.dark-mode .user-profile { background-color: var(--bg-body); border-color: var(--border-color); }
@@ -168,8 +168,10 @@ body.dark-mode .btn-outline:hover { background: #334155; }
 .btn-danger:hover { background: #fee2e2; }
 body.dark-mode .btn-danger { background: #7f1d1d; color: #fca5a5; border-color: #991b1b; }
 
-/* گرید اطلاعات (کادرهای کوچک) */
+/* گرید اطلاعات (ردیف‌های افقی) */
 .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.bank-info-grid { display: grid; grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+
 .info-box { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; position: relative; }
 .info-box .label { font-size: 11.5px; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
 .info-box .value { font-size: 15px; font-weight: 800; color: var(--text-main); }
@@ -178,13 +180,6 @@ body.dark-mode .btn-danger { background: #7f1d1d; color: #fca5a5; border-color: 
 .info-box .value.blue { color: var(--teal); }
 .copy-btn { position: absolute; top: 8px; left: 8px; background: #fff; border: 1px solid var(--border-color); border-radius: 6px; padding: 2px 6px; font-size: 10px; cursor: pointer; color: var(--text-muted); transition: 0.2s; }
 .copy-btn:hover { background: var(--accent-light); color: var(--accent-hover); border-color: var(--accent); }
-
-/* کادرهای تمام عرض (مثل شماره کارت) */
-.wide-info-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-.wide-info-box { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 16px; display: flex; flex-direction: row; justify-content: space-between; align-items: center; position: relative; }
-.wide-info-box .label { font-size: 13px; font-weight: 700; color: var(--text-muted); margin: 0; }
-.wide-info-box .value { font-size: 16px; font-weight: 800; color: var(--text-main); letter-spacing: 1px; }
-.wide-info-box .copy-btn { position: static; margin-right: 12px; }
 
 /* بخش رویدادها */
 .events-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
@@ -307,11 +302,9 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
   .mobile-bottom-nav button.active { color: var(--accent-hover); background: var(--accent-light); }
   
   .info-grid { grid-template-columns: 1fr 1fr !important; }
+  .bank-info-grid { grid-template-columns: 1fr 1fr !important; }
+  .bank-info-grid > div:first-child { grid-column: span 2; }
   .row, .row3 { grid-template-columns: 1fr; }
-  
-  /* کارت بانکی در موبایل */
-  .bank-card-light { grid-template-columns: 1fr 1fr; }
-  .bank-card-light > div:first-child { grid-column: span 2; }
 }
 </style>
 </head>
@@ -1068,27 +1061,21 @@ function renderMain(){
       </div>
     </div>
 
-    <div class="wide-info-grid">
-      <div class="wide-info-box">
+    <div class="info-grid">
+      <div class="info-box">
         <span class="label">🆔 کد ملی</span>
-        <div style="display:flex; align-items:center;">
-            <span class="value ltr">${esc(d.nat || '—')}</span>
-            ${d.nat ? `<button class="copy-btn" onclick="copyText('${esc(d.nat)}',this)">📋</button>` : ''}
-        </div>
+        <span class="value ltr">${esc(d.nat || '—')}</span>
+        ${d.nat ? `<button class="copy-btn" onclick="copyText('${esc(d.nat)}',this)">📋</button>` : ''}
       </div>
-      <div class="wide-info-box">
+      <div class="info-box">
         <span class="label">🔑 رمز سامانه</span>
-        <div style="display:flex; align-items:center;">
-            <span class="value ltr">${esc(d.pass || '—')}</span>
-            ${d.pass ? `<button class="copy-btn" onclick="copyText('${esc(d.pass)}',this)">📋</button>` : ''}
-        </div>
+        <span class="value ltr">${esc(d.pass || '—')}</span>
+        ${d.pass ? `<button class="copy-btn" onclick="copyText('${esc(d.pass)}',this)">📋</button>` : ''}
       </div>
-      <div class="wide-info-box">
+      <div class="info-box">
         <span class="label">📞 موبایل</span>
-        <div style="display:flex; align-items:center;">
-            <span class="value ltr">${esc(d.phone || '—')}</span>
-            ${d.phone ? `<button class="copy-btn" onclick="copyText('${esc(d.phone)}',this)">📋</button>` : ''}
-        </div>
+        <span class="value ltr">${esc(d.phone || '—')}</span>
+        ${d.phone ? `<button class="copy-btn" onclick="copyText('${esc(d.phone)}',this)">📋</button>` : ''}
       </div>
     </div>
 
@@ -1115,19 +1102,10 @@ function renderMain(){
       </div>
     </div>
 
-    <div class="wide-info-grid">
-      <div class="wide-info-box">
-        <span class="label">💰 کل هزینه</span>
-        <span class="value">${num(f.total||0)}</span>
-      </div>
-      <div class="wide-info-box">
-        <span class="label">✅ پرداختی</span>
-        <span class="value success" style="color:var(--accent);">${num(f.paid||0)}</span>
-      </div>
-      <div class="wide-info-box">
-        <span class="label">⏳ باقی مالی</span>
-        <span class="value ${rem$>0?'danger':'success'}" style="${rem$>0?'color:var(--danger);':'color:var(--accent);'}">${num(rem$)}</span>
-      </div>
+    <div class="info-grid">
+      <div class="info-box"><span class="label">💰 کل هزینه</span><span class="value">${num(f.total||0)}</span></div>
+      <div class="info-box"><span class="label">✅ پرداختی</span><span class="value success">${num(f.paid||0)}</span></div>
+      <div class="info-box"><span class="label">⏳ باقی مالی</span><span class="value ${rem$>0?'danger':'success'}">${num(rem$)}</span></div>
     </div>
     
     ${d.followUp ? `<div style="background:#fffbeb; border:1px solid #fef3c7; border-radius:12px; padding:16px; margin-bottom:20px;">
@@ -1136,11 +1114,13 @@ function renderMain(){
     </div>` : ''}
     
     ${(c.num||c.cvv2||c.pass2)?`
-    <div class="bank-card-light">
-        <div class="info-box" style="flex-direction: row; justify-content: space-between; padding: 10px 16px;">
-            <span class="label" style="margin:0;">شماره کارت</span>
-            <span class="value ltr" style="letter-spacing:1px;">${esc(c.num||'—')}</span>
-            ${c.num ? `<button class="copy-btn" style="position:static; margin-right:8px;" onclick="copyText('${esc(c.num)}',this)">📋</button>` : ''}
+    <div class="bank-info-grid">
+        <div class="info-box">
+            <span class="label" style="margin-bottom:4px;">شماره کارت</span>
+            <div style="display:flex; align-items:center; justify-content:center; gap:8px; width:100%;">
+                <span class="value ltr" style="letter-spacing:1px;">${esc(c.num||'—')}</span>
+                ${c.num ? `<button class="copy-btn" style="position:static;" onclick="copyText('${esc(c.num)}',this)">📋</button>` : ''}
+            </div>
         </div>
         <div class="info-box"><span class="label">ماه</span><span class="value ltr">${esc(c.m||'--')}</span></div>
         <div class="info-box"><span class="label">سال</span><span class="value ltr">${esc(c.y||'--')}</span></div>
