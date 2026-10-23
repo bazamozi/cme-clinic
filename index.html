@@ -5,490 +5,431 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>دفتر بازآموزی پزشکان</title>
 <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
-
-<link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;دفتر بازآموزی پزشکان&quot;,&quot;short_name&quot;:&quot;بازآموزی&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#0f172a&quot;,&quot;theme_color&quot;:&quot;#0f172a&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;https://cdn-icons-png.flaticon.com/512/3135/3135715.png&quot;,&quot;sizes&quot;:&quot;512x512&quot;,&quot;type&quot;:&quot;image/png&quot;}]}">
+<link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;دفتر بازآموزی پزشکان&quot;,&quot;short_name&quot;:&quot;بازآموزی&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#f3f4f6&quot;,&quot;theme_color&quot;:&quot;#0f4c5c&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;https://cdn-icons-png.flaticon.com/512/3135/3135715.png&quot;,&quot;sizes&quot;:&quot;512x512&quot;,&quot;type&quot;:&quot;image/png&quot;}]}">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#0f4c5c">
 
 <style>
-:root{--bg1:#0f172a;--bg2:#1e293b;--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--accent:#38bdf8;--accent2:#22d3ee;--success:#34d399;--danger:#f87171;--warn:#fbbf24;--purple:#a78bfa;--text:#e2e8f0;--muted:#94a3b8;--pink:#f472b6}
-*{box-sizing:border-box;margin:0;padding:0;font-family:Vazirmatn,Tahoma,sans-serif;-webkit-tap-highlight-color:transparent}
-body{background:radial-gradient(1200px 600px at 80% -10%,#1e3a8a55,transparent 60%),radial-gradient(900px 500px at -10% 110%,#0e749055,transparent 60%),linear-gradient(160deg,var(--bg1),var(--bg2));color:var(--text);min-height:100vh;padding:14px;overflow-x:hidden;max-width:100vw}
-.wrap{max-width:1600px;margin:0 auto}
-header{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:8px 18px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;backdrop-filter:blur(12px);box-shadow:0 8px 32px rgba(0,0,0,0.2)}
-h1{font-size:17px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
-.sub{color:var(--muted);font-size:11.5px;margin-top:3px}
-.tabs{display:flex;gap:6px;flex-wrap:wrap}
-.tab{padding:6px 14px;border-radius:10px;cursor:pointer;font-size:12.5px;font-weight:600;background:rgba(15,23,42,0.5);border:1px solid var(--border);color:var(--muted);transition:.3s cubic-bezier(0.4, 0, 0.2, 1);font-family:inherit}
-.tab.active{background:linear-gradient(135deg,rgba(56,189,248,0.25),rgba(34,211,238,0.15));color:var(--accent);border-color:rgba(56,189,248,0.6);box-shadow:0 4px 12px rgba(56,189,248,0.15)}
-.user-picker{display:flex;gap:5px;align-items:center;background:rgba(15,23,42,0.7);border:1px solid var(--border);border-radius:12px;padding:4px 6px;box-shadow:inset 0 2px 4px rgba(0,0,0,0.1)}
-.user-picker label{font-size:11px;color:var(--muted);padding:0 4px}
-.user-picker button{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:9px;font-size:12px;font-family:inherit;cursor:pointer;transition:.2s;font-weight:600}
-.user-picker button.active{background:linear-gradient(135deg,rgba(56,189,248,0.35),rgba(34,211,238,0.2));color:#fff;border-color:rgba(56,189,248,0.8);box-shadow:0 0 12px rgba(56,189,248,0.3)}
-.user-picker button:hover{color:var(--accent)}
-.owner-badge{display:inline-block;font-size:9.5px;padding:2px 8px;border-radius:20px;font-weight:700;margin-left:5px}
-.owner-badge.morteza{background:linear-gradient(135deg,rgba(56,189,248,0.3),rgba(34,211,238,0.2));color:var(--accent);border:1px solid rgba(56,189,248,0.4)}
-.owner-badge.parvin{background:linear-gradient(135deg,rgba(244,114,182,0.3),rgba(236,72,153,0.2));color:var(--pink);border:1px solid rgba(244,114,182,0.4)}
-.panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;backdrop-filter:blur(10px)}
-.panel h2{font-size:14px;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.panel h2::before{content:'';width:4px;height:16px;border-radius:2px;background:linear-gradient(180deg,var(--accent),var(--accent2))}
-.sect{font-size:11.5px;color:var(--accent2);font-weight:700;margin:10px 0 5px;padding-right:8px;border-right:3px solid var(--accent2)}
-label{display:block;font-size:11.5px;color:var(--muted);margin:7px 0 3px}
-input,select,textarea{width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:rgba(15,23,42,0.6);color:var(--text);font-family:inherit;font-size:13px;outline:none;transition:.25s}
-input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(56,189,248,0.15);background:rgba(15,23,42,0.9)}
-select{cursor:pointer}
-textarea{resize:vertical;min-height:55px}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-@media(max-width:700px){.row,.row3{grid-template-columns:1fr 1fr}}
-.btn{width:100%;margin-top:12px;padding:11px;border:none;border-radius:11px;cursor:pointer;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#062334;font-weight:700;font-family:inherit;font-size:13px;transition:.2s;box-shadow:0 4px 15px rgba(56,189,248,0.3)}
-.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(56,189,248,0.4)}
-.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--muted);box-shadow:none}
-.btn.sm{width:auto;padding:6px 12px;margin:0;font-size:11.5px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px}
-.stat{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center;transition:.2s}
-.stat:hover{background:rgba(255,255,255,0.06)}
-.stat .label{color:var(--muted);font-size:11px}
-.stat .value{font-size:22px;font-weight:800;color:var(--accent);margin-top:4px}
-.badge{display:inline-block;font-size:10px;padding:3px 8px;border-radius:20px;font-weight:600;margin:2px}
-.badge.blue{background:rgba(56,189,248,0.15);color:var(--accent);border:1px solid rgba(56,189,248,0.2)}
-.badge.green{background:rgba(52,211,153,0.15);color:var(--success);border:1px solid rgba(52,211,153,0.2)}
-.badge.red{background:rgba(248,113,113,0.15);color:var(--danger);border:1px solid rgba(248,113,113,0.2)}
-.badge.yellow{background:rgba(251,191,36,0.15);color:var(--warn);border:1px solid rgba(251,191,36,0.2)}
-.badge.gray{background:rgba(148,163,184,0.15);color:var(--muted);border:1px solid rgba(148,163,184,0.2)}
-.badge.purple{background:rgba(167,139,250,0.15);color:var(--purple);border:1px solid rgba(167,139,250,0.2)}
-.actions{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
-.mini{border:1px solid var(--border);background:rgba(255,255,255,0.03);color:var(--muted);padding:7px 12px;border-radius:9px;font-size:13px;cursor:pointer;font-family:inherit;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center; gap:5px;}
-.mini:hover{color:var(--accent);border-color:var(--accent);background:rgba(56,189,248,0.1)}
-.mini.danger:hover{color:var(--danger);border-color:var(--danger);background:rgba(248,113,113,0.1)}
-.mini.green:hover{color:var(--success);border-color:var(--success);background:rgba(52,211,153,0.1)}
-.empty{text-align:center;color:var(--muted);padding:25px;font-size:12.5px}
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(150%);background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;padding:12px 24px;border-radius:12px;font-size:13px;transition:.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);z-index:9999;box-shadow:0 10px 30px rgba(0,0,0,0.3);font-weight:600}
-.toast.show{transform:translateX(-50%) translateY(0)}
-.hidden{display:none!important}
-.ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
-.app{display:grid;grid-template-columns:340px 1fr;gap:14px}
-.sidebar{background:rgba(15,23,42,0.4);border:1px solid var(--border);border-radius:16px;padding:14px;height:calc(100vh - 180px);overflow:hidden;display:flex;flex-direction:column;backdrop-filter:blur(10px)}
-.sidebar-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.sidebar-head h2{margin:0;font-size:15px;color:var(--accent)}
-.doc-category-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
-.cat-tab{width:100%;text-align:center;padding:8px 5px;border-radius:10px;font-size:12px;font-weight:700;background:rgba(15,23,42,0.6);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:.3s}
-.cat-tab.all{grid-column:span 2}
-.cat-tab.active{background:linear-gradient(135deg,rgba(56,189,248,0.25),rgba(34,211,238,0.15));color:var(--accent);border-color:rgba(56,189,248,0.5);box-shadow:0 2px 10px rgba(56,189,248,0.15)}
-.cat-tab.all.active{color:#fff;background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3)}
-.cat-tab.completed.active{color:var(--success);border-color:var(--success);background:rgba(52,211,153,0.15);box-shadow:0 2px 10px rgba(52,211,153,0.15)}
-.cat-tab.in_progress.active{color:var(--warn);border-color:var(--warn);background:rgba(251,191,36,0.15);box-shadow:0 2px 10px rgba(251,191,36,0.15)}
-.cat-tab.new.active{color:var(--purple);border-color:var(--purple);background:rgba(167,139,250,0.15);box-shadow:0 2px 10px rgba(167,139,250,0.15)}
-.doc-list{flex:1;overflow-y:auto;padding-left:4px;scroll-behavior:smooth}
-.doc-row{background:rgba(15,23,42,0.4);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer;transition:.25s;position:relative;overflow:hidden;}
-.doc-row:hover{border-color:rgba(56,189,248,0.3);background:rgba(15,23,42,0.7);transform:translateY(-2px)}
-.doc-row.active{border-color:var(--accent);background:linear-gradient(135deg,rgba(56,189,248,0.1),rgba(34,211,238,0.05));box-shadow:0 4px 15px rgba(56,189,248,0.1)}
-
-@keyframes flashRed {
-    0%, 100% { background-color: rgba(248,113,113,0.1); box-shadow: 0 0 5px rgba(248,113,113,0.2); }
-    50% { background-color: rgba(248,113,113,0.3); box-shadow: 0 0 15px rgba(248,113,113,0.6); }
-}
-.critical-alert {
-    animation: flashRed 2s infinite;
-    border-right: 4px solid var(--danger) !important;
-}
-@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-.pulse-danger { animation: pulse 1.2s infinite; }
-.pulse-warn { animation: pulse 2s infinite; }
-
-@keyframes highlightPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(56,189,248,0); }
-  50% { box-shadow: 0 0 0 8px rgba(56,189,248,0.4); }
-}
-.call-card.highlight-call {
-  animation: highlightPulse 1.2s ease-in-out 3;
-  border-color: var(--accent) !important;
-  background: rgba(56,189,248,0.08) !important;
+/* ==================== متغیرهای رنگی (تم روشن) ==================== */
+:root {
+  --bg-body: #f0f4f8;
+  --sidebar-bg: #0f4c5c;
+  --sidebar-hover: #1a606f;
+  --card-bg: #ffffff;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --accent: #10b981; /* سبز نعنایی */
+  --accent-hover: #059669;
+  --accent-light: #d1fae5;
+  --teal: #0d9488;
+  --danger: #ef4444;
+  --warn: #f59e0b;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.025);
+  --radius: 16px;
 }
 
-.doc-name{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:15px;font-weight:700}
-.doc-spec{color:var(--muted);font-size:11px;margin-top:3px}
-.doc-bar{height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;margin-top:8px}
-.doc-bar .fill{height:100%;background:linear-gradient(90deg,var(--success),var(--accent2));transition:width .6s cubic-bezier(0.4, 0, 0.2, 1)}
-.doc-bar .fill.done{background:linear-gradient(90deg,#22c55e,#34d399)}
-.doc-meta{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:5px}
-.doc-meta b{color:var(--accent2)}
-.exam-badge{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0f172a;font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:5px;margin-left:6px}
-.offline-badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:5px;margin-left:6px}
-.offline-badge.ok{background:linear-gradient(135deg,#22c55e,#34d399);color:#052e16}
-.offline-badge.wait{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0f172a}
-.main-area{background:rgba(15,23,42,0.4);border:1px solid var(--border);border-radius:16px;padding:16px;height:calc(100vh - 180px);overflow-y:auto;backdrop-filter:blur(10px);-webkit-overflow-scrolling:touch}
-.empty-state{text-align:center;color:var(--muted);padding:80px 20px}
-.empty-state .big{font-size:50px;display:block;margin-bottom:12px;opacity:.3}
-.doc-header{background:linear-gradient(135deg,rgba(56,189,248,0.08),rgba(34,211,238,0.02));border:1px solid rgba(56,189,248,0.2);border-radius:16px;padding:14px 16px;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,0.1)}
-.doc-header .top{display:flex;justify-content:space-between;align-items:start;gap:10px;flex-wrap:wrap;margin-bottom:10px}
-.doc-header h2{color:#fff;font-size:17px;font-weight:800;margin:0;display:flex;align-items:center;flex-wrap:wrap;gap:5px}
-.doc-header .meta{color:var(--muted);font-size:12.5px;margin-top:4px;line-height:1.8}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: Vazirmatn, Tahoma, sans-serif; -webkit-tap-highlight-color: transparent; }
+body { background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; overflow-x: hidden; font-size: 13px; }
+.ltr { direction: ltr; unicode-bidi: isolate; display: inline-block; }
 
-.info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
-.info-box { background: rgba(15,23,42,0.5); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; font-size: 13.5px; font-weight: 700; transition: .2s; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; position: relative;}
-.info-box:hover { border-color: rgba(56,189,248,0.4); }
-.info-box .label { font-size: 13.5px; color: var(--muted); font-weight: 600; }
-.info-box .value { font-size: 16px; font-weight: 800; color: #fff; }
-.info-box .value.success { color: var(--success); }
+/* ==================== ساختار اصلی ==================== */
+.app-layout { display: flex; height: 100vh; overflow: hidden; }
+.main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* ==================== سایدبار راست ==================== */
+.sidebar-right {
+  width: 90px; background-color: var(--sidebar-bg); color: #fff;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 20px 0; z-index: 100;
+}
+.sidebar-logo { font-weight: 800; font-size: 14px; margin-bottom: 30px; text-align: center; line-height: 1.3; color: var(--accent-light); }
+.sidebar-nav { display: flex; flex-direction: column; gap: 15px; width: 100%; padding: 0 10px; }
+.sidebar-btn {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  background: transparent; border: none; color: #94a3b8; padding: 12px 5px;
+  border-radius: 12px; cursor: pointer; transition: all 0.2s; font-family: inherit; font-size: 11px; font-weight: 600;
+}
+.sidebar-btn .icon { font-size: 22px; }
+.sidebar-btn:hover { background-color: var(--sidebar-hover); color: #fff; }
+.sidebar-btn.active { background-color: var(--accent); color: #fff; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+
+/* ==================== هدر بالا ==================== */
+.top-header {
+  height: 72px; background-color: #fff; border-bottom: 1px solid var(--border-color);
+  display: flex; justify-content: space-between; align-items: center; padding: 0 24px;
+  box-shadow: var(--shadow-sm); z-index: 90;
+}
+.header-left { display: flex; align-items: center; gap: 15px; }
+.header-right { display: flex; align-items: center; gap: 20px; }
+.user-profile { display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-color); }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+.user-info { display: flex; flex-direction: column; }
+.user-name { font-weight: 700; font-size: 13px; }
+.user-role { font-size: 10px; color: var(--text-muted); }
+.date-time { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); background: #f8fafc; padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border-color); font-weight: 600; }
+
+/* ==================== محتوای اصلی ==================== */
+.content-area { flex: 1; overflow-y: auto; padding: 24px; }
+.tab-content { display: none; animation: fadeIn 0.3s ease; }
+.tab-content.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ==================== کارت‌ها و پنل‌ها ==================== */
+.panel { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow-sm); }
+.panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.panel-title { font-size: 15px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+
+/* ==================== استایل داشبورد ==================== */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: var(--card-bg); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; justify-content: center; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); position: relative; overflow: hidden; }
+.stat-card::before { content: ''; position: absolute; top: 0; right: 0; width: 4px; height: 100%; background: var(--accent); border-radius: 0 4px 4px 0; }
+.stat-card.danger::before { background: var(--danger); }
+.stat-card.warn::before { background: var(--warn); }
+.stat-label { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; }
+.stat-value { font-size: 26px; font-weight: 800; color: var(--text-main); }
+.stat-card.danger .stat-value { color: var(--danger); }
+
+/* ==================== استایل لیست و جزئیات پزشکان ==================== */
+.app-split { display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start; height: calc(100vh - 140px); }
+.sidebar-list-panel { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 20px; height: 100%; display: flex; flex-direction: column; box-shadow: var(--shadow-sm); }
+.list-search-box { margin-bottom: 16px; }
+.list-search-box input { width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background: #f8fafc; font-family: inherit; font-size: 13px; outline: none; transition: 0.2s; }
+.list-search-box input:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px var(--accent-light); }
+
+.doc-category-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.cat-tab { flex: 1; padding: 8px; border-radius: 8px; font-size: 12px; font-weight: 700; background: #f8fafc; border: 1px solid var(--border-color); color: var(--text-muted); cursor: pointer; text-align: center; transition: 0.2s; font-family: inherit; }
+.cat-tab.active { background: var(--accent-light); color: var(--accent-hover); border-color: var(--accent); }
+
+.doc-list { flex: 1; overflow-y: auto; padding-left: 5px; display: flex; flex-direction: column; gap: 12px; }
+.doc-list::-webkit-scrollbar { width: 6px; }
+.doc-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+.doc-row { background: #fff; border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; cursor: pointer; transition: all 0.2s ease; position: relative; }
+.doc-row:hover { border-color: #cbd5e1; box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.doc-row.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); background: #fafdfb; }
+
+.doc-name { font-size: 14px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; }
+.doc-spec { font-size: 11.5px; color: var(--text-muted); margin-top: 6px; }
+.doc-bar { height: 6px; background: #f1f5f9; border-radius: 3px; overflow: hidden; margin-top: 12px; }
+.doc-bar .fill { height: 100%; background: var(--accent); transition: width 0.4s ease; border-radius: 3px; }
+.doc-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 8px; font-weight: 600; }
+.doc-meta b { color: var(--text-main); }
+
+/* ==================== ناحیه جزئیات پزشک ==================== */
+.main-area { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 24px; height: 100%; overflow-y: auto; box-shadow: var(--shadow-sm); }
+.main-area::-webkit-scrollbar { width: 6px; }
+.main-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); text-align: center; }
+.empty-state .big { font-size: 50px; margin-bottom: 16px; opacity: 0.4; }
+
+/* هدر پروفایل */
+.profile-header { display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+.profile-info { display: flex; align-items: center; gap: 15px; }
+.profile-avatar-lg { width: 60px; height: 60px; border-radius: 50%; background: var(--accent-light); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; }
+.profile-title h2 { font-size: 18px; font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.profile-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* دکمه‌ها */
+.btn { padding: 8px 16px; border-radius: 8px; border: none; font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.btn-primary { background: var(--accent); color: #fff; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2); }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-outline { background: #fff; border: 1px solid var(--border-color); color: var(--text-main); }
+.btn-outline:hover { background: #f8fafc; }
+.btn-danger { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
+.btn-danger:hover { background: #fee2e2; }
+
+/* گرید اطلاعات */
+.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.info-box { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; position: relative; }
+.info-box .label { font-size: 11.5px; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
+.info-box .value { font-size: 15px; font-weight: 800; color: var(--text-main); }
+.info-box .value.success { color: var(--accent); }
 .info-box .value.danger { color: var(--danger); }
-.info-box .value.blue { color: var(--accent); }
-.info-box .copy-btn { position: absolute; top: 8px; left: 8px; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); color: var(--accent); padding: 2px 6px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: .2s;}
-.info-box .copy-btn:hover { background: rgba(56,189,248,0.3); color: #fff; }
+.info-box .value.blue { color: var(--teal); }
+.copy-btn { position: absolute; top: 8px; left: 8px; background: #fff; border: 1px solid var(--border-color); border-radius: 6px; padding: 2px 6px; font-size: 10px; cursor: pointer; color: var(--text-muted); transition: 0.2s; }
+.copy-btn:hover { background: var(--accent-light); color: var(--accent-hover); border-color: var(--accent); }
 
-.bank-card-wrapper{margin-top:14px}
-.bank-card{background:linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.95)); border:1px solid rgba(56,189,248,0.3); border-radius:16px; padding:16px; position:relative; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.3); backdrop-filter:blur(10px)}
-.bank-card::before{content:''; position:absolute; top:-50%; right:-20%; width:200px; height:200px; background:radial-gradient(circle, rgba(56,189,248,0.15) 0%, transparent 70%); border-radius:50%; pointer-events:none}
-.bank-row { display: flex; gap: 10px; width: 100%; position: relative; z-index: 1;}
-.bank-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
-.bank-box.card-number { flex: 3; display: flex; flex-direction: row; justify-content: space-between; padding: 10px 15px;}
-.bank-box.card-number .bank-label { margin-bottom: 0; font-size: 13px;}
-.bank-box.card-number .bank-val { font-size: 18px; letter-spacing: 1px;}
-.bank-box.other { flex: 1; }
-.bank-label { font-size: 11px; color: var(--muted); font-weight: 600; }
-.bank-val { font-size: 15px; font-weight: 800; color: #fff; direction: ltr; }
-.bank-box .copy-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: .2s; font-family: inherit; font-size:12px; margin:0;}
-.bank-box .copy-btn:hover { background: rgba(255,255,255,0.25); }
+/* بخش رویدادها */
+.events-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
+.ev-section { background: #fff; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; }
+.ev-head { padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+.ev-head h3 { font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; margin: 0; }
+.ev-stats-wrap { display: flex; gap: 6px; }
+.ev-stat-pill { background: #fff; border: 1px solid var(--border-color); padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 800; color: var(--text-muted); }
+.ev-stat-pill.success { background: var(--accent-light); color: var(--accent-hover); border-color: #a7f3d0; }
+.ev-head .add-btn { background: #fff; border: 1px solid var(--border-color); color: var(--accent-hover); padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; font-family: inherit; font-weight: 700; }
+.ev-head .add-btn:hover { background: var(--accent-light); }
+.ev-body { padding: 12px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
 
-.events-layout{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-top:14px; align-items:start;}
-.ev-section{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:rgba(15,23,42,0.3); box-shadow:0 4px 15px rgba(0,0,0,0.1); display:flex; flex-direction:column;}
-.mobile-event-tabs { display: none; }
-.ev-head { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(15,23,42,0.7); border-bottom: 1px solid var(--border); }
-.ev-head h3 { font-size: 14px; display: flex; align-items: center; gap: 6px; margin: 0; white-space: nowrap; }
-.ev-stats-wrap { display: flex; justify-content: center; gap: 6px; }
-.ev-stat-pill { background: linear-gradient(135deg,rgba(56,189,248,0.15),rgba(34,211,238,0.05)); border: 1px solid rgba(56,189,248,0.3); border-radius: 8px; padding: 4px 10px; font-size: 12.5px; font-weight: 800; color: var(--accent); white-space: nowrap; }
-.ev-stat-pill.success { background: linear-gradient(135deg,rgba(52,211,153,0.15),rgba(34,211,238,0.05)); border-color: rgba(52,211,153,0.4); color: var(--success); }
-.ev-head .add-btn { background: rgba(56,189,248,0.1); border: 1px solid var(--accent); color: var(--accent); padding: 6px 12px; border-radius: 8px; font-size: 12.5px; cursor: pointer; font-family: inherit; transition: .2s; font-weight: 700; white-space: nowrap; }
-.ev-head .add-btn:hover { background: rgba(56,189,248,0.2); box-shadow: 0 0 10px rgba(56,189,248,0.2); }
+/* کارت رویداد */
+.event-row { background: #fff; border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; transition: 0.2s; }
+.event-row:hover { border-color: #cbd5e1; box-shadow: var(--shadow-sm); }
+.event-row.earned { border-right: 4px solid var(--accent); }
+.event-row.partial { border-right: 4px solid var(--warn); }
+.event-row.failed { border-right: 4px solid var(--danger); }
+.event-title { font-weight: 800; font-size: 13px; color: var(--text-main); }
+.event-meta { color: var(--text-muted); font-size: 11.5px; margin-top: 6px; font-weight: 600; display: flex; gap: 10px; }
+.event-credit { font-size: 12px; color: var(--text-muted); margin-top: 8px; font-weight: 600; }
+.event-credit span { font-size: 16px; font-weight: 800; }
+.status-group { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 12px; }
+.stat-pill { background: #f8fafc; border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 8px; padding: 6px; font-size: 11px; cursor: pointer; font-family: inherit; text-align: center; font-weight: 700; transition: 0.2s; }
+.stat-pill:hover { background: #f1f5f9; }
+.stat-pill.ok { background: var(--accent-light); color: var(--accent-hover); border-color: #a7f3d0; }
+.stat-pill.no { background: #fef2f2; color: var(--danger); border-color: #fecaca; }
+.event-actions { display: flex; gap: 6px; margin-top: 12px; justify-content: flex-end; }
 
-.ev-body{padding:12px; flex-grow:1;}
-.event-row{background:rgba(15,23,42,0.5);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;transition:.2s;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
-.event-row:hover{border-color:rgba(255,255,255,0.15);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
-.event-row.earned{border-right:4px solid var(--success);background:rgba(52,211,153,0.04)}
-.event-row.partial{border-right:4px solid var(--warn);background:rgba(251,191,36,0.03)}
-.event-row.failed{border-right:4px solid var(--danger);background:rgba(248,113,113,0.03)}
-.event-title{font-weight:700;font-size:15px;color:#fff}
-.event-meta{color:var(--muted);font-size:14px;margin-top:6px;font-weight:600}
-.event-credit{font-size:15px;color:var(--muted);margin-top:6px;font-weight:600}
-.status-group{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
-.stat-pill{background:rgba(15,23,42,0.7);border:1px solid var(--border);color:var(--muted);border-radius:10px;padding:9px 4px;font-size:12.5px;cursor:pointer;font-family:inherit;text-align:center;font-weight:700;transition:.2s}
-.stat-pill:hover{background:rgba(255,255,255,0.05)}
-.stat-pill.ok{background:rgba(52,211,153,0.15);color:var(--success);border-color:rgba(52,211,153,0.4);box-shadow:0 0 10px rgba(52,211,153,0.1)}
-.stat-pill.no{background:rgba(248,113,113,0.15);color:var(--danger);border-color:rgba(248,113,113,0.4);box-shadow:0 0 10px rgba(248,113,113,0.1)}
-.stat-pill.neu{background:rgba(148,163,184,0.1);color:var(--muted)}
-.event-actions{display:flex;gap:8px;margin-top:10px;justify-content:flex-end}
+/* ==================== فرم‌ها و مودال‌ها ==================== */
+input, select, textarea { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-main); font-family: inherit; font-size: 13px; outline: none; transition: 0.2s; }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px var(--accent-light); }
+label { display: block; font-size: 12px; color: var(--text-main); font-weight: 700; margin: 12px 0 6px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.sect { font-size: 13px; font-weight: 800; color: var(--teal); margin: 20px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); }
 
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
-.modal{background:linear-gradient(160deg,#0f172a,#1e293b);border:1px solid var(--border);border-radius:16px;padding:20px;max-width:580px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.6);animation:zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)}
-@keyframes zoomIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
-.modal h2{color:var(--accent);font-size:15px;margin-bottom:12px;font-weight:800}
-.type-picker{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
-.type-pick{padding:10px 7px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:700;background:rgba(15,23,42,0.6);border:1px solid var(--border);color:var(--muted);text-align:center;font-family:inherit;transition:.2s}
-.type-pick:hover{background:rgba(255,255,255,0.05)}
-.type-pick.active{background:linear-gradient(135deg,rgba(56,189,248,0.2),rgba(34,211,238,0.1));color:var(--accent);border-color:rgba(56,189,248,0.5);box-shadow:0 4px 15px rgba(56,189,248,0.15)}
-.type-pick .icon{font-size:20px;display:block;margin-bottom:4px}
+.modal-bg { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 100000; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(3px); }
+.modal { background: #fff; border-radius: var(--radius); padding: 24px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.modal h2 { font-size: 16px; font-weight: 800; color: var(--text-main); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.type-picker { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.type-pick { padding: 12px 8px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 700; background: #f8fafc; border: 1px solid var(--border-color); color: var(--text-muted); text-align: center; transition: 0.2s; }
+.type-pick.active { background: var(--accent-light); color: var(--accent-hover); border-color: var(--accent); }
+.type-pick .icon { font-size: 24px; display: block; margin-bottom: 6px; }
 
-.calls-container { max-width: 1000px; margin: 0 auto; }
-.call-filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-.call-filter-btn { flex: 1; padding: 8px 12px; border-radius: 10px; font-size: 13px; font-weight: 700; background: rgba(15,23,42,0.6); border: 1px solid var(--border); color: var(--muted); cursor: pointer; transition: 0.2s; font-family: inherit; }
-.call-filter-btn:hover { background: rgba(255,255,255,0.05); }
-.call-filter-btn.active { background: var(--accent); color: #062334; border-color: var(--accent); box-shadow: 0 2px 10px rgba(56,189,248,0.3); }
-.call-card { background: rgba(15,23,42,0.6); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 12px; transition: 0.2s; }
-.call-card:hover { border-color: rgba(56,189,248,0.3); background: rgba(15,23,42,0.8); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-.call-card.missed { border-right: 4px solid var(--danger); background: rgba(248,113,113,0.03); }
-.call-card.incoming { border-right: 4px solid var(--success); background: rgba(52,211,153,0.03); }
-.call-card.outgoing { border-right: 4px solid var(--accent); background: rgba(56,189,248,0.03); }
-.call-header { display: flex; justify-content: space-between; align-items: flex-start; }
-.call-name { font-size: 16px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.call-phone { font-size: 24px; font-weight: 900; color: var(--accent); direction: ltr; margin-top: 8px; letter-spacing: 1.5px; display: block; text-decoration: none; }
-.call-phone:hover { text-decoration: underline; }
-.call-meta { font-size: 12.5px; color: var(--muted); margin-top: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.call-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; }
-.call-actions .mini { padding: 8px 10px; font-size: 12px; }
-.btn-call { background: rgba(52,211,153,0.15) !important; color: var(--success) !important; border-color: rgba(52,211,153,0.4) !important; font-weight: 800 !important; }
-.btn-call:hover { background: rgba(52,211,153,0.3) !important; box-shadow: 0 0 10px rgba(52,211,153,0.3); }
+/* ==================== استایل تماس‌ها و مخاطبین ==================== */
+.call-card, .contact-card { background: #fff; border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow-sm); transition: 0.2s; }
+.call-card:hover, .contact-card:hover { box-shadow: var(--shadow-md); border-color: #cbd5e1; }
+.call-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.call-name { font-size: 15px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+.call-phone { font-size: 20px; font-weight: 900; color: var(--teal); direction: ltr; text-decoration: none; display: inline-block; margin-top: 6px; }
+.call-meta { font-size: 12px; color: var(--text-muted); margin-top: 8px; display: flex; gap: 12px; flex-wrap: wrap; }
+.call-actions { display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 12px; }
 
-.call-note-box {
-    background: rgba(56,189,248,0.1);
-    padding: 12px;
-    border-radius: 8px;
-    border-right: 4px solid var(--accent);
-    font-size: 14px;
-    color: #fff;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    line-height: 1.6;
-    margin-bottom: 8px;
-}
-.call-note-box .note-text {
-    word-break: break-word;
-    flex: 1;
-}
+.badge { display: inline-flex; align-items: center; justify-content: center; padding: 3px 8px; border-radius: 6px; font-size: 10.5px; font-weight: 700; }
+.badge.blue { background: #e0f2fe; color: #0284c7; }
+.badge.green { background: var(--accent-light); color: var(--accent-hover); }
+.badge.red { background: #fef2f2; color: var(--danger); }
+.badge.yellow { background: #fffbeb; color: #d97706; }
+.badge.purple { background: #f3e8ff; color: #7e22ce; }
 
-.login-box {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: linear-gradient(160deg, #0f172a, #1e293b);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 30px 26px;
-    max-width: 380px;
-    width: 92%;
-    z-index: 100001;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-}
-#loginScreen {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 100000;
-    backdrop-filter: blur(6px);
-}
-#loginScreen.hidden { display: none !important; }
-.login-box h1 {
-    font-size: 18px;
-    text-align: center;
-    margin-bottom: 6px;
-}
-.login-box .subtitle {
-    text-align: center;
-    color: var(--muted);
-    font-size: 12px;
-    margin-bottom: 20px;
-}
-.login-box label { margin-top: 10px; }
-.login-box input { margin-bottom: 6px; }
-.login-box button {
-    width: 100%;
-    margin-top: 16px;
-    padding: 12px;
-    border: none;
-    border-radius: 11px;
-    cursor: pointer;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #062334;
-    font-weight: 800;
-    font-family: inherit;
-    font-size: 14px;
-}
-.login-error {
-    display: none;
-    background: rgba(248,113,113,0.15);
-    border: 1px solid var(--danger);
-    color: var(--danger);
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 12px;
-    text-align: center;
-    margin-bottom: 10px;
-}
-.login-error.show { display: block; }
+.mini { border: 1px solid var(--border-color); background: #fff; color: var(--text-main); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: inherit; transition: 0.2s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 4px; font-weight: 600; }
+.mini:hover { background: #f8fafc; border-color: #cbd5e1; }
+.mini.danger:hover { color: var(--danger); border-color: var(--danger); background: #fef2f2; }
+.mini.green { color: var(--accent-hover); border-color: #a7f3d0; background: var(--accent-light); }
+.mini.green:hover { background: #a7f3d0; }
 
+/* ==================== سایر ==================== */
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(150%); background: var(--text-main); color: #fff; padding: 12px 24px; border-radius: 10px; font-size: 13px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; box-shadow: var(--shadow-lg); font-weight: 600; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+.hidden { display: none !important; }
+
+/* ==================== ریسپانسیو و موبایل ==================== */
 .mobile-bottom-nav { display: none; }
-.mobile-menu-btn { display: none; }
-.header-expandable { display: contents; }
+.back-btn { display: none; }
 
-@media(max-width: 900px){
-    body { padding: 8px; padding-bottom: 80px; }
-    .wrap { max-width: 100%; }
-    header { 
-        position: sticky; top: 0; z-index: 1000; 
-        margin: -8px -8px 12px -8px; border-radius: 0 0 16px 16px;
-        background: rgba(15,23,42,0.95); backdrop-filter: blur(15px);
-        display: flex; flex-direction: column; gap: 8px; padding: 12px;
-    }
-    header > div:first-child { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 0; }
-    header > div:first-child > div { text-align: right; }
-    .tabs { display: none !important; }
-    .mobile-menu-btn { display: inline-flex !important; }
-    .header-expandable { display: none; flex-direction: column; gap: 10px; width: 100%; margin-top: 10px; }
-    .header-expandable.open { display: flex; }
-    .user-picker { justify-content: center; width: 100%; }
-    .header-actions { justify-content: center; gap: 6px; width: 100%; flex-wrap: wrap; }
-    #clock { text-align: center; margin-top: 5px; }
-    .mobile-bottom-nav {
-        display: flex; position: fixed; bottom: 0; left: 0; right: 0;
-        background: rgba(15,23,42,0.95); backdrop-filter: blur(15px);
-        border-top: 1px solid var(--border); z-index: 1000;
-        padding: 8px 10px; padding-bottom: calc(8px + env(safe-area-inset-bottom));
-        justify-content: space-around;
-    }
-    .mobile-bottom-nav button {
-        background: transparent; border: none; color: var(--muted);
-        font-family: inherit; font-size: 11px; font-weight: 700;
-        display: flex; flex-direction: column; align-items: center; gap: 4px;
-        padding: 6px 12px; border-radius: 10px; cursor: pointer; transition: 0.2s;
-    }
-    .mobile-bottom-nav button .icon { font-size: 20px; }
-    .mobile-bottom-nav button.active { color: var(--accent); background: rgba(56,189,248,0.1); }
-    .app { display: block; height: auto; }
-    .sidebar { height: auto; overflow-y: visible; padding-bottom: 20px; border-radius: 12px; }
-    .main-area { height: auto; overflow-y: visible; padding-bottom: 20px; border-radius: 12px; }
-    .app.no-selection .main-area { display: none; }
-    .app.has-selection .sidebar { display: none; }
-    .app.has-selection .main-area { display: block; }
-    .back-btn { display: flex; width: 100%; justify-content: center; padding: 12px; background: rgba(56,189,248,0.15); color: var(--accent); border: 1px solid var(--accent); border-radius: 10px; font-weight: 800; font-family: inherit; font-size: 14px; cursor: pointer; margin-bottom: 15px; }
-    .doc-header .top { flex-direction: column; }
-    .doc-header .top > div:last-child { width: 100%; justify-content: center; margin-top: 10px; }
-    .doc-header h2 { font-size: 15px; justify-content: center; text-align: center; }
-    .info-grid { grid-template-columns: 1fr 1fr !important; gap: 8px; }
-    .info-box { padding: 10px; font-size: 12px; }
-    .info-box .value { font-size: 14px; }
-    .bank-row { flex-wrap: wrap; }
-    .bank-box.card-number { flex: 100%; width: 100%; }
-    .bank-box.other { flex: 1 1 18%; min-width: 60px; }
-    .events-layout { grid-template-columns: 1fr; }
-    .mobile-event-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
-    .mobile-ev-tab { flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 700; background: rgba(15,23,42,0.6); border: 1px solid var(--border); color: var(--muted); cursor: pointer; font-family: inherit; }
-    .mobile-ev-tab.active { background: var(--accent); color: #062334; border-color: var(--accent); }
-    .ev-section { display: none; }
-    .ev-section.active-mobile { display: flex; }
-    .modal { padding: 15px; max-height: 95vh; }
-    .call-phone { font-size: 20px; }
-    .call-actions { grid-template-columns: 1fr 1fr; }
-}
-
-@media(min-width: 901px){
-    .back-btn { display: none; }
+@media (max-width: 900px) {
+  .app-layout { flex-direction: column; }
+  .sidebar-right { display: none; }
+  .top-header { padding: 0 15px; height: 60px; }
+  .content-area { padding: 15px; padding-bottom: 80px; }
+  
+  .app-split { display: block; height: auto; }
+  .sidebar-list-panel { height: auto; border: none; padding: 0; box-shadow: none; background: transparent; }
+  .main-area { border: none; padding: 0; box-shadow: none; background: transparent; }
+  
+  .app-split.no-selection .main-area { display: none; }
+  .app-split.has-selection .sidebar-list-panel { display: none; }
+  
+  .back-btn { display: flex; width: 100%; justify-content: center; padding: 12px; background: #fff; border: 1px solid var(--border-color); border-radius: 10px; font-weight: 800; font-family: inherit; font-size: 14px; cursor: pointer; margin-bottom: 15px; color: var(--text-main); box-shadow: var(--shadow-sm); }
+  
+  .events-layout { grid-template-columns: 1fr; }
+  .mobile-event-tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 5px; }
+  .mobile-ev-tab { flex: 1; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; background: #fff; border: 1px solid var(--border-color); color: var(--text-muted); cursor: pointer; white-space: nowrap; }
+  .mobile-ev-tab.active { background: var(--accent-light); color: var(--accent-hover); border-color: var(--accent); }
+  .ev-section { display: none; }
+  .ev-section.active-mobile { display: flex; }
+  
+  .mobile-bottom-nav {
+    display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+    background: #fff; border-top: 1px solid var(--border-color); z-index: 1000;
+    padding: 10px; padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    justify-content: space-around; box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+  }
+  .mobile-bottom-nav button {
+    background: transparent; border: none; color: var(--text-muted);
+    font-family: inherit; font-size: 11px; font-weight: 700;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 5px 15px; border-radius: 10px; cursor: pointer; transition: 0.2s;
+  }
+  .mobile-bottom-nav button .icon { font-size: 20px; }
+  .mobile-bottom-nav button.active { color: var(--accent-hover); background: var(--accent-light); }
+  
+  .info-grid { grid-template-columns: 1fr 1fr !important; }
+  .row, .row3 { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
+
 <div id="loginScreen" class="hidden">
-  <div class="login-box">
-    <h1>🔐 ورود به سیستم</h1>
-    <div class="subtitle">دفتر بازآموزی پزشکان</div>
-    <div class="login-error" id="loginError">❌ نام کاربری یا رمز عبور اشتباه است</div>
-    <label>نام کاربری</label>
-    <input id="loginUser" type="text" placeholder="نام کاربری" autocomplete="off">
-    <label>رمز عبور</label>
-    <input id="loginPass" type="password" placeholder="رمز عبور" autocomplete="off">
-    <button onclick="doLogin()">ورود به سیستم</button>
+  <div class="login-box modal-bg" style="display:flex;">
+    <div class="modal" style="max-width:400px;">
+      <h1 style="text-align:center; font-size:22px; color:var(--teal); margin-bottom:20px;">🔐 ورود به سیستم</h1>
+      <div id="loginError" class="badge red" style="display:none; width:100%; margin-bottom:15px; padding:10px; justify-content:center;">❌ نام کاربری یا رمز عبور اشتباه است</div>
+      <label>نام کاربری</label>
+      <input id="loginUser" type="text" placeholder="نام کاربری" autocomplete="off">
+      <label>رمز عبور</label>
+      <input id="loginPass" type="password" placeholder="رمز عبور" autocomplete="off">
+      <button class="btn btn-primary" style="width:100%; margin-top:20px; padding:12px;" onclick="doLogin()">ورود به سیستم</button>
+    </div>
   </div>
 </div>
 
 <iframe name="hidden_iframe_push" style="display:none;"></iframe>
 
-<div id="incomingCallBanner" class="hidden" style="position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:99999; background:linear-gradient(135deg, #1e293b, #0f172a); border:2px solid var(--accent); border-radius:20px; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,0.8); text-align:center; width:90%; max-width:500px;">
-  <div style="font-size:18px; color:var(--accent); margin-bottom:12px; font-weight:800;">📞 تماس ورودی</div>
-  <div id="incomingCallerName" style="font-size:24px; font-weight:800; color:#fff; margin-bottom:8px;">ناشناس</div>
-  <div id="incomingCallerNumber" class="ltr" style="font-size:42px; font-weight:900; color:var(--success); margin-bottom:16px; letter-spacing:3px;">0912...</div>
+<!-- بنر تماس ورودی -->
+<div id="incomingCallBanner" class="hidden" style="position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:99999; background:#fff; border:2px solid var(--accent); border-radius:20px; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,0.2); text-align:center; width:90%; max-width:500px;">
+  <div style="font-size:18px; color:var(--accent-hover); margin-bottom:12px; font-weight:800;">📞 تماس ورودی</div>
+  <div id="incomingCallerName" style="font-size:24px; font-weight:800; color:var(--text-main); margin-bottom:8px;">ناشناس</div>
+  <div id="incomingCallerNumber" class="ltr" style="font-size:42px; font-weight:900; color:var(--teal); margin-bottom:16px; letter-spacing:3px;">0912...</div>
   <div id="incomingCallAlert" style="margin-bottom:20px; font-size:14px; font-weight:700; line-height:1.6;"></div>
-  <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; border-top:1px solid rgba(255,255,255,0.1); padding-top:16px;">
-     <button id="btnViewProfile" class="mini" style="display:none; background:rgba(56,189,248,0.15); color:var(--accent); border-color:var(--accent);" onclick="viewIncomingProfile()">👁 مشاهده پروفایل</button>
-     <button id="btnRegisterProfile" class="mini" style="display:none; background:rgba(52,211,153,0.15); color:var(--success); border-color:var(--success);" onclick="registerFromCallBanner()">👤 ثبت پروفایل</button>
-     <button class="mini" style="background:rgba(251,191,36,0.15); color:var(--warn); border-color:rgba(251,191,36,0.4);" onclick="openCallNoteModal()">📝 ثبت یادداشت</button>
-     <a id="btnTelegram" class="mini" href="#" target="_blank" style="color:var(--accent); border-color:rgba(56,189,248,0.4);">✈️ تلگرام</a>
-     <a id="btnBale" class="mini" href="#" target="_blank" style="color:var(--success); border-color:rgba(52,211,153,0.4);">💬 بله</a>
-     <button class="mini danger" onclick="hideCallBanner()">❌ بستن</button>
+  <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; border-top:1px solid var(--border-color); padding-top:16px;">
+     <button id="btnViewProfile" class="btn btn-primary" style="display:none;" onclick="viewIncomingProfile()">👁 مشاهده پروفایل</button>
+     <button id="btnRegisterProfile" class="btn btn-primary" style="display:none;" onclick="registerFromCallBanner()">👤 ثبت پروفایل</button>
+     <button class="btn btn-outline" onclick="openCallNoteModal()">📝 ثبت یادداشت</button>
+     <a id="btnTelegram" class="btn btn-outline" href="#" target="_blank" style="color:#0284c7;">✈️ تلگرام</a>
+     <a id="btnBale" class="btn btn-outline" href="#" target="_blank" style="color:var(--accent-hover);">💬 بله</a>
+     <button class="btn btn-danger" onclick="hideCallBanner()">❌ بستن</button>
   </div>
 </div>
 
-<div class="wrap">
-
-<header>
-  <div>
-    <div>
-      <h1>📚 دفتر بازآموزی پزشکان</h1>
-      <div class="sub">حضوری 🏢 | وبینار 💻 | غیر حضوری 📁</div>
+<div class="app-layout">
+  <!-- سایدبار راست -->
+  <aside class="sidebar-right">
+    <div class="sidebar-logo">بازآموزی<br>پزشکان</div>
+    <nav class="sidebar-nav">
+      <button class="sidebar-btn" data-tab="dash" onclick="switchTab('dash')"><span class="icon">📊</span>داشبورد</button>
+      <button class="sidebar-btn active" data-tab="doctors" onclick="switchTab('doctors')"><span class="icon">👨‍⚕️</span>پزشکان</button>
+      <button class="sidebar-btn" data-tab="contacts" onclick="switchTab('contacts')"><span class="icon">📇</span>مخاطبین</button>
+      <button class="sidebar-btn" data-tab="calls" onclick="switchTab('calls')"><span class="icon">📞</span>تماس‌ها</button>
+    </nav>
+    <div style="margin-top:auto; display:flex; flex-direction:column; gap:10px;">
+      <button class="sidebar-btn" onclick="syncNow(true)" title="همگام‌سازی"><span class="icon">🔄</span>سینک</button>
+      <button class="sidebar-btn" onclick="doLogout()" title="خروج"><span class="icon">🚪</span>خروج</button>
     </div>
-    <button class="mini mobile-menu-btn" onclick="toggleHeader()">⚙️ تنظیمات</button>
-  </div>
-  <div class="tabs" id="mainTabs">
-    <button class="tab" data-tab="dash">📊 داشبورد</button>
-    <button class="tab active" data-tab="doctors">👨‍⚕️ دفتر پزشکان</button>
-    <button class="tab" data-tab="contacts">📇 مخاطبین</button>
-    <button class="tab" data-tab="calls">📞 تماس‌ها</button>
-  </div>
-  <div class="header-expandable" id="headerExpandable">
-    <div class="user-picker" id="userPicker">
-      <label>👤</label>
-      <button data-user="morteza" onclick="switchUser('morteza')">مرتضی</button>
-      <button data-user="parvin" onclick="switchUser('parvin')">پروین</button>
-      <button data-user="all" onclick="switchUser('all')">همه</button>
-    </div>
-    <div class="header-actions">
-      <span id="syncStatus" class="mini" style="min-width:90px; text-align:center; cursor:default;">☁️ آماده</span>
-      <button class="mini" onclick="syncNow(true)" title="همگام‌سازی دستی">🔄 همگام‌سازی</button>
-      <button class="mini" onclick="exportData()" title="پشتیبان‌گیری">💾 پشتیبان</button>
-      <button class="mini" onclick="document.getElementById('importFile').click()" title="بازیابی">📂 بازیابی</button>
-      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
-      <button class="mini" onclick="doLogout()" title="خروج">🚪 خروج</button>
-    </div>
-    <div class="sub" id="clock" style="font-weight:600"></div>
-  </div>
-</header>
+  </aside>
 
-<div class="tab-content hidden" id="tab-dash">
-  <div class="stats" id="statsBar"></div>
-  <div id="dashAlert"></div>
-  <div class="panel" style="margin-top:12px">
-    <h2>⚠️ پزشکانی که امتیازشان کامل نیست</h2>
-    <div id="incomplete"></div>
-  </div>
-</div>
-
-<div class="tab-content" id="tab-doctors">
-  <div class="app no-selection" id="appContainer">
-    <aside class="sidebar">
-      <div class="sidebar-head">
-        <h2>👨‍⚕️ پزشکان</h2>
-        <button class="btn sm" onclick="openDoctorModal()">➕ جدید</button>
+  <!-- محتوای اصلی -->
+  <div class="main-content">
+    <!-- هدر -->
+    <header class="top-header">
+      <div class="header-left">
+        <div class="user-profile">
+          <div class="user-avatar" id="headerUserAvatar">م</div>
+          <div class="user-info">
+            <div class="user-name" id="headerUserName">مرتضی</div>
+            <div class="user-role">مدیر سیستم</div>
+          </div>
+          <select id="userPickerSelect" onchange="switchUser(this.value)" style="width:auto; padding:4px 8px; font-size:11px; margin-right:8px; background:#f1f5f9; border:none; cursor:pointer;">
+            <option value="morteza">مرتضی</option>
+            <option value="parvin">پروین</option>
+            <option value="all">همه</option>
+          </select>
+        </div>
       </div>
-      <input id="searchDoctor" placeholder="🔍 جستجو..." style="margin-bottom:10px">
-      <div class="doc-category-tabs" id="docCategoryTabs"></div>
-      <div class="doc-list" id="docList"></div>
-    </aside>
-    <main class="main-area" id="mainArea">
-      <div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>
-    </main>
-  </div>
-</div>
+      <div class="header-right">
+        <span id="syncStatus" class="badge green">☁️ آماده</span>
+        <button class="mini" onclick="exportData()" title="پشتیبان‌گیری">💾</button>
+        <button class="mini" onclick="document.getElementById('importFile').click()" title="بازیابی">📂</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+        <div class="date-time" id="clock">در حال بارگذاری...</div>
+      </div>
+    </header>
 
-<div class="tab-content hidden" id="tab-contacts">
-  <div class="panel">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-      <h2 style="margin:0;">📇 لیست مخاطبین</h2>
-      <button class="btn sm" onclick="openContactModal()">➕ افزودن مخاطب جدید</button>
+    <!-- محتوای تب‌ها -->
+    <div class="content-area">
+      
+      <!-- داشبورد -->
+      <div class="tab-content" id="tab-dash">
+        <div class="stats-grid" id="statsBar"></div>
+        <div id="dashAlert"></div>
+        <div class="panel" style="margin-top:20px">
+          <div class="panel-header">
+            <h2 class="panel-title">⚠️ پزشکانی که امتیازشان کامل نیست</h2>
+          </div>
+          <div id="incomplete"></div>
+        </div>
+      </div>
+
+      <!-- پزشکان -->
+      <div class="tab-content active" id="tab-doctors">
+        <div class="app-split no-selection" id="appContainer">
+          <aside class="sidebar-list-panel">
+            <div class="panel-header" style="margin-bottom:12px">
+              <h2 class="panel-title">👨‍⚕️ لیست پزشکان</h2>
+              <button class="btn btn-primary" style="padding:6px 12px; font-size:12px;" onclick="openDoctorModal()">➕ جدید</button>
+            </div>
+            <div class="list-search-box">
+              <input id="searchDoctor" placeholder="🔍 جستجوی نام، تخصص یا شماره...">
+            </div>
+            <div class="doc-category-tabs" id="docCategoryTabs"></div>
+            <div class="doc-list" id="docList"></div>
+          </aside>
+          <main class="main-area" id="mainArea">
+            <div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>
+          </main>
+        </div>
+      </div>
+
+      <!-- مخاطبین -->
+      <div class="tab-content" id="tab-contacts">
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">📇 لیست مخاطبین</h2>
+            <button class="btn btn-primary" onclick="openContactModal()">➕ افزودن مخاطب</button>
+          </div>
+          <div class="list-search-box" style="margin-bottom:20px;">
+            <input id="searchContact" placeholder="🔍 جستجو در نام یا شماره...">
+          </div>
+          <div id="listContacts"></div>
+        </div>
+      </div>
+
+      <!-- تماس‌ها -->
+      <div class="tab-content" id="tab-calls">
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">📞 لیست تماس‌ها</h2>
+          </div>
+          <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+            <button class="cat-tab active" data-filter="all" onclick="setCallFilter('all')">همه</button>
+            <button class="cat-tab" data-filter="incoming" onclick="setCallFilter('incoming')">دریافتی 📥</button>
+            <button class="cat-tab" data-filter="outgoing" onclick="setCallFilter('outgoing')">ارسالی 📤</button>
+            <button class="cat-tab" data-filter="missed" onclick="setCallFilter('missed')">بی‌پاسخ ❌</button>
+            <button class="cat-tab" data-filter="noted" onclick="setCallFilter('noted')">📝 یادداشت‌دار</button>
+          </div>
+          <div class="row" style="margin-bottom:20px">
+            <input id="searchCall" placeholder="🔍 جستجو در شماره یا نام">
+            <select id="filterCall">
+              <option value="all">همه وضعیت‌های پیگیری</option>
+              <option value="pending">پیگیری‌نشده</option>
+              <option value="doing">در حال پیگیری</option>
+              <option value="done">پیگیری‌شده</option>
+            </select>
+          </div>
+          <div id="listCalls"></div>
+        </div>
+      </div>
+
     </div>
-    <input id="searchContact" placeholder="🔍 جستجو در نام یا شماره..." style="margin-bottom:12px">
-    <div id="listContacts"></div>
   </div>
 </div>
 
-<div class="tab-content hidden" id="tab-calls">
-  <div class="calls-container">
-    <div class="panel" style="margin-bottom: 0;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h2 style="margin:0;">لیست تماس‌ها</h2>
-      </div>
-      <div class="call-filters">
-        <button class="call-filter-btn active" data-filter="all" onclick="setCallFilter('all')">همه موارد</button>
-        <button class="call-filter-btn" data-filter="incoming" onclick="setCallFilter('incoming')">دریافتی 📥</button>
-        <button class="call-filter-btn" data-filter="outgoing" onclick="setCallFilter('outgoing')">ارسالی 📤</button>
-        <button class="call-filter-btn" data-filter="missed" onclick="setCallFilter('missed')">بی‌پاسخ ❌</button>
-        <button class="call-filter-btn" data-filter="noted" onclick="setCallFilter('noted')">📝 دارای یادداشت</button>
-      </div>
-      <div class="row" style="margin-bottom:16px">
-        <input id="searchCall" placeholder="🔍 جستجو در شماره یا نام">
-        <select id="filterCall">
-          <option value="all">همه وضعیت‌های پیگیری</option>
-          <option value="pending">پیگیری‌نشده</option>
-          <option value="doing">در حال پیگیری</option>
-          <option value="done">پیگیری‌شده</option>
-        </select>
-      </div>
-      <div id="listCalls"></div>
-    </div>
-  </div>
-</div>
-
-</div>
-
+<!-- ناوبری موبایل -->
 <nav class="mobile-bottom-nav">
     <button data-tab="dash" onclick="switchTab('dash')"><span class="icon">📊</span>داشبورد</button>
     <button data-tab="doctors" class="active" onclick="switchTab('doctors')"><span class="icon">👨‍⚕️</span>پزشکان</button>
@@ -501,12 +442,11 @@ textarea{resize:vertical;min-height:55px}
 <audio id="ringtone" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
 <script>
+// ==================== متغیرها و توابع پایه ====================
 const K = 'cme4_data';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxl4UYo-pMlrcIFIQS2rDghVi9D8toNdFfH2k_UDqSiW0hsT0yKJ6P9GZR4fwa12W2sng/exec';
 
-let doctors = [];
-let calls = [];
-let contacts = [];
+let doctors = [], calls = [], contacts = [];
 let selectedDoctorId = null;
 let currentUser = 'morteza';
 let currentDocCategory = 'all';
@@ -528,76 +468,12 @@ try {
 
 const uid = () => Date.now()+Math.random().toString(36).slice(2,6);
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const toEnDigits = s => String(s??'').replace(/[۰-۹]/g,d=>'0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]).replace(/[٠-٩]/g,d=>'0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
+const toEnDigits = s => String(s??'').replace(/[۰-۹]/g,d=>'0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]).replace(/[٠-٩]/g,d=>'0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]).replace(/,/g, '');
 const num = n => toEnDigits(Number(n||0).toLocaleString('en-US'));
 const dt = ts => { const d = new Date(ts); const p = x=>String(x).padStart(2,'0'); return `${p(d.getHours())}:${p(d.getMinutes())} - ${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())}`; };
-
-const cleanPhoneForLink = p => {
-    let s = toEnDigits(String(p||'')).replace(/\D/g, '');
-    if (s.startsWith('0')) s = s.substring(1);
-    return s;
-};
-
-/* =========================================================
-   ★★★ نرمال‌سازی شماره برای بله (فقط نمایش) ★★★
-   شماره را به فرمت 09xxxxxxxxx تبدیل می‌کند تا کاربر
-   بتواند در بله جستجو کند.
-   ========================================================= */
-const normalizePhoneForSearch = p => {
-    let s = toEnDigits(String(p || '')).replace(/\D/g, '');
-    if (s.startsWith('98') && s.length > 10) s = s.substring(2);
-    if (!s.startsWith('0')) s = '0' + s;
-    return s;
-};
-
-/* =========================================================
-   ★★★ باز کردن بله با کپی شماره ★★★
-   چون بله لینک عمیق پیوی بر اساس شماره تلفن ندارد،
-   شماره را کپی می‌کنیم و کاربر را به بله می‌فرستیم.
-   ========================================================= */
-window.openBaleWithCopy = function(phone) {
-    const displayNumber = normalizePhoneForSearch(phone);
-    if (!displayNumber || displayNumber === '0') {
-        toast('⚠️ شماره نامعتبر است');
-        return;
-    }
-    const showToast = () => toast(`📋 شماره ${displayNumber} کپی شد. در بله جستجو کنید.`);
-    try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(displayNumber).then(showToast).catch(() => {
-                try {
-                    const ta = document.createElement('textarea');
-                    ta.value = displayNumber;
-                    ta.style.position = 'fixed';
-                    ta.style.top = '-9999px';
-                    document.body.appendChild(ta);
-                    ta.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(ta);
-                    showToast();
-                } catch(e) {}
-            });
-        } else {
-            const ta = document.createElement('textarea');
-            ta.value = displayNumber;
-            ta.style.position = 'fixed';
-            ta.style.top = '-9999px';
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
-            showToast();
-        }
-    } catch(e) {}
-};
-
-function isSamePhone(p1, p2) {
-    const n1 = cleanPhoneForLink(p1);
-    const n2 = cleanPhoneForLink(p2);
-    if (!n1 || !n2) return false;
-    return n1.slice(-10) === n2.slice(-10);
-}
-
+const cleanPhoneForLink = p => { let s = toEnDigits(String(p||'')).replace(/\D/g, ''); if (s.startsWith('0')) s = s.substring(1); return s; };
+const normalizePhoneForSearch = p => { let s = toEnDigits(String(p || '')).replace(/\D/g, ''); if (s.startsWith('98') && s.length > 10) s = s.substring(2); if (!s.startsWith('0')) s = '0' + s; return s; };
+const isSamePhone = (p1, p2) => { const n1 = cleanPhoneForLink(p1), n2 = cleanPhoneForLink(p2); if (!n1 || !n2) return false; return n1.slice(-10) === n2.slice(-10); };
 const typeIcon = t => t==='حضوری'?'🏢':t==='وبینار'?'💻':'📁';
 const fullName = d => ((d.firstName||'')+' '+(d.lastName||'')).trim()||'بی‌نام';
 
@@ -610,9 +486,9 @@ function formatDate(y,m,d){ return `${y}/${String(m).padStart(2,'0')}/${String(d
 function toast(msg, type='info'){ 
   const t=document.getElementById('toast'); 
   t.textContent=msg; 
-  if(type==='danger'){ t.style.background = 'linear-gradient(135deg, #ef4444, #b91c1c)'; }
-  else if(type==='warn'){ t.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)'; }
-  else { t.style.background = 'linear-gradient(135deg, #0ea5e9, #0284c7)'; }
+  if(type==='danger'){ t.style.background = 'var(--danger)'; }
+  else if(type==='warn'){ t.style.background = 'var(--warn)'; }
+  else { t.style.background = 'var(--sidebar-bg)'; }
   t.classList.add('show'); 
   clearTimeout(t._t); 
   t._t=setTimeout(()=>t.classList.remove('show'),4000); 
@@ -666,7 +542,10 @@ function getShamsiToday(){
 function tick(){ 
   const d=new Date(); const p=x=>String(x).padStart(2,'0'); 
   const el=document.getElementById('clock'); 
-  if(el) { let shamsiDate = getShamsiToday() || `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())}`; el.textContent = `${shamsiDate} ساعت ${p(d.getHours())}:${p(d.getMinutes())}`; }
+  if(el) { 
+    let shamsiDate = getShamsiToday() || `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())}`; 
+    el.innerHTML = `<span>📅 ${shamsiDate}</span> <span style="margin:0 8px;">|</span> <span>⏰ ${p(d.getHours())}:${p(d.getMinutes())}</span>`; 
+  }
 }
 
 document.addEventListener('input', e => {
@@ -683,14 +562,17 @@ window.doLogin = function(){
   var errEl = document.getElementById('loginError');
   if(USERS[u] && USERS[u].pass === p){
     try { localStorage.setItem('cme_logged_in', u); } catch(e){}
-    errEl.classList.remove('show');
+    errEl.style.display = 'none';
     document.getElementById('loginScreen').classList.add('hidden');
     currentUser = u;
     try { localStorage.setItem('cme_current_user', u); } catch(e){}
-    document.querySelectorAll('.user-picker button').forEach(function(b){ if(b.dataset.user === u) b.classList.add('active'); else b.classList.remove('active'); });
+    updateUserUI();
     renderAll(); updateMobileSelection(); toast('👋 خوش آمدید ' + USERS[u].name);
     requestNotificationPermission();
-  } else { errEl.classList.add('show'); document.getElementById('loginPass').value = ''; }
+  } else { 
+    errEl.style.display = 'flex'; 
+    document.getElementById('loginPass').value = ''; 
+  }
 };
 
 window.doLogout = function(){ if(!confirm('از سیستم خارج می‌شوید؟')) return; try { localStorage.removeItem('cme_logged_in'); localStorage.removeItem('cme_current_user'); } catch(e){} location.reload(); };
@@ -701,12 +583,19 @@ function checkLogin(){
     document.getElementById('loginScreen').classList.add('hidden');
     currentUser = logged;
     try { localStorage.setItem('cme_current_user', logged); } catch(e){}
-    document.querySelectorAll('.user-picker button').forEach(function(b){ if(b.dataset.user === logged) b.classList.add('active'); else b.classList.remove('active'); });
+    updateUserUI();
     requestNotificationPermission();
   } else {
     document.getElementById('loginScreen').classList.remove('hidden');
     setTimeout(function(){ var u = document.getElementById('loginUser'); if(u) u.focus(); }, 100);
   }
+}
+
+function updateUserUI() {
+  const u = USERS[currentUser] || { name: 'همه' };
+  document.getElementById('headerUserName').textContent = u.name;
+  document.getElementById('headerUserAvatar').textContent = u.name.charAt(0);
+  document.getElementById('userPickerSelect').value = currentUser;
 }
 
 function requestNotificationPermission() {
@@ -719,16 +608,11 @@ function requestNotificationPermission() {
 
 document.addEventListener('keydown', function(e){ if(e.key === 'Enter' && !document.getElementById('loginScreen').classList.contains('hidden')){ doLogin(); } });
 
-window.toggleHeader = function() {
-    const el = document.getElementById('headerExpandable');
-    if(el) el.classList.toggle('open');
-};
-
 window.switchUser = function(user){
   currentUser = user; try { localStorage.setItem('cme_current_user', user); } catch(e){}
   selectedDoctorId = null;
   const ma = document.getElementById('mainArea'); if(ma) ma.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>';
-  document.querySelectorAll('.user-picker button').forEach(b=>{ if(b.dataset.user === user) b.classList.add('active'); else b.classList.remove('active'); });
+  updateUserUI();
   renderDash(); renderDocList(); renderCalls(); renderContacts(); updateMobileSelection();
 };
 
@@ -747,56 +631,39 @@ function getAutoStatus(d) {
     const hasFinance = fTotal > 0 || fPaid > 0;
 
     if (!hasEvents && !hasFinance && total === 0) return 'new';
-
     const allEventsComplete = hasEvents && events.every(e => eventState(e) === 'earned');
-
     const isCreditsDone = req > 0 ? total >= req : true;
     const isFinanceDone = fTotal > 0 ? fPaid >= fTotal : true;
-
     if (allEventsComplete && isCreditsDone && isFinanceDone) return 'completed';
-
     return 'in_progress';
 }
 
 function eventCredit(e){
   if(e.purchase!=='انجام شد') return 0;
-  if(e.type==='وبینار'){ 
-    if(e.attend!=='انجام شد') return 0; 
-    if(e.exam!=='قبول') return 0;
-  }
-  if(e.type==='غیر حضوری'){ 
-    if(e.exam!=='قبول') return 0;
-  }
-  if(e.type==='حضوری'){ 
-    if(e.attend!=='انجام شد') return 0; 
-  }
+  if(e.type==='وبینار'){ if(e.attend!=='انجام شد') return 0; if(e.exam!=='قبول') return 0; }
+  if(e.type==='غیر حضوری'){ if(e.exam!=='قبول') return 0; }
+  if(e.type==='حضوری'){ if(e.attend!=='انجام شد') return 0; }
   return Number(e.credit||0);
 }
 
 function eventState(e){
   if(e.purchase!=='انجام شد') return 'partial';
-  if(e.type==='وبینار'){ 
-    if(e.attend!=='انجام شد') return 'partial'; 
-    if(e.exam==='رد') return 'failed'; 
-    if(e.exam!=='قبول') return 'partial';
-  }
-  if(e.type==='غیر حضوری'){ 
-    if(e.exam==='رد') return 'failed'; 
-    if(e.exam!=='قبول') return 'partial';
-  }
-  if(e.type==='حضوری'){ 
-    if(e.attend!=='انجام شد') return 'partial'; 
-  }
+  if(e.type==='وبینار'){ if(e.attend!=='انجام شد') return 'partial'; if(e.exam==='رد') return 'failed'; if(e.exam!=='قبول') return 'partial'; }
+  if(e.type==='غیر حضوری'){ if(e.exam==='رد') return 'failed'; if(e.exam!=='قبول') return 'partial'; }
+  if(e.type==='حضوری'){ if(e.attend!=='انجام شد') return 'partial'; }
   return 'earned';
 }
 
-function doctorCredits(d){ const r = { 'حضوری':0, 'وبینار':0, 'غیر حضوری':0 }; (d.events||[]).forEach(e=>{ if(r[e.type]!==undefined) r[e.type] += eventCredit(e); }); return r; }
-
-function totalEarned(d){ 
-    const c = doctorCredits(d); 
-    return c['حضوری'] + c['وبینار'] + c['غیر حضوری'] + Number(d.manualWebinar || 0) + Number(d.manualOffline || 0); 
+function eventComplete(e){
+  if(e.purchase !== 'انجام شد') return false;
+  if(e.type === 'وبینار'){ if(e.attend !== 'انجام شد') return false; if(e.exam !== 'قبول') return false; }
+  if(e.type === 'غیر حضوری'){ if(e.exam !== 'قبول') return false; }
+  if(e.type === 'حضوری'){ if(e.attend !== 'انجام شد') return false; }
+  return true;
 }
 
+function doctorCredits(d){ const r = { 'حضوری':0, 'وبینار':0, 'غیر حضوری':0 }; (d.events||[]).forEach(e=>{ if(r[e.type]!==undefined) r[e.type] += eventCredit(e); }); return r; }
+function totalEarned(d){ const c = doctorCredits(d); return c['حضوری'] + c['وبینار'] + c['غیر حضوری'] + Number(d.manualWebinar || 0) + Number(d.manualOffline || 0); }
 function totalListedCredits(d){ return (d.events||[]).reduce((s,e)=>s+Number(e.credit||0), 0); }
 function remainingCredits(d){ return Math.max(0, Number(d.creditReq||0) - totalEarned(d)); }
 function isComplete(d){ return remainingCredits(d)===0 && Number(d.creditReq||0)>0; }
@@ -807,9 +674,7 @@ window.exportData = function() {
   const dataStr = JSON.stringify({ doctors, calls, contacts, exportedAt: Date.now() }, null, 2);
   const blob = new Blob([dataStr], { type: "application/json" });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `cme_backup_${(getShamsiToday()||'date').replace(/\//g,'-')}.json`;
+  const a = document.createElement('a'); a.href = url; a.download = `cme_backup_${(getShamsiToday()||'date').replace(/\//g,'-')}.json`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
   toast('💾 فایل پشتیبان دانلود شد');
 };
@@ -822,7 +687,7 @@ window.importData = function(event) {
       const data = JSON.parse(e.target.result);
       if(data) {
         if(!confirm('⚠️ با این کار اطلاعات فایل پشتیبان با داده‌های فعلی ادغام می‌شوند. ادامه؟')) { event.target.value = ''; return; }
-        doctors = mergeById(doctors, data.doctors || [], 'updatedAt');
+        doctors = mergeDoctors(doctors, data.doctors || []);
         calls = mergeById(calls, data.calls || [], 'updatedAt');
         contacts = mergeById(contacts, data.contacts || [], 'updatedAt');
         save(); renderAll(); toast('✅ بازیابی با موفقیت انجام شد');
@@ -833,22 +698,21 @@ window.importData = function(event) {
   reader.readAsText(file);
 };
 
+// ==================== همگام‌سازی ====================
 let _dirty = false, _syncing = false, _syncQueued = false, _syncTimer = null;
+let _saveVersion = 0;
 
 function updateSyncUI(status) {
   const el = document.getElementById('syncStatus'); if (!el) return;
-  if (status === 'syncing') { el.innerHTML = '⏳ در حال سینک...'; el.style.color = 'var(--warn)'; el.style.borderColor = 'var(--warn)'; }
-  else if (status === 'synced') { el.innerHTML = '✅ سینک شد'; el.style.color = 'var(--success)'; el.style.borderColor = 'var(--success)'; setTimeout(() => { if(el.innerHTML === '✅ سینک شد') { el.innerHTML = '☁️ آماده'; el.style.color = ''; el.style.borderColor = ''; } }, 3000); }
-  else if (status === 'error') { el.innerHTML = '❌ خطای سینک'; el.style.color = 'var(--danger)'; el.style.borderColor = 'var(--danger)'; }
-  else { el.innerHTML = '☁️ آماده'; el.style.color = ''; el.style.borderColor = ''; }
+  if (status === 'syncing') { el.innerHTML = '⏳ در حال سینک...'; el.className = 'badge yellow'; }
+  else if (status === 'synced') { el.innerHTML = '✅ سینک شد'; el.className = 'badge green'; setTimeout(() => { if(el.innerHTML === '✅ سینک شد') { el.innerHTML = '☁️ آماده'; el.className = 'badge green'; } }, 3000); }
+  else if (status === 'error') { el.innerHTML = '❌ خطای سینک'; el.className = 'badge red'; }
+  else { el.innerHTML = '☁️ آماده'; el.className = 'badge green'; }
 }
 
 function save(){
-  try { 
-    localStorage.setItem(K, JSON.stringify(doctors)); 
-    localStorage.setItem(K+'_calls', JSON.stringify(calls)); 
-    localStorage.setItem(K+'_contacts', JSON.stringify(contacts));
-  } catch(e){}
+  _saveVersion++;
+  try { localStorage.setItem(K, JSON.stringify(doctors)); localStorage.setItem(K+'_calls', JSON.stringify(calls)); localStorage.setItem(K+'_contacts', JSON.stringify(contacts)); } catch(e){}
   _dirty = true; scheduleSync();
 }
 
@@ -858,10 +722,15 @@ async function syncNow(isManual = false){
   if(_syncing){ _syncQueued = true; return; }
   _syncing = true;
   const wasDirty = _dirty;
+  const versionAtStart = _saveVersion;
   if (wasDirty || isManual) updateSyncUI('syncing');
 
   try {
-    if(wasDirty){ await pushToCloud(); _dirty = false; await new Promise(r => setTimeout(r, 1000)); }
+    if(wasDirty){ 
+      await pushToCloud(); 
+      if(_saveVersion === versionAtStart) { _dirty = false; } else { _syncQueued = true; }
+      await new Promise(r => setTimeout(r, 1000)); 
+    }
     pullFromCloud();
     if (wasDirty || isManual) updateSyncUI('synced');
   } catch(e) { if (wasDirty || isManual) updateSyncUI('error'); } finally {
@@ -895,33 +764,52 @@ function mergeById(localArr, remoteArr, tsField){
   return Array.from(map.values());
 }
 
+function mergeDoctors(localArr, remoteArr){
+  const map = new Map();
+  (localArr || []).forEach(d => { if(d && d.id) map.set(d.id, d); });
+  (remoteArr || []).forEach(rd => {
+    if(!rd || !rd.id) return;
+    const ld = map.get(rd.id);
+    if(!ld){ map.set(rd.id, rd); return; }
+    const evMap = new Map();
+    const addEvents = (events) => {
+      (events || []).forEach(e => {
+        if(!e || !e.id) return;
+        if(!e.updatedAt) e.updatedAt = e.createdAt || 0;
+        const ex = evMap.get(e.id);
+        if(!ex){ evMap.set(e.id, e); }
+        else {
+          const eTs = Number(e.updatedAt || e.createdAt || 0);
+          const exTs = Number(ex.updatedAt || ex.createdAt || 0);
+          if(eTs > exTs) evMap.set(e.id, e);
+        }
+      });
+    };
+    addEvents(ld.events); addEvents(rd.events);
+    const lTs = Number(ld.updatedAt || 0), rTs = Number(rd.updatedAt || 0);
+    const base = rTs > lTs ? { ...rd } : { ...ld };
+    base.events = Array.from(evMap.values());
+    base.updatedAt = Math.max(lTs, rTs);
+    map.set(rd.id, base);
+  });
+  return Array.from(map.values());
+}
+
 function jsonp(url, callback, onError) {
   const script = document.createElement('script');
   const uniqueName = 'jsonp_' + Date.now() + Math.floor(Math.random() * 1000);
   let done = false;
   let timeoutId = null;
   const cleanup = () => {
-    if (done) return;
-    done = true;
+    if (done) return; done = true;
     try { document.body.removeChild(script); } catch(_){}
     try { delete window[uniqueName]; } catch(_){}
     if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
   };
-  timeoutId = setTimeout(() => {
-    if (done) return;
-    cleanup();
-    if (onError) try { onError('timeout'); } catch(_){}
-  }, 15000);
-  window[uniqueName] = function(data) {
-    if (done) return;
-    try { callback(data); } finally { cleanup(); }
-  };
+  timeoutId = setTimeout(() => { if (done) return; cleanup(); if (onError) try { onError('timeout'); } catch(_){} }, 15000);
+  window[uniqueName] = function(data) { if (done) return; try { callback(data); } finally { cleanup(); } };
   script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + uniqueName;
-  script.onerror = function() {
-    if (done) return;
-    cleanup();
-    if (onError) try { onError('network'); } catch(_){}
-  };
+  script.onerror = function() { if (done) return; cleanup(); if (onError) try { onError('network'); } catch(_){} };
   document.body.appendChild(script);
 }
 
@@ -929,68 +817,82 @@ function pullFromCloud(){
   jsonp(SCRIPT_URL + '?t=' + Date.now(), function(data) {
     _pollErrorCount = 0;
     if(!data) return;
-    const newDocs  = mergeById(doctors, data.doctors || [], 'updatedAt');
+    const newDocs  = mergeDoctors(doctors, data.doctors || []);
     const newCalls = mergeById(calls,   data.calls   || [], 'updatedAt');
     const newContacts = mergeById(contacts, data.contacts || [], 'updatedAt');
-    const changed = JSON.stringify(newDocs) !== JSON.stringify(doctors) || 
-                    JSON.stringify(newCalls) !== JSON.stringify(calls) ||
-                    JSON.stringify(newContacts) !== JSON.stringify(contacts);
+    const changed = JSON.stringify(newDocs) !== JSON.stringify(doctors) || JSON.stringify(newCalls) !== JSON.stringify(calls) || JSON.stringify(newContacts) !== JSON.stringify(contacts);
     doctors = newDocs; calls = newCalls; contacts = newContacts;
     if(changed){
-      try { 
-        localStorage.setItem(K, JSON.stringify(doctors)); 
-        localStorage.setItem(K+'_calls', JSON.stringify(calls)); 
-        localStorage.setItem(K+'_contacts', JSON.stringify(contacts));
-      } catch(e){}
+      try { localStorage.setItem(K, JSON.stringify(doctors)); localStorage.setItem(K+'_calls', JSON.stringify(calls)); localStorage.setItem(K+'_contacts', JSON.stringify(contacts)); } catch(e){}
       renderAll();
     }
-  }, function() {
-    _pollErrorCount++;
-  });
+  }, function() { _pollErrorCount++; });
 }
 
+// ==================== تب‌ها ====================
 window.switchTab = function(tabName){
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden'));
+  document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.sidebar-btn').forEach(x=>{ if(x.dataset.tab === tabName) x.classList.add('active'); else x.classList.remove('active'); });
   document.querySelectorAll('.mobile-bottom-nav button').forEach(x=>{ if(x.dataset.tab === tabName) x.classList.add('active'); else x.classList.remove('active'); });
-  const tb = document.querySelector('.tab[data-tab="'+tabName+'"]'); if(tb) tb.classList.add('active');
-  const content = document.getElementById('tab-'+tabName); if(content) content.classList.remove('hidden');
+  
+  const content = document.getElementById('tab-'+tabName); if(content) content.classList.add('active');
+  
   if(tabName === 'dash') renderDash();
   if(tabName === 'doctors'){ renderDocList(); renderMain(); }
   if(tabName === 'calls') renderCalls();
   if(tabName === 'contacts') renderContacts();
 };
 
+// ==================== رندر داشبورد ====================
 function renderDash(){
-  const myD = myDoctors(), myC = myCalls(), today = getShamsiToday();
+  const myD = myDoctors(), myC = myCalls();
   let criticalCount = 0;
   myD.forEach(d => { const daysLeft = getDaysDifference(d.reminderDate); if(daysLeft !== null && daysLeft <= 0) criticalCount++; });
+  
   const stats = [
-    { label:'پزشکان', value:myD.length }, { label:'کل رویدادها', value:myD.reduce((s,d)=>s+(d.events||[]).length,0) },
-    { label:'امتیاز کل', value:myD.reduce((s,d)=>s+totalEarned(d),0) }, { label:'پزشکان کامل', value:myD.filter(isComplete).length },
-    { label:'پزشکان ناقص', value:myD.filter(d=>!isComplete(d)).length }, { label:'مانده دریافتی', value:myD.reduce((s,d)=>{ const f=d.finance||{}; return s+Math.max(0,Number(f.total||0)-Number(f.paid||0)); },0) },
-    { label:'تماس‌های پیگیری‌نشده', value:myC.filter(c=>c.follow==='پیگیری‌نشده').length }, { label:'پزشکان دارای هشدار', value:criticalCount, isDanger: criticalCount > 0 }
+    { label:'کل پزشکان', value:myD.length }, 
+    { label:'کل رویدادها', value:myD.reduce((s,d)=>s+(d.events||[]).length,0) },
+    { label:'امتیاز کل', value:myD.reduce((s,d)=>s+totalEarned(d),0) }, 
+    { label:'پزشکان کامل', value:myD.filter(isComplete).length },
+    { label:'پزشکان ناقص', value:myD.filter(d=>!isComplete(d)).length }, 
+    { label:'مانده دریافتی', value:myD.reduce((s,d)=>{ const f=d.finance||{}; return s+Math.max(0,Number(f.total||0)-Number(f.paid||0)); },0) },
+    { label:'تماس‌های پیگیری', value:myC.filter(c=>c.follow==='پیگیری‌نشده').length }, 
+    { label:'پزشکان دارای هشدار', value:criticalCount, isDanger: criticalCount > 0 }
   ];
-  document.getElementById('statsBar').innerHTML = stats.map(s=>`<div class="stat"><div class="label">${s.label}</div><div class="value" style="${s.isDanger?'color:var(--danger)':''}">${num(s.value)}</div></div>`).join('');
+  
+  document.getElementById('statsBar').innerHTML = stats.map(s=>`
+    <div class="stat-card ${s.isDanger ? 'danger' : ''}">
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-value">${num(s.value)}</div>
+    </div>
+  `).join('');
+  
   const alertBox = document.getElementById('dashAlert');
   if (alertBox) {
       if (criticalCount > 0) {
-          alertBox.innerHTML = `<div style="background:rgba(248,113,113,0.2); border:2px solid var(--danger); border-radius:12px; padding:15px; margin-bottom:12px; text-align:center; animation:flashRed 2s infinite;">
-            <h3 style="color:#fff; font-size:16px; margin:0;">🚨 توجه! شما ${criticalCount} پزشک دارید که تاریخ یادآوری آن‌ها رسیده یا گذشته است.</h3>
+          alertBox.innerHTML = `<div style="background:#fef2f2; border:1px solid #fecaca; border-radius:12px; padding:15px; margin-bottom:20px; text-align:center;">
+            <h3 style="color:var(--danger); font-size:14px; margin:0;">🚨 توجه! شما ${criticalCount} پزشک دارید که تاریخ یادآوری آن‌ها رسیده یا گذشته است.</h3>
           </div>`;
       } else { alertBox.innerHTML = ''; }
   }
+  
   const inc = myD.filter(d=>!isComplete(d)).slice(0,10);
   document.getElementById('incomplete').innerHTML = inc.length ? inc.map(d=>{
     const rem = remainingCredits(d);
-    return `<div style="background:rgba(15,23,42,0.6);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px">
-      <div style="font-weight:700;font-size:13px">${esc(fullName(d))} <span class="badge blue">${esc(d.spec||'')}</span> <span class="badge red">${num(rem)} کم</span></div>
-      <div style="color:var(--muted);font-size:11px;margin-top:5px">📞 <span class="ltr">${esc(d.phone || '—')}</span> | 🎯 ${num(totalEarned(d))} از ${num(d.creditReq||0)}</div>
-      <div class="actions"><button class="mini green" onclick="goDoctor('${d.id}')">👁 مشاهده</button></div>
+    return `<div style="background:#f8fafc; border:1px solid var(--border-color); border-radius:10px; padding:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div>
+        <div style="font-weight:800; font-size:14px; color:var(--text-main);">${esc(fullName(d))} <span class="badge blue">${esc(d.spec||'')}</span></div>
+        <div style="color:var(--text-muted); font-size:12px; margin-top:5px;">📞 <span class="ltr">${esc(d.phone || '—')}</span> | 🎯 ${num(totalEarned(d))} از ${num(d.creditReq||0)}</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span class="badge red">${num(rem)} امتیاز کم</span>
+        <button class="mini green" onclick="goDoctor('${d.id}')">👁 مشاهده</button>
+      </div>
     </div>`;
-  }).join('') : '<div class="empty">🎉 همه پزشکان کامل هستند</div>';
+  }).join('') : '<div class="empty-state" style="padding:30px;"><span class="big">🎉</span>همه پزشکان کامل هستند</div>';
 }
 
+// ==================== لیست پزشکان ====================
 window.setDocCategory = function(cat) { currentDocCategory = cat; renderDocList(); };
 
 function renderDocList(){
@@ -999,60 +901,60 @@ function renderDocList(){
   const statusPriority = { 'new': 1, 'in_progress': 2, 'completed': 3 };
   
   let allMyDocs = myDoctors().filter(d => !q || fullName(d).toLowerCase().includes(q) || (d.spec||'').toLowerCase().includes(q) || (d.phone||'').includes(q) || (d.nat||'').includes(q));
-  
   allMyDocs = allMyDocs.map(d => ({ ...d, _autoStatus: getAutoStatus(d) }));
-
+  
   allMyDocs.sort((a, b) => {
-    const pA = statusPriority[a._autoStatus] || 5;
-    const pB = statusPriority[b._autoStatus] || 5;
+    const pA = statusPriority[a._autoStatus] || 5, pB = statusPriority[b._autoStatus] || 5;
     if (pA !== pB) return pA - pB;
     return (b.updatedAt || 0) - (a.updatedAt || 0);
   });
 
-  const categories = { 
-    'all': { title: 'همه' }, 
-    'new': { title: '📋 پیگیری' }, 
-    'in_progress': { title: '⚡ در جریان' }, 
-    'completed': { title: '🏆 تکمیل شده' } 
-  };
-  
+  const categories = { 'all': { title: 'همه' }, 'new': { title: '📋 پیگیری' }, 'in_progress': { title: '⚡ در جریان' }, 'completed': { title: '🏆 کامل' } };
   let tabsHtml = '';
   for (const [key, cat] of Object.entries(categories)) {
     const count = key === 'all' ? allMyDocs.length : allMyDocs.filter(d => d._autoStatus === key).length;
-    const extraClass = key === 'all' ? 'all' : '';
-    tabsHtml += `<button class="cat-tab ${extraClass} ${key} ${currentDocCategory === key ? 'active' : ''}" onclick="setDocCategory('${key}')">${cat.title} (${num(count)})</button>`;
+    tabsHtml += `<button class="cat-tab ${currentDocCategory === key ? 'active' : ''}" onclick="setDocCategory('${key}')">${cat.title} (${num(count)})</button>`;
   }
   const tabsContainer = document.getElementById('docCategoryTabs'); if(tabsContainer) tabsContainer.innerHTML = tabsHtml;
   
   const displayDocs = currentDocCategory === 'all' ? allMyDocs : allMyDocs.filter(d => d._autoStatus === currentDocCategory);
   const el = document.getElementById('docList');
-  if(!displayDocs.length){ el.innerHTML='<div class="empty">پزشکی در این دسته‌بندی یافت نشد</div>'; return; }
+  if(!displayDocs.length){ el.innerHTML='<div class="empty-state" style="padding:20px;"><span class="big">🔍</span>پزشکی یافت نشد</div>'; return; }
   
-  let html = '';
-  html += displayDocs.map(d => {
+  el.innerHTML = displayDocs.map(d => {
     const req = Number(d.creditReq||0), total = totalEarned(d), pct = req ? Math.min(100, Math.round(total/req*100)) : 0;
     const complete = isComplete(d), f = d.finance||{}, rem$ = Math.max(0, Number(f.total||0)-Number(f.paid||0));
     const hasOffline = (d.events||[]).some(e=>e.type==='غیر حضوری');
     const daysLeft = getDaysDifference(d.reminderDate);
+    
     let reminderBadge = '', isCritical = false, rowClass = selectedDoctorId === d.id ? 'active' : '';
     if (daysLeft !== null) {
-        if (daysLeft < 0) { reminderBadge = `<span class="badge red pulse-danger" style="font-weight:800; font-size:11px;">🚨 ${Math.abs(daysLeft)} روز گذشته!</span>`; isCritical = true; }
-        else if (daysLeft === 0) { reminderBadge = `<span class="badge red pulse-danger" style="font-weight:800; font-size:11px;">🚨 امروز!</span>`; isCritical = true; }
-        else if (daysLeft <= 3) { reminderBadge = `<span class="badge yellow pulse-warn" style="font-weight:800; font-size:11px;">⏳ ${daysLeft} روز مانده</span>`; isCritical = true; }
-        else { reminderBadge = `<span class="badge yellow" style="font-weight:800; font-size:11px;">⏳ ${daysLeft} روز مانده</span>`; }
+        if (daysLeft < 0) { reminderBadge = `<span class="badge red">🚨 ${Math.abs(daysLeft)} روز گذشته</span>`; isCritical = true; }
+        else if (daysLeft === 0) { reminderBadge = `<span class="badge red">🚨 امروز</span>`; isCritical = true; }
+        else if (daysLeft <= 3) { reminderBadge = `<span class="badge yellow">⏳ ${daysLeft} روز مانده</span>`; isCritical = true; }
+        else { reminderBadge = `<span class="badge yellow">⏳ ${daysLeft} روز مانده</span>`; }
     }
-    if (isCritical) rowClass += ' critical-alert';
+    
     return `
       <div class="doc-row ${rowClass}" onclick="selectDoctor('${d.id}')">
-        <div class="doc-name"><span>${esc(fullName(d))}</span>${d.owner?`<span class="owner-badge ${d.owner}">${d.owner==='morteza'?'مرتضی':'پروین'}</span>`:''}</div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">${pendingExamWebinars(d)>0?`<span class="exam-badge">📝 آزمون: ${num(pendingExamWebinars(d))}</span>`:''}${hasOffline?(offlinePurchasedToday(d)?'<span class="offline-badge ok">✅ خرید شده</span>':'<span class="offline-badge wait">🛒 خرید نشده</span>'):''}</div>
-        <div class="doc-spec">${esc(d.spec||'—')} ${complete?'<span class="badge green" style="margin:0 4px">✔</span>':''}${rem$>0?'<span class="badge yellow" style="margin:0 4px">💸</span>':''}</div>
-        ${d.reminderDate ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:700;display:flex;align-items:center;gap:5px;">⏰ ${d.reminderDate} ${reminderBadge}</div>` : ''}
-        <div class="doc-bar"><div class="fill ${complete?'done':''}" style="width:${pct}%"></div></div>
+        <div class="doc-name">
+          <span>${esc(fullName(d))}</span>
+          ${d.owner?`<span class="badge ${d.owner==='morteza'?'blue':'purple'}">${d.owner==='morteza'?'مرتضی':'پروین'}</span>`:''}
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px">
+          ${pendingExamWebinars(d)>0?`<span class="badge yellow">📝 آزمون: ${num(pendingExamWebinars(d))}</span>`:''}
+          ${hasOffline?(offlinePurchasedToday(d)?'<span class="badge green">✅ خرید شده</span>':'<span class="badge yellow">🛒 خرید نشده</span>'):''}
+        </div>
+        <div class="doc-spec">
+          ${esc(d.spec||'—')} 
+          ${complete?'<span class="badge green" style="margin-right:4px">✔ کامل</span>':''}
+          ${rem$>0?'<span class="badge yellow" style="margin-right:4px">💸 بدهکار</span>':''}
+        </div>
+        ${d.reminderDate ? `<div style="font-size:11px; color:var(--text-muted); margin-top:8px; display:flex; align-items:center; gap:6px;">⏰ ${d.reminderDate} ${reminderBadge}</div>` : ''}
+        <div class="doc-bar"><div class="fill ${complete?'done':''}" style="width:${pct}%; background: ${complete ? 'var(--accent)' : 'var(--teal)'}"></div></div>
         <div class="doc-meta"><span>🎯 <b>${num(total)}</b> از ${num(req)}</span><span>${pct}%</span></div>
       </div>`;
   }).join('');
-  el.innerHTML = html;
 }
 
 function selectDoctor(id){ 
@@ -1064,107 +966,128 @@ function selectDoctor(id){
     window.scrollTo({ top: 0, behavior: 'smooth' }); 
 }
 
-function updateMobileSelection(){ const app = document.getElementById('appContainer'); if(!app) return; if(selectedDoctorId){ app.classList.add('has-selection'); app.classList.remove('no-selection'); } else { app.classList.remove('has-selection'); app.classList.add('no-selection'); } }
+function updateMobileSelection(){ 
+    const app = document.getElementById('appContainer'); if(!app) return; 
+    if(selectedDoctorId){ app.classList.add('has-selection'); app.classList.remove('no-selection'); } 
+    else { app.classList.remove('has-selection'); app.classList.add('no-selection'); } 
+}
 
 window.backToList = function(){ 
-    selectedDoctorId = null; 
-    renderDocList(); 
-    renderMain(); 
-    updateMobileSelection(); 
-    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+    selectedDoctorId = null; renderDocList(); renderMain(); updateMobileSelection(); window.scrollTo({ top: 0, behavior: 'smooth' }); 
 };
 
 window.switchMobileEventTab = function(tab) {
   currentMobileEventTab = tab;
-  document.querySelectorAll('.mobile-ev-tab').forEach(btn => {
-    if(btn.textContent.includes(tab)) btn.classList.add('active'); else btn.classList.remove('active');
-  });
+  document.querySelectorAll('.mobile-ev-tab').forEach(btn => { if(btn.textContent.includes(tab)) btn.classList.add('active'); else btn.classList.remove('active'); });
   document.querySelectorAll('.ev-section').forEach(sec => { sec.classList.toggle('active-mobile', sec.id === 'sec-' + tab); });
 };
 
+// ==================== نمایش جزئیات پزشک ====================
 function renderMain(){
   const el = document.getElementById('mainArea'); if(!el) return;
   if(!selectedDoctorId){ el.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>'; return; }
   const d = doctors.find(x=>x.id===selectedDoctorId); if(!d || d.deleted){ selectedDoctorId=null; renderMain(); return; }
+  
   const cr = doctorCredits(d), total = totalEarned(d), req = Number(d.creditReq||0), rem = remainingCredits(d);
   const totalListed = totalListedCredits(d);
   const c = d.card||{}, f = d.finance||{}, rem$ = Math.max(0, Number(f.total||0)-Number(f.paid||0)), complete = rem===0 && req>0;
   
   const autoStatus = getAutoStatus(d);
-  const statusMap = { 
-    'new': {txt: '📋 پیگیری', cls: 'purple'}, 
-    'in_progress': {txt: '⚡ در جریان', cls: 'yellow'}, 
-    'completed': {txt: '🏆 تکمیل شده', cls: 'green'} 
-  };
+  const statusMap = { 'new': {txt: '📋 پیگیری', cls: 'purple'}, 'in_progress': {txt: '⚡ در جریان', cls: 'yellow'}, 'completed': {txt: '🏆 تکمیل شده', cls: 'green'} };
   const st = statusMap[autoStatus];
-
   const daysLeft = getDaysDifference(d.reminderDate);
+  
   let reminderBadge = '';
   if (daysLeft !== null) {
-      if (daysLeft < 0) reminderBadge = `<span class="badge red pulse-danger" style="font-weight:800; font-size:12px;">🚨 ${Math.abs(daysLeft)} روز گذشته!</span>`;
-      else if (daysLeft === 0) reminderBadge = `<span class="badge red pulse-danger" style="font-weight:800; font-size:12px;">🚨 امروز!</span>`;
-      else if (daysLeft <= 3) reminderBadge = `<span class="badge yellow pulse-warn" style="font-weight:800; font-size:12px;">⏳ ${daysLeft} روز مانده</span>`;
-      else reminderBadge = `<span class="badge yellow" style="font-weight:800; font-size:12px;">⏳ ${daysLeft} روز مانده</span>`;
+      if (daysLeft < 0) reminderBadge = `<span class="badge red">🚨 ${Math.abs(daysLeft)} روز گذشته</span>`;
+      else if (daysLeft === 0) reminderBadge = `<span class="badge red">🚨 امروز</span>`;
+      else if (daysLeft <= 3) reminderBadge = `<span class="badge yellow">⏳ ${daysLeft} روز مانده</span>`;
+      else reminderBadge = `<span class="badge yellow">⏳ ${daysLeft} روز مانده</span>`;
   }
 
   el.innerHTML = `
-    <button class="back-btn" onclick="backToList()">← بازگشت به لیست</button>
-    <div class="doc-header">
-      <div class="top">
-        <div>
-          <h2>👨‍⚕️ ${esc(fullName(d))} <span class="badge blue">${esc(d.spec||'—')}</span><span class="badge ${st.cls}">${st.txt}</span>${complete?'<span class="badge green">✔ امتیاز کامل</span>':'<span class="badge red">⚠️ '+num(rem)+' امتیاز کم</span>'}${rem$>0?'<span class="badge yellow">💸 بدهکار</span>':''}</h2>
-          ${d.reminderDate ? `<div class="meta" style="color:${(daysLeft !== null && daysLeft <= 3) ? 'var(--danger)' : 'var(--purple)'};font-weight:700;margin-top:8px;">⏰ تاریخ یادآوری: ${d.reminderDate} &nbsp; ${reminderBadge}</div>` : ''}
-        </div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap">
-          <button class="mini green" onclick="openIRCME('${esc(d.nat||'')}','${esc(d.pass||'')}')">🔗 ورود به آموزش مداوم</button>
-          <button class="mini" onclick="openDoctorModal('${d.id}')">✏️ ویرایش</button>
-          <button class="mini danger" onclick="delDoctor('${d.id}')">🗑 حذف</button>
-        </div>
-      </div>
-      
-      <div class="info-grid">
-        <div class="info-box"><span class="label">📞 موبایل</span><span class="value ltr" style="font-size:18px;">${esc(d.phone || '—')}</span>${d.phone ? `<button class="copy-btn" onclick="copyText('${esc(d.phone)}',this)">📋</button>` : ''}</div>
-        <div class="info-box"><span class="label" style="font-size: 14px;">🔑 رمز سامانه</span><span class="value ltr">${esc(d.pass || '—')}</span>${d.pass ? `<button class="copy-btn" onclick="copyText('${esc(d.pass)}',this)">📋</button>` : ''}</div>
-        <div class="info-box"><span class="label" style="font-size: 14px;">🆔 کد ملی</span><span class="value ltr">${esc(d.nat || '—')}</span>${d.nat ? `<button class="copy-btn" onclick="copyText('${esc(d.nat)}',this)">📋</button>` : ''}</div>
-      </div>
-
-      <div class="info-grid">
-        <div class="info-box"><span class="label">🎯 امتیاز درخواستی</span><span class="value">${num(req)}</span></div>
-        <div class="info-box"><span class="label">📊 مجموع امتیازهای لیست</span><span class="value blue">${num(totalListed)}</span></div>
-        <div class="info-box" style="display:flex; flex-direction:row; align-items:center; justify-content:space-between; gap:8px; padding:8px 12px;">
-            <div style="display:flex; flex-direction:column; align-items:center; flex:1;">
-                <span class="label" style="font-size:12px; color:var(--purple); margin-bottom:4px;">💻 وبینار</span>
-                <span class="value" style="font-size:16px; font-weight:800; color:#fff;">${num(d.manualWebinar||0)}</span>
-            </div>
-            <div style="width:1px; height:40px; background:var(--border);"></div>
-            <div style="display:flex; flex-direction:column; align-items:center; flex:1;">
-                <span class="label" style="font-size:12px; color:var(--warn); margin-bottom:4px;">📁 غیرحضوری</span>
-                <span class="value" style="font-size:16px; font-weight:800; color:#fff;">${num(d.manualOffline||0)}</span>
-            </div>
-        </div>
-      </div>
-      
-      <div class="info-grid">
-        <div class="info-box"><span class="label">💰 کل هزینه</span><span class="value">${num(f.total||0)}</span></div>
-        <div class="info-box"><span class="label">✅ پرداختی</span><span class="value success">${num(f.paid||0)}</span></div>
-        <div class="info-box"><span class="label">⏳ باقی مالی</span><span class="value ${rem$>0?'danger':'success'}">${num(rem$)}</span></div>
-      </div>
-      
-      ${d.followUp ? `<div class="info-box" style="margin-top: 12px; background:rgba(251,191,36,0.05); border-color:rgba(251,191,36,0.2);"><span class="label" style="color:var(--warn);">📝 پیگیری و توضیحات</span><span class="value" style="font-size:14px; font-weight:600; color:#fff; text-align:right;">${esc(d.followUp)}</span></div>` : ''}
-      
-      ${(c.num||c.cvv2||c.pass2)?`
-      <div class="bank-card-wrapper">
-        <div class="bank-card">
-          <div class="bank-row">
-            <div class="bank-box card-number"><span class="bank-label">شماره کارت</span><span class="bank-val">${esc(c.num||'—')}</span><button class="copy-btn" onclick="copyText('${esc(c.num||'')}',this)">📋 کپی</button></div>
-            <div class="bank-box other"><div class="bank-label">ماه</div><div class="bank-val">${esc(c.m||'--')}</div></div>
-            <div class="bank-box other"><div class="bank-label">سال</div><div class="bank-val">${esc(c.y||'--')}</div></div>
-            <div class="bank-box other"><div class="bank-label">CVV2</div><div class="bank-val">${esc(c.cvv2||'—')}</div></div>
-            <div class="bank-box other"><div class="bank-label">رمز دوم</div><div class="bank-val">${esc(c.pass2||'—')}</div></div>
+    <button class="back-btn" onclick="backToList()">← بازگشت به لیست پزشکان</button>
+    
+    <div class="profile-header">
+      <div class="profile-info">
+        <div class="profile-avatar-lg">${esc(fullName(d).charAt(0))}</div>
+        <div class="profile-title">
+          <h2>${esc(fullName(d))} <span class="badge blue">${esc(d.spec||'—')}</span></h2>
+          <div style="display:flex; gap:8px; align-items:center; margin-top:6px; flex-wrap:wrap;">
+            <span class="badge ${st.cls}">${st.txt}</span>
+            ${complete?'<span class="badge green">✔ امتیاز کامل</span>':'<span class="badge red">⚠️ '+num(rem)+' امتیاز کم</span>'}
+            ${rem$>0?'<span class="badge yellow">💸 بدهکار</span>':''}
+            ${d.reminderDate ? `<span style="font-size:11.5px; color:var(--text-muted); font-weight:700;">⏰ ${d.reminderDate} ${reminderBadge}</span>` : ''}
           </div>
         </div>
-      </div>`:''}
+      </div>
+      <div class="profile-actions">
+        <button class="btn btn-outline" onclick="openIRCME('${esc(d.nat||'')}','${esc(d.pass||'')}')">🔗 سامانه آموزش مداوم</button>
+        <button class="btn btn-outline" onclick="openDoctorModal('${d.id}')">✏️ ویرایش</button>
+        <button class="btn btn-danger" onclick="delDoctor('${d.id}')">🗑 حذف</button>
+      </div>
     </div>
+    
+    <div class="info-grid">
+      <div class="info-box">
+        <span class="label">📞 موبایل</span>
+        <span class="value ltr" style="font-size:16px;">${esc(d.phone || '—')}</span>
+        ${d.phone ? `<button class="copy-btn" onclick="copyText('${esc(d.phone)}',this)">📋</button>` : ''}
+      </div>
+      <div class="info-box">
+        <span class="label">🔑 رمز سامانه</span>
+        <span class="value ltr">${esc(d.pass || '—')}</span>
+        ${d.pass ? `<button class="copy-btn" onclick="copyText('${esc(d.pass)}',this)">📋</button>` : ''}
+      </div>
+      <div class="info-box">
+        <span class="label">🆔 کد ملی</span>
+        <span class="value ltr">${esc(d.nat || '—')}</span>
+        ${d.nat ? `<button class="copy-btn" onclick="copyText('${esc(d.nat)}',this)">📋</button>` : ''}
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-box"><span class="label">🎯 امتیاز درخواستی</span><span class="value">${num(req)}</span></div>
+      <div class="info-box"><span class="label">📊 مجموع لیست</span><span class="value blue">${num(totalListed)}</span></div>
+      <div class="info-box" style="flex-direction:row; align-items:center; justify-content:space-between; padding:12px;">
+          <div style="display:flex; flex-direction:column; align-items:center; flex:1;">
+              <span class="label" style="color:var(--purple);">💻 وبینار</span>
+              <span class="value">${num(d.manualWebinar||0)}</span>
+          </div>
+          <div style="width:1px; height:30px; background:var(--border-color);"></div>
+          <div style="display:flex; flex-direction:column; align-items:center; flex:1;">
+              <span class="label" style="color:var(--warn);">📁 غیرحضوری</span>
+              <span class="value">${num(d.manualOffline||0)}</span>
+          </div>
+      </div>
+    </div>
+    
+    <div class="info-grid">
+      <div class="info-box"><span class="label">💰 کل هزینه</span><span class="value">${num(f.total||0)}</span></div>
+      <div class="info-box"><span class="label">✅ پرداختی</span><span class="value success">${num(f.paid||0)}</span></div>
+      <div class="info-box"><span class="label">⏳ باقی مالی</span><span class="value ${rem$>0?'danger':'success'}">${num(rem$)}</span></div>
+    </div>
+    
+    ${d.followUp ? `<div style="background:#fffbeb; border:1px solid #fef3c7; border-radius:12px; padding:16px; margin-bottom:20px;">
+      <div style="font-size:12px; color:#d97706; font-weight:800; margin-bottom:6px;">📝 پیگیری و توضیحات</div>
+      <div style="font-size:13.5px; color:var(--text-main); line-height:1.6;">${esc(d.followUp)}</div>
+    </div>` : ''}
+    
+    ${(c.num||c.cvv2||c.pass2)?`
+    <div style="background:linear-gradient(135deg, #0f4c5c, #1a606f); border-radius:16px; padding:20px; color:#fff; margin-bottom:24px; box-shadow:var(--shadow-md); position:relative; overflow:hidden;">
+      <div style="position:absolute; top:-50%; right:-20%; width:200px; height:200px; background:radial-gradient(circle, rgba(16,185,129,0.2) 0%, transparent 70%); border-radius:50%;"></div>
+      <div style="display:flex; flex-wrap:wrap; gap:12px; position:relative; z-index:1;">
+        <div style="flex:100%; display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.1); padding:12px 16px; border-radius:12px;">
+          <span style="font-size:12px; color:#a7f3d0; font-weight:700;">شماره کارت</span>
+          <span class="ltr" style="font-size:18px; font-weight:800; letter-spacing:1px;">${esc(c.num||'—')}</span>
+          <button class="mini" style="background:rgba(255,255,255,0.2); color:#fff; border:none;" onclick="copyText('${esc(c.num||'')}',this)">📋</button>
+        </div>
+        <div style="flex:1; text-align:center; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px;"><div style="font-size:10px; color:#a7f3d0;">ماه</div><div class="ltr" style="font-size:14px; font-weight:800;">${esc(c.m||'--')}</div></div>
+        <div style="flex:1; text-align:center; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px;"><div style="font-size:10px; color:#a7f3d0;">سال</div><div class="ltr" style="font-size:14px; font-weight:800;">${esc(c.y||'--')}</div></div>
+        <div style="flex:1; text-align:center; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px;"><div style="font-size:10px; color:#a7f3d0;">CVV2</div><div class="ltr" style="font-size:14px; font-weight:800;">${esc(c.cvv2||'—')}</div></div>
+        <div style="flex:1; text-align:center; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px;"><div style="font-size:10px; color:#a7f3d0;">رمز دوم</div><div class="ltr" style="font-size:14px; font-weight:800;">${esc(c.pass2||'—')}</div></div>
+      </div>
+    </div>`:''}
     
     <div class="events-layout">
       <div class="mobile-event-tabs">
@@ -1179,17 +1102,9 @@ function renderMain(){
   `;
 }
 
-function eventComplete(e){
-  if(e.purchase !== 'انجام شد') return false;
-  if(e.type === 'وبینار'){ if(e.attend !== 'انجام شد') return false; if(e.exam !== 'قبول') return false; }
-  if(e.type === 'غیر حضوری'){ if(e.exam !== 'قبول') return false; }
-  if(e.type === 'حضوری'){ if(e.attend !== 'انجام شد') return false; }
-  return true;
-}
-
 function renderEventSection(d, type){
   const icon = type==='وبینار'?'💻':type==='حضوری'?'🏢':'📁';
-  const color = type==='وبینار'?'var(--purple)':type==='حضوری'?'var(--accent)':'var(--warn)';
+  const color = type==='وبینار'?'var(--purple)':type==='حضوری'?'var(--teal)':'var(--warn)';
   const evs = (d.events||[]).filter(e=>e.type===type).sort((a,b)=>{
     const aComp = eventComplete(a), bComp = eventComplete(b);
     if(aComp && !bComp) return 1; if(!aComp && bComp) return -1;
@@ -1198,31 +1113,45 @@ function renderEventSection(d, type){
     return (b.createdAt||0)-(a.createdAt||0);
   });
   const totalCredit = evs.reduce((s,e)=>s+eventCredit(e),0), sumAllCredit = evs.reduce((s,e)=>s+Number(e.credit||0),0);
+  
   return `
     <div class="ev-head" style="border-right:4px solid ${color}">
-      <h3>${icon} ${type} <span class="count" style="background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:10px;font-size:11px">${num(evs.length)}</span></h3>
-      <div class="ev-stats-wrap"><div class="ev-stat-pill">جمع: ${num(sumAllCredit)}</div>${totalCredit>0?`<div class="ev-stat-pill success">✔ ${num(totalCredit)}</div>`:''}</div>
-      <button class="add-btn" onclick="openEventModal(null, '${type}')">➕ افزودن</button>
+      <h3>${icon} ${type} <span class="badge gray" style="background:#e2e8f0; color:#475569;">${num(evs.length)}</span></h3>
+      <div class="ev-stats-wrap">
+        <div class="ev-stat-pill">جمع: ${num(sumAllCredit)}</div>
+        ${totalCredit>0?`<div class="ev-stat-pill success">✔ ${num(totalCredit)}</div>`:''}
+      </div>
+      <button class="add-btn" onclick="openEventModal(null, '${type}')">➕ جدید</button>
     </div>
-    <div class="ev-body">${evs.length ? evs.map(e=>renderEventRow(e)).join('') : `<div class="empty">هنوز ${type}ی ثبت نشده است</div>`}</div>
+    <div class="ev-body">${evs.length ? evs.map(e=>renderEventRow(e)).join('') : `<div class="empty-state" style="padding:20px; font-size:12px;">هنوز ${type}ی ثبت نشده است</div>`}</div>
   `;
 }
 
 function renderEventRow(e){
   const state = eventState(e), earned = state==='earned', failed = state==='failed';
-  const purchaseTxt = e.purchase==='انجام شد' ? '🛒 خرید شده' : '🛒 خرید نشده', attendTxt = e.attend==='انجام شد' ? '🎟 شرکت شده' : '🎟 شرکت نشده';
-  let examTxt = '📝 آزمون نداده'; if(e.exam==='قبول') examTxt = '📝 آزمون داده شده'; else if(e.exam==='رد') examTxt = '📝 آزمون رد شده';
+  const purchaseTxt = e.purchase==='انجام شد' ? '🛒 خرید شد' : '🛒 خرید نشد';
+  const attendTxt = e.attend==='انجام شد' ? '🎟 شرکت شد' : '🎟 شرکت نشد';
+  let examTxt = '📝 آزمون نداده'; if(e.exam==='قبول') examTxt = '📝 قبول'; else if(e.exam==='رد') examTxt = '📝 رد شده';
+  
   return `
     <div class="event-row ${state}">
-      <div class="event-title" style="display:flex;align-items:center;gap:8px;font-size:15px"><span>${e.num?esc(e.num)+' ':''}${e.title?esc(e.title):''}${!e.num&&!e.title?'رویداد':''}</span>${e.num?`<button class="copy-btn" style="font-size:12px;padding:3px 8px" onclick="copyText('${esc(e.num)}',this)">📋</button>`:''}</div>
-      <div class="event-meta" style="font-size:14px!important;font-weight:600;margin-top:6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">${e.date?'<span>📅 <span class="ltr">'+esc(e.date)+'</span></span>':''}${e.time?'<span>⏰ <span class="ltr">'+esc(e.time)+'</span></span>':''}</div>
-      <div class="event-credit"><span style="font-size:20px;font-weight:800;color:${earned?'var(--success)':(failed?'var(--danger)':'var(--muted)')}">${e.credit?num(e.credit):'—'} <span style="font-size:13px;font-weight:600">امتیاز</span></span></div>
+      <div class="event-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>${e.num?esc(e.num)+' ':''}${e.title?esc(e.title):''}${!e.num&&!e.title?'رویداد':''}</span>
+        ${e.num?`<button class="mini" style="padding:2px 6px;" onclick="copyText('${esc(e.num)}',this)">📋</button>`:''}
+      </div>
+      <div class="event-meta">${e.date?'<span>📅 <span class="ltr">'+esc(e.date)+'</span></span>':''}${e.time?'<span>⏰ <span class="ltr">'+esc(e.time)+'</span></span>':''}</div>
+      <div class="event-credit">امتیاز: <span style="color:${earned?'var(--accent)':(failed?'var(--danger)':'var(--text-muted)')}">${e.credit?num(e.credit):'0'}</span></div>
+      
       <div class="status-group" style="${e.type==='وبینار'?'grid-template-columns:1fr 1fr 1fr':'grid-template-columns:1fr 1fr'}">
         <button class="stat-pill ${e.purchase==='انجام شد'?'ok':''}" onclick="cycleStatus('${e.id}','purchase')">${purchaseTxt}</button>
         ${(e.type==='حضوری' || e.type==='وبینار')?`<button class="stat-pill ${e.attend==='انجام شد'?'ok':''}" onclick="cycleStatus('${e.id}','attend')">${attendTxt}</button>`:''}
         ${(e.type==='وبینار' || e.type==='غیر حضوری')?`<button class="stat-pill ${e.exam==='قبول'?'ok':e.exam==='رد'?'no':'neu'}" onclick="cycleStatus('${e.id}','exam')">${examTxt}</button>`:''}
       </div>
-      <div class="event-actions"><button class="mini" onclick="openEventModal('${e.id}')">✏️ ویرایش</button><button class="mini danger" onclick="delEvent('${e.id}')">🗑 حذف</button></div>
+      
+      <div class="event-actions">
+        <button class="mini" onclick="openEventModal('${e.id}')">✏️</button>
+        <button class="mini danger" onclick="delEvent('${e.id}')">🗑</button>
+      </div>
     </div>`;
 }
 
@@ -1231,6 +1160,7 @@ window.cycleStatus = function(eventId, field){
   const e = (d.events||[]).find(x=>x.id===eventId); if(!e) return;
   if(field==='exam'){ const o=['ثبت نشده','قبول','رد']; e.exam = o[(o.indexOf(e.exam)+1)%3]; }
   else { e[field] = e[field]==='انجام شد' ? 'انجام نشد' : 'انجام شد'; }
+  e.updatedAt = Date.now();
   d.updatedAt = Date.now(); save(); renderMain(); renderDocList();
 };
 
@@ -1250,8 +1180,6 @@ window.delDoctor = function(id){
 };
 
 window.goDoctor = function(id){ switchTab('doctors'); selectDoctor(id); };
-window.toggleCard = function(id, btn){ const el = document.getElementById(id); el.classList.toggle('hidden'); btn.textContent = el.classList.contains('hidden') ? '👁 نمایش کارت بانکی' : '🙈 مخفی'; };
-
 window.copyText = function(text, btn){
   if(!text || text==='—'){ toast('⚠️ چیزی برای کپی نیست'); return; }
   var success = false;
@@ -1259,9 +1187,9 @@ window.copyText = function(text, btn){
   if(!success && navigator.clipboard){ navigator.clipboard.writeText(text).then(function(){ showCopied(btn); }).catch(function(){ toast('❌ کپی نشد'); }); return; }
   if(success){ showCopied(btn); } else { toast('❌ کپی نشد'); }
 };
-
 function showCopied(btn){ if(btn){ var old = btn.textContent; btn.textContent = '✅'; btn.classList.add('copied'); setTimeout(function(){ btn.textContent = old; btn.classList.remove('copied'); }, 1500); } toast('📋 کپی شد'); }
 
+// ==================== مودال‌ها ====================
 window.openModal = function(html){ document.getElementById('modalHost').innerHTML = `<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal">${html}</div></div>`; };
 window.closeModal = function(){ document.getElementById('modalHost').innerHTML=''; };
 
@@ -1273,9 +1201,8 @@ window.openDoctorModal = function(editId, defaultPhone){
     <form id="mDoctorForm" autocomplete="off">
       <input type="hidden" id="mEditId" value="${d?.id||''}">
       <div class="sect">📌 وضعیت و یادآوری</div>
-      <div class="row">
-        <div style="grid-column: span 2;"><label>تاریخ یادآوری (سررسید)</label><input autocomplete="off" dir="ltr" placeholder="1405/02/15" style="text-align:center" id="mReminderDate" value="${esc(d?.reminderDate||'')}"></div>
-      </div>
+      <div class="row"><div style="grid-column: span 2;"><label>تاریخ یادآوری (سررسید)</label><input autocomplete="off" dir="ltr" placeholder="1405/02/15" style="text-align:center" id="mReminderDate" value="${esc(d?.reminderDate||'')}"></div></div>
+      
       <div class="sect">👤 اطلاعات فردی</div>
       <div class="row">
         <div><label>نام *</label><input autocomplete="off" id="mFirstName" required value="${esc(d?.firstName||'')}"><label>کد ملی *</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mNat" required maxlength="10" value="${esc(d?.nat||'')}"><label>رمز سامانه *</label><input autocomplete="off" id="mPass" required value="${esc(d?.pass||'')}"><label>شماره موبایل</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPhone" value="${esc(phoneVal)}"></div>
@@ -1297,15 +1224,19 @@ window.openDoctorModal = function(editId, defaultPhone){
       <div class="row"><div><label>شماره کارت</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardNum" maxlength="16" value="${esc(c.num||'')}"></div><div><label>CVV2</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCvv2" maxlength="4" value="${esc(c.cvv2||'')}"></div></div>
       <div class="row"><div><label>ماه</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardM" maxlength="2" value="${esc(c.m||'')}"></div><div><label>سال</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mCardY" maxlength="2" value="${esc(c.y||'')}"></div></div>
       <div class="row"><div><label>رمز دوم</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPass2" value="${esc(c.pass2||'')}"></div><div></div></div>
+      
       <div class="sect">💰 هزینه‌ها (تومان)</div>
-      <div class="row3"><div><label>کل</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mTotal" value="${f.total?Number(f.total).toLocaleString('en-US'):''}"></div><div><label>پرداختی</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPaid" value="${f.paid?Number(f.paid).toLocaleString('en-US'):''}"></div><div><label>باقی</label><input id="mRem" disabled style="opacity:.7"></div></div>
-      <button class="btn" type="submit">${d?'💾 ذخیره تغییرات':'➕ ثبت پزشک'}</button><button class="btn ghost" type="button" onclick="closeModal()">انصراف</button>
+      <div class="row3"><div><label>کل</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mTotal" value="${f.total?Number(f.total).toLocaleString('en-US'):''}"></div><div><label>پرداختی</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPaid" value="${f.paid?Number(f.paid).toLocaleString('en-US'):''}"></div><div><label>باقی</label><input id="mRem" disabled style="opacity:.7; background:#f1f5f9;"></div></div>
+      
+      <button class="btn btn-primary" type="submit" style="width:100%; margin-top:20px;">${d?'💾 ذخیره تغییرات':'➕ ثبت پزشک'}</button>
+      <button class="btn btn-outline" type="button" onclick="closeModal()" style="width:100%; margin-top:10px;">انصراف</button>
     </form>
   `);
   const parseNum = inp => { var v = toEnDigits(String(inp.value)).replace(/,/g,'').replace(/[^0-9]/g,''); return Number(v) || 0; };
   const fmtNum = inp => { var v = toEnDigits(String(inp.value)).replace(/[^0-9]/g,''); inp.value = v ? parseInt(v).toLocaleString('en-US') : ''; };
   const upd = () => { const t=parseNum(document.getElementById('mTotal')), p=parseNum(document.getElementById('mPaid')); document.getElementById('mRem').value = Math.max(0,t-p).toLocaleString('en-US'); };
   document.getElementById('mTotal').addEventListener('input',function(){fmtNum(this);upd();}); document.getElementById('mPaid').addEventListener('input',function(){fmtNum(this);upd();}); upd();
+  
   document.getElementById('mDoctorForm').onsubmit = e => {
     e.preventDefault();
     const gv = id => toEnDigits(document.getElementById(id)?.value || '').trim();
@@ -1313,15 +1244,9 @@ window.openDoctorModal = function(editId, defaultPhone){
         firstName: document.getElementById('mFirstName').value.trim(), 
         lastName: document.getElementById('mLastName').value.trim(), 
         spec: document.getElementById('mSpec').value.trim(), 
-        nat: gv('mNat'), 
-        phone: gv('mPhone'), 
-        creditReq: Number(gv('mCreditReq')||0), 
-        manualWebinar: Number(gv('mManualWebinar')||0),
-        manualOffline: Number(gv('mManualOffline')||0),
-        pass: document.getElementById('mPass').value, 
-        year: gv('mYear'), 
-        reminderDate: gv('mReminderDate'), 
-        followUp: document.getElementById('mFollowUp').value.trim(), 
+        nat: gv('mNat'), phone: gv('mPhone'), 
+        creditReq: Number(gv('mCreditReq')||0), manualWebinar: Number(gv('mManualWebinar')||0), manualOffline: Number(gv('mManualOffline')||0),
+        pass: document.getElementById('mPass').value, year: gv('mYear'), reminderDate: gv('mReminderDate'), followUp: document.getElementById('mFollowUp').value.trim(), 
         card: { num: gv('mCardNum'), m: gv('mCardM').padStart(2,'0'), y: gv('mCardY').padStart(2,'0'), cvv2: gv('mCvv2'), pass2: gv('mPass2') }, 
         finance: { total: parseNum(document.getElementById('mTotal')), paid: parseNum(document.getElementById('mPaid')) }, 
         owner: document.getElementById('mOwner').value 
@@ -1337,57 +1262,86 @@ window.openEventModal = function(editId, presetType){
   const d = doctors.find(x=>x.id===selectedDoctorId); if(!d){ toast('⚠️ ابتدا یک پزشک انتخاب کنید'); return; }
   const existing = editId ? (d.events||[]).find(x=>x.id===editId) : null; const isEdit = !!existing; let type = existing?.type || presetType || 'وبینار';
   openModal(`
-    <h2>${isEdit?'✏️ ویرایش':'➕ افزودن'} رویداد — ${esc(fullName(d))}</h2>
+    <h2>${isEdit?'✏️ ویرایش':'➕ افزودن'} رویداد</h2>
     <div class="type-picker"><button type="button" class="type-pick ${type==='وبینار'?'active':''}" data-t="وبینار"><span class="icon">💻</span>وبینار</button><button type="button" class="type-pick ${type==='حضوری'?'active':''}" data-t="حضوری"><span class="icon">🏢</span>حضوری</button><button type="button" class="type-pick ${type==='غیر حضوری'?'active':''}" data-t="غیر حضوری"><span class="icon">📁</span>غیر حضوری</button></div>
-    <form id="mEventForm" autocomplete="off"><div id="dynFields"></div><button class="btn" type="submit">${isEdit?'💾 ذخیره':'➕ افزودن'}</button><button class="btn ghost" type="button" onclick="closeModal()">انصراف</button></form>
+    <form id="mEventForm" autocomplete="off"><div id="dynFields"></div><button class="btn btn-primary" type="submit" style="width:100%; margin-top:20px;">${isEdit?'💾 ذخیره':'➕ افزودن'}</button><button class="btn btn-outline" type="button" onclick="closeModal()" style="width:100%; margin-top:10px;">انصراف</button></form>
   `);
   document.querySelectorAll('.type-pick').forEach(b=>b.onclick=()=>{ type = b.dataset.t; document.querySelectorAll('.type-pick').forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderDynFields(); });
+  
   function sel(id, opts, cur){ return `<select id="${id}">${opts.map(o=>{const v=o.v!==undefined?o.v:o;const l=o.l!==undefined?o.l:o;return `<option value="${v}" ${String(v)===String(cur)?'selected':''}>${l}</option>`;}).join('')}</select>`; }
   function renderDynFields(){
     const e = existing || {}, pd = parseDate(e.date);
-    if(type==='غیر حضوری'){ document.getElementById('dynFields').innerHTML = `<label>شناسه برنامه *</label><input autocomplete="off" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}"><label>امتیاز</label><input autocomplete="off" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}"><div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:10px;padding:10px;font-size:12px;color:var(--warn);margin-top:10px;text-align:center;font-weight:600">📁 نیازی به تاریخ و ساعت ندارد</div>`; }
-    else { document.getElementById('dynFields').innerHTML = `<label>شناسه برنامه *</label><input autocomplete="off" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}"><label>تاریخ (شمسی)</label><div class="row3">${sel('eYear',YEARS,pd.y)}${sel('eMonth',MONTHS.map((m,i)=>({v:i+1,l:m})),pd.m)}${sel('eDay',DAYS,pd.d)}</div><label>امتیاز</label><input autocomplete="off" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">`; }
+    if(type==='غیر حضوری'){ 
+      document.getElementById('dynFields').innerHTML = `<label>شناسه برنامه *</label><input autocomplete="off" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}"><label>امتیاز</label><input autocomplete="off" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}"><div style="background:#fffbeb;border:1px solid #fef3c7;border-radius:8px;padding:10px;font-size:12px;color:#d97706;margin-top:15px;text-align:center;font-weight:700">📁 نیازی به تاریخ و ساعت ندارد</div>`; 
+    }
+    else { 
+      document.getElementById('dynFields').innerHTML = `<label>شناسه برنامه *</label><input autocomplete="off" dir="ltr" style="text-align:center" id="eNum" required value="${esc(e.num||'')}"><label>تاریخ (شمسی)</label><div class="row3">${sel('eYear',YEARS,pd.y)}${sel('eMonth',MONTHS.map((m,i)=>({v:i+1,l:m})),pd.m)}${sel('eDay',DAYS,pd.d)}</div><label>امتیاز</label><input autocomplete="off" dir="ltr" style="text-align:center" id="eCredit" value="${esc(e.credit||'')}">`; 
+    }
   }
   renderDynFields();
+  
   document.getElementById('mEventForm').onsubmit = ev => {
     ev.preventDefault(); if(!d.events) d.events = [];
     const gv = id => toEnDigits(document.getElementById(id)?.value || '').trim();
     let data = { type, credit:Number(gv('eCredit')||0) };
     if(type==='غیر حضوری'){ data.num = gv('eNum'); data.title=''; data.date=''; data.time=''; }
     else { data.num = gv('eNum'); data.title=''; data.date = formatDate(gv('eYear'),gv('eMonth'),gv('eDay')); data.time = ''; }
-    if(isEdit){ Object.assign(existing, data); toast('✅ ویرایش شد'); }
-    else { if(type==='غیر حضوری' && offlinePurchasedToday(d)){ if(!confirm('⚠️ امروز غیر حضوری خریده‌اید. ادامه؟')) return; } d.events.unshift({ id:uid(), ...data, purchase:'انجام نشد', attend:'انجام نشد', exam:'ثبت نشده', createdAt:Date.now() }); toast('✅ اضافه شد'); }
+    
+    if(isEdit){ Object.assign(existing, data); existing.updatedAt = Date.now(); toast('✅ ویرایش شد'); }
+    else { 
+      if(type==='غیر حضوری' && offlinePurchasedToday(d)){ if(!confirm('⚠️ امروز غیر حضوری خریده‌اید. ادامه؟')) return; } 
+      d.events.unshift({ id:uid(), ...data, purchase:'انجام نشد', attend:'انجام نشد', exam:'ثبت نشده', createdAt:Date.now(), updatedAt:Date.now() }); 
+      toast('✅ اضافه شد'); 
+    }
     d.updatedAt = Date.now(); save(); closeModal(); renderMain(); renderDocList();
   };
 };
 
+// ==================== مخاطبین ====================
 function renderContacts() {
   const searchEl = document.getElementById('searchContact'); if(!searchEl) return;
   const q = searchEl.value.trim().toLowerCase();
   const arr = myContacts().filter(c => !q || c.name.toLowerCase().includes(q) || c.phone.includes(q));
   
   const el = document.getElementById('listContacts');
-  if (!arr.length) { el.innerHTML = '<div class="empty">مخاطبی یافت نشد</div>'; return; }
+  if (!arr.length) { el.innerHTML = '<div class="empty-state"><span class="big">📇</span>مخاطبی یافت نشد</div>'; return; }
   
   el.innerHTML = arr.map(c => `
-    <div style="background:rgba(15,23,42,0.6); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-      <div>
-        <div style="font-weight:700; font-size:14.5px;">${esc(c.name)}</div>
-        <div style="color:var(--muted); font-size:12px; margin-top:4px;">📞 <span class="ltr" style="font-size:16px; font-weight:800; color:var(--accent);">${esc(c.phone)}</span> ${c.category ? ` | 🏷️ ${esc(c.category)}` : ''}</div>
-        ${c.note ? `<div style="color:var(--warn); font-size:11.5px; margin-top:6px;">📝 ${esc(c.note)}</div>` : ''}
-      </div>
-      <div style="display:flex; gap:6px; flex-wrap:wrap;">
-        <a class="mini btn-call" href="tel:${esc(c.phone)}" style="padding:6px 10px;">📞 تماس</a>
-        <button class="mini" onclick="copyText('${esc(c.phone)}', this)">📋 کپی</button>
-        <a class="mini" href="sms:${esc(c.phone)}" style="padding:6px 10px;">💬 پیامک</a>
-        <a class="mini" href="https://t.me/+98${cleanPhoneForLink(c.phone)}" target="_blank" style="padding:6px 10px; color:var(--accent); border-color:rgba(56,189,248,0.4);">✈️ تلگرام</a>
-        <a class="mini" href="https://ble.ir" target="_blank" onclick="openBaleWithCopy('${esc(c.phone)}')" style="padding:6px 10px; color:var(--success); border-color:rgba(52,211,153,0.4);">💬 بله</a>
-        <button class="mini" onclick="openContactModal('${c.id}')">✏️</button>
-        <button class="mini danger" onclick="delContact('${c.id}')">🗑</button>
+    <div class="contact-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <div style="font-weight:800; font-size:15px; color:var(--text-main);">${esc(c.name)}</div>
+          <div style="color:var(--text-muted); font-size:12px; margin-top:6px;">📞 <span class="ltr" style="font-size:16px; font-weight:800; color:var(--teal);">${esc(c.phone)}</span> ${c.category ? ` | 🏷️ ${esc(c.category)}` : ''}</div>
+          ${c.note ? `<div style="color:#d97706; font-size:12px; margin-top:8px; background:#fffbeb; padding:6px 10px; border-radius:6px; display:inline-block;">📝 ${esc(c.note)}</div>` : ''}
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <a class="mini btn-call" href="tel:${esc(c.phone)}" style="color:var(--accent-hover); border-color:#a7f3d0; background:var(--accent-light);">📞 تماس</a>
+          <button class="mini" onclick="copyText('${esc(c.phone)}', this)">📋 کپی</button>
+          <a class="mini" href="https://t.me/+98${cleanPhoneForLink(c.phone)}" target="_blank" style="color:#0284c7; border-color:#e0f2fe; background:#f0f9ff;">✈️ تلگرام</a>
+          <button class="mini" onclick="openBaleWithCopy('${esc(c.phone)}')" style="color:var(--accent-hover); border-color:#a7f3d0; background:var(--accent-light);">💬 بله</button>
+          <button class="mini" onclick="openContactModal('${c.id}')">✏️</button>
+          <button class="mini danger" onclick="delContact('${c.id}')">🗑</button>
+        </div>
       </div>
     </div>
   `).join('');
 }
+
+window.openBaleWithCopy = function(phone) {
+    const displayNumber = normalizePhoneForSearch(phone);
+    if (!displayNumber || displayNumber === '0') { toast('⚠️ شماره نامعتبر است'); return; }
+    const showToast = () => toast(`📋 شماره ${displayNumber} کپی شد. در بله جستجو کنید.`);
+    try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(displayNumber).then(showToast).catch(() => {
+                try { const ta = document.createElement('textarea'); ta.value = displayNumber; ta.style.position = 'fixed'; ta.style.top = '-9999px'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast(); } catch(e){}
+            });
+        } else {
+            const ta = document.createElement('textarea'); ta.value = displayNumber; ta.style.position = 'fixed'; ta.style.top = '-9999px'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast();
+        }
+    } catch(e) {}
+    window.open('https://ble.ir', '_blank');
+};
 
 window.openContactModal = function(editId) {
   const c = editId ? contacts.find(x => x.id === editId) : null;
@@ -1405,29 +1359,18 @@ window.openContactModal = function(editId) {
       </div>
       <label>یادداشت</label>
       <textarea id="cNote">${esc(c?.note||'')}</textarea>
-      <button class="btn" type="submit">${c ? '💾 ذخیره' : '➕ ثبت'}</button>
-      <button class="btn ghost" type="button" onclick="closeModal()">انصراف</button>
+      <button class="btn btn-primary" type="submit" style="width:100%; margin-top:20px;">${c ? '💾 ذخیره' : '➕ ثبت'}</button>
+      <button class="btn btn-outline" type="button" onclick="closeModal()" style="width:100%; margin-top:10px;">انصراف</button>
     </form>
   `);
   
   document.getElementById('mContactForm').onsubmit = e => {
     e.preventDefault();
     const gv = id => toEnDigits(document.getElementById(id)?.value || '').trim();
-    const data = {
-      name: document.getElementById('cName').value.trim(),
-      phone: gv('cPhone'),
-      category: document.getElementById('cCategory').value.trim(),
-      note: document.getElementById('cNote').value.trim(),
-      owner: document.getElementById('cOwner').value
-    };
+    const data = { name: document.getElementById('cName').value.trim(), phone: gv('cPhone'), category: document.getElementById('cCategory').value.trim(), note: document.getElementById('cNote').value.trim(), owner: document.getElementById('cOwner').value };
     const id = document.getElementById('cEditId').value;
-    if(id) {
-      const contact = contacts.find(x => x.id === id);
-      if(contact) { Object.assign(contact, data); contact.updatedAt = Date.now(); toast('✅ ویرایش شد'); }
-    } else {
-      contacts.unshift({ id: uid(), ...data, createdAt: Date.now(), updatedAt: Date.now() });
-      toast('✅ مخاطب ثبت شد');
-    }
+    if(id) { const contact = contacts.find(x => x.id === id); if(contact) { Object.assign(contact, data); contact.updatedAt = Date.now(); toast('✅ ویرایش شد'); } }
+    else { contacts.unshift({ id: uid(), ...data, createdAt: Date.now(), updatedAt: Date.now() }); toast('✅ مخاطب ثبت شد'); }
     save(); closeModal(); renderContacts();
   };
 };
@@ -1439,50 +1382,34 @@ window.delContact = function(id) {
   save(); renderContacts();
 };
 
+// ==================== تماس‌ها ====================
 window.setCallFilter = function(filter) {
   currentCallFilter = filter;
-  document.querySelectorAll('.call-filter-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.filter === filter);
-  });
+  document.querySelectorAll('#tab-calls .cat-tab').forEach(btn => { btn.classList.toggle('active', btn.dataset.filter === filter); });
   renderCalls();
 };
 
 window.toggleMissed = function(id) {
   const c = calls.find(x => x.id === id); if(!c) return;
-  c.type = c.type === 'missed' ? 'incoming' : 'missed';
-  c.updatedAt = Date.now();
+  c.type = c.type === 'missed' ? 'incoming' : 'missed'; c.updatedAt = Date.now();
   save(); renderCalls();
 };
 
 window.openCallProfile = function(phone) {
   const doc = doctors.find(x => !x.deleted && isSamePhone(x.phone, phone));
-  if (doc) {
-    switchTab('doctors');
-    selectDoctor(doc.id);
-  } else {
-    openDoctorModal(null, phone);
-  }
+  if (doc) { switchTab('doctors'); selectDoctor(doc.id); } 
+  else { openDoctorModal(null, phone); }
 };
 
 window.highlightCall = function(id) {
-  const searchEl = document.getElementById('searchCall');
-  const filterEl = document.getElementById('filterCall');
-  if (searchEl) searchEl.value = '';
-  if (filterEl) filterEl.value = 'all';
+  const searchEl = document.getElementById('searchCall'); const filterEl = document.getElementById('filterCall');
+  if (searchEl) searchEl.value = ''; if (filterEl) filterEl.value = 'all';
   currentCallFilter = 'all';
-  document.querySelectorAll('.call-filter-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.filter === 'all');
-  });
-
+  document.querySelectorAll('#tab-calls .cat-tab').forEach(btn => { btn.classList.toggle('active', btn.dataset.filter === 'all'); });
   switchTab('calls');
-
   setTimeout(() => {
     const card = document.querySelector(`[data-call-id="${id}"]`);
-    if (card) {
-      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      card.classList.add('highlight-call');
-      setTimeout(() => card.classList.remove('highlight-call'), 3000);
-    }
+    if (card) { card.scrollIntoView({ behavior: 'smooth', block: 'center' }); card.style.boxShadow = '0 0 0 3px var(--accent)'; setTimeout(() => card.style.boxShadow = 'var(--shadow-sm)', 3000); }
   }, 200);
 };
 
@@ -1500,15 +1427,13 @@ function renderCalls(){
     return true; 
   });
   
-  const el = document.getElementById('listCalls'); if(!arr.length){ el.innerHTML='<div class="empty" style="padding: 40px; text-align: center; color: var(--muted);">تماسی با این فیلتر یافت نشد</div>'; return; }
+  const el = document.getElementById('listCalls'); 
+  if(!arr.length){ el.innerHTML='<div class="empty-state"><span class="big">📞</span>تماسی با این فیلتر یافت نشد</div>'; return; }
   
   const fCls = { 'پیگیری‌نشده':'red', 'در حال پیگیری':'yellow', 'پیگیری‌شده':'green' };
   
   el.innerHTML = arr.map(c => {
-    let typeClass = 'incoming';
-    let typeIcon = '📥';
-    let typeLabel = 'دریافتی';
-    
+    let typeClass = 'incoming', typeIcon = '📥', typeLabel = 'دریافتی';
     if (c.type === 'outgoing') { typeClass = 'outgoing'; typeIcon = '📤'; typeLabel = 'ارسالی'; }
     else if (c.type === 'missed') { typeClass = 'missed'; typeIcon = '❌'; typeLabel = 'بی‌پاسخ'; }
     
@@ -1516,15 +1441,15 @@ function renderCalls(){
     const cleanNum = cleanPhoneForLink(c.phone);
     
     return `
-    <div class="call-card ${typeClass}" data-call-id="${c.id}">
+    <div class="call-card" data-call-id="${c.id}">
       <div class="call-header">
         <div>
           <div class="call-name">
             <span title="${typeLabel}" style="font-size: 18px;">${typeIcon}</span>
             ${c.name ? esc(c.name) : 'ناشناس'} 
-            <span class="badge ${fCls[c.follow]||'gray'}" style="margin-right:8px; font-size:11px;">${esc(c.follow)}</span>
+            <span class="badge ${fCls[c.follow]||'gray'}" style="margin-right:8px;">${esc(c.follow)}</span>
           </div>
-          <a href="tel:${esc(c.phone)}" class="call-phone" title="تماس مستقیم">${esc(c.phone)}</a>
+          <a href="tel:${esc(c.phone)}" class="call-phone">${esc(c.phone)}</a>
           <div class="call-meta">
              <span>🎯 ${esc(c.subject)}</span>
              <span>🕒 <span class="ltr">${dt(c.createdAt)}</span></span>
@@ -1533,26 +1458,25 @@ function renderCalls(){
       </div>
       
       ${c.note ? `
-        <div class="call-note-box">
-            <div class="note-text">📝 ${esc(c.note)}</div>
-            <button class="mini" onclick="openCallNoteModal('${c.id}')" style="padding:6px 12px; flex-shrink:0; font-size:13px; color:var(--warn); border-color:rgba(251,191,36,0.4);">✏️ ویرایش</button>
+        <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px; margin-top:12px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+            <div style="font-size:13px; color:var(--text-main); word-break:break-word;">📝 ${esc(c.note)}</div>
+            <button class="mini" onclick="openCallNoteModal('${c.id}')" style="color:var(--accent-hover); border-color:#a7f3d0; flex-shrink:0;">✏️ ویرایش</button>
         </div>
       ` : `
-        <div style="text-align:left;">
-            <button class="mini" onclick="openCallNoteModal('${c.id}')" style="padding:6px 12px; font-size:13px; color:var(--accent); border-color:rgba(56,189,248,0.4);">📝 افزودن یادداشت</button>
+        <div style="margin-top:12px;">
+            <button class="mini" onclick="openCallNoteModal('${c.id}')">📝 افزودن یادداشت</button>
         </div>
       `}
 
       <div class="call-actions">
-        <a class="mini btn-call" href="tel:${esc(c.phone)}">📞 تماس</a>
-        <button class="mini green" onclick="openCallProfile('${esc(c.phone)}')">👤 ${hasDoc ? 'پروفایل' : 'ثبت پروفایل'}</button>
+        <a class="mini btn-call" href="tel:${esc(c.phone)}" style="color:var(--accent-hover); border-color:#a7f3d0; background:var(--accent-light);">📞 تماس</a>
+        <button class="mini green" onclick="openCallProfile('${esc(c.phone)}')">👤 ${hasDoc ? 'پروفایل' : 'ثبت'}</button>
         <button class="mini" onclick="copyText('${esc(c.phone)}', this)">📋 کپی</button>
-        <a class="mini" href="sms:${esc(c.phone)}">💬 پیامک</a>
-        <a class="mini" href="https://t.me/+98${cleanNum}" target="_blank" style="color: var(--accent); border-color: rgba(56,189,248,0.4);">✈️ تلگرام</a>
-        <a class="mini" href="https://ble.ir" target="_blank" onclick="openBaleWithCopy('${esc(c.phone)}')" style="color: var(--success); border-color: rgba(52,211,153,0.4);">💬 بله</a>
+        <a class="mini" href="https://t.me/+98${cleanNum}" target="_blank" style="color:#0284c7; border-color:#e0f2fe; background:#f0f9ff;">✈️ تلگرام</a>
+        <button class="mini" onclick="openBaleWithCopy('${esc(c.phone)}')" style="color:var(--accent-hover); border-color:#a7f3d0; background:var(--accent-light);">💬 بله</button>
         <button class="mini" onclick="cycleFollow('${c.id}')">🔄 پیگیری</button>
-        <button class="mini" onclick="toggleMissed('${c.id}')" style="${c.type==='missed'?'background:rgba(248,113,113,0.2); color:var(--danger); border-color:var(--danger);':''}">${c.type==='missed' ? '✅ پاسخ داده' : '❌ بی‌پاسخ'}</button>
-        <button class="mini danger" onclick="delCall('${c.id}')">🗑 حذف</button>
+        <button class="mini" onclick="toggleMissed('${c.id}')" style="${c.type==='missed'?'color:var(--danger); border-color:var(--danger); background:#fef2f2;':''}">${c.type==='missed' ? '✅ پاسخ' : '❌ بی‌پاسخ'}</button>
+        <button class="mini danger" onclick="delCall('${c.id}')">🗑</button>
       </div>
     </div>`;
   }).join('');
@@ -1563,13 +1487,17 @@ window.delCall = function(id){ if(!confirm('حذف شود؟')) return; const c =
 
 function renderAll(){ renderDash(); renderDocList(); renderMain(); renderCalls(); renderContacts(); }
 
-document.querySelectorAll('.tab').forEach(t=>{ t.onclick = () => switchTab(t.dataset.tab); });
 document.getElementById('searchDoctor').addEventListener('input', renderDocList);
 document.getElementById('searchCall').addEventListener('input', renderCalls);
 document.getElementById('searchContact').addEventListener('input', renderContacts);
 document.getElementById('filterCall').addEventListener('change', renderCalls);
 
-window.openIRCME = function(nat, pass){ if(!nat || !pass){ toast('⚠️ کد ملی یا رمز سامانه موجود نیست'); return; } var url = 'https://www.ircme.ir/App_Web/%28Guest%29/Membership/Login.aspx?CenterID=25&u=' + encodeURIComponent(nat) + '&p=' + encodeURIComponent(pass); var w = window.open(url, '_blank'); if(!w || w.closed || typeof w.closed === 'undefined'){ window.location.href = url; } };
+window.openIRCME = function(nat, pass){ 
+    if(!nat || !pass){ toast('⚠️ کد ملی یا رمز سامانه موجود نیست'); return; } 
+    var url = 'https://www.ircme.ir/App_Web/%28Guest%29/Membership/Login.aspx?CenterID=25&u=' + encodeURIComponent(nat) + '&p=' + encodeURIComponent(pass); 
+    var w = window.open(url, '_blank'); 
+    if(!w || w.closed || typeof w.closed === 'undefined'){ window.location.href = url; } 
+};
 
 function autoAttendEvents(){
   var today = getShamsiToday(); if(!today) return; var totalChanged = 0;
@@ -1578,7 +1506,7 @@ function autoAttendEvents(){
     var changed = 0;
     (doc.events||[]).forEach(function(e){
       if(e.purchase === 'انجام شد' && e.attend === 'انجام نشد' && e.date && e.date.length >= 8){
-        if(today > e.date){ e.attend = 'انجام شد'; changed++; }
+        if(today > e.date){ e.attend = 'انجام شد'; e.updatedAt = Date.now(); changed++; }
       }
     });
     if(changed > 0){ doc.updatedAt = Date.now(); totalChanged += changed; }
@@ -1586,31 +1514,18 @@ function autoAttendEvents(){
   if(totalChanged > 0){ save(); renderAll(); toast('✅ ' + totalChanged + ' رویداد خودکار به «شرکت شده» تغییر یافت'); }
 }
 
-tick(); setInterval(tick, 30000);
-document.querySelectorAll('.user-picker button').forEach(b=>{ if(b.dataset.user === currentUser) b.classList.add('active'); else b.classList.remove('active'); });
-
-checkLogin();
-renderAll();
-
-setTimeout(autoAttendEvents, 2000); setInterval(autoAttendEvents, 60000);
-document.addEventListener('visibilitychange', function(){ if(!document.hidden) autoAttendEvents(); });
-
+// ==================== مدیریت تماس ورودی ====================
 function hideCallBanner() {
   document.getElementById('incomingCallBanner').classList.add('hidden');
   try { document.getElementById('ringtone').pause(); document.getElementById('ringtone').currentTime = 0; } catch(e){}
-  activeCallId = null;
-  _callRinging = false;
+  activeCallId = null; _callRinging = false;
   if (callBannerTimeout) clearTimeout(callBannerTimeout);
 }
 
 window.viewIncomingProfile = function() {
   if(!currentIncomingMatch) return;
-  if (currentIncomingMatch.doctor) {
-    switchTab('doctors');
-    selectDoctor(currentIncomingMatch.doctor.id);
-  } else if (currentIncomingMatch.contact) {
-    switchTab('contacts');
-  }
+  if (currentIncomingMatch.doctor) { switchTab('doctors'); selectDoctor(currentIncomingMatch.doctor.id); } 
+  else if (currentIncomingMatch.contact) { switchTab('contacts'); }
   hideCallBanner();
 };
 
@@ -1620,21 +1535,14 @@ window.registerFromCallBanner = function() {
 };
 
 window.openCallNoteModal = function(id) {
-  let c = null;
-  let isFromBanner = false;
-
-  if (id) {
-    c = calls.find(x => x.id === id);
-  } else {
-    c = currentIncomingCallRecord;
-    isFromBanner = true;
-  }
-  
+  let c = null; let isFromBanner = false;
+  if (id) { c = calls.find(x => x.id === id); } 
+  else { c = currentIncomingCallRecord; isFromBanner = true; }
   if(!c) return;
 
   openModal(`
     <h2>📝 ${isFromBanner ? 'ثبت' : 'ویرایش'} یادداشت تماس</h2>
-    <div style="font-size: 18px; font-weight: 800; color: var(--accent); margin-bottom: 16px; text-align: center; direction: ltr;">${esc(c.phone)}</div>
+    <div style="font-size: 20px; font-weight: 800; color: var(--teal); margin-bottom: 20px; text-align: center; direction: ltr;">${esc(c.phone)}</div>
     <form id="mNoteForm">
       <label>وضعیت پیگیری</label>
       <select id="nFollow">
@@ -1644,8 +1552,8 @@ window.openCallNoteModal = function(id) {
       </select>
       <label>یادداشت</label>
       <textarea id="nNote" placeholder="توضیحات تماس را اینجا وارد کنید..." style="min-height:100px;">${esc(c.note||'')}</textarea>
-      <button class="btn" type="submit">💾 ذخیره</button>
-      <button class="btn ghost" type="button" onclick="closeModal()">انصراف</button>
+      <button class="btn btn-primary" type="submit" style="width:100%; margin-top:20px;">💾 ذخیره</button>
+      <button class="btn btn-outline" type="button" onclick="closeModal()" style="width:100%; margin-top:10px;">انصراف</button>
     </form>
   `);
   
@@ -1656,13 +1564,9 @@ window.openCallNoteModal = function(id) {
     c.follow = document.getElementById('nFollow').value;
     c.note = document.getElementById('nNote').value.trim();
     c.updatedAt = Date.now();
-    save();
-    closeModal();
-
+    save(); closeModal();
     if (isFromBanner) {
-      if (!document.getElementById('incomingCallBanner').classList.contains('hidden')) {
-        hideCallBanner();
-      }
+      if (!document.getElementById('incomingCallBanner').classList.contains('hidden')) hideCallBanner();
       toast('✅ یادداشت ثبت شد — انتقال به تب تماس‌ها', 'info');
       highlightCall(c.id);
     } else {
@@ -1685,105 +1589,49 @@ function checkIncomingCalls() {
         const bannerVisible = !document.getElementById('incomingCallBanner').classList.contains('hidden');
         
         if (isNewCall) {
-          lastProcessedCallId = data.CallId;
-          activeCallId = data.CallId;
-          _callRinging = true;
-          
+          lastProcessedCallId = data.CallId; activeCallId = data.CallId; _callRinging = true;
           let callerNumber = data.CallerNumber;
-          if (callerNumber.length === 10 && callerNumber.startsWith('9')) {
-            callerNumber = '0' + callerNumber;
-          }
+          if (callerNumber.length === 10 && callerNumber.startsWith('9')) callerNumber = '0' + callerNumber;
 
           const doctor = doctors.find(d => !d.deleted && isSamePhone(d.phone, callerNumber));
           const contact = contacts.find(c => !c.deleted && isSamePhone(c.phone, callerNumber));
-          
           currentIncomingMatch = { doctor, contact };
           
-          let callerName = 'شماره ناشناس';
-          let alertMessage = '';
-          let alertType = 'info';
-
+          let callerName = 'شماره ناشناس', alertMessage = '', alertType = 'info';
           if (doctor) {
             callerName = fullName(doctor);
-            const rem = remainingCredits(doctor);
-            const f = doctor.finance || {};
-            const rem$ = Math.max(0, Number(f.total||0) - Number(f.paid||0));
+            const rem = remainingCredits(doctor); const f = doctor.finance || {}; const rem$ = Math.max(0, Number(f.total||0) - Number(f.paid||0));
             alertMessage = `👨‍⚕️ ${callerName}`;
             if (rem > 0) { alertMessage += ` | ⚠️ ${num(rem)} امتیاز کم`; alertType = 'warn'; }
             if (rem$ > 0) { alertMessage += ` | 💸 ${num(rem$)} تومان بدهکار`; alertType = 'danger'; }
-            
-            selectedDoctorId = doctor.id;
-            currentMobileEventTab = 'وبینار';
-            renderDocList();
-            renderMain();
-            updateMobileSelection();
-          } else if (contact) {
-            callerName = contact.name;
-            alertMessage = `📇 مخاطب: ${callerName}`;
-          } else {
-            alertMessage = 'شماره ناشناس';
-          }
+            selectedDoctorId = doctor.id; currentMobileEventTab = 'وبینار'; renderDocList(); renderMain(); updateMobileSelection();
+          } else if (contact) { callerName = contact.name; alertMessage = `📇 مخاطب: ${callerName}`; } 
+          else { alertMessage = 'شماره ناشناس'; }
 
           document.getElementById('incomingCallerName').textContent = callerName;
           document.getElementById('incomingCallerNumber').textContent = callerNumber;
           
           const alertBox = document.getElementById('incomingCallAlert');
           alertBox.textContent = alertMessage;
-          alertBox.style.color = alertType === 'danger' ? 'var(--danger)' : (alertType === 'warn' ? 'var(--warn)' : 'var(--muted)');
+          alertBox.style.color = alertType === 'danger' ? 'var(--danger)' : (alertType === 'warn' ? 'var(--warn)' : 'var(--text-muted)');
           
           const btnViewProfile = document.getElementById('btnViewProfile');
           const btnRegisterProfile = document.getElementById('btnRegisterProfile');
+          if (doctor || contact) { btnViewProfile.style.display = 'inline-flex'; btnRegisterProfile.style.display = 'none'; } 
+          else { btnViewProfile.style.display = 'none'; btnRegisterProfile.style.display = 'inline-flex'; }
           
-          if (doctor || contact) {
-              btnViewProfile.style.display = 'inline-flex';
-              btnRegisterProfile.style.display = 'none';
-          } else {
-              btnViewProfile.style.display = 'none';
-              btnRegisterProfile.style.display = 'inline-flex';
-          }
-          
-          // تلگرام: لینک مستقیم
           document.getElementById('btnTelegram').href = `https://t.me/+98${cleanPhoneForLink(callerNumber)}`;
-          
-          // بله: کپی شماره + باز کردن ble.ir
-          const btnBale = document.getElementById('btnBale');
-          btnBale.href = 'https://ble.ir';
-          btnBale.onclick = function() { openBaleWithCopy(callerNumber); };
+          const btnBale = document.getElementById('btnBale'); btnBale.href = 'javascript:void(0)'; btnBale.onclick = function() { openBaleWithCopy(callerNumber); };
           
           document.getElementById('incomingCallBanner').classList.remove('hidden');
-
           try { document.getElementById('ringtone').play(); } catch(err) {}
-          
-          if ("Notification" in window && Notification.permission === "granted") {
-            new Notification("تماس ورودی", { body: alertMessage, icon: "https://cdn-icons-png.flaticon.com/512/724/724664.png" });
-          }
-
+          if ("Notification" in window && Notification.permission === "granted") { new Notification("تماس ورودی", { body: alertMessage, icon: "https://cdn-icons-png.flaticon.com/512/724/724664.png" }); }
           toast(alertMessage, alertType);
 
-          currentIncomingCallRecord = {
-            id: uid(),
-            owner: currentUser,
-            phone: callerNumber,
-            name: callerName,
-            subject: doctor ? 'تماس پزشک' : (contact ? 'تماس مخاطب' : 'تماس ناشناس'),
-            follow: 'پیگیری‌نشده',
-            note: '',
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-            type: 'incoming'
-          };
-          
-          calls.unshift(currentIncomingCallRecord);
-          
-          save(); 
-          renderCalls(); 
-
-          if (data.hasEnded) {
-            callBannerTimeout = setTimeout(hideCallBanner, 15000);
-          }
-        } else if (data.hasEnded && bannerVisible) {
-          hideCallBanner();
-        }
+          currentIncomingCallRecord = { id: uid(), owner: currentUser, phone: callerNumber, name: callerName, subject: doctor ? 'تماس پزشک' : (contact ? 'تماس مخاطب' : 'تماس ناشناس'), follow: 'پیگیری‌نشده', note: '', createdAt: Date.now(), updatedAt: Date.now(), type: 'incoming' };
+          calls.unshift(currentIncomingCallRecord); save(); renderCalls(); 
+          if (data.hasEnded) callBannerTimeout = setTimeout(hideCallBanner, 15000);
+        } else if (data.hasEnded && bannerVisible) { hideCallBanner(); }
       }
       finish();
     }, finish);
@@ -1791,80 +1639,38 @@ function checkIncomingCalls() {
 }
 
 const POLL_CFG = {
-  SYNC_VISIBLE: 20000,
-  SYNC_IDLE:    60000,
-  SYNC_HIDDEN:  0,
-  CALL_VISIBLE: 6000,
-  CALL_IDLE:    12000,
-  CALL_RINGING: 2000,
-  CALL_HIDDEN:  0,
-  IDLE_AFTER:   120000,
-  BACKOFF_BASE: 5000,
-  BACKOFF_MAX:  120000,
-  CALL_TIMEOUT: 10000
+  SYNC_VISIBLE: 20000, SYNC_IDLE: 60000, SYNC_HIDDEN: 0, CALL_VISIBLE: 6000, CALL_IDLE: 12000, CALL_RINGING: 2000, CALL_HIDDEN: 0, IDLE_AFTER: 120000, BACKOFF_BASE: 5000, BACKOFF_MAX: 120000, CALL_TIMEOUT: 10000
 };
 
-let _pollSyncTimer  = null;
-let _pollCallTimer  = null;
-let _pollErrorCount = 0;
-let _pollLastActive = Date.now();
-let _callRinging    = false;
-
+let _pollSyncTimer = null, _pollCallTimer = null, _pollErrorCount = 0, _pollLastActive = Date.now(), _callRinging = false;
 function _isIdle(){ return Date.now() - _pollLastActive > POLL_CFG.IDLE_AFTER; }
-
-function _syncDelay(){
-  if (document.hidden || !navigator.onLine) return POLL_CFG.SYNC_HIDDEN;
-  return _isIdle() ? POLL_CFG.SYNC_IDLE : POLL_CFG.SYNC_VISIBLE;
-}
-function _callDelay(){
-  if (document.hidden || !navigator.onLine) return POLL_CFG.CALL_HIDDEN;
-  if (_callRinging) return POLL_CFG.CALL_RINGING;
-  return _isIdle() ? POLL_CFG.CALL_IDLE : POLL_CFG.CALL_VISIBLE;
-}
+function _syncDelay(){ if (document.hidden || !navigator.onLine) return POLL_CFG.SYNC_HIDDEN; return _isIdle() ? POLL_CFG.SYNC_IDLE : POLL_CFG.SYNC_VISIBLE; }
+function _callDelay(){ if (document.hidden || !navigator.onLine) return POLL_CFG.CALL_HIDDEN; if (_callRinging) return POLL_CFG.CALL_RINGING; return _isIdle() ? POLL_CFG.CALL_IDLE : POLL_CFG.CALL_VISIBLE; }
 
 function _armSyncTimer(){
   if (_pollSyncTimer) clearTimeout(_pollSyncTimer);
-  const base = _syncDelay();
-  if (base <= 0){ _pollSyncTimer = null; return; }
+  const base = _syncDelay(); if (base <= 0){ _pollSyncTimer = null; return; }
   const backoff = Math.min(_pollErrorCount * POLL_CFG.BACKOFF_BASE, POLL_CFG.BACKOFF_MAX);
-  _pollSyncTimer = setTimeout(() => {
-    try { syncNow(); } catch(e){}
-    _armSyncTimer();
-  }, base + backoff);
+  _pollSyncTimer = setTimeout(() => { try { syncNow(); } catch(e){} _armSyncTimer(); }, base + backoff);
 }
 
 function _armCallTimer(){
   if (_pollCallTimer) clearTimeout(_pollCallTimer);
-  const base = _callDelay();
-  if (base <= 0){ _pollCallTimer = null; return; }
-  _pollCallTimer = setTimeout(async () => {
-    try { await checkIncomingCalls(); } catch(e){}
-    _armCallTimer();
-  }, base);
+  const base = _callDelay(); if (base <= 0){ _pollCallTimer = null; return; }
+  _pollCallTimer = setTimeout(async () => { try { await checkIncomingCalls(); } catch(e){} _armCallTimer(); }, base);
 }
 
 function _refreshPolling(){ _armSyncTimer(); _armCallTimer(); }
 
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden){
-    _pollLastActive = Date.now();
-    try { syncNow(); } catch(e){}
-    try { checkIncomingCalls(); } catch(e){}
-  }
+  if (!document.hidden){ _pollLastActive = Date.now(); try { syncNow(); } catch(e){} try { checkIncomingCalls(); } catch(e){} }
   _refreshPolling();
 });
 window.addEventListener('online',  () => { try { syncNow(); } catch(e){} _refreshPolling(); });
 window.addEventListener('offline', () => _refreshPolling());
+['click','keydown','touchstart','scroll','mousemove'].forEach(ev => { window.addEventListener(ev, () => { _pollLastActive = Date.now(); }, { passive: true }); });
 
-['click','keydown','touchstart','scroll','mousemove'].forEach(ev => {
-  window.addEventListener(ev, () => { _pollLastActive = Date.now(); }, { passive: true });
-});
-
-setTimeout(() => {
-  try { syncNow(); } catch(e){}
-  try { checkIncomingCalls(); } catch(e){}
-  _refreshPolling();
-}, 500);
+setTimeout(() => { try { syncNow(); } catch(e){} try { checkIncomingCalls(); } catch(e){} _refreshPolling(); }, 500);
 
 if ('serviceWorker' in navigator) {
     const swCode = `self.addEventListener('fetch', function(event) {});`;
@@ -1872,6 +1678,13 @@ if ('serviceWorker' in navigator) {
     const swUrl = URL.createObjectURL(blob);
     navigator.serviceWorker.register(swUrl).catch(() => console.log('PWA Ready'));
 }
+
+tick(); setInterval(tick, 30000);
+checkLogin();
+renderAll();
+setTimeout(autoAttendEvents, 2000); setInterval(autoAttendEvents, 60000);
+document.addEventListener('visibilitychange', function(){ if(!document.hidden) autoAttendEvents(); });
+
 </script>
 </body>
 </html>
