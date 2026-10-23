@@ -242,7 +242,7 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
 /* ریسپانسیو */
 .mobile-bottom-nav { display: none; }
 .back-btn { display: none; }
-.mobile-event-tabs { display: none; } /* این خط مشکل نمایش در دسکتاپ را حل می‌کند */
+.mobile-event-tabs { display: none; }
 
 @media (max-width: 1000px) {
   .events-layout { grid-template-columns: 1fr 1fr; }
@@ -1034,9 +1034,9 @@ function renderMain(){
 
     <div class="info-grid">
       <div class="info-box">
-        <span class="label">📞 موبایل</span>
-        <span class="value ltr">${esc(d.phone || '—')}</span>
-        ${d.phone ? `<button class="copy-btn" onclick="copyText('${esc(d.phone)}',this)">📋</button>` : ''}
+        <span class="label">🆔 کد ملی</span>
+        <span class="value ltr">${esc(d.nat || '—')}</span>
+        ${d.nat ? `<button class="copy-btn" onclick="copyText('${esc(d.nat)}',this)">📋</button>` : ''}
       </div>
       <div class="info-box">
         <span class="label">🔑 رمز سامانه</span>
@@ -1044,9 +1044,9 @@ function renderMain(){
         ${d.pass ? `<button class="copy-btn" onclick="copyText('${esc(d.pass)}',this)">📋</button>` : ''}
       </div>
       <div class="info-box">
-        <span class="label">🆔 کد ملی</span>
-        <span class="value ltr">${esc(d.nat || '—')}</span>
-        ${d.nat ? `<button class="copy-btn" onclick="copyText('${esc(d.nat)}',this)">📋</button>` : ''}
+        <span class="label">📞 موبایل</span>
+        <span class="value ltr">${esc(d.phone || '—')}</span>
+        ${d.phone ? `<button class="copy-btn" onclick="copyText('${esc(d.phone)}',this)">📋</button>` : ''}
       </div>
       
       <div class="info-box"><span class="label">🎯 امتیاز درخواستی</span><span class="value">${num(req)}</span></div>
