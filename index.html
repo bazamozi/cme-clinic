@@ -150,6 +150,23 @@ body { background-color: var(--bg-body); color: var(--text-main); min-height: 10
 .copy-btn { position: absolute; top: 8px; left: 8px; background: #fff; border: 1px solid var(--border-color); border-radius: 6px; padding: 2px 6px; font-size: 10px; cursor: pointer; color: var(--text-muted); transition: 0.2s; }
 .copy-btn:hover { background: var(--accent-light); color: var(--accent-hover); border-color: var(--accent); }
 
+/* استایل جدید کارت بانکی (یک ردیف و تم روشن) */
+.bank-card-light {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr; /* شماره کارت پهن‌تر است */
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.bank-card-light .info-box {
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #fff;
+}
+.bank-card-light .info-box .label { margin-bottom: 0; }
+.bank-card-light .info-box .value { letter-spacing: 1px; font-size: 16px; }
+.bank-card-light .info-box .copy-btn { position: static; margin-right: 8px; }
+
 /* بخش رویدادها */
 .events-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
 .ev-section { background: #fff; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; }
@@ -226,7 +243,7 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
 .mobile-bottom-nav { display: none; }
 .back-btn { display: none; }
 
-@media (max-width: 1280px) {
+@media (max-width: 1000px) {
   .events-layout { grid-template-columns: 1fr 1fr; }
 }
 
@@ -269,32 +286,10 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
   
   .info-grid { grid-template-columns: 1fr 1fr !important; }
   .row, .row3 { grid-template-columns: 1fr; }
-}
-
-/* استایل اختصاصی کارت بانکی */
-.bank-card-container {
-  background: #1e293b; /* رنگ سرمه‌ای تیره شبیه عکس */
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 24px;
-  box-shadow: var(--shadow-md);
-}
-.bank-card-top {
-  display: flex; justify-content: space-between; align-items: center;
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 12px; padding: 12px 16px; color: #fff; margin-bottom: 12px;
-}
-.bank-card-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
-}
-.bank-card-box {
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 12px; padding: 12px; text-align: center; display: flex; flex-direction: column; gap: 6px;
-}
-.bank-card-box .label { font-size: 11px; color: #94a3b8; font-weight: 600; }
-.bank-card-box .value { font-size: 15px; font-weight: 800; color: #fff; }
-@media (max-width: 600px) {
-  .bank-card-grid { grid-template-columns: 1fr 1fr; }
+  
+  /* کارت بانکی در موبایل */
+  .bank-card-light { grid-template-columns: 1fr 1fr; }
+  .bank-card-light > div:first-child { grid-column: span 2; }
 }
 </style>
 </head>
@@ -1078,30 +1073,16 @@ function renderMain(){
     </div>` : ''}
     
     ${(c.num||c.cvv2||c.pass2)?`
-    <div class="bank-card-container">
-      <div class="bank-card-top">
-        <div style="font-size: 13px; color: #94a3b8; font-weight: 700;">شماره کارت</div>
-        <div class="ltr" style="font-size: 18px; font-weight: 800; letter-spacing: 2px;">${esc(c.num || '—')}</div>
-        <button class="mini" style="background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 4px 10px;" onclick="copyText('${esc(c.num||'')}',this)">📋</button>
-      </div>
-      <div class="bank-card-grid">
-        <div class="bank-card-box">
-          <span class="label">ماه</span>
-          <span class="ltr value">${esc(c.m || '--')}</span>
+    <div class="bank-card-light">
+        <div class="info-box" style="flex-direction: row; justify-content: space-between; padding: 10px 16px;">
+            <span class="label" style="margin:0;">شماره کارت</span>
+            <span class="value ltr" style="letter-spacing:1px;">${esc(c.num||'—')}</span>
+            ${c.num ? `<button class="copy-btn" style="position:static; margin-right:8px;" onclick="copyText('${esc(c.num)}',this)">📋</button>` : ''}
         </div>
-        <div class="bank-card-box">
-          <span class="label">سال</span>
-          <span class="ltr value">${esc(c.y || '--')}</span>
-        </div>
-        <div class="bank-card-box">
-          <span class="label">CVV2</span>
-          <span class="ltr value">${esc(c.cvv2 || '—')}</span>
-        </div>
-        <div class="bank-card-box">
-          <span class="label">رمز دوم</span>
-          <span class="ltr value">${esc(c.pass2 || '—')}</span>
-        </div>
-      </div>
+        <div class="info-box"><span class="label">ماه</span><span class="value ltr">${esc(c.m||'--')}</span></div>
+        <div class="info-box"><span class="label">سال</span><span class="value ltr">${esc(c.y||'--')}</span></div>
+        <div class="info-box"><span class="label">CVV2</span><span class="value ltr">${esc(c.cvv2||'—')}</span></div>
+        <div class="info-box"><span class="label">رمز دوم</span><span class="value ltr">${esc(c.pass2||'—')}</span></div>
     </div>`:''}
     
     <div class="mobile-event-tabs">
