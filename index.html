@@ -1916,58 +1916,35 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
 
     <script>
     window.addEventListener('load', function() {
-        // فیلتر دقیق داده‌ها بر اساس کاربر
-        window.myDoctors = function() {
-            const arr = doctors.filter(d => !d.deleted);
-            if (currentUser === 'all') return arr;
-            return arr.filter(d => d.owner === currentUser);
-        };
+        // بازنویسی امن تابع لاگین برای اطمینان از کارکرد درست کاربران
+        window.doLogin = function() {
+            var u = document.getElementById('loginUser').value.trim().toLowerCase();
+            var p = document.getElementById('loginPass').value;
+            var errEl = document.getElementById('loginError');
+            
+            // پسوردهای دقیق که مستقیم چک میشن
+            var USERS_PASS = { 
+                'morteza': { pass: 'MN13601353', name: 'مرتضی' }, 
+                'parvin': { pass: 'parvin123', name: 'پروین' }, 
+                'saeed': { pass: 'saeedcanani021', name: 'سعید' } 
+            };
 
-        window.myCalls = function() {
-            const arr = calls.filter(c => !c.deleted);
-            if (currentUser === 'all') return arr;
-            return arr.filter(c => c.owner === currentUser);
-        };
-
-        window.myContacts = function() {
-            const arr = contacts.filter(c => !c.deleted);
-            if (currentUser === 'all') return arr;
-            return arr.filter(c => c.owner === currentUser);
-        };
-
-        // مدیریت منوی کشویی (فقط مرتضی آن را می‌بیند)
-        window.updateUserUI = function() {
-            const u = USERS[currentUser] || { name: 'همه' };
-            const nameEl = document.getElementById('headerUserName');
-            const avatarEl = document.getElementById('headerUserAvatar');
-            const picker = document.getElementById('userPickerSelect');
-
-            if(nameEl) nameEl.textContent = u.name;
-            if(avatarEl) avatarEl.textContent = u.name.charAt(0);
-
-            // بررسی اینکه چه کسی واقعاً لاگین کرده است
-            const loggedInUser = localStorage.getItem('cme_logged_in');
-
-            if (picker) {
-                if (loggedInUser === 'morteza') {
-                    picker.innerHTML = '<option value="morteza">مرتضی</option><option value="parvin">پروین</option><option value="saeed">سعید</option><option value="all">همه</option>';
-                    picker.style.display = 'block';
-                    picker.value = currentUser;
-                } else {
-                    // برای سعید و پروین منو کاملاً حذف می‌شود
-                    picker.style.display = 'none';
-                    picker.innerHTML = ''; 
-                }
+            if(USERS_PASS[u] && USERS_PASS[u].pass === p){
+                try { localStorage.setItem('cme_logged_in', u); } catch(e){}
+                if(errEl) errEl.style.display = 'none';
+                document.getElementById('loginScreen').classList.add('hidden');
+                currentUser = u;
+                try { localStorage.setItem('cme_current_user', u); } catch(e){}
+                if(typeof updateUserUI === 'function') updateUserUI();
+                if(typeof renderAll === 'function') renderAll(); 
+                if(typeof updateMobileSelection === 'function') updateMobileSelection(); 
+                if(typeof toast === 'function') toast('👋 خوش آمدید ' + USERS_PASS[u].name);
+                if(typeof requestNotificationPermission === 'function') requestNotificationPermission();
+            } else { 
+                if(errEl) errEl.style.display = 'flex'; 
+                document.getElementById('loginPass').value = ''; 
             }
         };
-
-        // اعمال تغییرات و رندر مجدد
-        if (typeof renderAll === 'function') {
-            renderAll();
-        }
-        if (typeof updateUserUI === 'function') {
-            updateUserUI();
-        }
     });
     </script>
     
