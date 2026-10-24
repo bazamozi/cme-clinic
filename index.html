@@ -394,7 +394,6 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
         flex-direction: column !important;
         z-index: 99999;
       }
-      #headerActionMenu.show { display: flex !important; }
       #headerActionMenu > button, #headerActionMenu > span {
         width: 100% !important;
         justify-content: center !important;
@@ -1949,22 +1948,18 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
     <script>
     window.toggleHeaderMenu = function() {
       const menu = document.getElementById('headerActionMenu');
-      if (menu) {
-        if (menu.classList.contains('show')) {
-          menu.classList.remove('show');
-          menu.style.display = '';
-        } else {
-          menu.classList.add('show');
-          menu.style.display = 'flex';
-        }
+      if (!menu) return;
+      if (menu.style.display === 'flex') {
+        menu.style.setProperty('display', 'none', 'important');
+      } else {
+        menu.style.setProperty('display', 'flex', 'important');
       }
     };
     document.addEventListener('click', function(e) {
       const menu = document.getElementById('headerActionMenu');
       const btn = document.getElementById('mobileMenuToggle');
-      if (menu && menu.classList.contains('show') && !menu.contains(e.target) && !btn.contains(e.target)) {
-        menu.classList.remove('show');
-        menu.style.display = '';
+      if (menu && menu.style.display === 'flex' && !menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.style.setProperty('display', 'none', 'important');
       }
     });
     </script>
