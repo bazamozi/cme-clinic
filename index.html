@@ -85,7 +85,7 @@ body { background-color: var(--bg-body); color: var(--text-main); min-height: 10
 .top-header {
   height: 72px; background-color: var(--card-bg); border-bottom: 1px solid var(--border-color);
   display: flex; justify-content: space-between; align-items: center; padding: 0 24px;
-  box-shadow: var(--shadow-sm); z-index: 90;
+  box-shadow: var(--shadow-sm); z-index: 90; position: relative;
 }
 .header-left { display: flex; align-items: center; gap: 15px; }
 .header-right { display: flex; align-items: center; gap: 20px; }
@@ -306,29 +306,54 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
   
   /* --- اصلاح استایل هدر برای موبایل --- */
   .top-header { 
-    padding: 10px; 
-    height: auto; 
-    flex-wrap: wrap; 
-    gap: 10px; 
+    padding: 10px !important; 
+    height: auto !important; 
+    flex-wrap: wrap !important; 
+    gap: 10px !important; 
   }
   .header-left { 
-    width: 100%; 
-    justify-content: space-between; 
-    margin-bottom: 5px;
+    width: 100% !important; 
+    justify-content: space-between !important; 
+    margin-bottom: 5px !important;
   }
   .header-right { 
-    width: 100%; 
-    justify-content: flex-start; 
+    width: 100% !important; 
+    justify-content: flex-start !important; 
   }
   .header-right > div {
-    width: 100%;
+    width: 100% !important;
     justify-content: flex-start !important; 
-    flex-wrap: wrap;
-    gap: 6px;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
   }
   .header-action-btn {
-    padding: 6px 10px;
-    font-size: 11px;
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+  }
+  /* --- استایل منوی کشویی موبایل --- */
+  #mobileMenuToggle { display: inline-flex !important; }
+  #headerActionMenu {
+    display: none !important;
+    position: absolute;
+    top: 100%;
+    left: 10px;
+    right: 10px;
+    margin-top: 8px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    flex-direction: column !important;
+    z-index: 9999;
+  }
+  #headerActionMenu.show { display: flex !important; }
+  #headerActionMenu > button, #headerActionMenu > span {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 10px !important;
+    font-size: 13px !important;
+    margin-bottom: 5px;
   }
   /* ------------------------------------ */
 
@@ -435,10 +460,11 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
           </select>
         </div>
         <button class="mini" id="themeToggleBtn" onclick="toggleDarkMode()" title="تغییر حالت شب/روز" style="font-size: 16px;">☀️</button>
+        <button id="mobileMenuToggle" class="mini" onclick="toggleHeaderMenu()" title="منوی تنظیمات" style="display:none; font-size: 18px; margin-right: 5px;">⋮</button>
       </div>
       <div class="header-right">
         <div class="date-time" id="clock">در حال بارگذاری...</div>
-        <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+        <div id="headerActionMenu" style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
           <button class="header-action-btn blue" onclick="undoLastChange()" title="بازگردانی آخرین تغییر">↩️ بازگردانی</button>
           <span id="syncStatus" class="header-action-btn green" onclick="syncNow(true)" style="cursor:pointer;">☁️ آماده</span>
           <button class="header-action-btn green" onclick="exportData()" title="پشتیبان‌گیری">💾 پشتیبان</button>
@@ -586,6 +612,18 @@ window.toggleDarkMode = function() {
   localStorage.setItem('cme_dark_mode', isDark ? 'true' : 'false');
   document.getElementById('themeToggleBtn').innerHTML = isDark ? '☀️' : '🌙';
 };
+
+window.toggleHeaderMenu = function() {
+  const menu = document.getElementById('headerActionMenu');
+  if (menu) menu.classList.toggle('show');
+};
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('headerActionMenu');
+  const btn = document.getElementById('mobileMenuToggle');
+  if (menu && menu.classList.contains('show') && !menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.classList.remove('show');
+  }
+});
 
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const toEnDigits = s => String(s??'').replace(/[۰-۹]/g,d=>'0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]).replace(/[٠-٩]/g,d=>'0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]).replace(/,/g, '');
