@@ -712,24 +712,16 @@ function checkLogin(){
 }
 
 function updateUserUI() {
-      const u = USERS[currentUser] || { name: 'همه' };
-      const nameEl = document.getElementById('headerUserName');
-      const avatarEl = document.getElementById('headerUserAvatar');
-      const picker = document.getElementById('userPickerSelect');
-      
-      if(nameEl) nameEl.textContent = u.name;
-      if(avatarEl) avatarEl.textContent = u.name.charAt(0);
-      
-      if (picker) {
-        if (currentUser === 'morteza') {
-          picker.innerHTML = '<option value="morteza">مرتضی</option><option value="parvin">پروین</option><option value="saeed">سعید</option><option value="all">همه</option>';
-          picker.style.display = 'block';
-          picker.value = currentUser;
-        } else {
-          picker.style.display = 'none';
-          picker.innerHTML = ''; // حذف کامل گزینه‌ها برای سعید
-        }
-      }
+  const u = USERS[currentUser] || { name: 'همه' };
+  document.getElementById('headerUserName').textContent = u.name;
+  document.getElementById('headerUserAvatar').textContent = u.name.charAt(0);
+  document.getElementById('userPickerSelect').value = currentUser;
+}
+
+function requestNotificationPermission() {
+  if ("Notification" in window) {
+    if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+      Notification.requestPermission();
     }
   }
 }
@@ -744,11 +736,27 @@ window.switchUser = function(user){
   renderDash(); renderDocList(); renderCalls(); renderContacts(); updateMobileSelection();
 };
 
-function myDoctors(){ 
-      const arr = doctors.filter(d => !d.deleted); 
-      if (currentUser === 'all') return arr; 
-      return arr.filter(d => d.owner === currentUser); 
-    }
+function myDoctors(){ const arr = doctors.filter(d => !d.deleted); return currentUser === 'all' ? arr : arr.filter(d => d.owner === currentUser); }
+function myCalls(){ const arr = calls.filter(c => !c.deleted); return currentUser === 'all' ? arr : arr.filter(c => c.owner === currentUser); }
+function myContacts(){ const arr = contacts.filter(c => !c.deleted); return currentUser === 'all' ? arr : arr.filter(c => c.owner === currentUser); }
+
+function getAutoStatus(d) {
+    const req = Number(d.creditReq || 0);
+    const total = totalEarned(d);
+    const f = d.finance || {};
+    const fTotal = Number(f.total || 0);
+    const fPaid = Number(f.paid || 0);
+    const events = (d.events || []).filter(e => !e.deleted);
+    const hasEvents = events.length > 0;
+    const hasFinance = fTotal > 0 || fPaid > 0;
+
+    if (!hasEvents && !hasFinance && total === 0) return 'new';
+    const allEventsComplete = hasEvents && events.every(e => eventState(e) === 'earned');
+    const isCreditsDone = req > 0 ? total >= req : true;
+    const isFinanceDone = fTotal > 0 ? fPaid >= fTotal : true;
+    if (allEventsComplete && isCreditsDone && isFinanceDone) return 'completed';
+    return 'in_progress';
+}
 
 function eventCredit(e){
   if(e.deleted || e.purchase!=='انجام شد') return 0;
@@ -1905,5 +1913,63 @@ setTimeout(autoAttendEvents, 2000); setInterval(autoAttendEvents, 60000);
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) autoAttendEvents(); });
 
 </script>
+
+    <script>
+    window.addEventListener('load', function() {
+        // فیلتر دقیق داده‌ها بر اساس کاربر
+        window.myDoctors = function() {
+            const arr = doctors.filter(d => !d.deleted);
+            if (currentUser === 'all') return arr;
+            return arr.filter(d => d.owner === currentUser);
+        };
+
+        window.myCalls = function() {
+            const arr = calls.filter(c => !c.deleted);
+            if (currentUser === 'all') return arr;
+            return arr.filter(c => c.owner === currentUser);
+        };
+
+        window.myContacts = function() {
+            const arr = contacts.filter(c => !c.deleted);
+            if (currentUser === 'all') return arr;
+            return arr.filter(c => c.owner === currentUser);
+        };
+
+        // مدیریت منوی کشویی (فقط مرتضی آن را می‌بیند)
+        window.updateUserUI = function() {
+            const u = USERS[currentUser] || { name: 'همه' };
+            const nameEl = document.getElementById('headerUserName');
+            const avatarEl = document.getElementById('headerUserAvatar');
+            const picker = document.getElementById('userPickerSelect');
+
+            if(nameEl) nameEl.textContent = u.name;
+            if(avatarEl) avatarEl.textContent = u.name.charAt(0);
+
+            // بررسی اینکه چه کسی واقعاً لاگین کرده است
+            const loggedInUser = localStorage.getItem('cme_logged_in');
+
+            if (picker) {
+                if (loggedInUser === 'morteza') {
+                    picker.innerHTML = '<option value="morteza">مرتضی</option><option value="parvin">پروین</option><option value="saeed">سعید</option><option value="all">همه</option>';
+                    picker.style.display = 'block';
+                    picker.value = currentUser;
+                } else {
+                    // برای سعید و پروین منو کاملاً حذف می‌شود
+                    picker.style.display = 'none';
+                    picker.innerHTML = ''; 
+                }
+            }
+        };
+
+        // اعمال تغییرات و رندر مجدد
+        if (typeof renderAll === 'function') {
+            renderAll();
+        }
+        if (typeof updateUserUI === 'function') {
+            updateUserUI();
+        }
+    });
+    </script>
+    
 </body>
 </html>
