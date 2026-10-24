@@ -189,8 +189,9 @@ body.dark-mode .btn-danger { background: #7f1d1d; color: #fca5a5; border-color: 
 .ev-head .add-btn:hover { background: var(--accent-light); }
 .ev-body { padding: 12px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
 
-.event-row { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; transition: 0.2s; }
-.event-row:hover { border-color: #cbd5e1; box-shadow: var(--shadow-sm); }
+/* تغییر حاشیه دور کارت‌های رویداد به رنگ سبز */
+.event-row { background: var(--card-bg); border: 1.5px solid var(--accent); border-radius: 10px; padding: 14px; transition: 0.2s; }
+.event-row:hover { border-color: var(--accent-hover); box-shadow: var(--shadow-md); }
 .event-row.earned { border-right: 4px solid var(--accent); }
 .event-row.partial { border-right: 4px solid var(--warn); }
 .event-row.failed { border-right: 4px solid var(--danger); }
@@ -204,7 +205,12 @@ body.dark-mode .btn-danger { background: #7f1d1d; color: #fca5a5; border-color: 
 body.dark-mode .stat-pill:hover { background: #334155; }
 .stat-pill.ok { background: var(--accent-light); color: var(--accent-hover); border-color: #a7f3d0; }
 .stat-pill.no { background: #fef2f2; color: var(--danger); border-color: #fecaca; }
+
+/* اضافه شدن حالت شب برای دکمه‌های سبز تا تغییر رنگ کامل مشخص شود */
+body.dark-mode .stat-pill.ok { background: #064e3b; color: #6ee7b7; border-color: #047857; }
+body.dark-mode .stat-pill.ok:hover { background: #065f46; }
 body.dark-mode .stat-pill.no { background: #7f1d1d; color: #fca5a5; border-color: #991b1b; }
+
 .event-actions { display: flex; gap: 6px; margin-top: 12px; justify-content: flex-end; }
 
 /* فرم‌ها و مودال‌ها */
