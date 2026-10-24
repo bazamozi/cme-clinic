@@ -374,6 +374,70 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
   .row, .row3 { grid-template-columns: 1fr; }
 }
 </style>
+
+    <style>
+    .top-header {
+      position: relative !important;
+      height: 72px;
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      box-shadow: var(--shadow-sm);
+      z-index: 9000 !important;
+    }
+
+    @media (max-width: 900px) {
+      .top-header {
+        padding: 10px !important;
+        height: auto !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+      }
+      .header-left {
+        width: 100% !important;
+        justify-content: space-between !important;
+        margin-bottom: 5px !important;
+      }
+      #mobileMenuToggle {
+        display: inline-flex !important;
+      }
+      .header-right {
+        width: 100% !important;
+        justify-content: flex-start !important;
+      }
+      #headerActionMenu {
+        display: none !important;
+        position: absolute !important;
+        top: 100% !important;
+        left: 10px !important;
+        right: 10px !important;
+        margin-top: 5px !important;
+        background: var(--card-bg) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 12px !important;
+        padding: 15px !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;
+        flex-direction: column !important;
+        z-index: 99999 !important;
+        width: auto !important;
+      }
+      #headerActionMenu.show-mobile-menu {
+        display: flex !important;
+      }
+      #headerActionMenu > button, #headerActionMenu > span {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 10px !important;
+        font-size: 13px !important;
+        margin-bottom: 5px !important;
+      }
+      .date-time { display: none !important; }
+    }
+    </style>
+    
 </head>
 <body class="dark-mode">
 
@@ -420,6 +484,7 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
   </aside>
 
   <div class="main-content">
+    
     <header class="top-header">
       <div class="header-left">
         <div class="user-profile">
@@ -431,14 +496,18 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
           <select id="userPickerSelect" onchange="switchUser(this.value)" style="width:auto; padding:4px 8px; font-size:11px; margin-right:8px; background:#f1f5f9; border:none; cursor:pointer;" class="user-picker-select">
             <option value="morteza">مرتضی</option>
             <option value="parvin">پروین</option>
+            <option value="saeed">سعید</option>
             <option value="all">همه</option>
           </select>
         </div>
+        <button id="mobileMenuToggle" class="mini" onclick="toggleHeaderMenu(event)" style="display:none; font-size: 22px; padding: 2px 10px; margin-right: 5px; font-weight: bold; cursor: pointer;">⋮</button>
         <button class="mini" id="themeToggleBtn" onclick="toggleDarkMode()" title="تغییر حالت شب/روز" style="font-size: 16px;">☀️</button>
       </div>
       <div class="header-right">
         <div class="date-time" id="clock">در حال بارگذاری...</div>
-        <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+        <div id="headerActionMenu" style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+          <button class="header-action-btn blue" onclick="openAccounting('morteza')" title="حسابداری مرتضی">💼 حسابداری مرتضی</button>
+          <button class="header-action-btn blue" onclick="openAccounting('morteza_saeed')" title="حسابداری مرتضی و سعید">💼 حسابداری (مرتضی و سعید)</button>
           <button class="header-action-btn blue" onclick="undoLastChange()" title="بازگردانی آخرین تغییر">↩️ بازگردانی</button>
           <span id="syncStatus" class="header-action-btn green" onclick="syncNow(true)" style="cursor:pointer;">☁️ آماده</span>
           <button class="header-action-btn green" onclick="exportData()" title="پشتیبان‌گیری">💾 پشتیبان</button>
@@ -448,6 +517,7 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
         </div>
       </div>
     </header>
+    
 
     <div class="content-area">
       <div class="tab-content" id="tab-dash">
@@ -1913,5 +1983,23 @@ setTimeout(autoAttendEvents, 2000); setInterval(autoAttendEvents, 60000);
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) autoAttendEvents(); });
 
 </script>
+
+    <script>
+    window.toggleHeaderMenu = function(e) {
+        if(e) e.stopPropagation();
+        const menu = document.getElementById('headerActionMenu');
+        if (menu) {
+            menu.classList.toggle('show-mobile-menu');
+        }
+    };
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('headerActionMenu');
+        const btn = document.getElementById('mobileMenuToggle');
+        if (menu && menu.classList.contains('show-mobile-menu') && !menu.contains(e.target) && !btn.contains(e.target)) {
+            menu.classList.remove('show-mobile-menu');
+        }
+    });
+    </script>
+    
 </body>
 </html>
