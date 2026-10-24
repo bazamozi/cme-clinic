@@ -377,30 +377,34 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
 
     <style>
     @media (max-width: 900px) {
-      #mobileMenuToggle { display: inline-flex !important; }
-      #headerActionMenu {
-        display: none !important;
-        position: absolute;
-        top: 100%;
-        left: 10px;
-        right: 10px;
-        width: auto !important;
-        margin-top: 8px;
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 15px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        flex-direction: column !important;
-        z-index: 99999;
-      }
-      #headerActionMenu > button, #headerActionMenu > span {
-        width: 100% !important;
-        justify-content: center !important;
-        padding: 10px !important;
-        font-size: 13px !important;
-        margin-bottom: 5px;
-      }
+        #mobileMenuToggle {
+            display: inline-flex !important;
+        }
+        .header-right > div {
+            display: none !important;
+            position: absolute;
+            top: 100%;
+            left: 10px;
+            right: 10px;
+            margin-top: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            flex-direction: column !important;
+            z-index: 99999;
+        }
+        .header-right > div.show-mobile-menu {
+            display: flex !important;
+        }
+        .header-right > div > button, .header-right > div > span {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 10px !important;
+            font-size: 13px !important;
+            margin-bottom: 5px;
+        }
     }
     </style>
     
@@ -465,11 +469,10 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
           </select>
         </div>
         <button class="mini" id="themeToggleBtn" onclick="toggleDarkMode()" title="تغییر حالت شب/روز" style="font-size: 16px;">☀️</button>
-        <button id="mobileMenuToggle" class="mini" onclick="toggleHeaderMenu()" title="منوی تنظیمات" style="display:none; font-size: 18px; margin-right: 5px;">⋮</button>
       </div>
       <div class="header-right">
         <div class="date-time" id="clock">در حال بارگذاری...</div>
-        <div id="headerActionMenu" style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+        <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
           <button class="header-action-btn blue" onclick="undoLastChange()" title="بازگردانی آخرین تغییر">↩️ بازگردانی</button>
           <span id="syncStatus" class="header-action-btn green" onclick="syncNow(true)" style="cursor:pointer;">☁️ آماده</span>
           <button class="header-action-btn green" onclick="exportData()" title="پشتیبان‌گیری">💾 پشتیبان</button>
@@ -1946,21 +1949,29 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
 </script>
 
     <script>
-    window.toggleHeaderMenu = function() {
-      const menu = document.getElementById('headerActionMenu');
-      if (!menu) return;
-      if (menu.style.display === 'flex') {
-        menu.style.setProperty('display', 'none', 'important');
-      } else {
-        menu.style.setProperty('display', 'flex', 'important');
-      }
-    };
-    document.addEventListener('click', function(e) {
-      const menu = document.getElementById('headerActionMenu');
-      const btn = document.getElementById('mobileMenuToggle');
-      if (menu && menu.style.display === 'flex' && !menu.contains(e.target) && !btn.contains(e.target)) {
-        menu.style.setProperty('display', 'none', 'important');
-      }
+    document.addEventListener('DOMContentLoaded', function() {
+        const themeBtn = document.getElementById('themeToggleBtn');
+        if (themeBtn && !document.getElementById('mobileMenuToggle')) {
+            const menuBtn = document.createElement('button');
+            menuBtn.id = 'mobileMenuToggle';
+            menuBtn.className = 'mini';
+            menuBtn.innerHTML = '⋮';
+            menuBtn.style.cssText = 'display: none; font-size: 18px; margin-right: 5px;';
+            menuBtn.onclick = function(e) {
+                e.stopPropagation();
+                const menu = document.querySelector('.header-right > div');
+                if (menu) menu.classList.toggle('show-mobile-menu');
+            };
+            themeBtn.parentNode.insertBefore(menuBtn, themeBtn.nextSibling);
+        }
+
+        document.addEventListener('click', function(e) {
+            const menu = document.querySelector('.header-right > div');
+            const btn = document.getElementById('mobileMenuToggle');
+            if (menu && menu.classList.contains('show-mobile-menu') && !menu.contains(e.target) && !btn.contains(e.target)) {
+                menu.classList.remove('show-mobile-menu');
+            }
+        });
     });
     </script>
     
