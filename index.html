@@ -374,6 +374,16 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
   .row, .row3 { grid-template-columns: 1fr; }
 }
 </style>
+
+    <style>
+    #accountingModal .info-box { padding: 15px; }
+    #accountingModal .info-box .value { font-size: 16px; margin-top: 5px; }
+    #accountingModal table { background: var(--card-bg); width: 100%; }
+    #accountingModal th { font-weight: 800; background: var(--bg-body); }
+    #accountingModal td { border-bottom: 1px solid var(--border-color); }
+    #accountingModal tr:hover { background: var(--bg-body); }
+    </style>
+    
 </head>
 <body class="dark-mode">
 
@@ -435,6 +445,7 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
           </select>
         </div>
         <button class="mini" id="themeToggleBtn" onclick="toggleDarkMode()" title="تغییر حالت شب/روز" style="font-size: 16px;">☀️</button>
+        <button class="mini" onclick="openAccounting()" title="حسابداری و مالی" style="font-size: 16px; margin-right: 5px;">💼</button>
       </div>
       <div class="header-right">
         <div class="date-time" id="clock">در حال بارگذاری...</div>
@@ -1914,105 +1925,137 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
 
 </script>
 
+    <!-- پنجره حسابداری -->
+    <div id="accountingModal" class="modal-bg" style="display:none; z-index:100005; align-items: flex-start; padding-top: 50px; overflow-y: auto;">
+      <div class="modal" style="max-width: 900px; width: 95%; margin-bottom: 50px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+          <h2 style="margin:0; font-size:18px; color:var(--teal);">💼 سیستم حسابداری و مالی</h2>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="exportAccounting()" style="background:#10b981; border-radius:8px;">📥 خروجی اکسل</button>
+            <button class="btn btn-outline" onclick="document.getElementById('accountingModal').style.display='none'">بستن</button>
+          </div>
+        </div>
+        
+        <div id="accSummary" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:20px;"></div>
+        
+        <div style="overflow-x:auto; border:1px solid var(--border-color); border-radius:12px; box-shadow: var(--shadow-sm);">
+          <table id="accTable" style="border-collapse:collapse; text-align:right; font-size:13px;">
+            <thead>
+              <tr style="background:#f1f5f9; color:#334155;">
+                <th style="padding:12px;">نام پزشک</th>
+                <th style="padding:12px;">موبایل</th>
+                <th style="padding:12px;">کل هزینه</th>
+                <th style="padding:12px;">پرداختی</th>
+                <th style="padding:12px;">بدهکاری</th>
+                <th style="padding:12px;">تاریخ یادآوری</th>
+              </tr>
+            </thead>
+            <tbody id="accTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+
     <script>
-    window.addEventListener('load', function() {
-        var USERS_PASS = { 
-            'morteza': { pass: 'MN13601353', name: 'مرتضی' }, 
-            'parvin': { pass: 'parvin123', name: 'پروین' }, 
-            'saeed': { pass: 'saeedcanani021', name: 'سعید' } 
-        };
+    window.openAccounting = function() {
+        const modal = document.getElementById('accountingModal');
+        modal.style.display = 'flex';
+        
+        // فیلتر کردن پزشکان حذف نشده
+        let docs = doctors.filter(d => !d.deleted);
+        
+        // محاسبه بدهی و مرتب‌سازی از بیشترین بدهی به کمترین
+        docs = docs.map(d => {
+            const f = d.finance || {};
+            const total = Number(f.total || 0);
+            const paid = Number(f.paid || 0);
+            const debt = Math.max(0, total - paid);
+            return { ...d, _total: total, _paid: paid, _debt: debt };
+        }).sort((a, b) => b._debt - a._debt);
 
-        window.doLogin = function() {
-            var u = document.getElementById('loginUser').value.trim().toLowerCase();
-            var p = document.getElementById('loginPass').value.trim();
-            var errEl = document.getElementById('loginError');
-            
-            if(USERS_PASS[u] && USERS_PASS[u].pass === p){
-                try { localStorage.setItem('cme_logged_in', u); } catch(e){}
-                if(errEl) errEl.style.display = 'none';
-                document.getElementById('loginScreen').classList.add('hidden');
-                currentUser = u;
-                selectedDoctorId = null;
-                try { localStorage.setItem('cme_current_user', u); } catch(e){}
-                updateUserUI();
-                if(typeof renderAll === 'function') renderAll(); 
-                if(typeof updateMobileSelection === 'function') updateMobileSelection(); 
-                if(typeof toast === 'function') toast('👋 خوش آمدید ' + USERS_PASS[u].name);
-            } else { 
-                if(errEl) errEl.style.display = 'flex'; 
-                document.getElementById('loginPass').value = ''; 
-            }
-        };
+        // محاسبه مجموع کل
+        let sumTotal = 0, sumPaid = 0, sumDebt = 0;
+        docs.forEach(d => {
+            sumTotal += d._total;
+            sumPaid += d._paid;
+            sumDebt += d._debt;
+        });
 
-        window.updateUserUI = function() {
-            const u = USERS_PASS[currentUser] || { name: 'همه' };
-            const nameEl = document.getElementById('headerUserName');
-            const avatarEl = document.getElementById('headerUserAvatar');
-            const picker = document.getElementById('userPickerSelect');
+        document.getElementById('accSummary').innerHTML = `
+            <div class="info-box" style="background:#f0fdf4; border-color:#bbf7d0;">
+                <span class="label" style="color:#166534;">💰 مجموع کل هزینه‌ها</span>
+                <span class="value ltr" style="color:#15803d; font-weight:900;">${sumTotal.toLocaleString('en-US')} تومان</span>
+            </div>
+            <div class="info-box" style="background:#eff6ff; border-color:#bfdbfe;">
+                <span class="label" style="color:#1e40af;">✅ مجموع پرداختی‌ها</span>
+                <span class="value ltr" style="color:#1d4ed8; font-weight:900;">${sumPaid.toLocaleString('en-US')} تومان</span>
+            </div>
+            <div class="info-box" style="background:#fef2f2; border-color:#fecaca;">
+                <span class="label" style="color:#991b1b;">⚠️ مجموع بدهکاری‌ها</span>
+                <span class="value ltr" style="color:#dc2626; font-weight:900;">${sumDebt.toLocaleString('en-US')} تومان</span>
+            </div>
+        `;
 
-            if(nameEl) nameEl.textContent = u.name;
-            if(avatarEl) avatarEl.textContent = u.name.charAt(0);
+        const tbody = document.getElementById('accTableBody');
+        if (docs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">هیچ اطلاعاتی ثبت نشده است</td></tr>';
+            return;
+        }
 
-            const loggedInUser = localStorage.getItem('cme_logged_in');
+        tbody.innerHTML = docs.map(d => {
+            const debtColor = d._debt > 0 ? 'color: var(--danger); font-weight:900;' : 'color: var(--accent); font-weight:900;';
+            return `
+            <tr style="transition: 0.2s;">
+                <td style="padding:12px; font-weight:700;">${esc(fullName(d))}</td>
+                <td style="padding:12px;" class="ltr">${esc(d.phone || '—')}</td>
+                <td style="padding:12px;" class="ltr">${d._total.toLocaleString('en-US')}</td>
+                <td style="padding:12px; color: var(--accent); font-weight:700;" class="ltr">${d._paid.toLocaleString('en-US')}</td>
+                <td style="padding:12px; ${debtColor}" class="ltr">${d._debt.toLocaleString('en-US')}</td>
+                <td style="padding:12px;" class="ltr">${esc(d.reminderDate || '—')}</td>
+            </tr>
+            `;
+        }).join('');
+    };
 
-            if (picker) {
-                if (loggedInUser === 'morteza') {
-                    picker.innerHTML = '<option value="morteza">مرتضی</option><option value="parvin">پروین</option><option value="saeed">سعید</option><option value="all">همه</option>';
-                    picker.style.setProperty('display', 'block', 'important');
-                    picker.value = currentUser;
-                } else {
-                    picker.style.setProperty('display', 'none', 'important');
-                    picker.innerHTML = ''; 
-                }
-            }
-        };
+    window.exportAccounting = function() {
+        let docs = doctors.filter(d => !d.deleted);
+        docs = docs.map(d => {
+            const f = d.finance || {};
+            const total = Number(f.total || 0);
+            const paid = Number(f.paid || 0);
+            const debt = Math.max(0, total - paid);
+            return { ...d, _total: total, _paid: paid, _debt: debt };
+        }).sort((a, b) => b._debt - a._debt);
 
-        window.switchUser = function(user) {
-            const loggedInUser = localStorage.getItem('cme_logged_in');
-            if (loggedInUser !== 'morteza') return; 
-            
-            currentUser = user; 
-            try { localStorage.setItem('cme_current_user', user); } catch(e){}
-            selectedDoctorId = null;
-            const ma = document.getElementById('mainArea'); 
-            if(ma) ma.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>';
-            updateUserUI();
-            if(typeof renderDash === 'function') renderDash(); 
-            if(typeof renderDocList === 'function') renderDocList(); 
-            if(typeof renderCalls === 'function') renderCalls(); 
-            if(typeof renderContacts === 'function') renderContacts(); 
-            if(typeof updateMobileSelection === 'function') updateMobileSelection();
-        };
+        // استفاده از BOM برای پشتیبانی از زبان فارسی در اکسل
+        let csvContent = "\uFEFF"; 
+        csvContent += "نام پزشک,تخصص,شماره موبایل,کل هزینه (تومان),پرداختی (تومان),بدهکاری (تومان),تاریخ یادآوری\n";
 
-        const originalSelectDoctor = window.selectDoctor;
-        window.selectDoctor = function(id) {
-            const d = doctors.find(x => x.id === id);
-            if (!d) return;
-            if (currentUser !== 'all' && d.owner !== currentUser) {
-                if(typeof toast === 'function') toast('⚠️ شما به این پزشک دسترسی ندارید', 'danger');
-                return;
-            }
-            originalSelectDoctor(id);
-        };
+        docs.forEach(d => {
+            const row = [
+                `"${fullName(d)}"`,
+                `"${d.spec || ''}"`,
+                `"${d.phone || ''}"`,
+                d._total,
+                d._paid,
+                d._debt,
+                `"${d.reminderDate || ''}"`
+            ];
+            csvContent += row.join(",") + "\n";
+        });
 
-        const originalRenderMain = window.renderMain;
-        window.renderMain = function() {
-            if (selectedDoctorId) {
-                const d = doctors.find(x => x.id === selectedDoctorId);
-                if (d && currentUser !== 'all' && d.owner !== currentUser) {
-                    selectedDoctorId = null;
-                    const el = document.getElementById('mainArea'); 
-                    if(el) el.innerHTML = '<div class="empty-state"><span class="big">🚫</span>شما به این پروفایل دسترسی ندارید</div>';
-                    return;
-                }
-            }
-            originalRenderMain();
-        };
-
-        // اجرای اولیه
-        updateUserUI();
-        if (typeof renderAll === 'function') renderAll();
-    });
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `حسابداری_پزشکان_${(getShamsiToday()||'date').replace(/\//g,'-')}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast('📥 خروجی اکسل با موفقیت دانلود شد');
+    };
     </script>
     
 </body>
