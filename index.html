@@ -435,7 +435,9 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
           </select>
         </div>
         <button class="mini" id="themeToggleBtn" onclick="toggleDarkMode()" title="تغییر حالت شب/روز" style="font-size: 16px;">☀️</button>
-        <button class="mini" onclick="openAccounting()" title="حسابداری" style="font-size: 13px; margin-right: 5px; font-weight: bold; color: var(--teal); padding: 4px 10px;">💼 حسابداری</button>
+        <button class="mini" onclick="openAccounting('morteza')" title="حسابداری مرتضی" style="font-size: 12px; margin-right: 5px; font-weight: bold; color: var(--teal); padding: 4px 8px;">💼 حسابداری مرتضی</button>
+        <button class="mini" onclick="openAccounting('morteza_saeed')" title="حسابداری مرتضی و سعید" style="font-size: 12px; margin-right: 5px; font-weight: bold; color: #8b5cf6; padding: 4px 8px;">💼 حسابداری مرتضی و سعید</button>
+    
       </div>
       <div class="header-right">
         <div class="date-time" id="clock">در حال بارگذاری...</div>
@@ -540,7 +542,13 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxl4UYo-pMlrcIFIQS2r
 
 const uid = () => Date.now()+Math.random().toString(36).slice(2,6);
 
-let doctors = [], calls = [], contacts = [];
+let doctors = [], calls = [], contacts = [], accMorteza = [], accMortezaSaeed = [];
+  try { 
+    accMorteza = JSON.parse(localStorage.getItem('cme_acc_morteza') || '[]'); 
+    accMortezaSaeed = JSON.parse(localStorage.getItem('cme_acc_morteza_saeed') || '[]');
+    const oldAcc = localStorage.getItem('cme_accounting');
+    if(oldAcc && accMorteza.length === 0) { accMorteza = JSON.parse(oldAcc); localStorage.setItem('cme_acc_morteza', oldAcc); }
+  } catch(e) {}
 let selectedDoctorId = null;
 let currentUser = 'morteza';
 let currentDocCategory = 'in_progress';
@@ -882,7 +890,7 @@ function save(){
     localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
   } catch(e){}
 
-  try { localStorage.setItem(K, JSON.stringify(doctors)); localStorage.setItem(K+'_calls', JSON.stringify(calls)); localStorage.setItem(K+'_contacts', JSON.stringify(contacts)); } catch(e){}
+  try { localStorage.setItem(K, JSON.stringify(doctors)); localStorage.setItem(K+'_calls', JSON.stringify(calls)); localStorage.setItem(K+'_contacts', JSON.stringify(contacts)); localStorage.setItem('cme_acc_morteza', JSON.stringify(accMorteza)); localStorage.setItem('cme_acc_morteza_saeed', JSON.stringify(accMortezaSaeed)); } catch(e){}
   _dirty = true; scheduleSync();
 }
 
@@ -911,7 +919,7 @@ async function syncNow(isManual = false){
 async function pushToCloud(){
   return new Promise((resolve) => {
     try {
-      const payload = JSON.stringify({ doctors, calls, contacts, savedAt: Date.now() });
+      const payload = JSON.stringify({ doctors, calls, contacts, accMorteza, accMortezaSaeed, savedAt: Date.now() });
       const form = document.createElement('form');
       form.method = 'POST'; form.action = SCRIPT_URL; form.target = 'hidden_iframe_push'; form.style.display = 'none';
       const input = document.createElement('input');
@@ -1915,11 +1923,11 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
 
 </script>
 
-    <!-- پنجره حسابداری -->
+    <!-- پنجره حسابداری دوگانه -->
     <div id="accountingModal" class="modal-bg" style="display:none; z-index:100005; align-items: flex-start; padding-top: 50px; overflow-y: auto;">
       <div class="modal" style="max-width: 900px; width: 95%; margin-bottom: 50px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
-          <h2 style="margin:0; font-size:18px; color:var(--teal);">💼 سیستم حسابداری دستی</h2>
+          <h2 id="accModalTitle" style="margin:0; font-size:18px; color:var(--teal);">💼 سیستم حسابداری</h2>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <button class="btn btn-primary" onclick="exportAccounting()" style="background:#10b981; border-radius:8px;">📥 خروجی اکسل</button>
             <button class="btn btn-outline" onclick="document.getElementById('accountingModal').style.display='none'">بستن</button>
@@ -1951,16 +1959,31 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
     <!-- /پنجره حسابداری -->
 
     <script>
-    // تعریف متغیر سراسری برای جلوگیری از خطای undefined
-    window.accountingRecords = window.accountingRecords || [];
-    try { 
-        const savedAcc = localStorage.getItem('cme_accounting');
-        if(savedAcc) window.accountingRecords = JSON.parse(savedAcc); 
-    } catch(e) {}
+    window.currentAccType = 'morteza'; // نوع پیش‌فرض
 
-    window.openAccounting = function() {
+    window.getActiveAccData = function() {
+        return window.currentAccType === 'morteza' ? accMorteza : accMortezaSaeed;
+    };
+
+    window.setActiveAccData = function(data) {
+        if(window.currentAccType === 'morteza') accMorteza = data;
+        else accMortezaSaeed = data;
+    };
+
+    window.openAccounting = function(type) {
+        window.currentAccType = type;
         const modal = document.getElementById('accountingModal');
-        if(!modal) { alert('خطا: پنجره حسابداری یافت نشد.'); return; }
+        if(!modal) return;
+        
+        const title = document.getElementById('accModalTitle');
+        if (type === 'morteza') {
+            title.innerHTML = '💼 حسابداری مرتضی';
+            title.style.color = 'var(--teal)';
+        } else {
+            title.innerHTML = '💼 حسابداری مرتضی و سعید';
+            title.style.color = '#8b5cf6';
+        }
+
         modal.style.display = 'flex';
         renderAccountingTable();
     };
@@ -1968,7 +1991,8 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
     window.renderAccountingTable = function() {
         const tbody = document.getElementById('accTableBody');
         if(!tbody) return;
-        const accData = window.accountingRecords || [];
+        const accData = window.getActiveAccData() || [];
+        
         if(accData.length === 0) {
             tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">هیچ ردیفی ثبت نشده است. یک ردیف جدید اضافه کنید.</td></tr>';
             document.getElementById('accSummary').innerHTML = '';
@@ -2021,7 +2045,7 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
     };
 
     window.openAddAccountingModal = function(editId = null) {
-        const accData = window.accountingRecords || [];
+        const accData = window.getActiveAccData() || [];
         const r = editId ? accData.find(x => x.id === editId) : {};
         const initialTotal = Number(r.total !== undefined ? r.total : (r.amount || 0));
         const initialPaid = Number(r.paid || 0);
@@ -2081,10 +2105,10 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
             const total = Number(toEnDigits(document.getElementById('aTotal').value).replace(/,/g, '')) || 0;
             const paid = Number(toEnDigits(document.getElementById('aPaid').value).replace(/,/g, '')) || 0;
             
-            if(!window.accountingRecords) window.accountingRecords = [];
+            let accData = window.getActiveAccData();
 
             if(editId) {
-                const existing = window.accountingRecords.find(x => x.id === editId);
+                const existing = accData.find(x => x.id === editId);
                 if(existing) {
                     existing.name = document.getElementById('aName').value.trim();
                     existing.date = document.getElementById('aDate').value.trim();
@@ -2094,7 +2118,7 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
                     existing.updatedAt = Date.now();
                 }
             } else {
-                window.accountingRecords.push({
+                accData.push({
                     id: (typeof uid === 'function' ? uid() : Date.now().toString()),
                     name: document.getElementById('aName').value.trim(),
                     date: document.getElementById('aDate').value.trim(),
@@ -2106,8 +2130,8 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
                 });
             }
             
-            localStorage.setItem('cme_accounting', JSON.stringify(window.accountingRecords));
-            if(typeof save === 'function') save(); // ذخیره و سینک
+            window.setActiveAccData(accData);
+            if(typeof save === 'function') save(); 
             
             document.getElementById('modalHost').innerHTML = '';
             renderAccountingTable();
@@ -2117,15 +2141,16 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
 
     window.delAccountingRecord = function(id) {
         if(!confirm('این ردیف حسابداری حذف شود؟')) return;
-        window.accountingRecords = window.accountingRecords.filter(x => x.id !== id);
-        localStorage.setItem('cme_accounting', JSON.stringify(window.accountingRecords));
+        let accData = window.getActiveAccData();
+        accData = accData.filter(x => x.id !== id);
+        window.setActiveAccData(accData);
         if(typeof save === 'function') save();
         renderAccountingTable();
         if(typeof toast === 'function') toast('🗑 ردیف حذف شد');
     };
 
     window.exportAccounting = function() {
-        const accData = window.accountingRecords || [];
+        const accData = window.getActiveAccData() || [];
         if(accData.length === 0) { if(typeof toast === 'function') toast('⚠️ هیچ ردیفی برای خروجی وجود ندارد'); return; }
         
         let csvContent = "\uFEFF";
@@ -2145,7 +2170,8 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
         const link = document.createElement("a");
         link.href = url;
         const dStr = (typeof getShamsiToday === 'function' ? getShamsiToday() : 'export').replace(/\//g,'-');
-        link.download = `حسابداری_دستی_${dStr}.csv`;
+        const typeName = window.currentAccType === 'morteza' ? 'مرتضی' : 'مرتضی_و_سعید';
+        link.download = `حسابداری_${typeName}_${dStr}.csv`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
