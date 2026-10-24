@@ -431,7 +431,6 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
           <select id="userPickerSelect" onchange="switchUser(this.value)" style="width:auto; padding:4px 8px; font-size:11px; margin-right:8px; background:#f1f5f9; border:none; cursor:pointer;" class="user-picker-select">
             <option value="morteza">مرتضی</option>
             <option value="parvin">پروین</option>
-            <option value="saeed">سعید</option>
             <option value="all">همه</option>
           </select>
         </div>
@@ -675,17 +674,13 @@ document.addEventListener('input', e => {
   if(en !== t.value){ const pos = t.selectionStart; t.value = en; try{ t.setSelectionRange(pos,pos); }catch(_){} }
 });
 
-var USERS = { 
-      'morteza': { hash: 'TU4xMzYwMTM1Mw==', name: 'مرتضی' }, 
-      'parvin': { hash: 'cGFydmluMTIz', name: 'پروین' }, 
-      'saeed': { hash: 'c2FlZWRjYW5hbmkwMjE=', name: 'سعید' } 
-    };
+var USERS = { 'morteza': { pass: 'MN13601353', name: 'مرتضی' }, 'parvin': { pass: 'parvin123', name: 'پروین' } };
 
 window.doLogin = function(){
   var u = document.getElementById('loginUser').value.trim().toLowerCase();
   var p = document.getElementById('loginPass').value;
   var errEl = document.getElementById('loginError');
-  if(USERS[u] && USERS[u].hash === btoa(p)){
+  if(USERS[u] && USERS[u].pass === p){
     try { localStorage.setItem('cme_logged_in', u); } catch(e){}
     errEl.style.display = 'none';
     document.getElementById('loginScreen').classList.add('hidden');
@@ -718,35 +713,28 @@ function checkLogin(){
 
 function updateUserUI() {
       const u = USERS[currentUser] || { name: 'همه' };
-      document.getElementById('headerUserName').textContent = u.name;
-      document.getElementById('headerUserAvatar').textContent = u.name.charAt(0);
-      
+      const nameEl = document.getElementById('headerUserName');
+      const avatarEl = document.getElementById('headerUserAvatar');
       const picker = document.getElementById('userPickerSelect');
-      if (currentUser === 'morteza') {
-        picker.innerHTML = `
-          <option value="morteza">مرتضی</option>
-          <option value="parvin">پروین</option>
-          <option value="saeed">سعید</option>
-          <option value="all">همه</option>
-        `;
-        picker.style.display = 'block';
-        picker.value = currentUser;
-      } else {
-        picker.style.display = 'none';
+      
+      if(nameEl) nameEl.textContent = u.name;
+      if(avatarEl) avatarEl.textContent = u.name.charAt(0);
+      
+      if (picker) {
+        if (currentUser === 'morteza') {
+          picker.innerHTML = '<option value="morteza">مرتضی</option><option value="parvin">پروین</option><option value="saeed">سعید</option><option value="all">همه</option>';
+          picker.style.display = 'block';
+          picker.value = currentUser;
+        } else {
+          picker.style.display = 'none';
+        }
       }
     }
-    
-    function getOwnerOptions(selected) {
-      if (currentUser === 'morteza') {
-        return `
-          <option value="morteza" ${selected==='morteza'?'selected':''}>مرتضی</option>
-          <option value="parvin" ${selected==='parvin'?'selected':''}>پروین</option>
-          <option value="saeed" ${selected==='saeed'?'selected':''}>سعید</option>
-        `;
-      } else {
-        const name = USERS[currentUser] ? USERS[currentUser].name : currentUser;
-        return `<option value="${currentUser}" selected>${name}</option>`;
-      }
+
+function requestNotificationPermission() {
+  if ("Notification" in window) {
+    if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+      Notification.requestPermission();
     }
   }
 }
@@ -1128,7 +1116,7 @@ function renderDocList(){
   
   const displayDocs = currentDocCategory === 'all' ? allMyDocs : allMyDocs.filter(d => d._autoStatus === currentDocCategory);
   const el = document.getElementById('docList');
-  if(!displayDocs.length){ el.innerHTML='<div class="empty-state" style="padding:20px;"><span class="big">🔍</span>پزشکی یافت نشد</div>'; return; }
+  if(!displayDocs.length){ el.innerHTML='<div class="empty-state" style="padding:20px;"><span class="big">☁️</span>اطلاعات خالی است. لطفاً دکمه «☁️ آماده» را در بالای صفحه بزنید تا اطلاعات از سرور دانلود شود.</div>'; return; }
   
   el.innerHTML = displayDocs.map(d => {
     const hasOffline = (d.events||[]).filter(e=>!e.deleted).some(e=>e.type==='غیر حضوری');
@@ -1444,7 +1432,12 @@ window.openDoctorModal = function(editId, defaultPhone){
           <div><label>امتیاز حضوری 🏢</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mManualInPerson" value="${esc(d?.manualInPerson||'')}"></div>
       </div>
 
-      <div class="row"><div><label>مالک</label><select id="mOwner">${getOwnerOptions(d?.owner)}</select></div><div></div></div>
+      <div class="row"><div><label>مالک</label><select id="mOwner">${currentUser === 'morteza' ? `
+      <option value="morteza" ${(d?.owner||'')==='morteza'?'selected':''}>مرتضی</option>
+      <option value="parvin" ${(d?.owner||'')==='parvin'?'selected':''}>پروین</option>
+      <option value="saeed" ${(d?.owner||'')==='saeed'?'selected':''}>سعید</option>` : `
+      <option value="${currentUser}" selected>${USERS[currentUser]?.name || currentUser}</option>`}
+    </select></div><div></div></div>
       
       <div class="sect">📝 پیگیری و توضیحات</div>
       <textarea id="mFollowUp" placeholder="توضیحات کلی یا وضعیت پیگیری...">${esc(d?.followUp||'')}</textarea>
@@ -1604,7 +1597,12 @@ window.openContactModal = function(editId) {
       </div>
       <div class="row">
         <div><label>دسته‌بندی</label><input id="cCategory" placeholder="مثلا: همکار، تامین‌کننده..." value="${esc(c?.category||'')}"></div>
-        <div><label>مالک</label><select id="cOwner">${getOwnerOptions(c?.owner)}</select></div>
+        <div><label>مالک</label><select id="cOwner">${currentUser === 'morteza' ? `
+      <option value="morteza" ${(c?.owner||'')==='morteza'?'selected':''}>مرتضی</option>
+      <option value="parvin" ${(c?.owner||'')==='parvin'?'selected':''}>پروین</option>
+      <option value="saeed" ${(c?.owner||'')==='saeed'?'selected':''}>سعید</option>` : `
+      <option value="${currentUser}" selected>${USERS[currentUser]?.name || currentUser}</option>`}
+    </select></div>
       </div>
       <label>یادداشت</label>
       <textarea id="cNote">${esc(c?.note||'')}</textarea>
