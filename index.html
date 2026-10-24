@@ -1916,35 +1916,87 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
 
     <script>
     window.addEventListener('load', function() {
-        // بازنویسی امن تابع لاگین برای اطمینان از کارکرد درست کاربران
+        var USERS_PASS = { 
+            'morteza': { pass: 'MN13601353', name: 'مرتضی' }, 
+            'parvin': { pass: 'parvin123', name: 'پروین' }, 
+            'saeed': { pass: 'saeedcanani021', name: 'سعید' } 
+        };
+
+        // ۱. بازنویسی ورود برای پاک کردن حافظه انتخاب قبلی
         window.doLogin = function() {
             var u = document.getElementById('loginUser').value.trim().toLowerCase();
-            var p = document.getElementById('loginPass').value;
+            var p = document.getElementById('loginPass').value.trim();
             var errEl = document.getElementById('loginError');
             
-            // پسوردهای دقیق که مستقیم چک میشن
-            var USERS_PASS = { 
-                'morteza': { pass: 'MN13601353', name: 'مرتضی' }, 
-                'parvin': { pass: 'parvin123', name: 'پروین' }, 
-                'saeed': { pass: 'saeedcanani021', name: 'سعید' } 
-            };
-
             if(USERS_PASS[u] && USERS_PASS[u].pass === p){
                 try { localStorage.setItem('cme_logged_in', u); } catch(e){}
                 if(errEl) errEl.style.display = 'none';
                 document.getElementById('loginScreen').classList.add('hidden');
                 currentUser = u;
+                selectedDoctorId = null; // 🔥 پاکسازی انتخاب قبلی تا اطلاعات مرتضی به سعید نشون داده نشه
                 try { localStorage.setItem('cme_current_user', u); } catch(e){}
                 if(typeof updateUserUI === 'function') updateUserUI();
                 if(typeof renderAll === 'function') renderAll(); 
                 if(typeof updateMobileSelection === 'function') updateMobileSelection(); 
                 if(typeof toast === 'function') toast('👋 خوش آمدید ' + USERS_PASS[u].name);
-                if(typeof requestNotificationPermission === 'function') requestNotificationPermission();
             } else { 
                 if(errEl) errEl.style.display = 'flex'; 
                 document.getElementById('loginPass').value = ''; 
             }
         };
+
+        // ۲. مسدود کردن تغییر کاربر برای سعید
+        window.switchUser = function(user) {
+            const loggedInUser = localStorage.getItem('cme_logged_in');
+            if (loggedInUser !== 'morteza') return; // فقط مرتضی میتواند کاربر عوض کند
+            
+            currentUser = user; 
+            try { localStorage.setItem('cme_current_user', user); } catch(e){}
+            selectedDoctorId = null;
+            const ma = document.getElementById('mainArea'); 
+            if(ma) ma.innerHTML = '<div class="empty-state"><span class="big">📖</span>یک پزشک از ستون سمت راست انتخاب کنید</div>';
+            if(typeof updateUserUI === 'function') updateUserUI();
+            if(typeof renderDash === 'function') renderDash(); 
+            if(typeof renderDocList === 'function') renderDocList(); 
+            if(typeof renderCalls === 'function') renderCalls(); 
+            if(typeof renderContacts === 'function') renderContacts(); 
+            if(typeof updateMobileSelection === 'function') updateMobileSelection();
+        };
+
+        // ۳. مسدود کردن کلیک روی پزشکانی که مال سعید نیستند
+        const originalSelectDoctor = window.selectDoctor;
+        window.selectDoctor = function(id) {
+            const d = doctors.find(x => x.id === id);
+            if (!d) return;
+            if (currentUser !== 'all' && d.owner !== currentUser) {
+                if(typeof toast === 'function') toast('⚠️ شما به این پزشک دسترسی ندارید', 'danger');
+                return;
+            }
+            originalSelectDoctor(id);
+        };
+
+        // ۴. محافظت نهایی در صفحه نمایش پروفایل
+        const originalRenderMain = window.renderMain;
+        window.renderMain = function() {
+            if (selectedDoctorId) {
+                const d = doctors.find(x => x.id === selectedDoctorId);
+                if (d && currentUser !== 'all' && d.owner !== currentUser) {
+                    selectedDoctorId = null;
+                    const el = document.getElementById('mainArea'); 
+                    if(el) el.innerHTML = '<div class="empty-state"><span class="big">🚫</span>شما به این پروفایل دسترسی ندارید</div>';
+                    return;
+                }
+            }
+            originalRenderMain();
+        };
+
+        // ۵. مخفی کردن کاملاً منو برای غیرمدیر
+        const picker = document.getElementById('userPickerSelect');
+        if (picker && localStorage.getItem('cme_logged_in') !== 'morteza') {
+            picker.style.setProperty('display', 'none', 'important');
+        }
+        
+        if (typeof renderAll === 'function') renderAll();
     });
     </script>
     
