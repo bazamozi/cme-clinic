@@ -96,7 +96,7 @@ body { background-color: var(--bg-body); color: var(--text-main); min-height: 10
 .user-role { font-size: 10px; color: var(--text-muted); }
 .date-time { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); background: #f8fafc; padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border-color); font-weight: 600; }
 
-/* دکمه‌های هدر که هم‌شکل دکمه آماده شدند */
+/* دکمه‌های هدر */
 .header-action-btn {
   padding: 4px 10px;
   border-radius: 6px;
@@ -125,6 +125,11 @@ body.dark-mode .header-action-btn.red:hover { background: #991b1b; }
 .header-action-btn.yellow:hover { background: #fef3c7; }
 body.dark-mode .header-action-btn.yellow { background: #78350f; color: #fcd34d; border-color: #b45309; }
 body.dark-mode .header-action-btn.yellow:hover { background: #92400e; }
+
+.header-action-btn.blue { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+.header-action-btn.blue:hover { background: #dbeafe; }
+body.dark-mode .header-action-btn.blue { background: #1e3a8a; color: #93c5fd; border-color: #1d4ed8; }
+body.dark-mode .header-action-btn.blue:hover { background: #1e40af; }
 
 /* محتوای اصلی */
 .content-area { flex: 1; overflow-y: auto; padding: 24px; }
@@ -299,7 +304,7 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
   .app-layout { flex-direction: column; }
   .sidebar-right { display: none; }
   .top-header { padding: 0 10px; height: 60px; }
-  .date-time { display: none !important; } /* مخفی کردن ساعت در موبایل برای جا باز شدن */
+  .date-time { display: none !important; }
   .header-right { gap: 5px; }
   .content-area { padding: 15px; padding-bottom: 80px; }
   
@@ -334,11 +339,10 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
   .mobile-bottom-nav button .icon { font-size: 20px; }
   .mobile-bottom-nav button.active { color: var(--accent-hover); background: var(--accent-light); }
   
-  /* گریدهای موبایل */
   .info-grid-4 { grid-template-columns: 1fr 1fr !important; }
   .info-grid-3 { grid-template-columns: 1fr 1fr !important; }
-  .info-grid-3 > div:nth-child(1) { grid-column: span 2; } /* شماره کارت */
-  .info-grid-3 > div:nth-child(6) { grid-column: span 2; } /* کادر امتیازات دستی */
+  .info-grid-3 > div:nth-child(1) { grid-column: span 2; }
+  .info-grid-3 > div:nth-child(6) { grid-column: span 2; }
   
   .row, .row3 { grid-template-columns: 1fr; }
 }
@@ -378,7 +382,6 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
 </div>
 
 <div class="app-layout">
-  <!-- سایدبار -->
   <aside class="sidebar-right">
     <div class="sidebar-logo">بازآموزی<br>پزشکان</div>
     <nav class="sidebar-nav">
@@ -390,7 +393,6 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
   </aside>
 
   <div class="main-content">
-    <!-- هدر بالا با دکمه‌های یکپارچه -->
     <header class="top-header">
       <div class="header-left">
         <div class="user-profile">
@@ -410,6 +412,7 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
       <div class="header-right">
         <div class="date-time" id="clock">در حال بارگذاری...</div>
         <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+          <button class="header-action-btn blue" onclick="undoLastChange()" title="بازگردانی آخرین تغییر">↩️ بازگردانی</button>
           <span id="syncStatus" class="header-action-btn green" onclick="syncNow(true)" style="cursor:pointer;">☁️ آماده</span>
           <button class="header-action-btn green" onclick="exportData()" title="پشتیبان‌گیری">💾 پشتیبان</button>
           <button class="header-action-btn green" onclick="document.getElementById('importFile').click()" title="بازیابی">📂 بازیابی</button>
@@ -759,6 +762,36 @@ function remainingCredits(d){ return Math.max(0, Number(d.creditReq||0) - totalE
 function isComplete(d){ return remainingCredits(d)===0 && Number(d.creditReq||0)>0; }
 function pendingExamWebinars(d){ return (d.events||[]).filter(e=> !e.deleted && e.type==='وبینار' && e.purchase==='انجام شد' && e.attend==='انجام شد' && e.exam==='ثبت نشده').length; }
 
+// -------------------------------------------------------------------
+// 🔥 سیستم امنیت داده‌ها و تاریخچه (Data Integrity & History)
+// -------------------------------------------------------------------
+const HISTORY_KEY = 'cme4_history_backup';
+
+window.undoLastChange = function() {
+    const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    if (hist.length === 0) { toast('⚠️ تاریخچه‌ای برای بازگردانی وجود ندارد', 'warn'); return; }
+    
+    if (!confirm('آیا مطمئن هستید که می‌خواهید به آخرین وضعیت قبل از تغییرات برگردید؟')) return;
+    
+    const lastState = hist.shift(); // Get the most recent backup
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+    
+    doctors = lastState.doctors;
+    calls = lastState.calls;
+    contacts = lastState.contacts;
+    
+    // Force save locally without creating a new history entry immediately
+    try { 
+        localStorage.setItem(K, JSON.stringify(doctors)); 
+        localStorage.setItem(K+'_calls', JSON.stringify(calls)); 
+        localStorage.setItem(K+'_contacts', JSON.stringify(contacts)); 
+    } catch(e){}
+    
+    renderAll();
+    toast('✅ اطلاعات به نسخه قبل بازگردانده شد');
+};
+// -------------------------------------------------------------------
+
 window.exportData = function() {
   const dataStr = JSON.stringify({ doctors, calls, contacts, exportedAt: Date.now() }, null, 2);
   const blob = new Blob([dataStr], { type: "application/json" });
@@ -776,6 +809,13 @@ window.importData = function(event) {
       const data = JSON.parse(e.target.result);
       if(data) {
         if(!confirm('⚠️ با این کار اطلاعات فایل پشتیبان با داده‌های فعلی ادغام می‌شوند. ادامه؟')) { event.target.value = ''; return; }
+        
+        // Backup current state before import
+        let hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+        hist.unshift({ doctors: JSON.parse(JSON.stringify(doctors)), calls: JSON.parse(JSON.stringify(calls)), contacts: JSON.parse(JSON.stringify(contacts)), ts: Date.now() });
+        if(hist.length > 5) hist.pop();
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+
         doctors = mergeDoctors(doctors, data.doctors || []);
         calls = mergeById(calls, data.calls || [], 'updatedAt');
         contacts = mergeById(contacts, data.contacts || [], 'updatedAt');
@@ -800,6 +840,20 @@ function updateSyncUI(status) {
 
 function save(){
   _saveVersion++;
+  
+  // ایجاد نسخه پشتیبان قبل از ذخیره‌سازی
+  try {
+    let hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    hist.unshift({ 
+        doctors: JSON.parse(JSON.stringify(doctors)), 
+        calls: JSON.parse(JSON.stringify(calls)), 
+        contacts: JSON.parse(JSON.stringify(contacts)), 
+        ts: Date.now() 
+    });
+    if(hist.length > 5) hist.pop(); // نگه داشتن ۵ نسخه آخر
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+  } catch(e){}
+
   try { localStorage.setItem(K, JSON.stringify(doctors)); localStorage.setItem(K+'_calls', JSON.stringify(calls)); localStorage.setItem(K+'_contacts', JSON.stringify(contacts)); } catch(e){}
   _dirty = true; scheduleSync();
 }
@@ -840,6 +894,7 @@ async function pushToCloud(){
   });
 }
 
+// تابع مرج (ادغام) کاملاً سخت‌گیرانه برای جلوگیری از بازگشت اطلاعات قدیمی
 function mergeById(localArr, remoteArr, tsField){
   const map = new Map();
   (localArr || []).forEach(r => map.set(r.id, r));
@@ -847,6 +902,7 @@ function mergeById(localArr, remoteArr, tsField){
     if(!r || !r.id) return;
     const ex = map.get(r.id);
     const rTs = Number(r[tsField] || r.createdAt || 0), eTs = ex ? Number(ex[tsField] || ex.createdAt || 0) : -1;
+    // فقط در صورتی که زمان سرور به طور قطعی جدیدتر باشد، اطلاعات جایگزین می‌شود
     if(!ex || rTs > eTs) map.set(r.id, r);
   });
   return Array.from(map.values());
@@ -875,13 +931,14 @@ function mergeDoctors(localArr, remoteArr){
     };
     addEvents(ld.events); addEvents(rd.events);
     const lTs = Number(ld.updatedAt || 0), rTs = Number(rd.updatedAt || 0);
+    // اولویت مطلق با داده‌هایی است که زمان آپدیت جدیدتری دارند
     const base = rTs > lTs ? { ...rd } : { ...ld };
     
     const mergedEvents = Array.from(evMap.values());
     mergedEvents.forEach(e => { if(!e.id) e.id = uid(); });
     
     base.events = mergedEvents;
-    base.updatedAt = Math.max(lTs, rTs);
+    base.updatedAt = Math.max(lTs, rTs); // جلوگیری از عقب رفتن زمان
     map.set(rd.id, base);
   });
   return Array.from(map.values());
@@ -906,15 +963,26 @@ function jsonp(url, callback, onError) {
 }
 
 function pullFromCloud(){
-  jsonp(SCRIPT_URL + '?t=' + Date.now(), function(data) {
+  jsonp(SCRIPT_URL + '?t=' + Date.now() + '&nocache=1', function(data) {
     _pollErrorCount = 0;
-    if(!data) return;
+    // 🔥 محافظت شدید: اگر دیتای دریافتی ناقص یا خالی باشد، سینک انجام نمی‌شود تا اطلاعات پاک نشود
+    if(!data || (!data.doctors && !data.calls && !data.contacts)) return; 
+
     const newDocs  = mergeDoctors(doctors, data.doctors || []);
     const newCalls = mergeById(calls,   data.calls   || [], 'updatedAt');
     const newContacts = mergeById(contacts, data.contacts || [], 'updatedAt');
     const changed = JSON.stringify(newDocs) !== JSON.stringify(doctors) || JSON.stringify(newCalls) !== JSON.stringify(calls) || JSON.stringify(newContacts) !== JSON.stringify(contacts);
-    doctors = newDocs; calls = newCalls; contacts = newContacts;
+    
     if(changed){
+      // قبل از اینکه اطلاعات سرور جایگزین شوند، از وضعیت فعلی بکاپ گرفته می‌شود
+      try {
+        let hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+        hist.unshift({ doctors: JSON.parse(JSON.stringify(doctors)), calls: JSON.parse(JSON.stringify(calls)), contacts: JSON.parse(JSON.stringify(contacts)), ts: Date.now() });
+        if(hist.length > 5) hist.pop();
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+      } catch(e){}
+
+      doctors = newDocs; calls = newCalls; contacts = newContacts;
       try { localStorage.setItem(K, JSON.stringify(doctors)); localStorage.setItem(K+'_calls', JSON.stringify(calls)); localStorage.setItem(K+'_contacts', JSON.stringify(contacts)); } catch(e){}
       renderAll();
     }
@@ -1011,7 +1079,6 @@ function renderDocList(){
   if(!displayDocs.length){ el.innerHTML='<div class="empty-state" style="padding:20px;"><span class="big">🔍</span>پزشکی یافت نشد</div>'; return; }
   
   el.innerHTML = displayDocs.map(d => {
-    // حذف کامل و بدهکار و بررسی خرید غیرحضوری
     const hasOffline = (d.events||[]).filter(e=>!e.deleted).some(e=>e.type==='غیر حضوری');
     const offlineNotDone = (d.events||[]).filter(e=>!e.deleted).some(e=>e.type==='غیر حضوری' && e.purchase === 'انجام نشد');
     const pendingExams = pendingExamWebinars(d);
@@ -1113,7 +1180,6 @@ function renderMain(){
       </div>
     </div>
 
-    <!-- ردیف اول: کد ملی، رمز سامانه، موبایل، امتیاز درخواستی -->
     <div class="info-grid-4">
       <div class="info-box">
         <span class="label">🆔 کد ملی</span>
@@ -1136,7 +1202,6 @@ function renderMain(){
       </div>
     </div>
 
-    <!-- ردیف دوم: کل هزینه، پرداختی، باقی مانده، مجموع لیست -->
     <div class="info-grid-4">
       <div class="info-box">
         <span class="label">💰 کل هزینه</span>
@@ -1156,7 +1221,6 @@ function renderMain(){
       </div>
     </div>
 
-    <!-- ردیف سوم: مشخصات کارت + کادر ۳تایی امتیازات دستی -->
     <div class="info-grid-3">
       ${(c.num||c.cvv2||c.pass2)?`
         <div class="info-box">
@@ -1176,7 +1240,6 @@ function renderMain(){
         </div>
       `}
       
-      <!-- کادر ۳گزینه‌ای امتیازات دستی -->
       <div class="info-box" style="flex-direction:row; align-items:center; justify-content:space-between; padding:8px 4px;">
           <div style="display:flex; flex-direction:column; align-items:center; flex:1;">
               <span class="label" style="color:var(--teal); font-size:10px;">🏢 حضوری</span>
@@ -1200,7 +1263,6 @@ function renderMain(){
       <div style="font-size:13.5px; color:var(--text-main); line-height:1.6;">${esc(d.followUp)}</div>
     </div>` : ''}
     
-    <!-- تب‌های موبایل -->
     <div class="mobile-event-tabs">
       <button class="mobile-ev-tab ${currentMobileEventTab==='وبینار'?'active':''}" data-tab="وبینار" onclick="switchMobileEventTab('وبینار')">💻 وبینار</button>
       <button class="mobile-ev-tab ${currentMobileEventTab==='غیر حضوری'?'active':''}" data-tab="غیر حضوری" onclick="switchMobileEventTab('غیر حضوری')">📁 غیر حضوری</button>
