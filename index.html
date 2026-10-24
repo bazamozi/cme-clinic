@@ -727,14 +727,9 @@ function updateUserUI() {
           picker.value = currentUser;
         } else {
           picker.style.display = 'none';
+          picker.innerHTML = ''; // حذف کامل گزینه‌ها برای سعید
         }
       }
-    }
-
-function requestNotificationPermission() {
-  if ("Notification" in window) {
-    if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-      Notification.requestPermission();
     }
   }
 }
@@ -749,27 +744,11 @@ window.switchUser = function(user){
   renderDash(); renderDocList(); renderCalls(); renderContacts(); updateMobileSelection();
 };
 
-function myDoctors(){ const arr = doctors.filter(d => !d.deleted); return currentUser === 'all' ? arr : arr.filter(d => d.owner === currentUser); }
-function myCalls(){ const arr = calls.filter(c => !c.deleted); return currentUser === 'all' ? arr : arr.filter(c => c.owner === currentUser); }
-function myContacts(){ const arr = contacts.filter(c => !c.deleted); return currentUser === 'all' ? arr : arr.filter(c => c.owner === currentUser); }
-
-function getAutoStatus(d) {
-    const req = Number(d.creditReq || 0);
-    const total = totalEarned(d);
-    const f = d.finance || {};
-    const fTotal = Number(f.total || 0);
-    const fPaid = Number(f.paid || 0);
-    const events = (d.events || []).filter(e => !e.deleted);
-    const hasEvents = events.length > 0;
-    const hasFinance = fTotal > 0 || fPaid > 0;
-
-    if (!hasEvents && !hasFinance && total === 0) return 'new';
-    const allEventsComplete = hasEvents && events.every(e => eventState(e) === 'earned');
-    const isCreditsDone = req > 0 ? total >= req : true;
-    const isFinanceDone = fTotal > 0 ? fPaid >= fTotal : true;
-    if (allEventsComplete && isCreditsDone && isFinanceDone) return 'completed';
-    return 'in_progress';
-}
+function myDoctors(){ 
+      const arr = doctors.filter(d => !d.deleted); 
+      if (currentUser === 'all') return arr; 
+      return arr.filter(d => d.owner === currentUser); 
+    }
 
 function eventCredit(e){
   if(e.deleted || e.purchase!=='انجام شد') return 0;
@@ -1116,7 +1095,7 @@ function renderDocList(){
   
   const displayDocs = currentDocCategory === 'all' ? allMyDocs : allMyDocs.filter(d => d._autoStatus === currentDocCategory);
   const el = document.getElementById('docList');
-  if(!displayDocs.length){ el.innerHTML='<div class="empty-state" style="padding:20px;"><span class="big">☁️</span>اطلاعات خالی است. لطفاً دکمه «☁️ آماده» را در بالای صفحه بزنید تا اطلاعات از سرور دانلود شود.</div>'; return; }
+  if(!displayDocs.length){ el.innerHTML='<div class="empty-state" style="padding:20px;"><span class="big">🔍</span>پزشکی یافت نشد</div>'; return; }
   
   el.innerHTML = displayDocs.map(d => {
     const hasOffline = (d.events||[]).filter(e=>!e.deleted).some(e=>e.type==='غیر حضوری');
@@ -1432,12 +1411,7 @@ window.openDoctorModal = function(editId, defaultPhone){
           <div><label>امتیاز حضوری 🏢</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mManualInPerson" value="${esc(d?.manualInPerson||'')}"></div>
       </div>
 
-      <div class="row"><div><label>مالک</label><select id="mOwner">${currentUser === 'morteza' ? `
-      <option value="morteza" ${(d?.owner||'')==='morteza'?'selected':''}>مرتضی</option>
-      <option value="parvin" ${(d?.owner||'')==='parvin'?'selected':''}>پروین</option>
-      <option value="saeed" ${(d?.owner||'')==='saeed'?'selected':''}>سعید</option>` : `
-      <option value="${currentUser}" selected>${USERS[currentUser]?.name || currentUser}</option>`}
-    </select></div><div></div></div>
+      <div class="row"><div><label>مالک</label><select id="mOwner"><option value="morteza" ${(d?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='morteza'?'selected':''}>مرتضی</option><option value="parvin" ${(d?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='parvin'?'selected':''}>پروین</option></select></div><div></div></div>
       
       <div class="sect">📝 پیگیری و توضیحات</div>
       <textarea id="mFollowUp" placeholder="توضیحات کلی یا وضعیت پیگیری...">${esc(d?.followUp||'')}</textarea>
@@ -1597,12 +1571,7 @@ window.openContactModal = function(editId) {
       </div>
       <div class="row">
         <div><label>دسته‌بندی</label><input id="cCategory" placeholder="مثلا: همکار، تامین‌کننده..." value="${esc(c?.category||'')}"></div>
-        <div><label>مالک</label><select id="cOwner">${currentUser === 'morteza' ? `
-      <option value="morteza" ${(c?.owner||'')==='morteza'?'selected':''}>مرتضی</option>
-      <option value="parvin" ${(c?.owner||'')==='parvin'?'selected':''}>پروین</option>
-      <option value="saeed" ${(c?.owner||'')==='saeed'?'selected':''}>سعید</option>` : `
-      <option value="${currentUser}" selected>${USERS[currentUser]?.name || currentUser}</option>`}
-    </select></div>
+        <div><label>مالک</label><select id="cOwner"><option value="morteza" ${(c?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='morteza'?'selected':''}>مرتضی</option><option value="parvin" ${(c?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='parvin'?'selected':''}>پروین</option></select></div>
       </div>
       <label>یادداشت</label>
       <textarea id="cNote">${esc(c?.note||'')}</textarea>
