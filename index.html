@@ -85,7 +85,7 @@ body { background-color: var(--bg-body); color: var(--text-main); min-height: 10
 .top-header {
   height: 72px; background-color: var(--card-bg); border-bottom: 1px solid var(--border-color);
   display: flex; justify-content: space-between; align-items: center; padding: 0 24px;
-  box-shadow: var(--shadow-sm); z-index: 90; position: relative;
+  box-shadow: var(--shadow-sm); z-index: 90;
 }
 .header-left { display: flex; align-items: center; gap: 15px; }
 .header-right { display: flex; align-items: center; gap: 20px; }
@@ -306,54 +306,29 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
   
   /* --- اصلاح استایل هدر برای موبایل --- */
   .top-header { 
-    padding: 10px !important; 
-    height: auto !important; 
-    flex-wrap: wrap !important; 
-    gap: 10px !important; 
+    padding: 10px; 
+    height: auto; 
+    flex-wrap: wrap; 
+    gap: 10px; 
   }
   .header-left { 
-    width: 100% !important; 
-    justify-content: space-between !important; 
-    margin-bottom: 5px !important;
+    width: 100%; 
+    justify-content: space-between; 
+    margin-bottom: 5px;
   }
   .header-right { 
-    width: 100% !important; 
-    justify-content: flex-start !important; 
+    width: 100%; 
+    justify-content: flex-start; 
   }
   .header-right > div {
-    width: 100% !important;
+    width: 100%;
     justify-content: flex-start !important; 
-    flex-wrap: wrap !important;
-    gap: 6px !important;
+    flex-wrap: wrap;
+    gap: 6px;
   }
   .header-action-btn {
-    padding: 6px 10px !important;
-    font-size: 11px !important;
-  }
-  /* --- استایل منوی کشویی موبایل --- */
-  #mobileMenuToggle { display: inline-flex !important; }
-  #headerActionMenu {
-    display: none !important;
-    position: absolute;
-    top: 100%;
-    left: 10px;
-    right: 10px;
-    margin-top: 8px;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    flex-direction: column !important;
-    z-index: 9999;
-  }
-  #headerActionMenu.show { display: flex !important; }
-  #headerActionMenu > button, #headerActionMenu > span {
-    width: 100% !important;
-    justify-content: center !important;
-    padding: 10px !important;
-    font-size: 13px !important;
-    margin-bottom: 5px;
+    padding: 6px 10px;
+    font-size: 11px;
   }
   /* ------------------------------------ */
 
@@ -399,6 +374,36 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
   .row, .row3 { grid-template-columns: 1fr; }
 }
 </style>
+
+        <style>
+        @media (max-width: 900px) {
+          #mobileMenuToggle { display: inline-flex !important; }
+          #headerActionMenu {
+            display: none !important;
+            position: absolute;
+            top: 100%;
+            left: 10px;
+            right: 10px;
+            margin-top: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            flex-direction: column !important;
+            z-index: 9999;
+          }
+          #headerActionMenu.show { display: flex !important; }
+          #headerActionMenu > button, #headerActionMenu > span {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 10px !important;
+            font-size: 13px !important;
+            margin-bottom: 5px;
+          }
+        }
+        </style>
+        
 </head>
 <body class="dark-mode">
 
@@ -612,18 +617,6 @@ window.toggleDarkMode = function() {
   localStorage.setItem('cme_dark_mode', isDark ? 'true' : 'false');
   document.getElementById('themeToggleBtn').innerHTML = isDark ? '☀️' : '🌙';
 };
-
-window.toggleHeaderMenu = function() {
-  const menu = document.getElementById('headerActionMenu');
-  if (menu) menu.classList.toggle('show');
-};
-document.addEventListener('click', function(e) {
-  const menu = document.getElementById('headerActionMenu');
-  const btn = document.getElementById('mobileMenuToggle');
-  if (menu && menu.classList.contains('show') && !menu.contains(e.target) && !btn.contains(e.target)) {
-    menu.classList.remove('show');
-  }
-});
 
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const toEnDigits = s => String(s??'').replace(/[۰-۹]/g,d=>'0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]).replace(/[٠-٩]/g,d=>'0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]).replace(/,/g, '');
@@ -1951,5 +1944,20 @@ setTimeout(autoAttendEvents, 2000); setInterval(autoAttendEvents, 60000);
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) autoAttendEvents(); });
 
 </script>
+
+        <script>
+        window.toggleHeaderMenu = function() {
+          const menu = document.getElementById('headerActionMenu');
+          if (menu) menu.classList.toggle('show');
+        };
+        document.addEventListener('click', function(e) {
+          const menu = document.getElementById('headerActionMenu');
+          const btn = document.getElementById('mobileMenuToggle');
+          if (menu && menu.classList.contains('show') && !menu.contains(e.target) && !btn.contains(e.target)) {
+            menu.classList.remove('show');
+          }
+        });
+        </script>
+        
 </body>
 </html>
