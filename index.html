@@ -303,9 +303,36 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
 @media (max-width: 900px) {
   .app-layout { flex-direction: column; }
   .sidebar-right { display: none; }
-  .top-header { padding: 0 10px; height: 60px; }
+  
+  /* --- اصلاح استایل هدر برای موبایل --- */
+  .top-header { 
+    padding: 10px; 
+    height: auto; 
+    flex-wrap: wrap; 
+    gap: 10px; 
+  }
+  .header-left { 
+    width: 100%; 
+    justify-content: space-between; 
+    margin-bottom: 5px;
+  }
+  .header-right { 
+    width: 100%; 
+    justify-content: flex-start; 
+  }
+  .header-right > div {
+    width: 100%;
+    justify-content: flex-start !important; 
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .header-action-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  /* ------------------------------------ */
+
   .date-time { display: none !important; }
-  .header-right { gap: 5px; }
   .content-area { padding: 15px; padding-bottom: 80px; }
   
   .app-split { display: block; height: auto; }
