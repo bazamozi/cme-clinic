@@ -435,7 +435,6 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
           </select>
         </div>
         <button class="mini" id="themeToggleBtn" onclick="toggleDarkMode()" title="تغییر حالت شب/روز" style="font-size: 16px;">☀️</button>
-        <button class="mini" onclick="openAccounting()" title="حسابداری و مالی" style="font-size: 16px; margin-right: 5px;">💼</button>
       </div>
       <div class="header-right">
         <div class="date-time" id="clock">در حال بارگذاری...</div>
@@ -540,8 +539,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxl4UYo-pMlrcIFIQS2r
 
 const uid = () => Date.now()+Math.random().toString(36).slice(2,6);
 
-let doctors = [], calls = [], contacts = [], accountingRecords = [];
-  try { accountingRecords = JSON.parse(localStorage.getItem('cme_accounting') || '[]'); } catch(e) {}
+let doctors = [], calls = [], contacts = [];
 let selectedDoctorId = null;
 let currentUser = 'morteza';
 let currentDocCategory = 'in_progress';
@@ -883,7 +881,7 @@ function save(){
     localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
   } catch(e){}
 
-  try { localStorage.setItem(K, JSON.stringify(doctors)); localStorage.setItem(K+'_calls', JSON.stringify(calls)); localStorage.setItem(K+'_contacts', JSON.stringify(contacts)); localStorage.setItem('cme_accounting', JSON.stringify(accountingRecords)); } catch(e){}
+  try { localStorage.setItem(K, JSON.stringify(doctors)); localStorage.setItem(K+'_calls', JSON.stringify(calls)); localStorage.setItem(K+'_contacts', JSON.stringify(contacts)); } catch(e){}
   _dirty = true; scheduleSync();
 }
 
@@ -912,7 +910,7 @@ async function syncNow(isManual = false){
 async function pushToCloud(){
   return new Promise((resolve) => {
     try {
-      const payload = JSON.stringify({ doctors, calls, contacts, accountingRecords, savedAt: Date.now() });
+      const payload = JSON.stringify({ doctors, calls, contacts, savedAt: Date.now() });
       const form = document.createElement('form');
       form.method = 'POST'; form.action = SCRIPT_URL; form.target = 'hidden_iframe_push'; form.style.display = 'none';
       const input = document.createElement('input');
@@ -1000,7 +998,6 @@ function pullFromCloud(){
     const newDocs  = mergeDoctors(doctors, data.doctors || []);
     const newCalls = mergeById(calls,   data.calls   || [], 'updatedAt');
     const newContacts = mergeById(contacts, data.contacts || [], 'updatedAt');
-    if(data.accountingRecords) { accountingRecords = mergeById(accountingRecords, data.accountingRecords, 'updatedAt'); localStorage.setItem('cme_accounting', JSON.stringify(accountingRecords)); }
     const changed = JSON.stringify(newDocs) !== JSON.stringify(doctors) || JSON.stringify(newCalls) !== JSON.stringify(calls) || JSON.stringify(newContacts) !== JSON.stringify(contacts);
     
     if(changed){
@@ -1917,42 +1914,6 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
 
 </script>
 
-    <!-- پنجره حسابداری -->
-    <div id="accountingModal" class="modal-bg" style="display:none; z-index:100005; align-items: flex-start; padding-top: 50px; overflow-y: auto;">
-      <div class="modal" style="max-width: 900px; width: 95%; margin-bottom: 50px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
-          <h2 style="margin:0; font-size:18px; color:var(--teal);">💼 سیستم حسابداری دستی</h2>
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn btn-primary" onclick="exportAccounting()" style="background:#10b981; border-radius:8px;">📥 خروجی اکسل</button>
-            <button class="btn btn-outline" onclick="document.getElementById('accountingModal').style.display='none'">بستن</button>
-          </div>
-        </div>
-        
-        <div id="accSummary" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:20px;"></div>
-        
-        <div style="display:flex; justify-content:flex-start; margin-bottom:15px;">
-          <button class="btn btn-primary" onclick="openAddAccountingModal()" style="background:#10b981;">➕ افزودن ردیف جدید</button>
-        </div>
-        <div style="overflow-x:auto; border:1px solid var(--border-color); border-radius:12px; box-shadow: var(--shadow-sm);">
-          <table id="accTable" style="border-collapse:collapse; text-align:right; font-size:13px; width:100%;">
-            <thead>
-              <tr style="background:#f1f5f9; color:#334155;">
-                <th style="padding:12px;">ردیف</th>
-                <th style="padding:12px;">نام</th>
-                <th style="padding:12px;">تاریخ</th>
-                <th style="padding:12px;">مبلغ (تومان)</th>
-                <th style="padding:12px;">توضیحات</th>
-                <th style="padding:12px; text-align:center;">عملیات</th>
-              </tr>
-            </thead>
-            <tbody id="accTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <!-- /پنجره حسابداری -->
-    
-
     <script>
     window.openAccounting = function() {
         document.getElementById('accountingModal').style.display = 'flex';
@@ -1962,22 +1923,32 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
     window.renderAccountingTable = function() {
         const tbody = document.getElementById('accTableBody');
         if(!accountingRecords || accountingRecords.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">هیچ ردیفی ثبت نشده است. یک ردیف جدید اضافه کنید.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">هیچ ردیفی ثبت نشده است. یک ردیف جدید اضافه کنید.</td></tr>';
             document.getElementById('accSummary').innerHTML = '';
             return;
         }
         
-        let sum = 0;
+        let sumTotal = 0, sumPaid = 0, sumRemaining = 0;
         const sorted = [...accountingRecords].sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
         
         tbody.innerHTML = sorted.map((r, idx) => {
-            sum += Number(r.amount || 0);
+            // پشتیبانی از دیتای قدیمی (اگر قبلا مبلغ واحد بوده)
+            const total = Number(r.total !== undefined ? r.total : (r.amount || 0));
+            const paid = Number(r.paid || 0);
+            const remaining = Math.max(0, total - paid);
+            
+            sumTotal += total;
+            sumPaid += paid;
+            sumRemaining += remaining;
+
             return `
             <tr style="transition: 0.2s;">
                 <td style="padding:12px;">${idx + 1}</td>
                 <td style="padding:12px; font-weight:700;">${esc(r.name)}</td>
                 <td style="padding:12px;" class="ltr">${esc(r.date || '—')}</td>
-                <td style="padding:12px; color:var(--teal); font-weight:900;" class="ltr">${Number(r.amount || 0).toLocaleString('en-US')}</td>
+                <td style="padding:12px; color:var(--text-main); font-weight:900;" class="ltr">${total.toLocaleString('en-US')}</td>
+                <td style="padding:12px; color:var(--accent); font-weight:900;" class="ltr">${paid.toLocaleString('en-US')}</td>
+                <td style="padding:12px; color:${remaining > 0 ? 'var(--danger)' : 'var(--accent)'}; font-weight:900;" class="ltr">${remaining.toLocaleString('en-US')}</td>
                 <td style="padding:12px; color:var(--text-muted); font-size:12px;">${esc(r.desc || '—')}</td>
                 <td style="padding:12px; text-align:center;">
                     <button class="mini" onclick="openAddAccountingModal('${r.id}')">✏️</button>
@@ -1988,19 +1959,30 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
         }).join('');
         
         document.getElementById('accSummary').innerHTML = `
-            <div class="info-box" style="grid-column: span 3; background:#f0fdf4; border-color:#bbf7d0; text-align:center;">
-                <span class="label" style="color:#166534; font-size:14px;">💰 مجموع کل مبالغ ثبت شده</span>
-                <span class="value ltr" style="color:#15803d; font-weight:900; font-size:24px;">${sum.toLocaleString('en-US')} تومان</span>
+            <div class="info-box" style="background:#eff6ff; border-color:#bfdbfe; text-align:center;">
+                <span class="label" style="color:#1e40af; font-size:14px;">💵 مجموع مبلغ کل</span>
+                <span class="value ltr" style="color:#1d4ed8; font-weight:900; font-size:20px;">${sumTotal.toLocaleString('en-US')} تومان</span>
+            </div>
+            <div class="info-box" style="background:#f0fdf4; border-color:#bbf7d0; text-align:center;">
+                <span class="label" style="color:#166534; font-size:14px;">✅ مجموع دریافتی</span>
+                <span class="value ltr" style="color:#15803d; font-weight:900; font-size:20px;">${sumPaid.toLocaleString('en-US')} تومان</span>
+            </div>
+            <div class="info-box" style="background:#fef2f2; border-color:#fecaca; text-align:center;">
+                <span class="label" style="color:#991b1b; font-size:14px;">⚠️ مجموع مانده</span>
+                <span class="value ltr" style="color:#dc2626; font-weight:900; font-size:20px;">${sumRemaining.toLocaleString('en-US')} تومان</span>
             </div>
         `;
     };
 
     window.openAddAccountingModal = function(editId = null) {
         const r = editId ? accountingRecords.find(x => x.id === editId) : {};
+        const initialTotal = Number(r.total !== undefined ? r.total : (r.amount || 0));
+        const initialPaid = Number(r.paid || 0);
+        const initialRemaining = Math.max(0, initialTotal - initialPaid);
         
         document.getElementById('modalHost').innerHTML = `
           <div class="modal-bg" style="z-index: 100010; display:flex;" onclick="if(event.target===this)this.remove()">
-            <div class="modal" style="max-width: 450px;">
+            <div class="modal" style="max-width: 500px;">
               <h2>${editId ? '✏️ ویرایش ردیف' : '➕ افزودن ردیف جدید'}</h2>
               <form id="accAddForm">
                 <label>نام شخص / شرکت *</label>
@@ -2009,8 +1991,19 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
                 <label>تاریخ</label>
                 <input type="text" id="aDate" value="${esc(r.date || (typeof getShamsiToday === 'function' ? getShamsiToday() : ''))}" dir="ltr" style="text-align:center;">
                 
-                <label>مبلغ (تومان) *</label>
-                <input type="text" id="aAmount" value="${r.amount ? Number(r.amount).toLocaleString('en-US') : ''}" dir="ltr" style="text-align:center;" required>
+                <div class="row">
+                    <div>
+                        <label>مبلغ کل (تومان) *</label>
+                        <input type="text" id="aTotal" value="${initialTotal ? initialTotal.toLocaleString('en-US') : ''}" dir="ltr" style="text-align:center;" required>
+                    </div>
+                    <div>
+                        <label>مبلغ دریافتی (تومان) *</label>
+                        <input type="text" id="aPaid" value="${initialPaid ? initialPaid.toLocaleString('en-US') : ''}" dir="ltr" style="text-align:center;" required>
+                    </div>
+                </div>
+
+                <label>مانده (خودکار)</label>
+                <input type="text" id="aRemaining" value="${initialRemaining ? initialRemaining.toLocaleString('en-US') : '0'}" dir="ltr" style="text-align:center; opacity:0.7; background:#f1f5f9; font-weight:bold; color:var(--danger);" readonly>
                 
                 <label>توضیحات (اختیاری)</label>
                 <textarea id="aDesc" style="min-height: 80px;">${esc(r.desc || '')}</textarea>
@@ -2022,22 +2015,32 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
           </div>
         `;
 
-        const amtInput = document.getElementById('aAmount');
-        amtInput.addEventListener('input', function() {
-            let v = toEnDigits(this.value).replace(/[^0-9]/g, '');
-            this.value = v ? parseInt(v).toLocaleString('en-US') : '';
-        });
+        const formatInput = (inp) => {
+            let v = toEnDigits(inp.value).replace(/[^0-9]/g, '');
+            inp.value = v ? parseInt(v).toLocaleString('en-US') : '';
+        };
+
+        const calcRemaining = () => {
+            let t = Number(toEnDigits(document.getElementById('aTotal').value).replace(/,/g, '')) || 0;
+            let p = Number(toEnDigits(document.getElementById('aPaid').value).replace(/,/g, '')) || 0;
+            document.getElementById('aRemaining').value = Math.max(0, t - p).toLocaleString('en-US');
+        };
+
+        document.getElementById('aTotal').addEventListener('input', function() { formatInput(this); calcRemaining(); });
+        document.getElementById('aPaid').addEventListener('input', function() { formatInput(this); calcRemaining(); });
 
         document.getElementById('accAddForm').onsubmit = function(e) {
             e.preventDefault();
-            const amount = Number(toEnDigits(document.getElementById('aAmount').value).replace(/,/g, '')) || 0;
+            const total = Number(toEnDigits(document.getElementById('aTotal').value).replace(/,/g, '')) || 0;
+            const paid = Number(toEnDigits(document.getElementById('aPaid').value).replace(/,/g, '')) || 0;
             
             if(editId) {
                 const existing = accountingRecords.find(x => x.id === editId);
                 if(existing) {
                     existing.name = document.getElementById('aName').value.trim();
                     existing.date = document.getElementById('aDate').value.trim();
-                    existing.amount = amount;
+                    existing.total = total;
+                    existing.paid = paid;
                     existing.desc = document.getElementById('aDesc').value.trim();
                     existing.updatedAt = Date.now();
                 }
@@ -2046,7 +2049,8 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
                     id: uid(),
                     name: document.getElementById('aName').value.trim(),
                     date: document.getElementById('aDate').value.trim(),
-                    amount: amount,
+                    total: total,
+                    paid: paid,
                     desc: document.getElementById('aDesc').value.trim(),
                     createdAt: Date.now(),
                     updatedAt: Date.now()
@@ -2072,12 +2076,15 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
         if(!accountingRecords || accountingRecords.length === 0) { toast('⚠️ هیچ ردیفی برای خروجی وجود ندارد'); return; }
         
         let csvContent = "\uFEFF";
-        csvContent += "ردیف,نام,تاریخ,مبلغ (تومان),توضیحات\n";
+        csvContent += "ردیف,نام,تاریخ,مبلغ کل,دریافتی,مانده,توضیحات\n";
 
         const sorted = [...accountingRecords].sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
         
         sorted.forEach((r, idx) => {
-            csvContent += `${idx + 1},"${r.name}","${r.date || ''}",${r.amount || 0},"${r.desc || ''}"\n`;
+            const total = Number(r.total !== undefined ? r.total : (r.amount || 0));
+            const paid = Number(r.paid || 0);
+            const remaining = Math.max(0, total - paid);
+            csvContent += `${idx + 1},"${r.name}","${r.date || ''}",${total},${paid},${remaining},"${r.desc || ''}"\n`;
         });
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
