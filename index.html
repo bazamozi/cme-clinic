@@ -126,14 +126,15 @@ body { background-color: var(--bg-body); color: var(--text-main); min-height: 10
 .cat-tab { flex: 1; padding: 8px; border-radius: 8px; font-size: 12px; font-weight: 700; background: #f8fafc; border: 1px solid var(--border-color); color: var(--text-muted); cursor: pointer; text-align: center; transition: 0.2s; font-family: inherit; }
 .cat-tab.active { background: var(--accent-light); color: var(--accent-hover); border-color: var(--accent); }
 
-/* استایل‌های لیست کادرها برای باریک‌تر شدن */
+/* استایل‌های لیست کادرها برای باریک‌تر شدن و حاشیه سبز */
 .doc-list { flex: 1; overflow-y: auto; padding-left: 5px; display: flex; flex-direction: column; gap: 8px; }
 .doc-list::-webkit-scrollbar { width: 6px; }
 .doc-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-.doc-row { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 12px; cursor: pointer; transition: all 0.2s ease; position: relative; }
-.doc-row:hover { border-color: #cbd5e1; box-shadow: var(--shadow-md); transform: translateY(-1px); }
-.doc-row.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); background: #fafdfb; }
+/* حاشیه سبز برای همه کادرها */
+.doc-row { background: var(--card-bg); border: 1.5px solid var(--accent); border-radius: 10px; padding: 10px 12px; cursor: pointer; transition: all 0.2s ease; position: relative; }
+.doc-row:hover { border-color: var(--accent-hover); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.doc-row.active { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); background: #fafdfb; }
 body.dark-mode .doc-row.active { background: rgba(16, 185, 129, 0.1); }
 
 .doc-name { font-size: 13.5px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; }
@@ -1342,7 +1343,6 @@ window.openEventModal = function(editId, presetType){
   document.getElementById('mEventForm').onsubmit = ev => {
     ev.preventDefault(); 
     
-    // گرفتن مجدد اطلاعات پزشک از حافظه برای جلوگیری از تداخل با همگام‌سازی آنی
     const currentDoc = doctors.find(x=>x.id===selectedDoctorId);
     if(!currentDoc) return;
     if(!currentDoc.events) currentDoc.events = [];
