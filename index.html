@@ -206,7 +206,7 @@ body.dark-mode .stat-pill:hover { background: #334155; }
 .stat-pill.ok { background: var(--accent-light); color: var(--accent-hover); border-color: #a7f3d0; }
 .stat-pill.no { background: #fef2f2; color: var(--danger); border-color: #fecaca; }
 
-/* اضافه شدن حالت شب برای دکمه‌های سبز تا تغییر رنگ کامل مشخص شود */
+/* حالت شب برای دکمه‌های سبز و قرمز */
 body.dark-mode .stat-pill.ok { background: #064e3b; color: #6ee7b7; border-color: #047857; }
 body.dark-mode .stat-pill.ok:hover { background: #065f46; }
 body.dark-mode .stat-pill.no { background: #7f1d1d; color: #fca5a5; border-color: #991b1b; }
@@ -475,6 +475,9 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
 const K = 'cme4_data';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxl4UYo-pMlrcIFIQS2rDghVi9D8toNdFfH2k_UDqSiW0hsT0yKJ6P9GZR4fwa12W2sng/exec';
 
+// تابع تولید شناسه یکتا
+const uid = () => Date.now()+Math.random().toString(36).slice(2,6);
+
 let doctors = [], calls = [], contacts = [];
 let selectedDoctorId = null;
 let currentUser = 'morteza';
@@ -491,15 +494,28 @@ try {
   doctors = JSON.parse(localStorage.getItem(K)||'[]');
   calls = JSON.parse(localStorage.getItem(K+'_calls')||'[]');
   contacts = JSON.parse(localStorage.getItem(K+'_contacts')||'[]');
+  
+  // اصلاح خودکار رویدادهای قدیمی که شناسه نداشتند یا تکراری بودند
+  let needsSave = false;
+  const seenIds = new Set();
+  doctors.forEach(d => {
+    if(!d.events) d.events = [];
+    d.events.forEach(e => {
+      if(!e.id || seenIds.has(e.id)) { e.id = uid(); needsSave = true; }
+      seenIds.add(e.id);
+    });
+  });
+  if(needsSave) localStorage.setItem(K, JSON.stringify(doctors));
+
   var savedU = localStorage.getItem('cme_current_user');
   if(savedU) currentUser = savedU;
   
   // بررسی حالت شب - پیش‌فرض تاریک
   var savedDark = localStorage.getItem('cme_dark_mode');
-  if(savedDark === 'false') { // کاربر قبلا حالت روز را انتخاب کرده
+  if(savedDark === 'false') {
     document.body.classList.remove('dark-mode');
     document.getElementById('themeToggleBtn').innerHTML = '🌙';
-  } else { // پیش‌فرض تاریک
+  } else {
     document.body.classList.add('dark-mode');
     document.getElementById('themeToggleBtn').innerHTML = '☀️';
   }
@@ -512,7 +528,6 @@ window.toggleDarkMode = function() {
   document.getElementById('themeToggleBtn').innerHTML = isDark ? '☀️' : '🌙';
 };
 
-const uid = () => Date.now()+Math.random().toString(36).slice(2,6);
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const toEnDigits = s => String(s??'').replace(/[۰-۹]/g,d=>'0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]).replace(/[٠-٩]/g,d=>'0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]).replace(/,/g, '');
 const num = n => toEnDigits(Number(n||0).toLocaleString('en-US'));
@@ -672,7 +687,7 @@ function getAutoStatus(d) {
     const f = d.finance || {};
     const fTotal = Number(f.total || 0);
     const fPaid = Number(f.paid || 0);
-    const events = d.events || [];
+    const events = (d.events || []).filter(e => !e.deleted); // فیلتر رویدادهای حذف شده
     const hasEvents = events.length > 0;
     const hasFinance = fTotal > 0 || fPaid > 0;
 
@@ -685,7 +700,7 @@ function getAutoStatus(d) {
 }
 
 function eventCredit(e){
-  if(e.purchase!=='انجام شد') return 0;
+  if(e.deleted || e.purchase!=='انجام شد') return 0;
   if(e.type==='وبینار'){ if(e.attend!=='انجام شد') return 0; if(e.exam!=='قبول') return 0; }
   if(e.type==='غیر حضوری'){ if(e.exam!=='قبول') return 0; }
   if(e.type==='حضوری'){ if(e.attend!=='انجام شد') return 0; }
@@ -693,7 +708,7 @@ function eventCredit(e){
 }
 
 function eventState(e){
-  if(e.purchase!=='انجام شد') return 'partial';
+  if(e.deleted || e.purchase!=='انجام شد') return 'partial';
   if(e.type==='وبینار'){ if(e.attend!=='انجام شد') return 'partial'; if(e.exam==='رد') return 'failed'; if(e.exam!=='قبول') return 'partial'; }
   if(e.type==='غیر حضوری'){ if(e.exam==='رد') return 'failed'; if(e.exam!=='قبول') return 'partial'; }
   if(e.type==='حضوری'){ if(e.attend!=='انجام شد') return 'partial'; }
@@ -701,20 +716,20 @@ function eventState(e){
 }
 
 function eventComplete(e){
-  if(e.purchase !== 'انجام شد') return false;
+  if(e.deleted || e.purchase !== 'انجام شد') return false;
   if(e.type === 'وبینار'){ if(e.attend !== 'انجام شد') return false; if(e.exam !== 'قبول') return false; }
   if(e.type === 'غیر حضوری'){ if(e.exam !== 'قبول') return false; }
   if(e.type === 'حضوری'){ if(e.attend !== 'انجام شد') return false; }
   return true;
 }
 
-function doctorCredits(d){ const r = { 'حضوری':0, 'وبینار':0, 'غیر حضوری':0 }; (d.events||[]).forEach(e=>{ if(r[e.type]!==undefined) r[e.type] += eventCredit(e); }); return r; }
+function doctorCredits(d){ const r = { 'حضوری':0, 'وبینار':0, 'غیر حضوری':0 }; (d.events||[]).filter(e=>!e.deleted).forEach(e=>{ if(r[e.type]!==undefined) r[e.type] += eventCredit(e); }); return r; }
 function totalEarned(d){ const c = doctorCredits(d); return c['حضوری'] + c['وبینار'] + c['غیر حضوری'] + Number(d.manualWebinar || 0) + Number(d.manualOffline || 0) + Number(d.manualInPerson || 0); }
-function totalListedCredits(d){ return (d.events||[]).reduce((s,e)=>s+Number(e.credit||0), 0); }
+function totalListedCredits(d){ return (d.events||[]).filter(e=>!e.deleted).reduce((s,e)=>s+Number(e.credit||0), 0); }
 function remainingCredits(d){ return Math.max(0, Number(d.creditReq||0) - totalEarned(d)); }
 function isComplete(d){ return remainingCredits(d)===0 && Number(d.creditReq||0)>0; }
-function pendingExamWebinars(d){ return (d.events||[]).filter(e=> e.type==='وبینار' && e.purchase==='انجام شد' && e.attend==='انجام شد' && e.exam==='ثبت نشده').length; }
-function offlinePurchasedToday(d){ const t=new Date(); const y=t.getFullYear(), m=t.getMonth(), day=t.getDate(); return (d.events||[]).some(e=>{ if(e.type!=='غیر حضوری' || e.purchase!=='انجام شد') return false; const d2=new Date(e.createdAt); return d2.getFullYear()===y && d2.getMonth()===m && d2.getDate()===day; }); }
+function pendingExamWebinars(d){ return (d.events||[]).filter(e=> !e.deleted && e.type==='وبینار' && e.purchase==='انجام شد' && e.attend==='انجام شد' && e.exam==='ثبت نشده').length; }
+function offlinePurchasedToday(d){ const t=new Date(); const y=t.getFullYear(), m=t.getMonth(), day=t.getDate(); return (d.events||[]).filter(e=>!e.deleted).some(e=>{ if(e.type!=='غیر حضوری' || e.purchase!=='انجام شد') return false; const d2=new Date(e.createdAt); return d2.getFullYear()===y && d2.getMonth()===m && d2.getDate()===day; }); }
 
 window.exportData = function() {
   const dataStr = JSON.stringify({ doctors, calls, contacts, exportedAt: Date.now() }, null, 2);
@@ -833,7 +848,12 @@ function mergeDoctors(localArr, remoteArr){
     addEvents(ld.events); addEvents(rd.events);
     const lTs = Number(ld.updatedAt || 0), rTs = Number(rd.updatedAt || 0);
     const base = rTs > lTs ? { ...rd } : { ...ld };
-    base.events = Array.from(evMap.values());
+    
+    // تبدیل به آرایه و اطمینان از اینکه همه شناسه دارند
+    const mergedEvents = Array.from(evMap.values());
+    mergedEvents.forEach(e => { if(!e.id) e.id = uid(); });
+    
+    base.events = mergedEvents;
     base.updatedAt = Math.max(lTs, rTs);
     map.set(rd.id, base);
   });
@@ -894,7 +914,7 @@ function renderDash(){
   
   const stats = [
     { label:'کل پزشکان', value:myD.length }, 
-    { label:'کل رویدادها', value:myD.reduce((s,d)=>s+(d.events||[]).length,0) },
+    { label:'کل رویدادها', value:myD.reduce((s,d)=>s+(d.events||[]).filter(e=>!e.deleted).length,0) },
     { label:'امتیاز کل', value:myD.reduce((s,d)=>s+totalEarned(d),0) }, 
     { label:'پزشکان کامل', value:myD.filter(isComplete).length },
     { label:'پزشکان ناقص', value:myD.filter(d=>!isComplete(d)).length }, 
@@ -965,7 +985,7 @@ function renderDocList(){
   
   el.innerHTML = displayDocs.map(d => {
     const complete = isComplete(d), f = d.finance||{}, rem$ = Math.max(0, Number(f.total||0)-Number(f.paid||0));
-    const hasOffline = (d.events||[]).some(e=>e.type==='غیر حضوری');
+    const hasOffline = (d.events||[]).filter(e=>!e.deleted).some(e=>e.type==='غیر حضوری');
     const daysLeft = getDaysDifference(d.reminderDate);
     
     let reminderBadge = '', rowClass = selectedDoctorId === d.id ? 'active' : '';
@@ -1014,7 +1034,10 @@ window.backToList = function(){
 
 window.switchMobileEventTab = function(tab) {
   currentMobileEventTab = tab;
-  document.querySelectorAll('.mobile-ev-tab').forEach(btn => { if(btn.textContent.includes(tab)) btn.classList.add('active'); else btn.classList.remove('active'); });
+  document.querySelectorAll('.mobile-ev-tab').forEach(btn => { 
+      if(btn.dataset.tab === tab) btn.classList.add('active'); 
+      else btn.classList.remove('active'); 
+  });
   document.querySelectorAll('.ev-section').forEach(sec => { sec.classList.toggle('active-mobile', sec.id === 'sec-' + tab); });
 };
 
@@ -1152,9 +1175,9 @@ function renderMain(){
     
     <!-- تب‌های موبایل -->
     <div class="mobile-event-tabs">
-      <button class="mobile-ev-tab ${currentMobileEventTab==='وبینار'?'active':''}" onclick="switchMobileEventTab('وبینار')">💻 وبینار</button>
-      <button class="mobile-ev-tab ${currentMobileEventTab==='غیر حضوری'?'active':''}" onclick="switchMobileEventTab('غیر حضوری')">📁 غیر حضوری</button>
-      <button class="mobile-ev-tab ${currentMobileEventTab==='حضوری'?'active':''}" onclick="switchMobileEventTab('حضوری')">🏢 حضوری</button>
+      <button class="mobile-ev-tab ${currentMobileEventTab==='وبینار'?'active':''}" data-tab="وبینار" onclick="switchMobileEventTab('وبینار')">💻 وبینار</button>
+      <button class="mobile-ev-tab ${currentMobileEventTab==='غیر حضوری'?'active':''}" data-tab="غیر حضوری" onclick="switchMobileEventTab('غیر حضوری')">📁 غیر حضوری</button>
+      <button class="mobile-ev-tab ${currentMobileEventTab==='حضوری'?'active':''}" data-tab="حضوری" onclick="switchMobileEventTab('حضوری')">🏢 حضوری</button>
     </div>
 
     <div class="events-layout">
@@ -1168,13 +1191,14 @@ function renderMain(){
 function renderEventSection(d, type){
   const icon = type==='وبینار'?'💻':type==='حضوری'?'🏢':'📁';
   const color = type==='وبینار'?'var(--purple)':type==='حضوری'?'var(--teal)':'var(--warn)';
-  const evs = (d.events||[]).filter(e=>e.type===type).sort((a,b)=>{
-    const aComp = eventComplete(a), bComp = eventComplete(b);
-    if(aComp && !bComp) return 1; if(!aComp && bComp) return -1;
+  
+  // حذف مرتب سازی بر اساس وضعیت تکمیل تا کارت‌ها هنگام کلیک جابه‌جا نشوند
+  const evs = (d.events||[]).filter(e=>!e.deleted && e.type===type).sort((a,b)=>{
     if(a.date && b.date){ return a.date.localeCompare(b.date); }
     if(a.date && !b.date) return -1; if(!a.date && b.date) return 1;
     return (b.createdAt||0)-(a.createdAt||0);
   });
+  
   const totalCredit = evs.reduce((s,e)=>s+eventCredit(e),0), sumAllCredit = evs.reduce((s,e)=>s+Number(e.credit||0),0);
   
   return `
@@ -1230,7 +1254,10 @@ window.cycleStatus = function(eventId, field){
 window.delEvent = function(eventId){
   if(!confirm('حذف شود؟')) return;
   const d = doctors.find(x=>x.id===selectedDoctorId); if(!d) return;
-  d.events = (d.events||[]).filter(x=>x.id!==eventId); d.updatedAt = Date.now();
+  // حذف نرم برای جلوگیری از بازگشت در سینک
+  const e = (d.events||[]).find(x=>x.id===eventId);
+  if(e) { e.deleted = true; e.updatedAt = Date.now(); }
+  d.updatedAt = Date.now();
   save(); renderMain(); renderDocList();
 };
 
@@ -1587,7 +1614,7 @@ function autoAttendEvents(){
   doctors.forEach(function(doc){
     if(doc.deleted) return;
     var changed = 0;
-    (doc.events||[]).forEach(function(e){
+    (doc.events||[]).filter(e=>!e.deleted).forEach(function(e){
       if(e.purchase === 'انجام شد' && e.attend === 'انجام نشد' && e.date && e.date.length >= 8){
         if(today > e.date){ e.attend = 'انجام شد'; e.updatedAt = Date.now(); changed++; }
       }
