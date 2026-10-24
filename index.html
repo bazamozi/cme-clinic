@@ -374,15 +374,6 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
   .row, .row3 { grid-template-columns: 1fr; }
 }
 </style>
-
-    <style>
-    /* استایل‌های مخصوص پنجره تنظیمات */
-    #settingsModal .modal { padding-bottom: 15px; }
-    #settingsModal label { font-weight: 600; font-size: 13px; color: var(--text-main); margin-bottom: 8px; }
-    #settingsModal input[type="checkbox"] { accent-color: var(--accent); }
-    #settingsModal select { margin-bottom: 15px; }
-    </style>
-    
 </head>
 <body class="dark-mode">
 
@@ -444,7 +435,6 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
           </select>
         </div>
         <button class="mini" id="themeToggleBtn" onclick="toggleDarkMode()" title="تغییر حالت شب/روز" style="font-size: 16px;">☀️</button>
-        <button class="mini" onclick="openSettingsModal()" title="تنظیمات" style="font-size: 16px; margin-right: 5px;">⚙️</button>
       </div>
       <div class="header-right">
         <div class="date-time" id="clock">در حال بارگذاری...</div>
@@ -684,7 +674,7 @@ document.addEventListener('input', e => {
   if(en !== t.value){ const pos = t.selectionStart; t.value = en; try{ t.setSelectionRange(pos,pos); }catch(_){} }
 });
 
-var USERS = { 'morteza': { pass: 'MN13601353', name: 'مرتضی' }, 'parvin': { pass: 'parvin123', name: 'پروین' } };
+var USERS = { 'morteza': { pass: 'MN13601353', name: 'مرتضی' }, 'parvin': { pass: 'parvin123', name: 'پروین' }, 'saeed': { pass: 'saeedcanani021', name: 'سعید' } };
 
 window.doLogin = function(){
   var u = document.getElementById('loginUser').value.trim().toLowerCase();
@@ -1429,7 +1419,7 @@ window.openDoctorModal = function(editId, defaultPhone){
           <div><label>امتیاز حضوری 🏢</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mManualInPerson" value="${esc(d?.manualInPerson||'')}"></div>
       </div>
 
-      <div class="row"><div><label>مالک</label><select id="mOwner"><option value="morteza" ${(d?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='morteza'?'selected':''}>مرتضی</option><option value="parvin" ${(d?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='parvin'?'selected':''}>پروین</option></select></div><div></div></div>
+      <div class="row"><div><label>مالک</label><select id="mOwner">${getOwnerOptions(d?.owner)}</select></div><div></div></div>
       
       <div class="sect">📝 پیگیری و توضیحات</div>
       <textarea id="mFollowUp" placeholder="توضیحات کلی یا وضعیت پیگیری...">${esc(d?.followUp||'')}</textarea>
@@ -1589,7 +1579,7 @@ window.openContactModal = function(editId) {
       </div>
       <div class="row">
         <div><label>دسته‌بندی</label><input id="cCategory" placeholder="مثلا: همکار، تامین‌کننده..." value="${esc(c?.category||'')}"></div>
-        <div><label>مالک</label><select id="cOwner"><option value="morteza" ${(c?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='morteza'?'selected':''}>مرتضی</option><option value="parvin" ${(c?.owner||(currentUser==='parvin'?'parvin':'morteza'))==='parvin'?'selected':''}>پروین</option></select></div>
+        <div><label>مالک</label><select id="cOwner">${getOwnerOptions(c?.owner)}</select></div>
       </div>
       <label>یادداشت</label>
       <textarea id="cNote">${esc(c?.note||'')}</textarea>
@@ -1923,91 +1913,5 @@ setTimeout(autoAttendEvents, 2000); setInterval(autoAttendEvents, 60000);
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) autoAttendEvents(); });
 
 </script>
-
-    <!-- پنجره تنظیمات -->
-    <div id="settingsModal" class="modal-bg" style="display:none; z-index:100001;">
-      <div class="modal" style="max-width: 500px;">
-        <h2>⚙️ تنظیمات برنامه</h2>
-        
-        <div class="sect">🔔 تنظیمات اعلان‌ها و صدا</div>
-        <label style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-          <span>پخش صدای زنگ برای تماس‌های ورودی</span>
-          <input type="checkbox" id="settingSound" style="width:20px; height:20px; cursor:pointer;" checked>
-        </label>
-        <label style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-          <span>نمایش پاپ‌آپ تماس ورودی</span>
-          <input type="checkbox" id="settingPopup" style="width:20px; height:20px; cursor:pointer;" checked>
-        </label>
-
-        <div class="sect">🔄 تنظیمات همگام‌سازی (Sync)</div>
-        <label style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-          <span>همگام‌سازی خودکار با سرور</span>
-          <input type="checkbox" id="settingAutoSync" style="width:20px; height:20px; cursor:pointer;" checked>
-        </label>
-        <label>فاصله زمانی همگام‌سازی خودکار (ثانیه)</label>
-        <input type="number" id="settingSyncInterval" value="20" style="text-align:center;" min="5" max="300">
-
-        <div class="sect">🎨 ظاهر برنامه</div>
-        <label>رنگ اصلی برنامه</label>
-        <select id="settingThemeColor">
-          <option value="#10b981">سبز (پیش‌فرض)</option>
-          <option value="#2563eb">آبی</option>
-          <option value="#9333ea">بنفش</option>
-          <option value="#ef4444">قرمز</option>
-          <option value="#f59e0b">نارنجی</option>
-        </select>
-
-        <div style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 15px;">
-          <button class="btn btn-primary" onclick="saveSettings()" style="width:100%;">💾 ذخیره تنظیمات</button>
-          <button class="btn btn-outline" onclick="closeSettingsModal()" style="width:100%; margin-top:10px;">انصراف</button>
-        </div>
-      </div>
-    </div>
-    
-
-    <script>
-    // بارگذاری تنظیمات هنگام لود شدن
-    window.loadSettings = function() {
-        const s = JSON.parse(localStorage.getItem('cme_app_settings') || '{}');
-        if(s.sound !== undefined) document.getElementById('settingSound').checked = s.sound;
-        if(s.popup !== undefined) document.getElementById('settingPopup').checked = s.popup;
-        if(s.autoSync !== undefined) document.getElementById('settingAutoSync').checked = s.autoSync;
-        if(s.syncInterval !== undefined) document.getElementById('settingSyncInterval').value = s.syncInterval;
-        if(s.themeColor) document.getElementById('settingThemeColor').value = s.themeColor;
-    };
-
-    window.openSettingsModal = function() {
-        window.loadSettings();
-        document.getElementById('settingsModal').style.display = 'flex';
-    };
-
-    window.closeSettingsModal = function() {
-        document.getElementById('settingsModal').style.display = 'none';
-    };
-
-    window.saveSettings = function() {
-        const s = {
-            sound: document.getElementById('settingSound').checked,
-            popup: document.getElementById('settingPopup').checked,
-            autoSync: document.getElementById('settingAutoSync').checked,
-            syncInterval: parseInt(document.getElementById('settingSyncInterval').value) || 20,
-            themeColor: document.getElementById('settingThemeColor').value
-        };
-        localStorage.setItem('cme_app_settings', JSON.stringify(s));
-        
-        // اعمال رنگ جدید
-        document.documentElement.style.setProperty('--accent', s.themeColor);
-        
-        toast('✅ تنظیمات با موفقیت ذخیره شد');
-        closeSettingsModal();
-    };
-
-    // اعمال رنگ ذخیره شده در هنگام لود
-    document.addEventListener('DOMContentLoaded', () => {
-        const s = JSON.parse(localStorage.getItem('cme_app_settings') || '{}');
-        if(s.themeColor) document.documentElement.style.setProperty('--accent', s.themeColor);
-    });
-    </script>
-    
 </body>
 </html>
