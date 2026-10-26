@@ -376,68 +376,39 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
 </style>
 
     <style>
-    /* 🔥 رفع مشکل رنگ‌های سفید و ناخوانا در حالت شب */
+    /* هدر باید position relative داشته باشد تا منو درست باز شود */
+    .top-header { position: relative !important; }
     
-    /* تبدیل پس‌زمینه‌های روشن (کدهای رنگی اینلاین) به رنگ تیره */
-    body.dark-mode [style*="#f0fdf4"], 
-    body.dark-mode [style*="#fffbeb"], 
-    body.dark-mode [style*="#eff6ff"],
-    body.dark-mode [style*="#fef2f2"],
-    body.dark-mode [style*="#f1f5f9"],
-    body.dark-mode [style*="#f8fafc"],
-    body.dark-mode [style*="background:#fff"],
-    body.dark-mode [style*="background: #fff"],
-    body.dark-mode [style*="background-color:#fff"],
-    body.dark-mode [style*="background-color: #fff"] {
-        background-color: var(--bg-body) !important;
-        border-color: var(--border-color) !important;
-        color: var(--text-main) !important;
-    }
-    
-    /* اطمینان از اینکه متن‌های داخل این باکس‌ها هم تیره/روشن درست بشن */
-    body.dark-mode [style*="#f0fdf4"] *, 
-    body.dark-mode [style*="#fffbeb"] *, 
-    body.dark-mode [style*="#eff6ff"] *,
-    body.dark-mode [style*="#fef2f2"] *,
-    body.dark-mode [style*="#f1f5f9"] *,
-    body.dark-mode [style*="#f8fafc"] * {
-        color: var(--text-main) !important;
-    }
-
-    /* فیلدهای ورودی (Input) و متن‌ها در حالت شب */
-    body.dark-mode input, 
-    body.dark-mode textarea, 
-    body.dark-mode select {
-        background-color: var(--bg-body) !important;
-        color: var(--text-main) !important;
-        border-color: var(--border-color) !important;
-    }
-    
-    body.dark-mode input:focus, 
-    body.dark-mode textarea:focus, 
-    body.dark-mode select:focus {
-        background-color: var(--card-bg) !important;
-        color: var(--text-main) !important;
-    }
-
-    /* جلوگیری از سفید شدن خودکار فیلدها توسط مرورگر (Autofill) */
-    body.dark-mode input:-webkit-autofill,
-    body.dark-mode input:-webkit-autofill:hover, 
-    body.dark-mode input:-webkit-autofill:focus, 
-    body.dark-mode textarea:-webkit-autofill,
-    body.dark-mode select:-webkit-autofill {
-        -webkit-box-shadow: 0 0 0 30px var(--bg-body) inset !important;
-        -webkit-text-fill-color: var(--text-main) !important;
-        transition: background-color 5000s ease-in-out 0s;
-    }
-    
-    /* اصلاح فیلدهای غیرفعال (مثل مانده مالی) */
-    body.dark-mode input:disabled,
-    body.dark-mode textarea:disabled,
-    body.dark-mode select:disabled {
-        background-color: var(--bg-body) !important;
-        color: var(--text-muted) !important;
-        opacity: 0.8;
+    @media (max-width: 900px) {
+        #mobileMenuToggle {
+            display: inline-flex !important;
+        }
+        #headerActionMenu {
+            display: none !important;
+            position: absolute !important;
+            top: 100% !important;
+            left: 10px !important;
+            right: 10px !important;
+            margin-top: 8px !important;
+            background: var(--card-bg) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 12px !important;
+            padding: 15px !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;
+            flex-direction: column !important;
+            z-index: 99999 !important;
+            width: auto !important;
+        }
+        #headerActionMenu.show-mobile-menu {
+            display: flex !important;
+        }
+        #headerActionMenu > button, #headerActionMenu > span {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 10px !important;
+            font-size: 13px !important;
+            margin-bottom: 5px !important;
+        }
     }
     </style>
     
@@ -501,11 +472,12 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
             <option value="all">همه</option>
           </select>
         </div>
+        <button id="mobileMenuToggle" class="mini" onclick="toggleMobileMenu(event)" style="display:none; font-size: 22px; padding: 2px 8px; margin-right: 5px; font-weight: bold; cursor: pointer;">⋮</button>
         <button class="mini" id="themeToggleBtn" onclick="toggleDarkMode()" title="تغییر حالت شب/روز" style="font-size: 16px;">☀️</button>
       </div>
       <div class="header-right">
         <div class="date-time" id="clock">در حال بارگذاری...</div>
-        <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+        <div id="headerActionMenu" style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
           <button class="header-action-btn blue" onclick="undoLastChange()" title="بازگردانی آخرین تغییر">↩️ بازگردانی</button>
           <span id="syncStatus" class="header-action-btn green" onclick="syncNow(true)" style="cursor:pointer;">☁️ آماده</span>
           <button class="header-action-btn green" onclick="exportData()" title="پشتیبان‌گیری">💾 پشتیبان</button>
@@ -1980,5 +1952,27 @@ setTimeout(autoAttendEvents, 2000); setInterval(autoAttendEvents, 60000);
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) autoAttendEvents(); });
 
 </script>
+
+    <script>
+    window.toggleMobileMenu = function(e) {
+        if(e) e.stopPropagation();
+        const menu = document.getElementById('headerActionMenu');
+        if (menu) {
+            if (menu.classList.contains('show-mobile-menu')) {
+                menu.classList.remove('show-mobile-menu');
+            } else {
+                menu.classList.add('show-mobile-menu');
+            }
+        }
+    };
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('headerActionMenu');
+        const btn = document.getElementById('mobileMenuToggle');
+        if (menu && menu.classList.contains('show-mobile-menu') && !menu.contains(e.target) && !btn.contains(e.target)) {
+            menu.classList.remove('show-mobile-menu');
+        }
+    });
+    </script>
+    
 </body>
 </html>
