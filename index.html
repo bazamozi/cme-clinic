@@ -373,45 +373,11 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
   
   .row, .row3 { grid-template-columns: 1fr; }
 }
-</style>
 
-    <style>
-    /* هدر باید position relative داشته باشد تا منو درست باز شود */
-    .top-header { position: relative !important; }
+    @media (min-width: 901px) { .mobile-acc-btns { display: none !important; } }
+    @media (max-width: 900px) { .desktop-acc-btns { display: none !important; } .mobile-acc-btns { display: flex !important; } }
     
-    @media (max-width: 900px) {
-        #mobileMenuToggle {
-            display: inline-flex !important;
-        }
-        #headerActionMenu {
-            display: none !important;
-            position: absolute !important;
-            top: 100% !important;
-            left: 10px !important;
-            right: 10px !important;
-            margin-top: 8px !important;
-            background: var(--card-bg) !important;
-            border: 1px solid var(--border-color) !important;
-            border-radius: 12px !important;
-            padding: 15px !important;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;
-            flex-direction: column !important;
-            z-index: 99999 !important;
-            width: auto !important;
-        }
-        #headerActionMenu.show-mobile-menu {
-            display: flex !important;
-        }
-        #headerActionMenu > button, #headerActionMenu > span {
-            width: 100% !important;
-            justify-content: center !important;
-            padding: 10px !important;
-            font-size: 13px !important;
-            margin-bottom: 5px !important;
-        }
-    }
-    </style>
-    
+</style>
 </head>
 <body class="dark-mode">
 
@@ -472,12 +438,16 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
             <option value="all">همه</option>
           </select>
         </div>
-        <button id="mobileMenuToggle" class="mini" onclick="toggleMobileMenu(event)" style="display:none; font-size: 22px; padding: 2px 8px; margin-right: 5px; font-weight: bold; cursor: pointer;">⋮</button>
         <button class="mini" id="themeToggleBtn" onclick="toggleDarkMode()" title="تغییر حالت شب/روز" style="font-size: 16px;">☀️</button>
+        <div class="desktop-acc-btns" style="display:flex; gap:5px; margin-right:5px;">
+            <button class="mini" onclick="openAccounting('morteza')" style="font-size: 12px; font-weight: bold; color: var(--teal); padding: 4px 8px;">💼 حسابداری مرتضی</button>
+            <button class="mini" onclick="openAccounting('morteza_saeed')" style="font-size: 12px; font-weight: bold; color: #8b5cf6; padding: 4px 8px;">💼 حسابداری (مرتضی و سعید)</button>
+        </div>
+    
       </div>
       <div class="header-right">
         <div class="date-time" id="clock">در حال بارگذاری...</div>
-        <div id="headerActionMenu" style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+        <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
           <button class="header-action-btn blue" onclick="undoLastChange()" title="بازگردانی آخرین تغییر">↩️ بازگردانی</button>
           <span id="syncStatus" class="header-action-btn green" onclick="syncNow(true)" style="cursor:pointer;">☁️ آماده</span>
           <button class="header-action-btn green" onclick="exportData()" title="پشتیبان‌گیری">💾 پشتیبان</button>
@@ -1953,26 +1923,104 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
 
 </script>
 
-    <script>
-    window.toggleMobileMenu = function(e) {
-        if(e) e.stopPropagation();
-        const menu = document.getElementById('headerActionMenu');
-        if (menu) {
-            if (menu.classList.contains('show-mobile-menu')) {
-                menu.classList.remove('show-mobile-menu');
-            } else {
-                menu.classList.add('show-mobile-menu');
+        <div id="accountingModal" class="modal-bg" style="display:none; z-index:100005; align-items: flex-start; padding-top: 50px; overflow-y: auto;">
+          <div class="modal" style="max-width: 900px; width: 95%; margin-bottom: 50px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+              <h2 id="accModalTitle" style="margin:0; font-size:18px; color:var(--teal);">💼 سیستم حسابداری</h2>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn btn-primary" onclick="exportAccounting()" style="background:#10b981; border-radius:8px;">📥 خروجی اکسل</button>
+                <button class="btn btn-outline" onclick="document.getElementById('accountingModal').style.display='none'">بستن</button>
+              </div>
+            </div>
+            <div id="accSummary" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:20px;"></div>
+            <div style="display:flex; justify-content:flex-start; margin-bottom:15px;">
+              <button class="btn btn-primary" onclick="openAddAccountingModal()" style="background:#10b981;">➕ افزودن ردیف جدید</button>
+            </div>
+            <div style="overflow-x:auto; border:1px solid var(--border-color); border-radius:12px; box-shadow: var(--shadow-sm);">
+              <table id="accTable" style="border-collapse:collapse; text-align:right; font-size:13px; width:100%;">
+                <thead>
+                  <tr style="background:#f1f5f9; color:#334155;">
+                    <th style="padding:12px;">ردیف</th><th style="padding:12px;">نام</th><th style="padding:12px;">تاریخ</th>
+                    <th style="padding:12px;">مبلغ کل</th><th style="padding:12px;">دریافتی</th><th style="padding:12px;">مانده</th>
+                    <th style="padding:12px;">توضیحات</th><th style="padding:12px; text-align:center;">عملیات</th>
+                  </tr>
+                </thead>
+                <tbody id="accTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+
+        <script>
+        window.currentAccType = 'morteza';
+        window.accMorteza = window.accMorteza || JSON.parse(localStorage.getItem('cme_acc_morteza') || '[]');
+        window.accMortezaSaeed = window.accMortezaSaeed || JSON.parse(localStorage.getItem('cme_acc_morteza_saeed') || '[]');
+
+        window.getActiveAccData = function() { return window.currentAccType === 'morteza' ? window.accMorteza : window.accMortezaSaeed; };
+        window.setActiveAccData = function(data) {
+            if(window.currentAccType === 'morteza') { window.accMorteza = data; localStorage.setItem('cme_acc_morteza', JSON.stringify(data)); }
+            else { window.accMortezaSaeed = data; localStorage.setItem('cme_acc_morteza_saeed', JSON.stringify(data)); }
+        };
+
+        window.openAccounting = function(type) {
+            window.currentAccType = type;
+            document.getElementById('accountingModal').style.display = 'flex';
+            document.getElementById('accModalTitle').innerHTML = type === 'morteza' ? '💼 حسابداری مرتضی' : '💼 حسابداری (مرتضی و سعید)';
+            renderAccountingTable();
+            const menu = document.getElementById('headerActionMenu'); if(menu) menu.classList.remove('show-mobile-menu');
+        };
+
+        window.renderAccountingTable = function() {
+            const tbody = document.getElementById('accTableBody');
+            const accData = window.getActiveAccData() || [];
+            if(accData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">هیچ ردیفی ثبت نشده است.</td></tr>';
+                document.getElementById('accSummary').innerHTML = ''; return;
             }
-        }
-    };
-    document.addEventListener('click', function(e) {
-        const menu = document.getElementById('headerActionMenu');
-        const btn = document.getElementById('mobileMenuToggle');
-        if (menu && menu.classList.contains('show-mobile-menu') && !menu.contains(e.target) && !btn.contains(e.target)) {
-            menu.classList.remove('show-mobile-menu');
-        }
-    });
-    </script>
-    
+            let sumTotal = 0, sumPaid = 0, sumRemaining = 0;
+            tbody.innerHTML = [...accData].sort((a,b) => (b.createdAt||0) - (a.createdAt||0)).map((r, idx) => {
+                const total = Number(r.total || 0); const paid = Number(r.paid || 0); const remaining = Math.max(0, total - paid);
+                sumTotal += total; sumPaid += paid; sumRemaining += remaining;
+                return `<tr><td style="padding:12px;">${idx+1}</td><td style="padding:12px;font-weight:700;">${esc(r.name)}</td><td style="padding:12px;" class="ltr">${esc(r.date||'—')}</td><td style="padding:12px;font-weight:900;" class="ltr">${total.toLocaleString('en-US')}</td><td style="padding:12px;color:var(--accent);font-weight:900;" class="ltr">${paid.toLocaleString('en-US')}</td><td style="padding:12px;color:${remaining>0?'var(--danger)':'var(--accent)'};font-weight:900;" class="ltr">${remaining.toLocaleString('en-US')}</td><td style="padding:12px;color:var(--text-muted);font-size:12px;">${esc(r.desc||'—')}</td><td style="padding:12px;text-align:center;"><button class="mini" onclick="openAddAccountingModal('${r.id}')">✏️</button><button class="mini danger" onclick="delAccountingRecord('${r.id}')">🗑</button></td></tr>`;
+            }).join('');
+            document.getElementById('accSummary').innerHTML = `<div class="info-box" style="background:#eff6ff;"><span class="label">💵 مجموع کل</span><span class="value ltr">${sumTotal.toLocaleString('en-US')}</span></div><div class="info-box" style="background:#f0fdf4;"><span class="label">✅ مجموع دریافتی</span><span class="value ltr" style="color:var(--accent);">${sumPaid.toLocaleString('en-US')}</span></div><div class="info-box" style="background:#fef2f2;"><span class="label">⚠️ مجموع مانده</span><span class="value ltr" style="color:var(--danger);">${sumRemaining.toLocaleString('en-US')}</span></div>`;
+        };
+
+        window.openAddAccountingModal = function(editId = null) {
+            const accData = window.getActiveAccData() || []; const r = editId ? accData.find(x => x.id === editId) : {};
+            document.getElementById('modalHost').innerHTML = `
+              <div class="modal-bg" style="z-index: 100010; display:flex;" onclick="if(event.target===this)this.remove()">
+                <div class="modal" style="max-width: 500px;">
+                  <h2>${editId ? '✏️ ویرایش' : '➕ افزودن'} ردیف</h2>
+                  <form id="accAddForm">
+                    <label>نام *</label><input type="text" id="aName" value="${esc(r.name||'')}" required>
+                    <label>تاریخ</label><input type="text" id="aDate" value="${esc(r.date||getShamsiToday())}" dir="ltr">
+                    <div class="row"><div><label>مبلغ کل *</label><input type="text" id="aTotal" value="${r.total?Number(r.total).toLocaleString('en-US'):''}" dir="ltr" required></div><div><label>دریافتی *</label><input type="text" id="aPaid" value="${r.paid?Number(r.paid).toLocaleString('en-US'):''}" dir="ltr" required></div></div>
+                    <label>مانده</label><input type="text" id="aRemaining" value="${r.total?Math.max(0,r.total-(r.paid||0)).toLocaleString('en-US'):'0'}" dir="ltr" readonly>
+                    <label>توضیحات</label><textarea id="aDesc">${esc(r.desc||'')}</textarea>
+                    <button class="btn btn-primary" type="submit" style="width:100%;margin-top:20px;">💾 ذخیره</button>
+                    <button class="btn btn-outline" type="button" onclick="document.getElementById('modalHost').innerHTML=''" style="width:100%;margin-top:10px;">انصراف</button>
+                  </form>
+                </div>
+              </div>`;
+            const fmt = i => { let v = toEnDigits(i.value).replace(/[^0-9]/g,''); i.value = v ? parseInt(v).toLocaleString('en-US') : ''; };
+            const calc = () => { let t = Number(toEnDigits(document.getElementById('aTotal').value).replace(/,/g,''))||0; let p = Number(toEnDigits(document.getElementById('aPaid').value).replace(/,/g,''))||0; document.getElementById('aRemaining').value = Math.max(0,t-p).toLocaleString('en-US'); };
+            document.getElementById('aTotal').addEventListener('input', function(){fmt(this);calc();});
+            document.getElementById('aPaid').addEventListener('input', function(){fmt(this);calc();});
+            document.getElementById('accAddForm').onsubmit = function(e) {
+                e.preventDefault();
+                const total = Number(toEnDigits(document.getElementById('aTotal').value).replace(/,/g,''))||0;
+                const paid = Number(toEnDigits(document.getElementById('aPaid').value).replace(/,/g,''))||0;
+                let accData = window.getActiveAccData();
+                if(editId) { const ex = accData.find(x => x.id === editId); if(ex){ ex.name=document.getElementById('aName').value; ex.date=document.getElementById('aDate').value; ex.total=total; ex.paid=paid; ex.desc=document.getElementById('aDesc').value; ex.updatedAt=Date.now(); } }
+                else { accData.push({ id:uid(), name:document.getElementById('aName').value, date:document.getElementById('aDate').value, total, paid, desc:document.getElementById('aDesc').value, createdAt:Date.now(), updatedAt:Date.now() }); }
+                window.setActiveAccData(accData); save(); document.getElementById('modalHost').innerHTML=''; renderAccountingTable(); toast('✅ ذخیره شد');
+            };
+        };
+        window.delAccountingRecord = function(id) { if(!confirm('حذف شود؟')) return; let d = window.getActiveAccData().filter(x=>x.id!==id); window.setActiveAccData(d); save(); renderAccountingTable(); };
+        window.exportAccounting = function() { /* export logic */ };
+        </script>
+        
 </body>
 </html>
