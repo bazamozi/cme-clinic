@@ -376,27 +376,50 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
 </style>
 
     <style>
-    .top-header { position: relative !important; z-index: 9000 !important; }
-    @media (min-width: 901px) {
-        .header-action-btn { padding: 4px 8px !important; font-size: 10px !important; }
-        .header-right > div { gap: 4px !important; }
-        .mobile-acc-btns { display: none !important; }
+    /* 🔥 رفع مشکل رنگ‌های سفید و ناخوانا در حالت شب */
+    body.dark-mode [style*="#f0fdf4"], 
+    body.dark-mode [style*="#fffbeb"], 
+    body.dark-mode [style*="#eff6ff"],
+    body.dark-mode [style*="#fef2f2"],
+    body.dark-mode [style*="#f1f5f9"] {
+        background-color: var(--card-bg) !important;
+        border-color: var(--border-color) !important;
+        color: var(--text-main) !important;
     }
-    @media (max-width: 900px) {
-        .top-header { padding: 10px !important; height: auto !important; flex-wrap: wrap !important; gap: 10px !important; }
-        .header-left { width: 100% !important; justify-content: space-between !important; margin-bottom: 5px !important; }
-        #mobileMenuToggle { display: inline-flex !important; }
-        .desktop-acc-btns { display: none !important; }
-        .mobile-acc-btns { display: flex !important; }
-        .header-right { width: 100% !important; justify-content: flex-start !important; }
-        #headerActionMenu {
-            display: none !important; position: absolute !important; top: 100% !important; left: 10px !important; right: 10px !important; margin-top: 5px !important;
-            background: var(--card-bg) !important; border: 1px solid var(--border-color) !important; border-radius: 12px !important; padding: 15px !important;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important; flex-direction: column !important; z-index: 99999 !important; width: auto !important;
-        }
-        #headerActionMenu.show-mobile-menu { display: flex !important; }
-        #headerActionMenu > button, #headerActionMenu > span { width: 100% !important; justify-content: center !important; padding: 10px !important; font-size: 13px !important; margin-bottom: 5px !important; }
-        .date-time { display: none !important; }
+    
+    /* اطمینان از اینکه متن‌های داخل این باکس‌ها هم تیره/روشن درست بشن */
+    body.dark-mode [style*="#f0fdf4"] *, 
+    body.dark-mode [style*="#fffbeb"] *, 
+    body.dark-mode [style*="#eff6ff"] *,
+    body.dark-mode [style*="#fef2f2"] *,
+    body.dark-mode [style*="#f1f5f9"] * {
+        color: var(--text-main) !important;
+    }
+
+    /* فیلدهای ورودی (Input) و متن‌ها در حالت شب */
+    body.dark-mode input, 
+    body.dark-mode textarea, 
+    body.dark-mode select {
+        background-color: var(--bg-body) !important;
+        color: var(--text-main) !important;
+        border-color: var(--border-color) !important;
+    }
+    
+    body.dark-mode input:focus, 
+    body.dark-mode textarea:focus, 
+    body.dark-mode select:focus {
+        background-color: var(--card-bg) !important;
+        color: var(--text-main) !important;
+    }
+
+    /* جلوگیری از سفید شدن خودکار فیلدها توسط مرورگر (Autofill) */
+    body.dark-mode input:-webkit-autofill,
+    body.dark-mode input:-webkit-autofill:hover, 
+    body.dark-mode input:-webkit-autofill:focus, 
+    body.dark-mode input:-webkit-autofill:active{
+        -webkit-box-shadow: 0 0 0 30px var(--bg-body) inset !important;
+        -webkit-text-fill-color: var(--text-main) !important;
+        transition: background-color 5000s ease-in-out 0s;
     }
     </style>
     
@@ -446,7 +469,6 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
   </aside>
 
   <div class="main-content">
-    
     <header class="top-header">
       <div class="header-left">
         <div class="user-profile">
@@ -458,33 +480,15 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
           <select id="userPickerSelect" onchange="switchUser(this.value)" style="width:auto; padding:4px 8px; font-size:11px; margin-right:8px; background:#f1f5f9; border:none; cursor:pointer;" class="user-picker-select">
             <option value="morteza">مرتضی</option>
             <option value="parvin">پروین</option>
-            <option value="saeed">سعید</option>
             <option value="all">همه</option>
           </select>
         </div>
-        
         <button class="mini" id="themeToggleBtn" onclick="toggleDarkMode()" title="تغییر حالت شب/روز" style="font-size: 16px;">☀️</button>
-        
-        <!-- دکمه‌های حسابداری برای دسکتاپ -->
-        <div class="desktop-acc-btns" style="display:flex; gap:5px; margin-right:5px;">
-            <button class="mini" onclick="openAccounting('morteza')" style="font-size: 12px; font-weight: bold; color: var(--teal); padding: 4px 8px;">💼 حسابداری مرتضی</button>
-            <button class="mini" onclick="openAccounting('morteza_saeed')" style="font-size: 12px; font-weight: bold; color: #8b5cf6; padding: 4px 8px;">💼 حسابداری (مرتضی و سعید)</button>
-        </div>
-
-        <button id="mobileMenuToggle" class="mini" onclick="toggleHeaderMenu(event)" style="display:none; font-size: 22px; padding: 2px 10px; font-weight: bold; cursor: pointer;">⋮</button>
       </div>
-      
       <div class="header-right">
         <div class="date-time" id="clock">در حال بارگذاری...</div>
-        <div id="headerActionMenu" style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
-          
-          <!-- دکمه‌های حسابداری برای موبایل (در منوی کشویی) -->
-          <div class="mobile-acc-btns" style="display:none; flex-direction:column; width:100%; gap:5px; margin-bottom:5px;">
-              <button class="header-action-btn blue" onclick="openAccounting('morteza')">💼 حسابداری مرتضی</button>
-              <button class="header-action-btn blue" onclick="openAccounting('morteza_saeed')">💼 حسابداری (مرتضی و سعید)</button>
-          </div>
-
-          <button class="header-action-btn blue" onclick="undoLastChange()" title="بازگردانی">↩️ بازگردانی</button>
+        <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+          <button class="header-action-btn blue" onclick="undoLastChange()" title="بازگردانی آخرین تغییر">↩️ بازگردانی</button>
           <span id="syncStatus" class="header-action-btn green" onclick="syncNow(true)" style="cursor:pointer;">☁️ آماده</span>
           <button class="header-action-btn green" onclick="exportData()" title="پشتیبان‌گیری">💾 پشتیبان</button>
           <button class="header-action-btn green" onclick="document.getElementById('importFile').click()" title="بازیابی">📂 بازیابی</button>
@@ -493,7 +497,6 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
         </div>
       </div>
     </header>
-    
 
     <div class="content-area">
       <div class="tab-content" id="tab-dash">
@@ -956,13 +959,7 @@ async function syncNow(isManual = false){
 async function pushToCloud(){
   return new Promise((resolve) => {
     try {
-      let contactsToPush = JSON.parse(JSON.stringify(contacts || []));
-          contactsToPush = contactsToPush.filter(c => c.id !== '__SYS_ACC__');
-          contactsToPush.push({
-              id: '__SYS_ACC__', name: 'SYSTEM_ACCOUNTING_DATA', owner: 'system', updatedAt: Date.now(), deleted: false,
-              accMorteza: window.accMorteza || [], accMortezaSaeed: window.accMortezaSaeed || []
-          });
-          const payload = JSON.stringify({ doctors, calls, contacts: contactsToPush, savedAt: Date.now() });
+      const payload = JSON.stringify({ doctors, calls, contacts, savedAt: Date.now() });
       const form = document.createElement('form');
       form.method = 'POST'; form.action = SCRIPT_URL; form.target = 'hidden_iframe_push'; form.style.display = 'none';
       const input = document.createElement('input');
@@ -1046,16 +1043,6 @@ function pullFromCloud(){
     _pollErrorCount = 0;
     // 🔥 محافظت شدید: اگر دیتای دریافتی ناقص یا خالی باشد، سینک انجام نمی‌شود تا اطلاعات پاک نشود
     if(!data || (!data.doctors && !data.calls && !data.contacts)) return; 
-          if (data.contacts) {
-              const sysAcc = data.contacts.find(c => c.id === '__SYS_ACC__');
-              if (sysAcc) {
-                  window.accMorteza = sysAcc.accMorteza || [];
-                  window.accMortezaSaeed = sysAcc.accMortezaSaeed || [];
-                  localStorage.setItem('cme_acc_morteza', JSON.stringify(window.accMorteza));
-                  localStorage.setItem('cme_acc_morteza_saeed', JSON.stringify(window.accMortezaSaeed));
-                  data.contacts = data.contacts.filter(c => c.id !== '__SYS_ACC__');
-              }
-          } 
 
     const newDocs  = mergeDoctors(doctors, data.doctors || []);
     const newCalls = mergeById(calls,   data.calls   || [], 'updatedAt');
@@ -1975,289 +1962,5 @@ setTimeout(autoAttendEvents, 2000); setInterval(autoAttendEvents, 60000);
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) autoAttendEvents(); });
 
 </script>
-
-    <!-- پنجره حسابداری دوگانه -->
-    <div id="accountingModal" class="modal-bg" style="display:none; z-index:100005; align-items: flex-start; padding-top: 50px; overflow-y: auto;">
-      <div class="modal" style="max-width: 900px; width: 95%; margin-bottom: 50px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
-          <h2 id="accModalTitle" style="margin:0; font-size:18px; color:var(--teal);">💼 سیستم حسابداری</h2>
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn btn-primary" onclick="exportAccounting()" style="background:#10b981; border-radius:8px;">📥 خروجی اکسل</button>
-            <button class="btn btn-outline" onclick="document.getElementById('accountingModal').style.display='none'">بستن</button>
-          </div>
-        </div>
-        <div id="accSummary" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:20px;"></div>
-        <div style="display:flex; justify-content:flex-start; margin-bottom:15px;">
-          <button class="btn btn-primary" onclick="openAddAccountingModal()" style="background:#10b981;">➕ افزودن ردیف جدید</button>
-        </div>
-        <div style="overflow-x:auto; border:1px solid var(--border-color); border-radius:12px; box-shadow: var(--shadow-sm);">
-          <table id="accTable" style="border-collapse:collapse; text-align:right; font-size:13px; width:100%;">
-            <thead>
-              <tr style="background:#f1f5f9; color:#334155;">
-                <th style="padding:12px;">ردیف</th>
-                <th style="padding:12px;">نام</th>
-                <th style="padding:12px;">تاریخ</th>
-                <th style="padding:12px;">مبلغ کل</th>
-                <th style="padding:12px;">دریافتی</th>
-                <th style="padding:12px;">مانده</th>
-                <th style="padding:12px;">توضیحات</th>
-                <th style="padding:12px; text-align:center;">عملیات</th>
-              </tr>
-            </thead>
-            <tbody id="accTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <!-- /پنجره حسابداری -->
-
-    <script>
-    window.currentAccType = 'morteza';
-    
-    // تعریف متغیرهای سراسری برای جلوگیری از خطا
-    window.accMorteza = window.accMorteza || JSON.parse(localStorage.getItem('cme_acc_morteza') || '[]');
-    window.accMortezaSaeed = window.accMortezaSaeed || JSON.parse(localStorage.getItem('cme_acc_morteza_saeed') || '[]');
-
-    // باز و بسته کردن منوی موبایل
-    window.toggleHeaderMenu = function(e) {
-        if(e) e.stopPropagation();
-        const menu = document.getElementById('headerActionMenu');
-        if (menu) menu.classList.toggle('show-mobile-menu');
-    };
-    document.addEventListener('click', function(e) {
-        const menu = document.getElementById('headerActionMenu');
-        const btn = document.getElementById('mobileMenuToggle');
-        if (menu && menu.classList.contains('show-mobile-menu') && !menu.contains(e.target) && !btn.contains(e.target)) {
-            menu.classList.remove('show-mobile-menu');
-        }
-    });
-
-    window.getActiveAccData = function() {
-        return window.currentAccType === 'morteza' ? window.accMorteza : window.accMortezaSaeed;
-    };
-
-    window.setActiveAccData = function(data) {
-        if(window.currentAccType === 'morteza') {
-            window.accMorteza = data;
-            localStorage.setItem('cme_acc_morteza', JSON.stringify(data));
-        } else {
-            window.accMortezaSaeed = data;
-            localStorage.setItem('cme_acc_morteza_saeed', JSON.stringify(data));
-        }
-    };
-
-    window.openAccounting = function(type) {
-        window.currentAccType = type;
-        const modal = document.getElementById('accountingModal');
-        if(!modal) return;
-        
-        const title = document.getElementById('accModalTitle');
-        if (type === 'morteza') {
-            title.innerHTML = '💼 حسابداری مرتضی';
-            title.style.color = 'var(--teal)';
-        } else {
-            title.innerHTML = '💼 حسابداری مرتضی و سعید';
-            title.style.color = '#8b5cf6';
-        }
-
-        modal.style.display = 'flex';
-        renderAccountingTable();
-        
-        const menu = document.getElementById('headerActionMenu');
-        if(menu) menu.classList.remove('show-mobile-menu');
-    };
-
-    window.renderAccountingTable = function() {
-        const tbody = document.getElementById('accTableBody');
-        if(!tbody) return;
-        const accData = window.getActiveAccData() || [];
-        
-        if(accData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">هیچ ردیفی ثبت نشده است. یک ردیف جدید اضافه کنید.</td></tr>';
-            document.getElementById('accSummary').innerHTML = '';
-            return;
-        }
-        
-        let sumTotal = 0, sumPaid = 0, sumRemaining = 0;
-        const sorted = [...accData].sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
-        
-        tbody.innerHTML = sorted.map((r, idx) => {
-            const total = Number(r.total !== undefined ? r.total : (r.amount || 0));
-            const paid = Number(r.paid || 0);
-            const remaining = Math.max(0, total - paid);
-            
-            sumTotal += total;
-            sumPaid += paid;
-            sumRemaining += remaining;
-
-            return `
-            <tr style="transition: 0.2s;">
-                <td style="padding:12px;">${idx + 1}</td>
-                <td style="padding:12px; font-weight:700;">${esc(r.name)}</td>
-                <td style="padding:12px;" class="ltr">${esc(r.date || '—')}</td>
-                <td style="padding:12px; color:var(--text-main); font-weight:900;" class="ltr">${total.toLocaleString('en-US')}</td>
-                <td style="padding:12px; color:var(--accent); font-weight:900;" class="ltr">${paid.toLocaleString('en-US')}</td>
-                <td style="padding:12px; color:${remaining > 0 ? 'var(--danger)' : 'var(--accent)'}; font-weight:900;" class="ltr">${remaining.toLocaleString('en-US')}</td>
-                <td style="padding:12px; color:var(--text-muted); font-size:12px;">${esc(r.desc || '—')}</td>
-                <td style="padding:12px; text-align:center;">
-                    <button class="mini" onclick="openAddAccountingModal('${r.id}')">✏️</button>
-                    <button class="mini danger" onclick="delAccountingRecord('${r.id}')">🗑</button>
-                </td>
-            </tr>
-            `;
-        }).join('');
-        
-        document.getElementById('accSummary').innerHTML = `
-            <div class="info-box" style="background:#eff6ff; border-color:#bfdbfe; text-align:center;">
-                <span class="label" style="color:#1e40af; font-size:14px;">💵 مجموع مبلغ کل</span>
-                <span class="value ltr" style="color:#1d4ed8; font-weight:900; font-size:20px;">${sumTotal.toLocaleString('en-US')} تومان</span>
-            </div>
-            <div class="info-box" style="background:#f0fdf4; border-color:#bbf7d0; text-align:center;">
-                <span class="label" style="color:#166534; font-size:14px;">✅ مجموع دریافتی</span>
-                <span class="value ltr" style="color:#15803d; font-weight:900; font-size:20px;">${sumPaid.toLocaleString('en-US')} تومان</span>
-            </div>
-            <div class="info-box" style="background:#fef2f2; border-color:#fecaca; text-align:center;">
-                <span class="label" style="color:#991b1b; font-size:14px;">⚠️ مجموع مانده</span>
-                <span class="value ltr" style="color:#dc2626; font-weight:900; font-size:20px;">${sumRemaining.toLocaleString('en-US')} تومان</span>
-            </div>
-        `;
-    };
-
-    window.openAddAccountingModal = function(editId = null) {
-        const accData = window.getActiveAccData() || [];
-        const r = editId ? accData.find(x => x.id === editId) : {};
-        const initialTotal = Number(r.total !== undefined ? r.total : (r.amount || 0));
-        const initialPaid = Number(r.paid || 0);
-        const initialRemaining = Math.max(0, initialTotal - initialPaid);
-        
-        document.getElementById('modalHost').innerHTML = `
-          <div class="modal-bg" style="z-index: 100010; display:flex;" onclick="if(event.target===this)this.remove()">
-            <div class="modal" style="max-width: 500px;">
-              <h2>${editId ? '✏️ ویرایش ردیف' : '➕ افزودن ردیف جدید'}</h2>
-              <form id="accAddForm">
-                <label>نام شخص / شرکت *</label>
-                <input type="text" id="aName" value="${esc(r.name || '')}" required placeholder="مثلا: دکتر احمدی، آزمایشگاه...">
-                
-                <label>تاریخ</label>
-                <input type="text" id="aDate" value="${esc(r.date || (typeof getShamsiToday === 'function' ? getShamsiToday() : ''))}" dir="ltr" style="text-align:center;">
-                
-                <div class="row">
-                    <div>
-                        <label>مبلغ کل (تومان) *</label>
-                        <input type="text" id="aTotal" value="${initialTotal ? initialTotal.toLocaleString('en-US') : ''}" dir="ltr" style="text-align:center;" required>
-                    </div>
-                    <div>
-                        <label>مبلغ دریافتی (تومان) *</label>
-                        <input type="text" id="aPaid" value="${initialPaid ? initialPaid.toLocaleString('en-US') : ''}" dir="ltr" style="text-align:center;" required>
-                    </div>
-                </div>
-
-                <label>مانده (خودکار)</label>
-                <input type="text" id="aRemaining" value="${initialRemaining ? initialRemaining.toLocaleString('en-US') : '0'}" dir="ltr" style="text-align:center; opacity:0.7; background:#f1f5f9; font-weight:bold; color:var(--danger);" readonly>
-                
-                <label>توضیحات (اختیاری)</label>
-                <textarea id="aDesc" style="min-height: 80px;">${esc(r.desc || '')}</textarea>
-                
-                <button class="btn btn-primary" type="submit" style="width:100%; margin-top:20px;">💾 ذخیره ردیف</button>
-                <button class="btn btn-outline" type="button" onclick="document.getElementById('modalHost').innerHTML=''" style="width:100%; margin-top:10px;">انصراف</button>
-              </form>
-            </div>
-          </div>
-        `;
-
-        const formatInput = (inp) => {
-            let v = toEnDigits(inp.value).replace(/[^0-9]/g, '');
-            inp.value = v ? parseInt(v).toLocaleString('en-US') : '';
-        };
-
-        const calcRemaining = () => {
-            let t = Number(toEnDigits(document.getElementById('aTotal').value).replace(/,/g, '')) || 0;
-            let p = Number(toEnDigits(document.getElementById('aPaid').value).replace(/,/g, '')) || 0;
-            document.getElementById('aRemaining').value = Math.max(0, t - p).toLocaleString('en-US');
-        };
-
-        document.getElementById('aTotal').addEventListener('input', function() { formatInput(this); calcRemaining(); });
-        document.getElementById('aPaid').addEventListener('input', function() { formatInput(this); calcRemaining(); });
-
-        document.getElementById('accAddForm').onsubmit = function(e) {
-            e.preventDefault();
-            const total = Number(toEnDigits(document.getElementById('aTotal').value).replace(/,/g, '')) || 0;
-            const paid = Number(toEnDigits(document.getElementById('aPaid').value).replace(/,/g, '')) || 0;
-            
-            let accData = window.getActiveAccData();
-
-            if(editId) {
-                const existing = accData.find(x => x.id === editId);
-                if(existing) {
-                    existing.name = document.getElementById('aName').value.trim();
-                    existing.date = document.getElementById('aDate').value.trim();
-                    existing.total = total;
-                    existing.paid = paid;
-                    existing.desc = document.getElementById('aDesc').value.trim();
-                    existing.updatedAt = Date.now();
-                }
-            } else {
-                accData.push({
-                    id: (typeof uid === 'function' ? uid() : Date.now().toString()),
-                    name: document.getElementById('aName').value.trim(),
-                    date: document.getElementById('aDate').value.trim(),
-                    total: total,
-                    paid: paid,
-                    desc: document.getElementById('aDesc').value.trim(),
-                    createdAt: Date.now(),
-                    updatedAt: Date.now()
-                });
-            }
-            
-            window.setActiveAccData(accData);
-            if(typeof save === 'function') save(); 
-            
-            document.getElementById('modalHost').innerHTML = '';
-            renderAccountingTable();
-            if(typeof toast === 'function') toast('✅ ردیف حسابداری ذخیره شد');
-        };
-    };
-
-    window.delAccountingRecord = function(id) {
-        if(!confirm('این ردیف حسابداری حذف شود؟')) return;
-        let accData = window.getActiveAccData();
-        accData = accData.filter(x => x.id !== id);
-        window.setActiveAccData(accData);
-        if(typeof save === 'function') save();
-        renderAccountingTable();
-        if(typeof toast === 'function') toast('🗑 ردیف حذف شد');
-    };
-
-    window.exportAccounting = function() {
-        const accData = window.getActiveAccData() || [];
-        if(accData.length === 0) { if(typeof toast === 'function') toast('⚠️ هیچ ردیفی برای خروجی وجود ندارد'); return; }
-        
-        let csvContent = "\uFEFF";
-        csvContent += "ردیف,نام,تاریخ,مبلغ کل,دریافتی,مانده,توضیحات\n";
-
-        const sorted = [...accData].sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
-        
-        sorted.forEach((r, idx) => {
-            const total = Number(r.total !== undefined ? r.total : (r.amount || 0));
-            const paid = Number(r.paid || 0);
-            const remaining = Math.max(0, total - paid);
-            csvContent += `${idx + 1},"${r.name}","${r.date || ''}",${total},${paid},${remaining},"${r.desc || ''}"\n`;
-        });
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        const dStr = (typeof getShamsiToday === 'function' ? getShamsiToday() : 'export').replace(/\//g,'-');
-        const typeName = window.currentAccType === 'morteza' ? 'مرتضی' : 'مرتضی_و_سعید';
-        link.download = `حسابداری_${typeName}_${dStr}.csv`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        if(typeof toast === 'function') toast('📥 خروجی اکسل با موفقیت دانلود شد');
-    };
-    </script>
-    
 </body>
 </html>
