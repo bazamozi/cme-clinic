@@ -448,6 +448,8 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
       <div class="header-right">
         <div class="date-time" id="clock">در حال بارگذاری...</div>
         <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+          <button class="header-action-btn blue" onclick="openAccounting('morteza')" title="حسابداری مرتضی">📊 حسابداری مرتضی</button>
+          <button class="header-action-btn blue" onclick="openAccounting('shared')" title="حسابداری مرتضی و سعید">📊 حسابداری (مرتضی و سعید)</button>
           <button class="header-action-btn blue" onclick="undoLastChange()" title="بازگردانی آخرین تغییر">↩️ بازگردانی</button>
           <span id="syncStatus" class="header-action-btn green" onclick="syncNow(true)" style="cursor:pointer;">☁️ آماده</span>
           <button class="header-action-btn green" onclick="exportData()" title="پشتیبان‌گیری">💾 پشتیبان</button>
@@ -564,6 +566,7 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
 </div>
 
 
+
 <!-- Accounting System HTML -->
 <div id="accountingHost" class="modal-bg hidden" style="z-index: 100001; backdrop-filter: blur(5px);">
   <div class="modal" style="max-width: 900px; width: 95%; background: var(--card-bg); padding: 24px; border-radius: 16px; border: 1px solid var(--border-color);">
@@ -607,7 +610,8 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
     </div>
   </div>
 </div>
-\n<div id="modalHost"></div>
+
+<div id="modalHost"></div>
 <audio id="ringtone" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
 <script>
@@ -2259,5 +2263,180 @@ document.addEventListener('visibilitychange', function(){ if(!document.hidden) a
         window.exportAccounting = function() { /* export logic */ };
         </script>
         
+
+<!-- Accounting Script -->
+<script>
+// --- ACCOUNTING SYSTEM START ---
+const ACC_KEY = 'cme_acc_data';
+window.accountingData = { morteza: [], shared: [] };
+window.currentAccountingType = 'morteza';
+
+try {
+    const savedAcc = localStorage.getItem(ACC_KEY);
+    if (savedAcc) window.accountingData = JSON.parse(savedAcc);
+} catch(e) {}
+
+window.openAccounting = function(type) {
+    window.currentAccountingType = type;
+    document.getElementById('accountingHost').classList.remove('hidden');
+    window.renderAccounting(type);
+};
+
+window.closeAccounting = function() {
+    document.getElementById('accountingHost').classList.add('hidden');
+};
+
+window.renderAccounting = function(type) {
+    document.getElementById('accTitle').textContent = type === 'morteza' ? '📊 حسابداری مرتضی' : '📊 حسابداری (مرتضی و سعید)';
+    const arr = window.accountingData[type] || [];
+    let totalSum = 0, paidSum = 0, remSum = 0;
+    let html = '';
+    
+    if (arr.length === 0) {
+        html = '<tr><td colspan="8" style="padding:20px; color:var(--text-muted);">هیچ ردیفی ثبت نشده است</td></tr>';
+    } else {
+        arr.forEach((item, index) => {
+            const total = Number(item.total || 0);
+            const paid = Number(item.paid || 0);
+            const rem = Math.max(0, total - paid);
+            totalSum += total; paidSum += paid; remSum += rem;
+            
+            html += `<tr style="border-bottom:1px solid var(--border-color);">
+                <td style="padding:12px;">${index + 1}</td>
+                <td style="padding:12px; font-weight:700;">${esc(item.name)}</td>
+                <td style="padding:12px; direction:ltr;">${esc(item.date || '—')}</td>
+                <td style="padding:12px; color:var(--teal); font-weight:700;">${num(total)}</td>
+                <td style="padding:12px; color:var(--accent); font-weight:700;">${num(paid)}</td>
+                <td style="padding:12px; color:${rem > 0 ? 'var(--danger)' : 'var(--text-muted)'}; font-weight:700;">${num(rem)}</td>
+                <td style="padding:12px; font-size:12px; color:var(--text-muted);">${esc(item.desc || '')}</td>
+                <td style="padding:12px;">
+                    <button class="mini" onclick="openAccountingModal('${item.id}')">✏️</button>
+                    <button class="mini danger" onclick="delAccounting('${item.id}')">🗑</button>
+                </td>
+            </tr>`;
+        });
+    }
+    document.getElementById('accTotalSum').textContent = num(totalSum);
+    document.getElementById('accPaidSum').textContent = num(paidSum);
+    document.getElementById('accRemSum').textContent = num(remSum);
+    document.getElementById('accTableBody').innerHTML = html;
+};
+
+window.openAccountingModal = function(editId) {
+    const type = window.currentAccountingType;
+    const item = editId ? (window.accountingData[type] || []).find(x => x.id === editId) : null;
+    
+    openModal(`
+        <h2>${item ? '✏️ ویرایش' : '➕ افزودن'} ردیف</h2>
+        <form id="mAccForm" autocomplete="off">
+            <input type="hidden" id="accEditId" value="${item ? item.id : ''}">
+            <div class="row">
+                <div><label>نام *</label><input id="accName" required value="${item ? esc(item.name) : ''}"></div>
+                <div><label>تاریخ</label><input id="accDate" dir="ltr" style="text-align:center" value="${item ? esc(item.date) : ''}"></div>
+            </div>
+            <div class="row">
+                <div><label>مبلغ کل *</label><input id="accTotal" dir="ltr" style="text-align:center" required value="${item ? num(item.total) : ''}"></div>
+                <div><label>دریافتی *</label><input id="accPaid" dir="ltr" style="text-align:center" required value="${item ? num(item.paid) : ''}"></div>
+            </div>
+            <div class="row">
+                <div><label>مانده</label><input id="accRem" disabled style="opacity:.7; background:var(--bg-body);"></div>
+                <div></div>
+            </div>
+            <label>توضیحات</label>
+            <textarea id="accDesc">${item ? esc(item.desc) : ''}</textarea>
+            <button class="btn btn-primary" type="submit" style="width:100%; margin-top:20px;">💾 ذخیره</button>
+            <button class="btn btn-outline" type="button" onclick="closeModal()" style="width:100%; margin-top:10px;">انصراف</button>
+        </form>
+    `);
+
+    const parseNum = inp => { var v = toEnDigits(String(inp.value)).replace(/,/g,'').replace(/[^0-9]/g,''); return Number(v) || 0; };
+    const fmtNum = inp => { var v = toEnDigits(String(inp.value)).replace(/[^0-9]/g,''); inp.value = v ? parseInt(v).toLocaleString('en-US') : ''; };
+    const upd = () => {
+        const t = parseNum(document.getElementById('accTotal'));
+        const p = parseNum(document.getElementById('accPaid'));
+        document.getElementById('accRem').value = Math.max(0, t - p).toLocaleString('en-US');
+    };
+    
+    document.getElementById('accTotal').addEventListener('input', function(){ fmtNum(this); upd(); });
+    document.getElementById('accPaid').addEventListener('input', function(){ fmtNum(this); upd(); });
+    if(item) upd();
+
+    document.getElementById('mAccForm').onsubmit = function(e) {
+        e.preventDefault();
+        const name = document.getElementById('accName').value.trim();
+        const date = document.getElementById('accDate').value.trim();
+        const total = parseNum(document.getElementById('accTotal'));
+        const paid = parseNum(document.getElementById('accPaid'));
+        const desc = document.getElementById('accDesc').value.trim();
+        const id = document.getElementById('accEditId').value;
+
+        if(!window.accountingData[type]) window.accountingData[type] = [];
+
+        if (id) {
+            const index = window.accountingData[type].findIndex(x => x.id === id);
+            if (index !== -1) window.accountingData[type][index] = { ...window.accountingData[type][index], name, date, total, paid, desc, updatedAt: Date.now() };
+        } else {
+            window.accountingData[type].unshift({ id: uid(), name, date, total, paid, desc, createdAt: Date.now(), updatedAt: Date.now() });
+        }
+
+        localStorage.setItem(ACC_KEY, JSON.stringify(window.accountingData));
+        window.syncAccountingToContacts();
+        closeModal();
+        window.renderAccounting(type);
+        if (typeof save === 'function') save();
+        toast('✅ ردیف حسابداری ذخیره شد');
+    };
+};
+
+window.delAccounting = function(id) {
+    if (!confirm('حذف شود؟')) return;
+    window.accountingData[window.currentAccountingType] = window.accountingData[window.currentAccountingType].filter(x => x.id !== id);
+    localStorage.setItem(ACC_KEY, JSON.stringify(window.accountingData));
+    window.syncAccountingToContacts();
+    window.renderAccounting(window.currentAccountingType);
+    if (typeof save === 'function') save();
+};
+
+window.syncAccountingToContacts = function() {
+    if (typeof contacts === 'undefined') return;
+    let sysAcc = contacts.find(c => c.id === '__SYS_ACC__');
+    if (!sysAcc) {
+        sysAcc = { id: '__SYS_ACC__', name: 'سیستم حسابداری', phone: '0', owner: 'morteza', createdAt: Date.now(), deleted: false, updatedAt: Date.now() };
+        contacts.push(sysAcc);
+    }
+    sysAcc.data = window.accountingData;
+    sysAcc.updatedAt = Date.now();
+};
+
+// همگام سازی دوره‌ای بی‌خطر برای دریافت اطلاعات از سرور
+setInterval(() => {
+    if (typeof contacts !== 'undefined') {
+        const sysAcc = contacts.find(c => c.id === '__SYS_ACC__');
+        if (sysAcc && sysAcc.data) {
+            const newDataStr = JSON.stringify(sysAcc.data);
+            if (JSON.stringify(window.accountingData) !== newDataStr) {
+                window.accountingData = sysAcc.data;
+                localStorage.setItem(ACC_KEY, newDataStr);
+                const accHost = document.getElementById('accountingHost');
+                if (accHost && !accHost.classList.contains('hidden')) window.renderAccounting(window.currentAccountingType);
+            }
+        }
+    }
+}, 3000);
+
+// مخفی کردن مخاطب سیستم از لیست مخاطبین اصلی
+try {
+    if (typeof myContacts === 'function') {
+        const originalMyContacts = myContacts;
+        myContacts = function() {
+            const arr = contacts.filter(c => !c.deleted && c.id !== '__SYS_ACC__');
+            return currentUser === 'all' ? arr : arr.filter(c => c.owner === currentUser);
+        };
+    }
+} catch(e) {}
+
+// --- ACCOUNTING SYSTEM END ---
+</script>
+
 </body>
 </html>
