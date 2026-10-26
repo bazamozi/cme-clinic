@@ -1102,6 +1102,7 @@ function pullFromCloud(){
       } catch(e){}
 
       doctors = newDocs; calls = newCalls; contacts = newContacts;
+      if (typeof handleIncomingAcc === 'function') { try { handleIncomingAcc(contacts); } catch(e){} }
       try { localStorage.setItem(K, JSON.stringify(doctors)); localStorage.setItem(K+'_calls', JSON.stringify(calls)); localStorage.setItem(K+'_contacts', JSON.stringify(contacts)); } catch(e){}
       renderAll();
     }
