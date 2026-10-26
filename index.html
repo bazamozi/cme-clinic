@@ -311,9 +311,21 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
 .acc-table tr:hover { background: rgba(0,0,0,0.02); }
 body.dark-mode .acc-table tr:hover { background: rgba(255,255,255,0.02); }
 .acc-table .actions-col { display: flex; justify-content: center; gap: 6px; }
-.acc-table .btn-icon { background: transparent; border: none; cursor: pointer; font-size: 16px; transition: 0.2s; padding: 4px; border-radius: 6px; }
+.acc-table .btn-icon { background: transparent; border: none; cursor: pointer; font-size: 16px; transition: 0.2s; padding: 4px; border-radius: 6px; color: var(--text-main); }
 .acc-table .btn-icon:hover { background: var(--border-color); }
 .acc-table .btn-icon.del:hover { background: #fef2f2; color: var(--danger); }
+
+/* اصلاح عدم خوانایی در حالت شب */
+.disabled-input {
+    background-color: #f1f5f9 !important;
+    color: #64748b !important;
+    opacity: 1 !important;
+    cursor: not-allowed;
+}
+body.dark-mode .disabled-input {
+    background-color: #0f172a !important;
+    color: #94a3b8 !important;
+}
 
 @media (max-width: 600px) {
     .acc-summary-grid { grid-template-columns: 1fr; }
@@ -502,16 +514,19 @@ body.dark-mode .acc-table tr:hover { background: rgba(255,255,255,0.02); }
             <option value="all">همه</option>
           </select>
         </div>
+        
+        <!-- بخش حسابداری‌ها و دکمه شب/روز در کنار هم -->
+        <div style="display:flex; align-items:center; gap:6px;">
+            <button class="mini" onclick="openAccountingModal('morteza')" style="font-size: 12px; padding: 4px 8px; height: 32px; border-radius: 8px;" title="حسابداری مرتضی">🧾 مرتضی</button>
+            <button class="mini" onclick="openAccountingModal('saeed')" style="font-size: 12px; padding: 4px 8px; height: 32px; border-radius: 8px;" title="حسابداری مرتضی و سعید">🧾 مرتضی و سعید</button>
+            <button class="mini" id="themeToggleBtn" onclick="toggleDarkMode()" title="تغییر حالت شب/روز" style="font-size: 16px; height: 32px; width: 32px; border-radius: 8px; padding:0;">☀️</button>
+        </div>
+        
         <button id="mobileMenuToggle" class="mini" onclick="toggleMobileMenu(event)" style="display:none; font-size: 22px; padding: 2px 8px; margin-right: 5px; font-weight: bold; cursor: pointer;">⋮</button>
-        <button class="mini" id="themeToggleBtn" onclick="toggleDarkMode()" title="تغییر حالت شب/روز" style="font-size: 16px;">☀️</button>
       </div>
       <div class="header-right">
         <div class="date-time" id="clock">در حال بارگذاری...</div>
         <div id="headerActionMenu" style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
-          
-          <!-- دکمه حسابداری اضافه شد -->
-          <button class="header-action-btn blue" onclick="openAccountingModal()" title="حسابداری">🧾 حسابداری</button>
-          
           <button class="header-action-btn blue" onclick="undoLastChange()" title="بازگردانی آخرین تغییر">↩️ بازگردانی</button>
           <span id="syncStatus" class="header-action-btn green" onclick="syncNow(true)" style="cursor:pointer;">☁️ آماده</span>
           <button class="header-action-btn green" onclick="exportData()" title="پشتیبان‌گیری">💾 پشتیبان</button>
@@ -616,6 +631,7 @@ const uid = () => Date.now()+Math.random().toString(36).slice(2,6);
 let doctors = [], calls = [], contacts = [], accounting = [];
 let selectedDoctorId = null;
 let currentUser = 'morteza';
+let currentAccSection = 'morteza'; // بخش حسابداری فعال
 let currentDocCategory = 'in_progress';
 let currentMobileEventTab = 'وبینار';
 let lastProcessedCallId = null;
@@ -814,7 +830,10 @@ window.switchUser = function(user){
 function myDoctors(){ const arr = doctors.filter(d => !d.deleted); return currentUser === 'all' ? arr : arr.filter(d => d.owner === currentUser); }
 function myCalls(){ const arr = calls.filter(c => !c.deleted); return currentUser === 'all' ? arr : arr.filter(c => c.owner === currentUser); }
 function myContacts(){ const arr = contacts.filter(c => !c.deleted); return currentUser === 'all' ? arr : arr.filter(c => c.owner === currentUser); }
-function myAccounting(){ const arr = accounting.filter(c => !c.deleted); return currentUser === 'all' ? arr : arr.filter(c => c.owner === currentUser); }
+function myAccounting(section) {
+    const arr = accounting.filter(c => !c.deleted && (c.section || 'morteza') === section);
+    return currentUser === 'all' ? arr : arr.filter(c => c.owner === currentUser);
+}
 
 function getAutoStatus(d) {
     const req = Number(d.creditReq || 0);
@@ -1517,7 +1536,7 @@ window.openDoctorModal = function(editId, defaultPhone){
       <div class="row"><div><label>رمز دوم</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPass2" value="${esc(c.pass2||'')}"></div><div></div></div>
       
       <div class="sect">💰 هزینه‌ها (تومان)</div>
-      <div class="row3"><div><label>کل</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mTotal" value="${f.total?Number(f.total).toLocaleString('en-US'):''}"></div><div><label>پرداختی</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPaid" value="${f.paid?Number(f.paid).toLocaleString('en-US'):''}"></div><div><label>باقی</label><input id="mRem" disabled style="opacity:.7; background:#f1f5f9;"></div></div>
+      <div class="row3"><div><label>کل</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mTotal" value="${f.total?Number(f.total).toLocaleString('en-US'):''}"></div><div><label>پرداختی</label><input autocomplete="off" dir="ltr" style="text-align:center" id="mPaid" value="${f.paid?Number(f.paid).toLocaleString('en-US'):''}"></div><div><label>باقی</label><input id="mRem" disabled class="disabled-input" style="text-align:center;"></div></div>
       
       <button class="btn btn-primary" type="submit" style="width:100%; margin-top:20px;">${d?'💾 ذخیره تغییرات':'➕ ثبت پزشک'}</button>
       <button class="btn btn-outline" type="button" onclick="closeModal()" style="width:100%; margin-top:10px;">انصراف</button>
@@ -1609,12 +1628,13 @@ window.openEventModal = function(editId, presetType){
   };
 };
 
-/* ================== توابع حسابداری ================== */
-window.openAccountingModal = function() {
-    const ownerName = USERS[currentUser]?.name || 'همه';
+/* ================== توابع حسابداری (تفکیک شده) ================== */
+window.openAccountingModal = function(section = 'morteza') {
+    currentAccSection = section;
+    const sectionTitle = section === 'morteza' ? 'مرتضی' : 'مرتضی و سعید';
     openModal(`
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 style="margin:0; color:var(--teal); font-size:16px; font-weight:800;">🧾 حسابداری (${ownerName})</h2>
+            <h2 style="margin:0; color:var(--teal); font-size:16px; font-weight:800;">🧾 حسابداری (${sectionTitle})</h2>
             <div style="display:flex; gap:10px;">
                 <button class="btn btn-primary" style="padding:6px 12px; font-size:12px;" onclick="openAccRowModal()">➕ افزودن ردیف جدید</button>
                 <button class="btn btn-outline" style="padding:6px 12px; font-size:12px;" onclick="closeModal()">بستن</button>
@@ -1645,7 +1665,7 @@ window.openAccountingModal = function() {
 };
 
 function renderAccountingModal() {
-    const list = myAccounting().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    const list = myAccounting(currentAccSection).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
     
     let total = 0, received = 0, remaining = 0;
     list.forEach(item => {
@@ -1727,13 +1747,13 @@ window.openAccRowModal = function(editId) {
             </div>
             
             <label>مانده</label>
-            <input id="accRemaining" dir="ltr" style="text-align:center; background:var(--bg-body); opacity:0.7;" disabled value="">
+            <input id="accRemaining" dir="ltr" class="disabled-input" style="text-align:center;" disabled value="">
             
             <label>توضیحات</label>
             <textarea id="accNotes" style="min-height:80px;">${esc(item?.notes || '')}</textarea>
             
             <button class="btn btn-primary" type="submit" style="width:100%; margin-top:20px;">💾 ذخیره</button>
-            <button class="btn btn-outline" type="button" onclick="openAccountingModal()" style="width:100%; margin-top:10px;">انصراف</button>
+            <button class="btn btn-outline" type="button" onclick="openAccountingModal('${currentAccSection}')" style="width:100%; margin-top:10px;">انصراف</button>
         </form>
     `);
 
@@ -1757,7 +1777,8 @@ window.openAccRowModal = function(editId) {
             total: parseNum(document.getElementById('accTotal')),
             received: parseNum(document.getElementById('accReceived')),
             notes: document.getElementById('accNotes').value.trim(),
-            owner: currentUser // ذخیره برای کاربر فعلی
+            owner: currentUser, // ذخیره برای کاربر فعلی
+            section: currentAccSection // ذخیره بخش حسابداری
         };
         
         const id = document.getElementById('accId').value;
@@ -1769,7 +1790,7 @@ window.openAccRowModal = function(editId) {
             toast('✅ ردیف جدید ثبت شد');
         }
         save();
-        openAccountingModal(); // برگشت به جدول
+        openAccountingModal(currentAccSection); // برگشت به جدول
     };
 };
 
