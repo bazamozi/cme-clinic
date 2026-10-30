@@ -438,13 +438,15 @@ label { display: block; font-size: 12px; color: var(--text-main); font-weight: 7
             <option value="all">همه</option>
           </select>
         </div>
-        <button class="mini" id="themeToggleBtn" onclick="toggleDarkMode()" title="تغییر حالت شب/روز" style="font-size: 16px;">☀️</button>
-        <div class="desktop-acc-btns" style="display:flex; gap:5px; margin-right:5px;">
-            <button class="mini" onclick="openAccounting('morteza')" style="font-size: 12px; font-weight: bold; color: var(--teal); padding: 4px 8px;">💼 حسابداری مرتضی</button>
-            <button class="mini" onclick="openAccounting('morteza_saeed')" style="font-size: 12px; font-weight: bold; color: #8b5cf6; padding: 4px 8px;">💼 حسابداری (مرتضی و سعید)</button>
+        
+        <!-- دکمه‌های حسابداری (دقیقاً یک بار) -->
+        <div style="display:flex; align-items:center; gap:6px;">
+            <button class="mini" onclick="openAccountingModal('morteza')" style="font-size: 12px; padding: 4px 8px; height: 32px; border-radius: 8px;" title="حسابداری مرتضی">🧾 مرتضی</button>
+            <button class="mini" onclick="openAccountingModal('saeed')" style="font-size: 12px; padding: 4px 8px; height: 32px; border-radius: 8px;" title="حسابداری مرتضی و سعید">🧾 مرتضی و سعید</button>
+            <button class="mini" id="themeToggleBtn" onclick="toggleDarkMode()" title="تغییر حالت شب/روز" style="font-size: 16px; height: 32px; width: 32px; border-radius: 8px; padding:0;">☀️</button>
         </div>
-    
-      </div>
+        
+        <button id="mobileMenuToggle" class="mini" onclick="toggleMobileMenu(event)" style="display:none; font-size: 22px; padding: 2px 8px; margin-right: 5px; font-weight: bold; cursor: pointer;">⋮</button>
       <div class="header-right">
         <div class="date-time" id="clock">در حال بارگذاری...</div>
         <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
